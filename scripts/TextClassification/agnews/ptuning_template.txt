@@ -1,0 +1,4 @@
+<new> <mask> news <new> <text_a> <text_b>
+<text_a> <text_b> <new> topic <new> <new> <mask> <new>
+<new> Category <new> <mask> <new> <text_a> <text_b>
+<new> Topic <new> <mask> <new> <text_a> <text_b>

@@ -1,0 +1,2 @@
+
+<text_a> Question: <text_b> ? <soft>the Answer <soft>is <mask> .

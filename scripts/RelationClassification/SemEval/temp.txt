@@ -1,0 +1,19 @@
+0	Other	nothing	nothing
+0	Member-Collection(e1,e2)	member	collection
+0	Entity-Origin(e1,e2)	entity	origin
+0	Cause-Effect(e1,e2)	cause	effect
+0	Component-Whole(e1,e2)	component	whole
+0	Product-Producer(e1,e2)	product	producer
+0	Instrument-Agency(e1,e2)	instrument	agency
+0	Entity-Destination(e1,e2)	entity	destination
+0	Content-Container(e1,e2)	content	container
+0	Message-Topic(e1,e2)	message	topic
+2	Cause-Effect(e2,e1)	cause	effect	Cause-Effect(e1,e2)
+2	Product-Producer(e2,e1)	product	producer	Product-Producer(e1,e2)
+2	Component-Whole(e2,e1)	component	whole	Component-Whole(e1,e2)
+2	Instrument-Agency(e2,e1)	instrument	agency	Instrument-Agency(e1,e2)
+2	Member-Collection(e2,e1)	member	collection	Member-Collection(e1,e2)
+2	Message-Topic(e2,e1)	message	topic	Message-Topic(e1,e2)
+2	Entity-Origin(e2,e1)	entity	origin	Entity-Origin(e1,e2)
+2	Content-Container(e2,e1)	content	container	Content-Container(e1,e2)
+2	Entity-Destination(e2,e1)	entity	destination	Entity-Destination(e1,e2)

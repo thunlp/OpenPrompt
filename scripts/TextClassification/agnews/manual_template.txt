@@ -1,0 +1,4 @@
+A <mask> news : <text_a> <text_b>
+<text_a> <text_b> This topic is about <mask> .
+[ Category : <mask> ] <text_a> <text_b>
+[ Topic : <mask> ] <text_a> <text_b>

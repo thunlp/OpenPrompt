@@ -1,0 +1,14 @@
+[
+    {
+        "World": ["politics" ],
+        "Sports": ["sports"],
+        "Business": ["business"],
+        "Tech": ["technology"]
+    },
+    {
+        "World": ["politics", "world" ],
+        "Sports": ["sports", "competition"],
+        "Business": ["business", "corporation"],
+        "Tech": ["technology", "science"]
+    }
+]

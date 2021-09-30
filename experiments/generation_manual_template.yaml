@@ -1,0 +1,51 @@
+dataset:
+  name: webnlg
+  path: ./datasets/CondGen/webnlg_2017
+
+task: generation
+
+train:
+  num_epochs: 5
+  batch_size: 2
+  teacher_forcing: True
+
+generation: # Adding any arguments for generation here.
+  parent_config: task
+  max_length: 512
+  result_path: ./outputs/generation/webnlg/
+
+plm:
+  model_name: gpt2
+  model_path: gpt2-medium
+  optimize: 
+    freeze_para: False
+
+## LEARINING SETTING  ####################################################
+learning_setting: full # selecting from "full", "zero-shot", "few-shot"
+
+# few_shot:
+#   parent_config: learning_setting
+#   few_shot_sampling: sampling_from_train
+  
+# sampling_from_train:
+#   parent_config: few_shot_sampling
+#   num_examples_per_label: 100
+#   also_sample_dev: True
+#   num_examples_per_label_dev: 100
+#   seed: 123
+
+dataloader:
+  predict_eos_token: True
+
+template: manual_template
+verbalizer: 
+
+manual_template:
+  choice: 0
+  file_path: scripts/CondGen/webnlg_2017/manual_template.txt
+
+
+
+
+
+

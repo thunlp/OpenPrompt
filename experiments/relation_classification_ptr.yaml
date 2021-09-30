@@ -1,0 +1,61 @@
+dataset:
+  name: TACRED
+  path: datasets/RelationClassification/TACRED
+
+plm:
+  model_name: roberta
+  model_path: roberta-large
+  optimize:
+    freeze_para: False
+    lr: 0.00003
+    weight_decay: 0.01
+    scheduler:
+      type: 
+      num_warmup_steps: 500
+
+train:
+  batch_size: 2
+
+test:
+  batch_size: 8
+
+valid:
+  batch_size: 8
+
+
+
+template: ptr_template
+verbalizer: ptr_verbalizer
+
+
+ptr_template:
+  choice: 0
+  file_path: scripts/RelationClassification/TACRED/ptr_template.txt
+  optimize:
+    lr: 0.00001
+
+ptr_verbalizer:
+  choice: 0
+  file_path: scripts/RelationClassification/TACRED/ptr_verbalizer.jsonl
+  
+environment:
+  num_gpus: 1
+  cuda_visible_devices:
+    - 0
+  local_rank: 0 
+
+classification:
+  loss_function: nll_loss
+
+learning_setting: few_shot
+
+few_shot:
+  parent_config: learning_setting
+  few_shot_sampling: sampling_from_train
+  
+sampling_from_train:
+  parent_config: few_shot_sampling
+  num_examples_per_label: 8
+  also_sample_dev: True
+  num_examples_per_label_dev: 8
+  seed: 123

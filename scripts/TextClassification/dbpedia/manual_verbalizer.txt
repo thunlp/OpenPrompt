@@ -1,0 +1,14 @@
+company
+school
+artist
+athlete
+politics
+transportation
+building
+river
+village
+animal
+plant
+album
+film
+book

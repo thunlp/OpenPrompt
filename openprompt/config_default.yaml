@@ -1,0 +1,168 @@
+# config-default.yaml: OpenPrompt's default configuration options
+
+
+environment:
+  num_gpus: 1 # number of gpus to use
+  cuda_visible_devices: # which index of cuda devices is visible to the program
+    - 0
+  local_rank: 0 # the main device in the cuda visible devices that your DataParallel model will put the model on.
+                # The following should holds: local_rank < len(cuda_visible_devices)
+
+reproduce:  # seed for reproduction 
+  seed: 100  # a seed for all random part
+  random_seed: -1 # seed for random package
+  torch_seed: -1 # seed for pytorch
+  numpy_seed: -1 # seed for numpy 
+  cuda_seed: -1 # seed for cuda
+
+plm:   # plm parameters 
+  model_name: 
+  model_path:
+  optimize: 
+    freeze_para: False
+    no_decay:
+      - bias
+      - LayerNorm.weight
+    lr: 0.0005
+    weight_decay: 0.01
+    scheduler:
+      type:      # by default, it will choose get_linear_schedule_with_warmup
+      num_warmup_steps: 500
+
+## PIPELINE #######################################################
+
+train:
+  num_epochs: 5
+  batch_size: 2
+  shuffle_data: True
+  teacher_forcing: False
+
+dev:
+  batch_size: 2
+  shuffle_data: False
+
+test:
+  batch_size: 2
+  shuffle_data: False
+  
+## TASK ##########################################################@
+task: classification
+
+
+classification:
+  parent_config: task
+  metric: 
+    - micro-f1
+  loss_function: cross_entropy ## the loss function for classification
+
+generation: # Adding any arguments for generation here.
+  parent_config: task
+  max_length: 512   # the max_length of the generated sentence. INCLUDING the input_ids. So: generation.max_length > dataloader.max_seq_length
+  result_path:   # the path to save the generated sentences.
+  
+
+relation_classification:
+  parent_config: task
+
+## DATASET #########################################################
+dataset:
+  name:
+  path:
+
+## DATALOADER ######################################################
+dataloader:
+  max_seq_length: 256
+  decoder_max_length: 256
+  predict_eos_token: False  # necessary to set to true in generation.
+  truncate_method: "head" # choosing from balanced, head, tail
+
+## LEARINING SETTING  ####################################################
+learning_setting:   # selecting from "full", "zero-shot", "few-shot"
+
+zero_shot:
+  parent_config: learning_setting
+
+few_shot:
+  parent_config: learning_setting
+  few_shot_sampling:
+  
+sampling_from_train:
+  parent_config: few_shot_sampling
+  num_examples_per_label: 10
+  also_sample_dev: True
+  num_examples_per_label_dev: 10
+  seed: 123
+
+## CALIBRATION ###########################################################
+calibrate: # leave blank to use no calibrate
+
+contextualized_calibrate:
+  parent_config: calibrate
+  num_example:
+  use_split: train
+
+pmi_calibrate:
+  parent_config: calibrate
+
+## PROMPT SPECIFIC CONFIG ############################################
+template:
+verbalizer:
+
+manual_template:
+  parent_config: template
+  text: 
+  mask_token: <mask>
+  placeholder_mapping:
+    <text_a>: text_a
+    <text_b>: text_b
+  file_path:
+  choice: 0
+  optimize:  # the parameters related to optimize the tempalte
+
+
+automatic_verbalizer:
+  parent_config: verbalizer
+  num_cadidates: 1000
+  label_word_num_per_class: 1
+  num_searches: 1
+  score_fct: llr
+  balance: true
+  optimize:
+    level: epoch
+  num_classes:
+  init_using_split: valid
+
+one2one_verbalizer:
+  parent_config: verbalizer
+  label_words:
+  prefix: " "
+  multi_token_handler: first
+  file_path:
+  choice:
+  num_classes:
+  optimize:
+  
+manual_verbalizer:
+  parent_config: verbalizer
+  label_words:
+  prefix: " "
+  multi_token_handler: first
+  file_path:
+  choice:
+  num_classes:
+  optimize:
+
+prefix_tuning_template:
+  parent_config: template
+  text:
+  mask_token: <mask>
+  num_token: 5
+  placeholder_mapping: 
+    <text_a>: text_a
+    <text_b>: text_b
+  prefix_dropout: 0.0
+  optimize:
+    lr: 0.0001
+    
+
+
