@@ -168,7 +168,7 @@ Please refer to our documentation for more details.
 
 ## Datasets
 
-We provide a downloads scripts in the `dataset/` folder, feel free to use them to download benchmarks.
+We provide a series of download scripts in the `dataset/` folder, feel free to use them to download benchmarks.
 
 ## Citation
 
