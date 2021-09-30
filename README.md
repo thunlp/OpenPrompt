@@ -8,6 +8,8 @@
 
 ------
 
+
+
 <p align="center">
   <a href="#Overview">Overview</a> •
   <a href="#installation">Installation</a> •
@@ -168,8 +170,12 @@ Please refer to our documentation for more details.
 
 We provide a downloads scripts in the `dataset/` folder, feel free to use them to download benchmarks.
 
-
-
 ## Citation
 
 We are working on the technical report...
+
+## Contributors
+
+We thank all the  contributors to this project, more contributors are welcome!
+
+[Ning Ding](https://github.com/ningding97), [Shengding Hu](), [Weilin Zhao](https://github.com/Achazwl).
