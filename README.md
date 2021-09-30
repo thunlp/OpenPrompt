@@ -178,4 +178,4 @@ We are working on the technical report...
 
 We thank all the  contributors to this project, more contributors are welcome!
 
-[Ning Ding](https://github.com/ningding97), [Shengding Hu](), [Weilin Zhao](https://github.com/Achazwl).
+[Ning Ding](https://github.com/ningding97), [Shengding Hu](https://github.com/ShengdingHu), [Weilin Zhao](https://github.com/Achazwl).
