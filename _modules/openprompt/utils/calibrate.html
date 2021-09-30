@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openprompt.utils.calibrate &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/js/custom.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>openprompt.utils.calibrate</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openprompt.utils.calibrate</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span> <span class="nn">yacs.config</span> <span class="kn">import</span> <span class="n">CfgNode</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">FewShotSampler</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">transformers.data.processors.utils</span> <span class="kn">import</span> <span class="n">InputExample</span>
+<span class="kn">from</span> <span class="nn">openprompt.pipeline_base</span> <span class="kn">import</span> <span class="n">PromptDataLoader</span><span class="p">,</span> <span class="n">PromptModel</span><span class="p">,</span> <span class="n">PromptForClassification</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<div class="viewcode-block" id="pmi_calibrate"><a class="viewcode-back" href="../../../modules/utils.html#openprompt.utils.calibrate.pmi_calibrate">[docs]</a><span class="k">def</span> <span class="nf">pmi_calibrate</span><span class="p">(</span><span class="n">prompt_model</span><span class="p">:</span> <span class="n">PromptModel</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Pmi calibrate. See `Paper &lt;https://arxiv.org/pdf/2104.08315.pdf&gt;`_</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        prompt_model (:obj:`PromptForClassification`): the PromptForClassification model.</span>
+<span class="sd">        max_seq_length: (:obj:`int`): the truncation parameters for dataloader.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">prompt</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">tokenizer</span>
+    <span class="n">virtual_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="s1">&#39;000&#39;</span><span class="p">,</span> <span class="n">text_a</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text_b</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">virtual_loader</span> <span class="o">=</span> <span class="n">PromptDataLoader</span><span class="p">(</span><span class="n">virtual_dataset</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="n">max_seq_length</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">virtual_dataset</span><span class="p">),</span><span class="n">device</span><span class="o">=</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">virtual_loader</span><span class="p">:</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">forward_without_verbalize</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">loss_ids</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">logits</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="contextualized_calibrate"><a class="viewcode-back" href="../../../modules/utils.html#openprompt.utils.calibrate.contextualized_calibrate">[docs]</a><span class="k">def</span> <span class="nf">contextualized_calibrate</span><span class="p">(</span><span class="n">prompt_model</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">],</span> <span class="n">max_seq_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Contextualized calibrate. See `Paper &lt;https://arxiv.org/abs/2108.02035&gt;`_</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        prompt_model (:obj:`PromptForClassification`): the PromptForClassification model.</span>
+<span class="sd">        context (:obj:`List`): the context dataset, if use the training dataset to do contextualized calibrate.</span>
+<span class="sd">        max_seq_length: (:obj:`int`): the truncation parameters for dataloader.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">prompt</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">tokenizer</span>
+    <span class="n">virtual_dataset</span> <span class="o">=</span> <span class="n">context</span>
+    <span class="n">virtual_loader</span> <span class="o">=</span> <span class="n">PromptDataLoader</span><span class="p">(</span><span class="n">virtual_dataset</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="n">max_seq_length</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">all_logits</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">prompt_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">virtual_loader</span><span class="p">,</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;ContextCali&#39;</span><span class="p">):</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">forward_without_verbalize</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">loss_ids</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)]</span>
+        <span class="n">all_logits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+    <span class="n">all_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">all_logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_logits</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="calibrate"><a class="viewcode-back" href="../../../modules/utils.html#openprompt.utils.calibrate.calibrate">[docs]</a><span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">PromptForClassification</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valid_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calibrate the PromptForClassification model. Select and run the calibrate using the global config node.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (:obj:`PromptForClassification`): the PromptForClassification model.</span>
+<span class="sd">        config (:obj:`CfgNode`): The global config node.</span>
+<span class="sd">        train_dataset: (:obj:`List`): the training dataset, if use the training dataset to do contextualized calibrate.</span>
+<span class="sd">        valid_dataset: (:obj:`List`): the valid dataset, if use the valid dataset to do contextualized calibrate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">calibrate</span> <span class="o">==</span> <span class="s2">&quot;pmi_calibrate&quot;</span><span class="p">:</span>
+        <span class="n">calibrate_logits</span> <span class="o">=</span> <span class="n">pmi_calibrate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dataloader</span><span class="o">.</span><span class="n">max_seq_length</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">register_calibrate_logits</span><span class="p">(</span><span class="n">calibrate_logits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">calibrate_type</span> <span class="o">==</span> <span class="s2">&quot;contextualized_calibrate&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">use_split</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
+            <span class="n">context_dataset</span> <span class="o">=</span> <span class="n">train_dataset</span>
+        <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">use_split</span> <span class="o">==</span> <span class="s2">&quot;valid&quot;</span><span class="p">:</span>
+            <span class="n">context_dataset</span> <span class="o">=</span> <span class="n">valid_dataset</span>
+        <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">use_split</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">num_example</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sampler</span> <span class="o">=</span> <span class="n">FewShotSampler</span><span class="p">(</span><span class="n">num_examples_total</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">num_example</span><span class="p">,</span>
+                                <span class="n">also_sample_dev</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">context_dataset</span> <span class="o">=</span> <span class="n">sampler</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span>
+        <span class="n">calibrate_logits</span> <span class="o">=</span> <span class="n">contextualized_calibrate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context_dataset</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dataloader</span><span class="o">.</span><span class="n">max_seq_length</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">register_calibrate_logits</span><span class="p">(</span><span class="n">calibrate_logits</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

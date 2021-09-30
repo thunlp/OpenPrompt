@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trainer &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/js/custom.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Utils Functions" href="utils.html" />
+    <link rel="prev" title="Data Processors" href="data_processors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_processors.html">Data Processors</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Trainer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#classification-runner">Classification Runner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generation-runner">Generation Runner</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Trainer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/trainer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trainer">
+<h1>Trainer<a class="headerlink" href="#trainer" title="Permalink to this headline">¶</a></h1>
+<p>Users could freely customize the training process, and can also use our <code class="docutils literal notranslate"><span class="pre">Runner</span></code> API to conduct classification or generation,
+while in this case you need to construct a <code class="docutils literal notranslate"><span class="pre">config.yml</span></code> file, see <a class="reference internal" href="../notes/configuration.html#ref-config"><span class="std std-ref">Play with Configuration</span></a>.</p>
+<section id="classification-runner">
+<h2>Classification Runner<a class="headerlink" href="#classification-runner" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.trainer.ClassificationRunner">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ClassificationRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.nn.parallel.data_parallel.DataParallel</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptForClassification" title="openprompt.pipeline_base.PromptForClassification"><span class="pre">openprompt.pipeline_base.PromptForClassification</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptDataLoader" title="openprompt.pipeline_base.PromptDataLoader"><span class="pre">openprompt.pipeline_base.PromptDataLoader</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptDataLoader" title="openprompt.pipeline_base.PromptDataLoader"><span class="pre">openprompt.pipeline_base.PromptDataLoader</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptDataLoader" title="openprompt.pipeline_base.PromptDataLoader"><span class="pre">openprompt.pipeline_base.PromptDataLoader</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">yacs.config.CfgNode</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_function</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/trainer.html#ClassificationRunner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.trainer.ClassificationRunner" title="Permalink to this definition">¶</a></dt>
+<dd><p>A runner for simple training without training tricks.
+Applying training tricks such as ensemble of template or verbalizer,
+or self-training can use other runner class.
+This class is specially implemented for classification.
+For generation task, though it can be integrated in this class
+via <cite>task</cite> option, we keep it as another class for simplicity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prompt_model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[DataParallel,</span> <span class="pre">PromptForClassification]</span></code>) – One <code class="docutils literal notranslate"><span class="pre">PromptModel</span></code> object.</p></li>
+<li><p><strong>train_dataloader</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptDataloader</span></code>, optional) – The dataloader to bachify and process the training data.</p></li>
+<li><p><strong>valid_dataloader</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptDataloader</span></code>, optionla) – The dataloader to bachify and process the val data.</p></li>
+<li><p><strong>test_dataloader</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptDataloader</span></code>, optional) – The dataloader to bachify and process the test data.</p></li>
+<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – A configuration object.</p></li>
+<li><p><strong>loss_function</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Callable</span></code>, optional) – The loss function in the training process.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.trainer.ClassificationRunner.config_loss_function">
+<span class="sig-name descname"><span class="pre">config_loss_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/trainer.html#ClassificationRunner.config_loss_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.trainer.ClassificationRunner.config_loss_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>config the loss function if it’s not passed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.trainer.ClassificationRunner.config_optimize">
+<span class="sig-name descname"><span class="pre">config_optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/trainer.html#ClassificationRunner.config_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.trainer.ClassificationRunner.config_optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>config the optimizer and scheduler for 1. model 2. template 3. verbalizer</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="generation-runner">
+<h2>Generation Runner<a class="headerlink" href="#generation-runner" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.trainer.GenerationRunner">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">GenerationRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.nn.parallel.data_parallel.DataParallel</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptForGeneration" title="openprompt.pipeline_base.PromptForGeneration"><span class="pre">openprompt.pipeline_base.PromptForGeneration</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptDataLoader" title="openprompt.pipeline_base.PromptDataLoader"><span class="pre">openprompt.pipeline_base.PromptDataLoader</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptDataLoader" title="openprompt.pipeline_base.PromptDataLoader"><span class="pre">openprompt.pipeline_base.PromptDataLoader</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_dataloader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptDataLoader" title="openprompt.pipeline_base.PromptDataLoader"><span class="pre">openprompt.pipeline_base.PromptDataLoader</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">yacs.config.CfgNode</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/trainer.html#GenerationRunner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.trainer.GenerationRunner" title="Permalink to this definition">¶</a></dt>
+<dd><p>A runner for simple training without training tricks.
+Applying training tricks such as ensemble of template or verbalizer,
+or self-training can use other runner class.
+This class is specially implemented for generation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prompt_model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[DataParallel,</span> <span class="pre">PromptForClassification]</span></code>) – One <code class="docutils literal notranslate"><span class="pre">PromptModel</span></code> object.</p></li>
+<li><p><strong>train_dataloader</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptDataloader</span></code>, optional) – The dataloader to bachify and process the training data.</p></li>
+<li><p><strong>valid_dataloader</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptDataloader</span></code>, optionla) – The dataloader to bachify and process the val data.</p></li>
+<li><p><strong>test_dataloader</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptDataloader</span></code>, optional) – The dataloader to bachify and process the test data.</p></li>
+<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – A configuration object.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.trainer.GenerationRunner.config_loss_function">
+<span class="sig-name descname"><span class="pre">config_loss_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/trainer.html#GenerationRunner.config_loss_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.trainer.GenerationRunner.config_loss_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>config the loss function if it’s not passed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.trainer.GenerationRunner.config_optimize">
+<span class="sig-name descname"><span class="pre">config_optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/trainer.html#GenerationRunner.config_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.trainer.GenerationRunner.config_optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>config the optimizer and scheduler for 1. model 2. template 3. verbalizer</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="data_processors.html" class="btn btn-neutral float-left" title="Data Processors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.html" class="btn btn-neutral float-right" title="Utils Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

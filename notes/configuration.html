@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play with Configuration &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/js/custom.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Utils Functions" href="../modules/utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../modules/base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/utils.html">Utils Functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Play with Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#default-configuration">Default Configuration</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Play with Configuration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/configuration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="play-with-configuration">
+<span id="ref-config"></span><h1>Play with Configuration<a class="headerlink" href="#play-with-configuration" title="Permalink to this headline">¶</a></h1>
+<p>OpenPrompt suggests to use configuration file to developen the users’ own prompt-leanring pipelines.
+We provide a <code class="docutils literal notranslate"><span class="pre">config_default.yaml</span></code> file to implement common attributes in prompt-learning, which will be detailed introduced next.
+For a prompt-learning pipeline derived by OpenPrompt, you can implement a model specific config file to implement specific attributes.</p>
+<p>We provide a unified entrance for experiment with OpenPrompt. Just run the following code  in the root directory.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">experiments</span><span class="o">/</span><span class="n">cli</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">config_yaml</span> <span class="n">experiments</span><span class="o">/</span><span class="n">classification_manual_prompt</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>You may choose the configuration file we wrote for you, or write your own configuration file.</p>
+<p>Next, we will introduce the meaning of each configuration parameter in the default configuration.
+In your own experiments, you can create a yaml file containing a subset of configuration parameters
+that you want to change or specify.</p>
+<section id="default-configuration">
+<h2>Default Configuration<a class="headerlink" href="#default-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Now we introduce the details of the default configuration of OpenPrompt.</p>
+<section id="environment">
+<h3>Environment<a class="headerlink" href="#environment" title="Permalink to this headline">¶</a></h3>
+<p>In <code class="docutils literal notranslate"><span class="pre">environment</span></code>, we can set the attributes regarding to the training and inference environment.</p>
+<ul class="simple">
+<li><p><strong>num_gpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>): The number of GPUs during training and evaluation.</p></li>
+<li><p><strong>cuda_visible_devices</strong>: Which devices are visible during training and evaluation.</p></li>
+<li><p><strong>local_rank:</strong> The indices of devices for the current process.</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">environment</span><span class="p">:</span>
+    <span class="nt">num_gpus</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="nt">cuda_visible_devices</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+    <span class="nt">local_rank</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+</pre></div>
+</div>
+</section>
+<section id="reproduce">
+<h3>Reproduce<a class="headerlink" href="#reproduce" title="Permalink to this headline">¶</a></h3>
+<p>The <cite>reproduce</cite> configuration controls key attributes that determines the reproduction of a prompt-leanring framework.
+Specifically, seeds for all potential randomness.</p>
+<p>Example:</p>
+<ul class="simple">
+<li><p><strong>seed</strong>: If seed this seed, and other seeds are unset, then all the seeds will use this value.</p></li>
+<li><p><strong>random_seed</strong>: The seed for the <code class="docutils literal notranslate"><span class="pre">ramdom</span></code> package.</p></li>
+<li><p><strong>torch_seed</strong>: The seed for the <code class="docutils literal notranslate"><span class="pre">pytorch</span></code> package.</p></li>
+<li><p><strong>numpy_seed</strong>:  The seed for the <code class="docutils literal notranslate"><span class="pre">numpy</span></code> package.</p></li>
+<li><p><strong>cuda_seed</strong>:  The seed for <code class="docutils literal notranslate"><span class="pre">CUDA</span></code>.</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reproduce</span><span class="p">:</span>
+    <span class="nt">seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+    <span class="nt">random_seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-1</span>
+    <span class="nt">torch_seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-1</span>
+    <span class="nt">numpy_seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-1</span>
+    <span class="nt">cuda_seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-1</span>
+</pre></div>
+</div>
+</section>
+<section id="plm">
+<h3>PLM<a class="headerlink" href="#plm" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PLM</span></code> implements attributes regarding to pre-trained language models, including the model’s type, path and optimization.</p>
+<ul class="simple">
+<li><p><strong>model_name</strong>: The name of the pre-trained model.</p></li>
+<li><p><strong>model_path</strong>: The path of the pre-trained model.</p></li>
+<li><dl class="simple">
+<dt><strong>optimize</strong>:</dt><dd><ul>
+<li><p><strong>freeze_para</strong>:  If the parameters of the model are freezed.</p></li>
+<li><p><strong>loss_function</strong>:  The loss function during training.</p></li>
+<li><p><strong>no_decay</strong>: The <code class="docutils literal notranslate"><span class="pre">no_decay</span></code> setup of the optimization.</p></li>
+<li><p><strong>lr</strong>: The learning rate during training.</p></li>
+<li><p><strong>weight_decay</strong>: The <code class="docutils literal notranslate"><span class="pre">weight_decay</span></code> setup of optimization.</p></li>
+<li><dl class="simple">
+<dt><strong>scheduler</strong>:</dt><dd><ul>
+<li><p><strong>type</strong>: The scheduler type.</p></li>
+<li><p><strong>num_warmup_steps</strong>: The number of steps for warming up.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plm</span><span class="p">:</span>
+    <span class="nt">model_name</span><span class="p">:</span>
+    <span class="nt">model_path</span><span class="p">:</span>
+    <span class="nt">optimize</span><span class="p">:</span>
+        <span class="nt">freeze_para</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+        <span class="nt">no_decay</span><span class="p">:</span>
+            <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bias</span>
+            <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">LayerNorm.weight</span>
+        <span class="nt">lr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0005</span>
+        <span class="nt">weight_decay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.01</span>
+        <span class="nt">scheduler</span><span class="p">:</span>
+            <span class="nt">type</span><span class="p">:</span>
+            <span class="nt">num_warmup_steps</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">500</span>
+</pre></div>
+</div>
+</section>
+<section id="pipeline">
+<h3>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h3>
+<p>This part contains the attributes of <code class="docutils literal notranslate"><span class="pre">train</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span></code> and <code class="docutils literal notranslate"><span class="pre">test</span></code>.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>train</strong></dt><dd><ul>
+<li><p><strong>num_epochs</strong>: The number of epochs during training.</p></li>
+<li><p><strong>batch_size</strong>: The batch size during training.</p></li>
+<li><p><strong>shuffle_data</strong>: If True, the data will be shuffled during training.</p></li>
+<li><p><strong>teacher_forcing</strong>: If True, the teach forcing method will be used during training.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>dev</strong></dt><dd><ul>
+<li><p><strong>batch_size</strong>: The batch size during validation.</p></li>
+<li><p><strong>shuffle_data</strong>: If True, the data will be shuffled during validation.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>test</strong></dt><dd><ul>
+<li><p><strong>batch_size</strong>: The batch size during testing.</p></li>
+<li><p><strong>shuffle_data</strong>: If True, the data will be shuffled during testing.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">train</span><span class="p">:</span>
+    <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
+    <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+    <span class="nt">shuffle_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+    <span class="nt">teacher_forcing</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+
+<span class="nt">dev</span><span class="p">:</span>
+    <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+    <span class="nt">shuffle_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+
+<span class="nt">test</span><span class="p">:</span>
+    <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+    <span class="nt">shuffle_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+</section>
+<section id="task">
+<h3>Task<a class="headerlink" href="#task" title="Permalink to this headline">¶</a></h3>
+<p>The configuration about the current task.
+There will be a parent configuration <code class="docutils literal notranslate"><span class="pre">task</span></code> to determine the current type of task, e.g. classfiication.
+And for the specific task, a user could specifically set the corresponding attributes.</p>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">classification</span>
+<span class="nt">classification</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">task</span>
+    <span class="nt">metric</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">micro-f1</span>
+    <span class="nt">loss_function</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cross_entropy</span> <span class="c1">## select from cross_entropy</span>
+
+<span class="nt">generation</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">task</span>
+    <span class="nt">gen_max_length</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
+    <span class="nt">decoding_strategy</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">greedy</span>
+
+<span class="nt">relation_classification</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">task</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="dataloader">
+<h3>Dataloader<a class="headerlink" href="#dataloader" title="Permalink to this headline">¶</a></h3>
+<p>This is the configuration about the dataloader,
+which sets some attributes like <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>, etc.</p>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dataloader</span><span class="p">:</span>
+    <span class="nt">max_seq_length</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">256</span>
+    <span class="nt">decoder_max_length</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">256</span>
+    <span class="nt">predict_eos_token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>  <span class="c1"># necessary to set to true in generation.</span>
+    <span class="nt">truncate_method</span><span class="p">:</span> <span class="s">&quot;head&quot;</span> <span class="c1"># choosing from balanced, head, tail</span>
+</pre></div>
+</div>
+</section>
+<section id="learning-setting">
+<h3>Learning Setting<a class="headerlink" href="#learning-setting" title="Permalink to this headline">¶</a></h3>
+<p>Configuration about the learning settings, including <code class="docutils literal notranslate"><span class="pre">full</span></code>, <code class="docutils literal notranslate"><span class="pre">few-shot</span></code> and <code class="docutils literal notranslate"><span class="pre">zero-shot</span></code>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">learning_setting</span><span class="p">:</span>   <span class="c1"># selecting from &quot;full&quot;, &quot;zero-shot&quot;, &quot;few-shot&quot;</span>
+
+<span class="nt">zero_shot</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">learning_setting</span>
+
+<span class="nt">few_shot</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">learning_setting</span>
+    <span class="nt">few_shot_sampling</span><span class="p">:</span>
+
+<span class="nt">sampling_from_train</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">few_shot_sampling</span>
+    <span class="nt">num_examples_per_label</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+    <span class="nt">also_sample_dev</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+    <span class="nt">num_examples_per_label_dev</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+    <span class="nt">seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">123</span>
+</pre></div>
+</div>
+</section>
+<section id="prompt-specific-config">
+<h3>Prompt-specific Config<a class="headerlink" href="#prompt-specific-config" title="Permalink to this headline">¶</a></h3>
+<p>Configuration about templates and verbalizers, there are different attributes for different classes.
+Here are some examples:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">template</span><span class="p">:</span>
+<span class="nt">verbalizer</span><span class="p">:</span>
+
+<span class="nt">manual_template</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">template</span>
+    <span class="nt">text</span><span class="p">:</span>
+    <span class="nt">mask_token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;mask&gt;</span>
+    <span class="nt">placeholder_mapping</span><span class="p">:</span>
+    <span class="nt">&lt;text_a&gt;</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">text_a</span>
+    <span class="nt">&lt;text_b&gt;</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">text_b</span>
+<span class="nt">file_path</span><span class="p">:</span>
+    <span class="nt">choice</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+    <span class="nt">optimize</span><span class="p">:</span>  <span class="c1"># the parameters related to optimize the tempalte</span>
+
+
+<span class="nt">automatic_verbalizer</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">verbalizer</span>
+    <span class="nt">num_cadidates</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+    <span class="nt">label_word_num_per_class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="nt">num_searches</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="nt">score_fct</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">llr</span>
+    <span class="nt">balance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">optimize</span><span class="p">:</span>
+    <span class="nt">level</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">epoch</span>
+<span class="nt">num_classes</span><span class="p">:</span>
+    <span class="nt">init_using_split</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">valid</span>
+
+<span class="nt">one2one_verbalizer</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">verbalizer</span>
+    <span class="nt">label_words</span><span class="p">:</span>
+    <span class="nt">prefix</span><span class="p">:</span> <span class="s">&quot;</span><span class="nv"> </span><span class="s">&quot;</span>
+    <span class="nt">multi_token_handler</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">first</span>
+    <span class="nt">file_path</span><span class="p">:</span>
+    <span class="nt">choice</span><span class="p">:</span>
+    <span class="nt">num_classes</span><span class="p">:</span>
+    <span class="nt">optimize</span><span class="p">:</span>
+
+<span class="nt">manual_verbalizer</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">verbalizer</span>
+    <span class="nt">label_words</span><span class="p">:</span>
+    <span class="nt">prefix</span><span class="p">:</span> <span class="s">&quot;</span><span class="nv"> </span><span class="s">&quot;</span>
+    <span class="nt">multi_token_handler</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">first</span>
+    <span class="nt">file_path</span><span class="p">:</span>
+    <span class="nt">choice</span><span class="p">:</span>
+    <span class="nt">num_classes</span><span class="p">:</span>
+    <span class="nt">optimize</span><span class="p">:</span>
+
+<span class="nt">prefix_tuning_template</span><span class="p">:</span>
+    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">template</span>
+    <span class="nt">text</span><span class="p">:</span>
+        <span class="nt">mask_token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;mask&gt;</span>
+    <span class="nt">num_token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
+    <span class="nt">placeholder_mapping</span><span class="p">:</span>
+        <span class="nt">&lt;text_a&gt;</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">text_a</span>
+        <span class="nt">&lt;text_b&gt;</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">text_b</span>
+    <span class="nt">prefix_dropout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
+    <span class="nt">optimize</span><span class="p">:</span>
+        <span class="nt">lr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0001</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../modules/utils.html" class="btn btn-neutral float-left" title="Utils Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

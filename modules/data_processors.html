@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Processors &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/js/custom.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Trainer" href="trainer.html" />
+    <link rel="prev" title="Data Utils" href="data_utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_utils.html">Data Utils</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Processors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-processor">Basic Processor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#text-classification-processor">Text Classification Processor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#entity-typing-processor">Entity Typing Processor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#relation-classification-processor">Relation Classification Processor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conditional-generation-processor">Conditional Generation Processor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Data Processors</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/data_processors.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-processors">
+<span id="id1"></span><h1>Data Processors<a class="headerlink" href="#data-processors" title="Permalink to this headline">¶</a></h1>
+<section id="basic-processor">
+<h2>Basic Processor<a class="headerlink" href="#basic-processor" title="Permalink to this headline">¶</a></h2>
+<p>Abstract class that provides methods for loading train/dev/test/unlabeled examples for a given task.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.data_processor.DataProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">DataProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_processor.html#DataProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_processor.DataProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>labels of the dataset is optional</p>
+<p>here’s the examples of loading the labels:</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">I</span></code>: <code class="docutils literal notranslate"><span class="pre">DataProcessor(labels</span> <span class="pre">=</span> <span class="pre">['positive',</span> <span class="pre">'negative'])</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">II</span></code>: <code class="docutils literal notranslate"><span class="pre">DataProcessor(labels_path</span> <span class="pre">=</span> <span class="pre">'datasets/labels.txt')</span></code>
+labels file should have label names seperated by any blank characters, such as</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">positive</span> <span class="n">neutral</span>
+<span class="n">negative</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>labels</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Sequence[Any]</span></code>, optional) – class labels of the dataset. Defaults to None.</p></li>
+<li><p><strong>labels_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – Defaults to None. If set and <code class="xref py py-obj docutils literal notranslate"><span class="pre">labels</span></code> is None, load labels from <code class="xref py py-obj docutils literal notranslate"><span class="pre">labels_path</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.data_processor.DataProcessor.get_label_id">
+<span class="sig-name descname"><span class="pre">get_label_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_processor.html#DataProcessor.get_label_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_processor.DataProcessor.get_label_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>get label id of the corresponding label</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>label</strong> – label in dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the index of label</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.data_processor.DataProcessor.get_labels">
+<span class="sig-name descname"><span class="pre">get_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_processor.html#DataProcessor.get_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_processor.DataProcessor.get_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>get labels of the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>labels of the dataset</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.data_processor.DataProcessor.get_num_labels">
+<span class="sig-name descname"><span class="pre">get_num_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_processor.html#DataProcessor.get_num_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_processor.DataProcessor.get_num_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the number of labels in the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of labels in the dataset</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.data_processor.DataProcessor.get_train_examples">
+<span class="sig-name descname"><span class="pre">get_train_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_processor.html#DataProcessor.get_train_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_processor.DataProcessor.get_train_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get train examples from the training file under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p>call <code class="docutils literal notranslate"><span class="pre">get_examples(data_dir,</span> <span class="pre">&quot;train&quot;)</span></code>, see <a class="reference internal" href="#openprompt.data_utils.data_processor.DataProcessor.get_examples" title="openprompt.data_utils.data_processor.DataProcessor.get_examples"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_examples()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.data_processor.DataProcessor.get_dev_examples">
+<span class="sig-name descname"><span class="pre">get_dev_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_processor.html#DataProcessor.get_dev_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_processor.DataProcessor.get_dev_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get dev examples from the development file under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p>call <code class="docutils literal notranslate"><span class="pre">get_examples(data_dir,</span> <span class="pre">&quot;dev&quot;)</span></code>, see <a class="reference internal" href="#openprompt.data_utils.data_processor.DataProcessor.get_examples" title="openprompt.data_utils.data_processor.DataProcessor.get_examples"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_examples()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.data_processor.DataProcessor.get_test_examples">
+<span class="sig-name descname"><span class="pre">get_test_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_processor.html#DataProcessor.get_test_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_processor.DataProcessor.get_test_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get test examples from the test file under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p>call <code class="docutils literal notranslate"><span class="pre">get_examples(data_dir,</span> <span class="pre">&quot;test&quot;)</span></code>, see <a class="reference internal" href="#openprompt.data_utils.data_processor.DataProcessor.get_examples" title="openprompt.data_utils.data_processor.DataProcessor.get_examples"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_examples()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.data_processor.DataProcessor.get_unlabeled_examples">
+<span class="sig-name descname"><span class="pre">get_unlabeled_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_processor.html#DataProcessor.get_unlabeled_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_processor.DataProcessor.get_unlabeled_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get unlabeled examples from the unlabeled file under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p>call <code class="docutils literal notranslate"><span class="pre">get_examples(data_dir,</span> <span class="pre">&quot;unlabeled&quot;)</span></code>, see <a class="reference internal" href="#openprompt.data_utils.data_processor.DataProcessor.get_examples" title="openprompt.data_utils.data_processor.DataProcessor.get_examples"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_examples()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.data_processor.DataProcessor.get_examples">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">get_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_processor.html#DataProcessor.get_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_processor.DataProcessor.get_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the <code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code> of dataset under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code> is the base path of the dataset, for example:</p>
+<p>training file could be located in <code class="docutils literal notranslate"><span class="pre">data_dir/train.txt</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the base path of the dataset</p></li>
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – <code class="docutils literal notranslate"><span class="pre">train</span></code> / <code class="docutils literal notranslate"><span class="pre">dev</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> / <code class="docutils literal notranslate"><span class="pre">unlabeled</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return a list of <a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample">InputExample</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="text-classification-processor">
+<h2>Text Classification Processor<a class="headerlink" href="#text-classification-processor" title="Permalink to this headline">¶</a></h2>
+<section id="agnewsprocessor">
+<h3>AgnewsProcessor<a class="headerlink" href="#agnewsprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.text_classification_dataset.AgnewsProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">AgnewsProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/text_classification_dataset.html#AgnewsProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.text_classification_dataset.AgnewsProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://arxiv.org/pdf/1509.01626.pdf">AG News</a> is a News Topic classification dataset</p>
+<p>we use dataset provided by <a class="reference external" href="https://github.com/yumeng5/LOTClass">LOTClass</a></p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.text_classification_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/TextClassification&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;agnews&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+<span class="n">trainvalid_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;World&quot;</span><span class="p">,</span> <span class="s2">&quot;Sports&quot;</span><span class="p">,</span> <span class="s2">&quot;Business&quot;</span><span class="p">,</span> <span class="s2">&quot;Tech&quot;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">trainvalid_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">120000</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">7600</span>
+<span class="k">assert</span> <span class="n">test_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_a</span> <span class="o">==</span> <span class="s2">&quot;Fears for T N pension after talks&quot;</span>
+<span class="k">assert</span> <span class="n">test_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_b</span> <span class="o">==</span> <span class="s2">&quot;Unions representing workers at Turner   Newall say they are &#39;disappointed&#39; after talks with stricken parent firm Federal Mogul.&quot;</span>
+<span class="k">assert</span> <span class="n">test_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.text_classification_dataset.AgnewsProcessor.get_examples">
+<span class="sig-name descname"><span class="pre">get_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/text_classification_dataset.html#AgnewsProcessor.get_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.text_classification_dataset.AgnewsProcessor.get_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the <code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code> of dataset under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code> is the base path of the dataset, for example:</p>
+<p>training file could be located in <code class="docutils literal notranslate"><span class="pre">data_dir/train.txt</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the base path of the dataset</p></li>
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – <code class="docutils literal notranslate"><span class="pre">train</span></code> / <code class="docutils literal notranslate"><span class="pre">dev</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> / <code class="docutils literal notranslate"><span class="pre">unlabeled</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return a list of <a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample">InputExample</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="dbpediaprocessor">
+<h3>DBpediaProcessor<a class="headerlink" href="#dbpediaprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.text_classification_dataset.DBpediaProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">DBpediaProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/text_classification_dataset.html#DBpediaProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.text_classification_dataset.DBpediaProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://aclanthology.org/L16-1532.pdf">Dbpedia</a> is a Wikipedia Topic Classification dataset.</p>
+<p>we use dataset provided by <a class="reference external" href="https://github.com/yumeng5/LOTClass">LOTClass</a></p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.text_classification_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/TextClassification&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;dbpedia&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+<span class="n">trainvalid_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">14</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">trainvalid_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">560000</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">70000</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.text_classification_dataset.DBpediaProcessor.get_examples">
+<span class="sig-name descname"><span class="pre">get_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/text_classification_dataset.html#DBpediaProcessor.get_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.text_classification_dataset.DBpediaProcessor.get_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the <code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code> of dataset under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code> is the base path of the dataset, for example:</p>
+<p>training file could be located in <code class="docutils literal notranslate"><span class="pre">data_dir/train.txt</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the base path of the dataset</p></li>
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – <code class="docutils literal notranslate"><span class="pre">train</span></code> / <code class="docutils literal notranslate"><span class="pre">dev</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> / <code class="docutils literal notranslate"><span class="pre">unlabeled</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return a list of <a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample">InputExample</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="imdbprocessor">
+<h3>ImdbProcessor<a class="headerlink" href="#imdbprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.text_classification_dataset.ImdbProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ImdbProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/text_classification_dataset.html#ImdbProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.text_classification_dataset.ImdbProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://ai.stanford.edu/~ang/papers/acl11-WordVectorsSentimentAnalysis.pdf">IMDB</a> is a Movie Review Sentiment Classification dataset.</p>
+<p>we use dataset provided by <a class="reference external" href="https://github.com/yumeng5/LOTClass">LOTClass</a></p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.text_classification_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/TextClassification&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;imdb&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+<span class="n">trainvalid_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">trainvalid_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">25000</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">25000</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.text_classification_dataset.ImdbProcessor.get_examples">
+<span class="sig-name descname"><span class="pre">get_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/text_classification_dataset.html#ImdbProcessor.get_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.text_classification_dataset.ImdbProcessor.get_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the <code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code> of dataset under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code> is the base path of the dataset, for example:</p>
+<p>training file could be located in <code class="docutils literal notranslate"><span class="pre">data_dir/train.txt</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the base path of the dataset</p></li>
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – <code class="docutils literal notranslate"><span class="pre">train</span></code> / <code class="docutils literal notranslate"><span class="pre">dev</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> / <code class="docutils literal notranslate"><span class="pre">unlabeled</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return a list of <a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample">InputExample</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="entity-typing-processor">
+<h2>Entity Typing Processor<a class="headerlink" href="#entity-typing-processor" title="Permalink to this headline">¶</a></h2>
+<section id="fewnerdprocessor">
+<h3>FewNERDProcessor<a class="headerlink" href="#fewnerdprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.typing_dataset.FewNERDProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">FewNERDProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/typing_dataset.html#FewNERDProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.typing_dataset.FewNERDProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://ningding97.github.io/fewnerd/">Few-NERD</a> a large-scale, fine-grained manually annotated named entity recognition dataset</p>
+<p>It was released together with <a class="reference external" href="https://arxiv.org/pdf/2105.07464.pdf">Few-NERD: Not Only a Few-shot NER Dataset (Ning Ding et al. 2021)</a></p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.typing_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/Typing&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;FewNERD&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()](</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_dev_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">66</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span>
+    <span class="s2">&quot;person-actor&quot;</span><span class="p">,</span> <span class="s2">&quot;person-director&quot;</span><span class="p">,</span> <span class="s2">&quot;person-artist/author&quot;</span><span class="p">,</span> <span class="s2">&quot;person-athlete&quot;</span><span class="p">,</span> <span class="s2">&quot;person-politician&quot;</span><span class="p">,</span> <span class="s2">&quot;person-scholar&quot;</span><span class="p">,</span> <span class="s2">&quot;person-soldier&quot;</span><span class="p">,</span> <span class="s2">&quot;person-other&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;organization-showorganization&quot;</span><span class="p">,</span> <span class="s2">&quot;organization-religion&quot;</span><span class="p">,</span> <span class="s2">&quot;organization-company&quot;</span><span class="p">,</span> <span class="s2">&quot;organization-sportsteam&quot;</span><span class="p">,</span> <span class="s2">&quot;organization-education&quot;</span><span class="p">,</span> <span class="s2">&quot;organization-government/governmentagency&quot;</span><span class="p">,</span> <span class="s2">&quot;organization-media/newspaper&quot;</span><span class="p">,</span> <span class="s2">&quot;organization-politicalparty&quot;</span><span class="p">,</span> <span class="s2">&quot;organization-sportsleague&quot;</span><span class="p">,</span> <span class="s2">&quot;organization-other&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;location-GPE&quot;</span><span class="p">,</span> <span class="s2">&quot;location-road/railway/highway/transit&quot;</span><span class="p">,</span> <span class="s2">&quot;location-bodiesofwater&quot;</span><span class="p">,</span> <span class="s2">&quot;location-park&quot;</span><span class="p">,</span> <span class="s2">&quot;location-mountain&quot;</span><span class="p">,</span> <span class="s2">&quot;location-island&quot;</span><span class="p">,</span> <span class="s2">&quot;location-other&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;product-software&quot;</span><span class="p">,</span> <span class="s2">&quot;product-food&quot;</span><span class="p">,</span> <span class="s2">&quot;product-game&quot;</span><span class="p">,</span> <span class="s2">&quot;product-ship&quot;</span><span class="p">,</span> <span class="s2">&quot;product-train&quot;</span><span class="p">,</span> <span class="s2">&quot;product-airplane&quot;</span><span class="p">,</span> <span class="s2">&quot;product-car&quot;</span><span class="p">,</span> <span class="s2">&quot;product-weapon&quot;</span><span class="p">,</span> <span class="s2">&quot;product-other&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;building-theater&quot;</span><span class="p">,</span> <span class="s2">&quot;building-sportsfacility&quot;</span><span class="p">,</span> <span class="s2">&quot;building-airport&quot;</span><span class="p">,</span> <span class="s2">&quot;building-hospital&quot;</span><span class="p">,</span> <span class="s2">&quot;building-library&quot;</span><span class="p">,</span> <span class="s2">&quot;building-hotel&quot;</span><span class="p">,</span> <span class="s2">&quot;building-restaurant&quot;</span><span class="p">,</span> <span class="s2">&quot;building-other&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;event-sportsevent&quot;</span><span class="p">,</span> <span class="s2">&quot;event-attack/battle/war/militaryconflict&quot;</span><span class="p">,</span> <span class="s2">&quot;event-disaster&quot;</span><span class="p">,</span> <span class="s2">&quot;event-election&quot;</span><span class="p">,</span> <span class="s2">&quot;event-protest&quot;</span><span class="p">,</span> <span class="s2">&quot;event-other&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;art-music&quot;</span><span class="p">,</span> <span class="s2">&quot;art-writtenart&quot;</span><span class="p">,</span> <span class="s2">&quot;art-film&quot;</span><span class="p">,</span> <span class="s2">&quot;art-painting&quot;</span><span class="p">,</span> <span class="s2">&quot;art-broadcastprogram&quot;</span><span class="p">,</span> <span class="s2">&quot;art-other&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;other-biologything&quot;</span><span class="p">,</span> <span class="s2">&quot;other-chemicalthing&quot;</span><span class="p">,</span> <span class="s2">&quot;other-livingthing&quot;</span><span class="p">,</span> <span class="s2">&quot;other-astronomything&quot;</span><span class="p">,</span> <span class="s2">&quot;other-god&quot;</span><span class="p">,</span> <span class="s2">&quot;other-law&quot;</span><span class="p">,</span> <span class="s2">&quot;other-award&quot;</span><span class="p">,</span> <span class="s2">&quot;other-disease&quot;</span><span class="p">,</span> <span class="s2">&quot;other-medical&quot;</span><span class="p">,</span> <span class="s2">&quot;other-language&quot;</span><span class="p">,</span> <span class="s2">&quot;other-currency&quot;</span><span class="p">,</span> <span class="s2">&quot;other-educationaldegree&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_a</span> <span class="o">==</span> <span class="s2">&quot;The final stage in the development of the Skyfox was the production of a model with tricycle landing gear to better cater for the pilot training market .&quot;</span>
+<span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;entity&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Skyfox&quot;</span>
+<span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="mi">30</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+<section id="relation-classification-processor">
+<h2>Relation Classification Processor<a class="headerlink" href="#relation-classification-processor" title="Permalink to this headline">¶</a></h2>
+<section id="tacredprocessor">
+<h3>TACREDProcessor<a class="headerlink" href="#tacredprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.relation_classification_dataset.TACREDProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">TACREDProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/relation_classification_dataset.html#TACREDProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.relation_classification_dataset.TACREDProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://nlp.stanford.edu/projects/tacred/">TAC Relation Extraction Dataset (TACRED)</a> is one of the largest and most widely used datasets for relation classification.</p>
+<p>It was released together with the paper <a class="reference external" href="https://nlp.stanford.edu/pubs/zhang2017tacred.pdf">Position-aware Attention and Supervised Data Improve Slot Filling (Zhang et al. 2017)</a></p>
+<p>This processor is also inherited by <a class="reference internal" href="#openprompt.data_utils.relation_classification_dataset.TACREVProcessor" title="openprompt.data_utils.relation_classification_dataset.TACREVProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">TACREVProcessor</span></code></a> and <a class="reference internal" href="#openprompt.data_utils.relation_classification_dataset.ReTACREDProcessor" title="openprompt.data_utils.relation_classification_dataset.ReTACREDProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReTACREDProcessor</span></code></a>.</p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.relation_classification_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/RelationClassification&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;TACRED&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_dev_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">42</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;no_relation&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded&quot;</span><span class="p">,</span> <span class="s2">&quot;org:subsidiaries&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cause_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:age&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:countries_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovinces_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;org:website&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cities_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;per:employee_of&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;org:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;org:political/religious_affiliation&quot;</span><span class="p">,</span> <span class="s2">&quot;per:schools_attended&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:children&quot;</span><span class="p">,</span> <span class="s2">&quot;org:top_members/employees&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:members&quot;</span><span class="p">,</span> <span class="s2">&quot;org:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;per:religion&quot;</span><span class="p">,</span> <span class="s2">&quot;org:member_of&quot;</span><span class="p">,</span> <span class="s2">&quot;org:city_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:origin&quot;</span><span class="p">,</span> <span class="s2">&quot;org:shareholders&quot;</span><span class="p">,</span> <span class="s2">&quot;per:charges&quot;</span><span class="p">,</span> <span class="s2">&quot;per:title&quot;</span><span class="p">,</span> <span class="s2">&quot;org:number_of_employees/members&quot;</span><span class="p">,</span> <span class="s2">&quot;org:dissolved&quot;</span><span class="p">,</span> <span class="s2">&quot;org:country_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;per:siblings&quot;</span><span class="p">,</span> <span class="s2">&quot;org:stateorprovince_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:spouse&quot;</span><span class="p">,</span> <span class="s2">&quot;per:other_family&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded_by&quot;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">68124</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">22631</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">15509</span>
+<span class="k">assert</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_a</span> <span class="o">==</span> <span class="s1">&#39;Tom Thabane resigned in October last year to form the All Basotho Convention -LRB- ABC -RRB- , crossing the floor with 17 members of parliament , causing constitutional monarch King Letsie III to dissolve parliament and call the snap election .&#39;</span>
+<span class="k">assert</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;head&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;All Basotho Convention&quot;</span>
+<span class="k">assert</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;tail&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Tom Thabane&quot;</span>
+<span class="k">assert</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="mi">41</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="tacrevprocessor">
+<h3>TACREVProcessor<a class="headerlink" href="#tacrevprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.relation_classification_dataset.TACREVProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">TACREVProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/relation_classification_dataset.html#TACREVProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.relation_classification_dataset.TACREVProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://github.com/DFKI-NLP/tacrev">TACRED Revisted (TACREV)</a> is a variant of the TACRED dataset</p>
+<p>It was proposed by the paper <a class="reference external" href="https://aclanthology.org/2020.acl-main.142.pdf">TACRED Revisited: A Thorough Evaluation of the TACRED Relation Extraction Task (Alt et al. 2020)</a></p>
+<p>This processor inherit <a class="reference internal" href="#openprompt.data_utils.relation_classification_dataset.TACREDProcessor" title="openprompt.data_utils.relation_classification_dataset.TACREDProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">TACREDProcessor</span></code></a> and can be used similarly</p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.relation_classification_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/RelationClassification&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;TACREV&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_dev_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">42</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;no_relation&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded&quot;</span><span class="p">,</span> <span class="s2">&quot;org:subsidiaries&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cause_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:age&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:countries_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovinces_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;org:website&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cities_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;per:employee_of&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;org:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;org:political/religious_affiliation&quot;</span><span class="p">,</span> <span class="s2">&quot;per:schools_attended&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:children&quot;</span><span class="p">,</span> <span class="s2">&quot;org:top_members/employees&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:members&quot;</span><span class="p">,</span> <span class="s2">&quot;org:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;per:religion&quot;</span><span class="p">,</span> <span class="s2">&quot;org:member_of&quot;</span><span class="p">,</span> <span class="s2">&quot;org:city_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:origin&quot;</span><span class="p">,</span> <span class="s2">&quot;org:shareholders&quot;</span><span class="p">,</span> <span class="s2">&quot;per:charges&quot;</span><span class="p">,</span> <span class="s2">&quot;per:title&quot;</span><span class="p">,</span> <span class="s2">&quot;org:number_of_employees/members&quot;</span><span class="p">,</span> <span class="s2">&quot;org:dissolved&quot;</span><span class="p">,</span> <span class="s2">&quot;org:country_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;per:siblings&quot;</span><span class="p">,</span> <span class="s2">&quot;org:stateorprovince_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:spouse&quot;</span><span class="p">,</span> <span class="s2">&quot;per:other_family&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded_by&quot;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">68124</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">22631</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">15509</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="retacredprocessor">
+<h3>ReTACREDProcessor<a class="headerlink" href="#retacredprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.relation_classification_dataset.ReTACREDProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ReTACREDProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/relation_classification_dataset.html#ReTACREDProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.relation_classification_dataset.ReTACREDProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://github.com/gstoica27/Re-TACRED">Re-TACRED</a> is a variant of the TACRED dataset</p>
+<p>It was proposed by the paper <a class="reference external" href="https://arxiv.org/pdf/2104.08398.pdf">Re-TACRED: Addressing Shortcomings of the TACRED Dataset (Stoica et al. 2021)</a></p>
+<p>This processor inherit <a class="reference internal" href="#openprompt.data_utils.relation_classification_dataset.TACREDProcessor" title="openprompt.data_utils.relation_classification_dataset.TACREDProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">TACREDProcessor</span></code></a> and can be used similarly</p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.relation_classification_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/RelationClassification&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;ReTACRED&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_dev_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">40</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;no_relation&quot;</span><span class="p">,</span> <span class="s2">&quot;org:members&quot;</span><span class="p">,</span> <span class="s2">&quot;per:siblings&quot;</span><span class="p">,</span> <span class="s2">&quot;per:spouse&quot;</span><span class="p">,</span> <span class="s2">&quot;org:country_of_branch&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovinces_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;org:top_members/employees&quot;</span><span class="p">,</span> <span class="s2">&quot;org:dissolved&quot;</span><span class="p">,</span> <span class="s2">&quot;org:number_of_employees/members&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:origin&quot;</span><span class="p">,</span> <span class="s2">&quot;per:children&quot;</span><span class="p">,</span> <span class="s2">&quot;org:political/religious_affiliation&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:title&quot;</span><span class="p">,</span> <span class="s2">&quot;org:shareholders&quot;</span><span class="p">,</span> <span class="s2">&quot;per:employee_of&quot;</span><span class="p">,</span> <span class="s2">&quot;org:member_of&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded_by&quot;</span><span class="p">,</span> <span class="s2">&quot;per:countries_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:other_family&quot;</span><span class="p">,</span> <span class="s2">&quot;per:religion&quot;</span><span class="p">,</span> <span class="s2">&quot;per:identity&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;org:city_of_branch&quot;</span><span class="p">,</span> <span class="s2">&quot;org:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;org:website&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cause_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:stateorprovince_of_branch&quot;</span><span class="p">,</span> <span class="s2">&quot;per:schools_attended&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cities_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:age&quot;</span><span class="p">,</span> <span class="s2">&quot;per:charges&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_birth&quot;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">58465</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">19584</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">13418</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="semevalprocessor">
+<h3>SemEvalProcessor<a class="headerlink" href="#semevalprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.relation_classification_dataset.SemEvalProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SemEvalProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/relation_classification_dataset.html#SemEvalProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.relation_classification_dataset.SemEvalProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://aclanthology.org/S10-1006.pdf">SemEval-2010 Task 8</a> is a  a traditional dataset in relation classification.</p>
+<p>It was released together with the paper <a class="reference external" href="https://aclanthology.org/S10-1006.pdf">SemEval-2010 Task 8: Multi-Way Classification of Semantic Relations Between Pairs of Nominals (Hendrickx et al. 2010)</a></p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.relation_classification_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/RelationClassification&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;SemEval&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()](</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_dev_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">19</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;Other&quot;</span><span class="p">,</span> <span class="s2">&quot;Member-Collection(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Entity-Destination(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Content-Container(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Message-Topic(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Entity-Origin(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Cause-Effect(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Product-Producer(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Instrument-Agency(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Component-Whole(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Member-Collection(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Entity-Destination(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Content-Container(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Message-Topic(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Entity-Origin(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Cause-Effect(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Product-Producer(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Instrument-Agency(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Component-Whole(e2,e1)&quot;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6507</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1493</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2717</span>
+<span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_a</span> <span class="o">==</span> <span class="s1">&#39;the system as described above has its greatest application in an arrayed configuration of antenna elements .&#39;</span>
+<span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;head&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;configuration&quot;</span>
+<span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;tail&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;elements&quot;</span>
+<span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="mi">18</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+<section id="conditional-generation-processor">
+<h2>Conditional Generation Processor<a class="headerlink" href="#conditional-generation-processor" title="Permalink to this headline">¶</a></h2>
+<section id="webnlgprocessor">
+<h3>WebNLGProcessor<a class="headerlink" href="#webnlgprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.conditional_generation_dataset.WebNLGProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">WebNLGProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/conditional_generation_dataset.html#WebNLGProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.conditional_generation_dataset.WebNLGProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p># TODO citation</p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.conditional_generation_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/CondGen&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;webnlg_2017&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">valid_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">18025</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">18025</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4928</span>
+<span class="k">assert</span> <span class="n">test_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_a</span> <span class="o">==</span> <span class="s2">&quot; | Abilene_Regional_Airport : cityServed : Abilene,_Texas&quot;</span>
+<span class="k">assert</span> <span class="n">test_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_b</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+<span class="k">assert</span> <span class="n">test_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tgt_text</span> <span class="o">==</span> <span class="s2">&quot;Abilene, Texas is served by the Abilene regional airport.&quot;</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.conditional_generation_dataset.WebNLGProcessor.get_examples">
+<span class="sig-name descname"><span class="pre">get_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/conditional_generation_dataset.html#WebNLGProcessor.get_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.conditional_generation_dataset.WebNLGProcessor.get_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the <code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code> of dataset under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code> is the base path of the dataset, for example:</p>
+<p>training file could be located in <code class="docutils literal notranslate"><span class="pre">data_dir/train.txt</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the base path of the dataset</p></li>
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – <code class="docutils literal notranslate"><span class="pre">train</span></code> / <code class="docutils literal notranslate"><span class="pre">dev</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> / <code class="docutils literal notranslate"><span class="pre">unlabeled</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return a list of <a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample">InputExample</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="data_utils.html" class="btn btn-neutral float-left" title="Data Utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trainer.html" class="btn btn-neutral float-right" title="Trainer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

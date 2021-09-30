@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openprompt.data_utils.relation_classification_dataset &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/js/custom.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>openprompt.data_utils.relation_classification_dataset</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openprompt.data_utils.relation_classification_dataset</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This file contains the logic for loading data for all RelationClassification tasks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span> <span class="nn">openprompt.utils.logging</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputExample</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils.data_processor</span> <span class="kn">import</span> <span class="n">DataProcessor</span>
+
+
+
+
+<div class="viewcode-block" id="TACREDProcessor"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.TACREDProcessor">[docs]</a><span class="k">class</span> <span class="nc">TACREDProcessor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `TAC Relation Extraction Dataset (TACRED) &lt;https://nlp.stanford.edu/projects/tacred/&gt;`_ is one of the largest and most widely used datasets for relation classification.</span>
+
+<span class="sd">    It was released together with the paper `Position-aware Attention and Supervised Data Improve Slot Filling (Zhang et al. 2017) &lt;https://nlp.stanford.edu/pubs/zhang2017tacred.pdf&gt;`_</span>
+<span class="sd">    </span>
+<span class="sd">    This processor is also inherited by :py:class:`TACREVProcessor` and :py:class:`ReTACREDProcessor`. </span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ..  code-block:: python </span>
+
+<span class="sd">        from openprompt.data_utils.relation_classification_dataset import PROCESSORS</span>
+
+<span class="sd">        base_path = &quot;datasets/RelationClassification&quot;</span>
+
+<span class="sd">        dataset_name = &quot;TACRED&quot;</span>
+<span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
+<span class="sd">        processor = PROCESSORS[dataset_name.lower()]()</span>
+<span class="sd">        train_dataset = processor.get_train_examples(dataset_path)</span>
+<span class="sd">        dev_dataset = processor.get_dev_examples(dataset_path)</span>
+<span class="sd">        test_dataset = processor.get_test_examples(dataset_path)</span>
+
+<span class="sd">        assert processor.get_num_labels() == 42</span>
+<span class="sd">        assert processor.get_labels() == [&quot;no_relation&quot;, &quot;org:founded&quot;, &quot;org:subsidiaries&quot;, &quot;per:date_of_birth&quot;, &quot;per:cause_of_death&quot;, &quot;per:age&quot;, &quot;per:stateorprovince_of_birth&quot;, &quot;per:countries_of_residence&quot;, &quot;per:country_of_birth&quot;, &quot;per:stateorprovinces_of_residence&quot;, &quot;org:website&quot;, &quot;per:cities_of_residence&quot;, &quot;per:parents&quot;, &quot;per:employee_of&quot;, &quot;per:city_of_birth&quot;, &quot;org:parents&quot;, &quot;org:political/religious_affiliation&quot;, &quot;per:schools_attended&quot;, &quot;per:country_of_death&quot;, &quot;per:children&quot;, &quot;org:top_members/employees&quot;, &quot;per:date_of_death&quot;, &quot;org:members&quot;, &quot;org:alternate_names&quot;, &quot;per:religion&quot;, &quot;org:member_of&quot;, &quot;org:city_of_headquarters&quot;, &quot;per:origin&quot;, &quot;org:shareholders&quot;, &quot;per:charges&quot;, &quot;per:title&quot;, &quot;org:number_of_employees/members&quot;, &quot;org:dissolved&quot;, &quot;org:country_of_headquarters&quot;, &quot;per:alternate_names&quot;, &quot;per:siblings&quot;, &quot;org:stateorprovince_of_headquarters&quot;, &quot;per:spouse&quot;, &quot;per:other_family&quot;, &quot;per:city_of_death&quot;, &quot;per:stateorprovince_of_death&quot;, &quot;org:founded_by&quot;]</span>
+<span class="sd">        assert len(train_dataset) == 68124</span>
+<span class="sd">        assert len(dev_dataset) == 22631</span>
+<span class="sd">        assert len(test_dataset) == 15509</span>
+<span class="sd">        assert train_dataset[0].text_a == &#39;Tom Thabane resigned in October last year to form the All Basotho Convention -LRB- ABC -RRB- , crossing the floor with 17 members of parliament , causing constitutional monarch King Letsie III to dissolve parliament and call the snap election .&#39;</span>
+<span class="sd">        assert train_dataset[0].meta[&quot;head&quot;] == &quot;All Basotho Convention&quot;</span>
+<span class="sd">        assert train_dataset[0].meta[&quot;tail&quot;] == &quot;Tom Thabane&quot;</span>
+<span class="sd">        assert train_dataset[0].label == 41</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;no_relation&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded&quot;</span><span class="p">,</span> <span class="s2">&quot;org:subsidiaries&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cause_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:age&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:countries_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovinces_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;org:website&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cities_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;per:employee_of&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;org:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;org:political/religious_affiliation&quot;</span><span class="p">,</span> <span class="s2">&quot;per:schools_attended&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:children&quot;</span><span class="p">,</span> <span class="s2">&quot;org:top_members/employees&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:members&quot;</span><span class="p">,</span> <span class="s2">&quot;org:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;per:religion&quot;</span><span class="p">,</span> <span class="s2">&quot;org:member_of&quot;</span><span class="p">,</span> <span class="s2">&quot;org:city_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:origin&quot;</span><span class="p">,</span> <span class="s2">&quot;org:shareholders&quot;</span><span class="p">,</span> <span class="s2">&quot;per:charges&quot;</span><span class="p">,</span> <span class="s2">&quot;per:title&quot;</span><span class="p">,</span> <span class="s2">&quot;org:number_of_employees/members&quot;</span><span class="p">,</span> <span class="s2">&quot;org:dissolved&quot;</span><span class="p">,</span> <span class="s2">&quot;org:country_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;per:siblings&quot;</span><span class="p">,</span> <span class="s2">&quot;org:stateorprovince_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:spouse&quot;</span><span class="p">,</span> <span class="s2">&quot;per:other_family&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded_by&quot;</span>
+        <span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.json&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">))</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">example_jsons</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">example_json</span> <span class="ow">in</span> <span class="n">example_jsons</span><span class="p">:</span>
+                <span class="n">guid</span> <span class="o">=</span> <span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_label_id</span><span class="p">(</span><span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;relation&quot;</span><span class="p">])</span>
+                <span class="n">tokens</span> <span class="o">=</span> <span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">]</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;head&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">[</span><span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;subj_start&quot;</span><span class="p">]:</span> <span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;subj_end&quot;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="s2">&quot;tail&quot;</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">[</span><span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;obj_start&quot;</span><span class="p">]:</span> <span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;obj_end&quot;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="p">}</span>
+
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="n">guid</span><span class="p">,</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">examples</span></div>
+
+<div class="viewcode-block" id="TACREVProcessor"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.TACREVProcessor">[docs]</a><span class="k">class</span> <span class="nc">TACREVProcessor</span><span class="p">(</span><span class="n">TACREDProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `TACRED Revisted (TACREV) &lt;https://github.com/DFKI-NLP/tacrev&gt;`_ is a variant of the TACRED dataset</span>
+
+<span class="sd">    It was proposed by the paper `TACRED Revisited: A Thorough Evaluation of the TACRED Relation Extraction Task (Alt et al. 2020) &lt;https://aclanthology.org/2020.acl-main.142.pdf&gt;`_</span>
+<span class="sd">    </span>
+<span class="sd">    This processor inherit :py:class:`TACREDProcessor` and can be used similarly</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ..  code-block:: python</span>
+
+<span class="sd">        from openprompt.data_utils.relation_classification_dataset import PROCESSORS</span>
+
+<span class="sd">        base_path = &quot;datasets/RelationClassification&quot;</span>
+<span class="sd">    </span>
+<span class="sd">        dataset_name = &quot;TACREV&quot;</span>
+<span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
+<span class="sd">        processor = PROCESSORS[dataset_name.lower()]()</span>
+<span class="sd">        train_dataset = processor.get_train_examples(dataset_path)</span>
+<span class="sd">        dev_dataset = processor.get_dev_examples(dataset_path)</span>
+<span class="sd">        test_dataset = processor.get_test_examples(dataset_path)</span>
+<span class="sd">        assert processor.get_num_labels() == 42</span>
+<span class="sd">        assert processor.get_labels() == [&quot;no_relation&quot;, &quot;org:founded&quot;, &quot;org:subsidiaries&quot;, &quot;per:date_of_birth&quot;, &quot;per:cause_of_death&quot;, &quot;per:age&quot;, &quot;per:stateorprovince_of_birth&quot;, &quot;per:countries_of_residence&quot;, &quot;per:country_of_birth&quot;, &quot;per:stateorprovinces_of_residence&quot;, &quot;org:website&quot;, &quot;per:cities_of_residence&quot;, &quot;per:parents&quot;, &quot;per:employee_of&quot;, &quot;per:city_of_birth&quot;, &quot;org:parents&quot;, &quot;org:political/religious_affiliation&quot;, &quot;per:schools_attended&quot;, &quot;per:country_of_death&quot;, &quot;per:children&quot;, &quot;org:top_members/employees&quot;, &quot;per:date_of_death&quot;, &quot;org:members&quot;, &quot;org:alternate_names&quot;, &quot;per:religion&quot;, &quot;org:member_of&quot;, &quot;org:city_of_headquarters&quot;, &quot;per:origin&quot;, &quot;org:shareholders&quot;, &quot;per:charges&quot;, &quot;per:title&quot;, &quot;org:number_of_employees/members&quot;, &quot;org:dissolved&quot;, &quot;org:country_of_headquarters&quot;, &quot;per:alternate_names&quot;, &quot;per:siblings&quot;, &quot;org:stateorprovince_of_headquarters&quot;, &quot;per:spouse&quot;, &quot;per:other_family&quot;, &quot;per:city_of_death&quot;, &quot;per:stateorprovince_of_death&quot;, &quot;org:founded_by&quot;]</span>
+<span class="sd">        assert len(train_dataset) == 68124</span>
+<span class="sd">        assert len(dev_dataset) == 22631</span>
+<span class="sd">        assert len(test_dataset) == 15509</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;no_relation&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded&quot;</span><span class="p">,</span> <span class="s2">&quot;org:subsidiaries&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cause_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:age&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:countries_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovinces_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;org:website&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cities_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;per:employee_of&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;org:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;org:political/religious_affiliation&quot;</span><span class="p">,</span> <span class="s2">&quot;per:schools_attended&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:children&quot;</span><span class="p">,</span> <span class="s2">&quot;org:top_members/employees&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:members&quot;</span><span class="p">,</span> <span class="s2">&quot;org:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;per:religion&quot;</span><span class="p">,</span> <span class="s2">&quot;org:member_of&quot;</span><span class="p">,</span> <span class="s2">&quot;org:city_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:origin&quot;</span><span class="p">,</span> <span class="s2">&quot;org:shareholders&quot;</span><span class="p">,</span> <span class="s2">&quot;per:charges&quot;</span><span class="p">,</span> <span class="s2">&quot;per:title&quot;</span><span class="p">,</span> <span class="s2">&quot;org:number_of_employees/members&quot;</span><span class="p">,</span> <span class="s2">&quot;org:dissolved&quot;</span><span class="p">,</span> <span class="s2">&quot;org:country_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;per:siblings&quot;</span><span class="p">,</span> <span class="s2">&quot;org:stateorprovince_of_headquarters&quot;</span><span class="p">,</span> <span class="s2">&quot;per:spouse&quot;</span><span class="p">,</span> <span class="s2">&quot;per:other_family&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded_by&quot;</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="ReTACREDProcessor"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.ReTACREDProcessor">[docs]</a><span class="k">class</span> <span class="nc">ReTACREDProcessor</span><span class="p">(</span><span class="n">TACREDProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `Re-TACRED &lt;https://github.com/gstoica27/Re-TACRED&gt;`_ is a variant of the TACRED dataset</span>
+
+<span class="sd">    It was proposed by the paper `Re-TACRED: Addressing Shortcomings of the TACRED Dataset (Stoica et al. 2021) &lt;https://arxiv.org/pdf/2104.08398.pdf&gt;`_</span>
+<span class="sd">    </span>
+<span class="sd">    This processor inherit :py:class:`TACREDProcessor` and can be used similarly</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ..  code-block:: python</span>
+
+<span class="sd">        from openprompt.data_utils.relation_classification_dataset import PROCESSORS</span>
+
+<span class="sd">        base_path = &quot;datasets/RelationClassification&quot;</span>
+
+<span class="sd">        dataset_name = &quot;ReTACRED&quot;</span>
+<span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
+<span class="sd">        processor = PROCESSORS[dataset_name.lower()]()</span>
+<span class="sd">        train_dataset = processor.get_train_examples(dataset_path)</span>
+<span class="sd">        dev_dataset = processor.get_dev_examples(dataset_path)</span>
+<span class="sd">        test_dataset = processor.get_test_examples(dataset_path)</span>
+<span class="sd">        assert processor.get_num_labels() == 40</span>
+<span class="sd">        assert processor.get_labels() == [&quot;no_relation&quot;, &quot;org:members&quot;, &quot;per:siblings&quot;, &quot;per:spouse&quot;, &quot;org:country_of_branch&quot;, &quot;per:country_of_death&quot;, &quot;per:parents&quot;, &quot;per:stateorprovinces_of_residence&quot;, &quot;org:top_members/employees&quot;, &quot;org:dissolved&quot;, &quot;org:number_of_employees/members&quot;, &quot;per:stateorprovince_of_death&quot;, &quot;per:origin&quot;, &quot;per:children&quot;, &quot;org:political/religious_affiliation&quot;, &quot;per:city_of_birth&quot;, &quot;per:title&quot;, &quot;org:shareholders&quot;, &quot;per:employee_of&quot;, &quot;org:member_of&quot;, &quot;org:founded_by&quot;, &quot;per:countries_of_residence&quot;, &quot;per:other_family&quot;, &quot;per:religion&quot;, &quot;per:identity&quot;, &quot;per:date_of_birth&quot;, &quot;org:city_of_branch&quot;, &quot;org:alternate_names&quot;, &quot;org:website&quot;, &quot;per:cause_of_death&quot;, &quot;org:stateorprovince_of_branch&quot;, &quot;per:schools_attended&quot;, &quot;per:country_of_birth&quot;, &quot;per:date_of_death&quot;, &quot;per:city_of_death&quot;, &quot;org:founded&quot;, &quot;per:cities_of_residence&quot;, &quot;per:age&quot;, &quot;per:charges&quot;, &quot;per:stateorprovince_of_birth&quot;]</span>
+<span class="sd">        assert len(train_dataset) == 58465</span>
+<span class="sd">        assert len(dev_dataset) == 19584</span>
+<span class="sd">        assert len(test_dataset) == 13418</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;no_relation&quot;</span><span class="p">,</span> <span class="s2">&quot;org:members&quot;</span><span class="p">,</span> <span class="s2">&quot;per:siblings&quot;</span><span class="p">,</span> <span class="s2">&quot;per:spouse&quot;</span><span class="p">,</span> <span class="s2">&quot;org:country_of_branch&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:parents&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovinces_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;org:top_members/employees&quot;</span><span class="p">,</span> <span class="s2">&quot;org:dissolved&quot;</span><span class="p">,</span> <span class="s2">&quot;org:number_of_employees/members&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:origin&quot;</span><span class="p">,</span> <span class="s2">&quot;per:children&quot;</span><span class="p">,</span> <span class="s2">&quot;org:political/religious_affiliation&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:title&quot;</span><span class="p">,</span> <span class="s2">&quot;org:shareholders&quot;</span><span class="p">,</span> <span class="s2">&quot;per:employee_of&quot;</span><span class="p">,</span> <span class="s2">&quot;org:member_of&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded_by&quot;</span><span class="p">,</span> <span class="s2">&quot;per:countries_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:other_family&quot;</span><span class="p">,</span> <span class="s2">&quot;per:religion&quot;</span><span class="p">,</span> <span class="s2">&quot;per:identity&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;org:city_of_branch&quot;</span><span class="p">,</span> <span class="s2">&quot;org:alternate_names&quot;</span><span class="p">,</span> <span class="s2">&quot;org:website&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cause_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:stateorprovince_of_branch&quot;</span><span class="p">,</span> <span class="s2">&quot;per:schools_attended&quot;</span><span class="p">,</span> <span class="s2">&quot;per:country_of_birth&quot;</span><span class="p">,</span> <span class="s2">&quot;per:date_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;per:city_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;org:founded&quot;</span><span class="p">,</span> <span class="s2">&quot;per:cities_of_residence&quot;</span><span class="p">,</span> <span class="s2">&quot;per:age&quot;</span><span class="p">,</span> <span class="s2">&quot;per:charges&quot;</span><span class="p">,</span> <span class="s2">&quot;per:stateorprovince_of_birth&quot;</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="SemEvalProcessor"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.SemEvalProcessor">[docs]</a><span class="k">class</span> <span class="nc">SemEvalProcessor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `SemEval-2010 Task 8 &lt;https://aclanthology.org/S10-1006.pdf&gt;`_ is a  a traditional dataset in relation classification.</span>
+
+<span class="sd">    It was released together with the paper `SemEval-2010 Task 8: Multi-Way Classification of Semantic Relations Between Pairs of Nominals (Hendrickx et al. 2010) &lt;https://aclanthology.org/S10-1006.pdf&gt;`_</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ..  code-block:: python</span>
+
+<span class="sd">        from openprompt.data_utils.relation_classification_dataset import PROCESSORS</span>
+
+<span class="sd">        base_path = &quot;datasets/RelationClassification&quot;</span>
+
+<span class="sd">        dataset_name = &quot;SemEval&quot;</span>
+<span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
+<span class="sd">        processor = PROCESSORS[dataset_name.lower()](dataset_path)</span>
+<span class="sd">        train_dataset = processor.get_train_examples(dataset_path)</span>
+<span class="sd">        dev_dataset = processor.get_dev_examples(dataset_path)</span>
+<span class="sd">        test_dataset = processor.get_test_examples(dataset_path)</span>
+<span class="sd">        assert processor.get_num_labels() == 19</span>
+<span class="sd">        assert processor.get_labels() == [&quot;Other&quot;, &quot;Member-Collection(e1,e2)&quot;, &quot;Entity-Destination(e1,e2)&quot;, &quot;Content-Container(e1,e2)&quot;, &quot;Message-Topic(e1,e2)&quot;, &quot;Entity-Origin(e1,e2)&quot;, &quot;Cause-Effect(e1,e2)&quot;, &quot;Product-Producer(e1,e2)&quot;, &quot;Instrument-Agency(e1,e2)&quot;, &quot;Component-Whole(e1,e2)&quot;, &quot;Member-Collection(e2,e1)&quot;, &quot;Entity-Destination(e2,e1)&quot;, &quot;Content-Container(e2,e1)&quot;, &quot;Message-Topic(e2,e1)&quot;, &quot;Entity-Origin(e2,e1)&quot;, &quot;Cause-Effect(e2,e1)&quot;, &quot;Product-Producer(e2,e1)&quot;, &quot;Instrument-Agency(e2,e1)&quot;, &quot;Component-Whole(e2,e1)&quot;]</span>
+<span class="sd">        assert len(train_dataset) == 6507</span>
+<span class="sd">        assert len(dev_dataset) == 1493</span>
+<span class="sd">        assert len(test_dataset) == 2717</span>
+<span class="sd">        assert dev_dataset[0].text_a == &#39;the system as described above has its greatest application in an arrayed configuration of antenna elements .&#39;</span>
+<span class="sd">        assert dev_dataset[0].meta[&quot;head&quot;] == &quot;configuration&quot;</span>
+<span class="sd">        assert dev_dataset[0].meta[&quot;tail&quot;] == &quot;elements&quot;</span>
+<span class="sd">        assert dev_dataset[0].label == 18</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Other&quot;</span><span class="p">,</span> <span class="s2">&quot;Member-Collection(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Entity-Destination(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Content-Container(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Message-Topic(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Entity-Origin(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Cause-Effect(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Product-Producer(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Instrument-Agency(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Component-Whole(e1,e2)&quot;</span><span class="p">,</span> <span class="s2">&quot;Member-Collection(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Entity-Destination(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Content-Container(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Message-Topic(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Entity-Origin(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Cause-Effect(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Product-Producer(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Instrument-Agency(e2,e1)&quot;</span><span class="p">,</span> <span class="s2">&quot;Component-Whole(e2,e1)&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.jsonl&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">))</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">choicex</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+                <span class="n">example_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_label_id</span><span class="p">(</span><span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;relation&quot;</span><span class="p">])</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">])</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;head&quot;</span><span class="p">:</span> <span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;tail&quot;</span><span class="p">:</span> <span class="n">example_json</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                <span class="p">}</span>
+
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">choicex</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">examples</span></div>
+
+<span class="n">PROCESSORS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;tacred&quot;</span><span class="p">:</span> <span class="n">TACREDProcessor</span><span class="p">,</span>
+    <span class="s2">&quot;tacrev&quot;</span><span class="p">:</span> <span class="n">TACREVProcessor</span><span class="p">,</span>
+    <span class="s2">&quot;retacred&quot;</span><span class="p">:</span> <span class="n">ReTACREDProcessor</span><span class="p">,</span>
+    <span class="s2">&quot;semeval&quot;</span><span class="p">:</span> <span class="n">SemEvalProcessor</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction with an Example &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/js/custom.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to Write a Template?" href="template.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction with an Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-define-a-task">Step 1. Define a task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-obtain-a-plm">Step 2. Obtain a PLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-define-a-template">Step 3. Define a Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-4-define-a-verbalizer">Step 4. Define a Verbalizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-5-construct-a-promptmodel">Step 5. Construct a PromptModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-6-define-a-dataloader">Step 6. Define a DataLoader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-7-train-and-inference">Step 7. Train and inference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Introduction with an Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/examples.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction-with-an-example">
+<h1>Introduction with an Example<a class="headerlink" href="#introduction-with-an-example" title="Permalink to this headline">¶</a></h1>
+<p>How to construct a prompt-learning pipeline?
+With the modularity and flexibility of OpenPrompt, you can easily develop a prompt-learning application step by step.</p>
+<section id="step-1-define-a-task">
+<h2>Step 1. Define a task<a class="headerlink" href="#step-1-define-a-task" title="Permalink to this headline">¶</a></h2>
+<p>The first step is to determine the current NLP task, think about what’s your data looks like and what do you want from the data!
+That is, the essence of this step is to determine the <code class="docutils literal notranslate"><span class="pre">classses</span></code> and the <a class="reference internal" href="../modules/data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a> of the task.
+For simplicity, we use Sentiment Analysis as an example.</p>
+<p>You can also use our pre-defined <a class="reference internal" href="../modules/data_processors.html#data-processors"><span class="std std-ref">Data Processors</span></a> to get train/dev/test dataset for a given task.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputExample</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="p">[</span> <span class="c1"># There are two classes in Sentiment Analysis, one for negative and one for positive</span>
+    <span class="s2">&quot;negative&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;positive&quot;</span>
+<span class="p">]</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="p">[</span> <span class="c1"># For simplicity, there&#39;s only two examples</span>
+    <span class="c1"># text_a is the input text of the data, some other datasets may have multiple input sentences in one example.</span>
+    <span class="n">InputExample</span><span class="p">(</span>
+        <span class="n">guid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">text_a</span> <span class="o">=</span> <span class="s2">&quot;Albert Einstein was one of the greatest intellects of his time.&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">InputExample</span><span class="p">(</span>
+        <span class="n">guid</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">text_a</span> <span class="o">=</span> <span class="s2">&quot;The film was badly made.&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="step-2-obtain-a-plm">
+<h2>Step 2. Obtain a PLM<a class="headerlink" href="#step-2-obtain-a-plm" title="Permalink to this headline">¶</a></h2>
+<p>Choose a PLM to support your task. Different models have different attributes,
+we encourge you to use OpenPrompt to explore the potential of various PLMs.
+OpenPrompt is compatible with models on <a class="reference external" href="https://huggingface.co/transformers/">huggingface</a>,
+the following models have been tested:</p>
+<ul class="simple">
+<li><p>Masked Language Models (MLM): <code class="docutils literal notranslate"><span class="pre">BERT</span></code>, <code class="docutils literal notranslate"><span class="pre">RoBERTa</span></code>, <code class="docutils literal notranslate"><span class="pre">ALBERT</span></code></p></li>
+<li><p>Autoregressive Language Models (LM): <code class="docutils literal notranslate"><span class="pre">GPT</span></code>, <code class="docutils literal notranslate"><span class="pre">GPT2</span></code></p></li>
+<li><p>Sequence-to-Sequence Models (Seq2Seq): <code class="docutils literal notranslate"><span class="pre">T5</span></code></p></li>
+</ul>
+<p>Simply use a <code class="docutils literal notranslate"><span class="pre">get_model_class</span></code> to obtain your PLM.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.plms</span> <span class="kn">import</span> <span class="n">get_model_class</span>
+<span class="n">model_class</span> <span class="o">=</span> <span class="n">get_model_class</span><span class="p">(</span><span class="n">plm_type</span> <span class="o">=</span> <span class="s2">&quot;bert&quot;</span><span class="p">)</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="s2">&quot;bert-base-cased&quot;</span>
+<span class="n">bertConfig</span> <span class="o">=</span> <span class="n">model_class</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+<span class="n">bertTokenizer</span> <span class="o">=</span> <span class="n">model_class</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+<span class="n">bertModel</span> <span class="o">=</span> <span class="n">model_class</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="step-3-define-a-template">
+<h2>Step 3. Define a Template<a class="headerlink" href="#step-3-define-a-template" title="Permalink to this headline">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">Template</span></code> is a modifier of the original input text, which is also one of the most important modules in prompt-learning.
+A more advanced tutorial to define a template is in <a class="reference internal" href="template.html#tutorial-template"><span class="std std-ref">How to Write a Template?</span></a></p>
+<p>Here is an example, where the <code class="docutils literal notranslate"><span class="pre">&lt;text_a&gt;</span></code> will be replaced by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">text_a</span></code> in <a class="reference internal" href="../modules/data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a>, and the <code class="docutils literal notranslate"><span class="pre">&lt;mask&gt;</span></code> will be used to predict a label word.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.prompts</span> <span class="kn">import</span> <span class="n">ManualTemplate</span>
+<span class="n">promptTemplate</span> <span class="o">=</span> <span class="n">ManualTemplate</span><span class="p">(</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;text_a&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;It&quot;</span><span class="p">,</span> <span class="s2">&quot;was&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;mask&gt;&quot;</span><span class="p">],</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">bertTokenizer</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="step-4-define-a-verbalizer">
+<h2>Step 4. Define a Verbalizer<a class="headerlink" href="#step-4-define-a-verbalizer" title="Permalink to this headline">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">Verbalizer</span></code> is another important (but not neccessary such as in generation) in prompt-learning,which projects the original labels (we have defined them as <code class="docutils literal notranslate"><span class="pre">classes</span></code>, remember?) to a set of label words.
+A more advanced tutorial to define a verbalizer is in <a class="reference internal" href="verbalizer.html#how-to-write-a-verbalizer"><span class="std std-ref">How to Write a Verbalizer?</span></a></p>
+<p>Here is an example that we</p>
+<ul class="simple">
+<li><p>project the <code class="docutils literal notranslate"><span class="pre">negative</span></code> class to the word  <cite>bad</cite></p></li>
+<li><p>project the <code class="docutils literal notranslate"><span class="pre">positive</span></code> class to the words <cite>good</cite>, <cite>wonderful</cite>, <cite>great</cite>.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.prompts</span> <span class="kn">import</span> <span class="n">ManualVerbalizer</span>
+<span class="n">promptVerbalizer</span> <span class="o">=</span> <span class="n">ManualVerbalizer</span><span class="p">(</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span><span class="p">,</span>
+    <span class="n">label_words</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;negative&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;bad&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;positive&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;good&quot;</span><span class="p">,</span> <span class="s2">&quot;wonderful&quot;</span><span class="p">,</span> <span class="s2">&quot;great&quot;</span><span class="p">],</span>
+    <span class="p">},</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">bertTokenizer</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="step-5-construct-a-promptmodel">
+<h2>Step 5. Construct a PromptModel<a class="headerlink" href="#step-5-construct-a-promptmodel" title="Permalink to this headline">¶</a></h2>
+<p>Given the task, now we have a <code class="docutils literal notranslate"><span class="pre">PLM</span></code>, a <code class="docutils literal notranslate"><span class="pre">Template</span></code> and a <code class="docutils literal notranslate"><span class="pre">Verbalizer</span></code>, we combine them into a <code class="docutils literal notranslate"><span class="pre">PromptModel</span></code>.</p>
+<p>Note that although this example naively combine the three modules, you can actually define some complicated interactions among them.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt</span> <span class="kn">import</span> <span class="n">PromptForClassification</span>
+<span class="n">promptModel</span> <span class="o">=</span> <span class="n">PromptForClassification</span><span class="p">(</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">promptTemplate</span><span class="p">,</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">bertModel</span><span class="p">,</span>
+    <span class="n">verbalizer</span> <span class="o">=</span> <span class="n">promptVerbalizer</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="step-6-define-a-dataloader">
+<h2>Step 6. Define a DataLoader<a class="headerlink" href="#step-6-define-a-dataloader" title="Permalink to this headline">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">PromptDataLoader</span></code> is basically a prompt version of pytorch Dataloader, which also includes a <code class="docutils literal notranslate"><span class="pre">Tokenizer</span></code> and a <code class="docutils literal notranslate"><span class="pre">Template</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt</span> <span class="kn">import</span> <span class="n">PromptDataLoader</span>
+<span class="n">data_loader</span> <span class="o">=</span> <span class="n">PromptDataLoader</span><span class="p">(</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">,</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">bertTokenizer</span><span class="p">,</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">promptTemplate</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="step-7-train-and-inference">
+<h2>Step 7. Train and inference<a class="headerlink" href="#step-7-train-and-inference" title="Permalink to this headline">¶</a></h2>
+<p>Done! We can conduct training and inference the same as other processes in Pytorch.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">promptModel</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">data_loader</span><span class="p">:</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">promptModel</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">classes</span><span class="p">[</span><span class="n">preds</span><span class="p">])</span>
+<span class="c1"># predictions would be 1, 0 for classes &#39;positive&#39;, &#39;negative&#39;</span>
+</pre></div>
+</div>
+<p>This is a quick start of OpenPrompt, please refer to the APIs for more details.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="template.html" class="btn btn-neutral float-right" title="How to Write a Template?" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

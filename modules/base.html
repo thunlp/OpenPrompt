@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base Classes &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="../_static/js/custom.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Templates" href="template.html" />
+    <link rel="prev" title="FAQ" href="../notes/faq.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Base Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prompt-base">Prompt Base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline-base">Pipeline Base</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Base Classes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/base.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="base-classes">
+<h1>Base Classes<a class="headerlink" href="#base-classes" title="Permalink to this headline">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This page introduces the base classes of the prompt-learning framework.
+Generally, to conduct prompt-learning, a <code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedModel</span></code> is selected with the corresponding pre-trained task,
+a <code class="xref py py-obj docutils literal notranslate"><span class="pre">Template</span></code> class is established to wrap the original text,
+and a <code class="xref py py-obj docutils literal notranslate"><span class="pre">Verbalizer</span></code> class (if needed) is defined to project the labels to the label words in the vocabulary.
+In OpenPrompt, the specific prompt-related classes will inherit these base classes.</p>
+</section>
+<section id="prompt-base">
+<h2>Prompt Base<a class="headerlink" href="#prompt-base" title="Permalink to this headline">¶</a></h2>
+<p>Base classes of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Template</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">Verbalizer</span></code>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'&lt;mask&gt;'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">placeholder_mapping</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{'&lt;text_a&gt;':</span> <span class="pre">'text_a',</span> <span class="pre">'&lt;text_b&gt;':</span> <span class="pre">'text_b'}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for all the templates.
+Most of methods are abstract, with some expections to hold the common methods for all template, such as <code class="docutils literal notranslate"><span class="pre">loss_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">save</span></code>, <code class="docutils literal notranslate"><span class="pre">load</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PreTrainedTokenizer</span></code>) – A tokenizer to appoint the vocabulary and the tokenization strategy.</p></li>
+<li><p><strong>mask_token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The special token that is masked and need to be predicted by the model.</p></li>
+<li><p><strong>placeholder_mapping</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>) – A place holder to represent the original input text.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.get_default_loss_ids">
+<span class="sig-name descname"><span class="pre">get_default_loss_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_loss_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_loss_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the loss indices for the template using mask.
+E.g. when self.text is <code class="docutils literal notranslate"><span class="pre">['&lt;text_a&gt;',</span> <span class="pre">'it',</span> <span class="pre">'is',</span> <span class="pre">'&lt;mask&gt;',</span> <span class="pre">'.']</span></code>, output is <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0]</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>A list of integers in the range [0, 1]:</p>
+<ul class="simple">
+<li><p>1 for a masked tokens.</p></li>
+<li><p>0 for a sequence tokens.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[int]</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.get_default_shortenable_ids">
+<span class="sig-name descname"><span class="pre">get_default_shortenable_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_shortenable_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_shortenable_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Every template needs shortenable_ids, denoting which part of the template can be trucate to fit
+the language model’s <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>. Default: the input text is shortenable, while the template text and other
+special tokens are not shortenable. As far as we are concerned, almost every template will use this default setting.
+e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">['&lt;text_a&gt;',</span> <span class="pre">'&lt;meta:word&gt;',</span> <span class="pre">'is',</span> <span class="pre">'&lt;mask&gt;',</span> <span class="pre">'.']</span></code>, output is <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0]</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>A list of integers in the range <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>:</p>
+<ul class="simple">
+<li><p>1 for the input tokens.</p></li>
+<li><p>0 for the template sequence tokens.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[int]</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.get_default_new_token_ids">
+<span class="sig-name descname"><span class="pre">get_default_new_token_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_new_token_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_new_token_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sometimes tokens in the template are not from the vocabulary,
+but a sequence of newly iniliazed tokens (ones may say, soft-encoding).
+In this case, you need to implement this function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.9)"><strong>NotImplementedError</strong></a> – if needed, add <code class="docutils literal notranslate"><span class="pre">new_token_ids</span></code> into <code class="docutils literal notranslate"><span class="pre">registered_inputflag_names</span></code> attribute of Template class and implement this method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.get_default_soft_token_ids">
+<span class="sig-name descname"><span class="pre">get_default_soft_token_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_soft_token_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_soft_token_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function identifies which tokens are soft tokens.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.9)"><strong>NotImplementedError</strong></a> – if needed, add <code class="docutils literal notranslate"><span class="pre">soft_token_ids</span></code> into <code class="docutils literal notranslate"><span class="pre">registered_inputflag_names</span></code> attribute of Template class and implement this method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.wrap_one_example">
+<span class="sig-name descname"><span class="pre">wrap_one_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">example</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.wrap_one_example"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.wrap_one_example" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an input example which contains input text, which can be referenced
+by self.template.placeholder_mapping ‘s value.
+This function process the example into a list of dict,
+Each dict functions as a group, which has the sample properties, such as
+whether it’s shortenable, whether it’s the masked position, whether it’s soft token, etc.
+Since a text will be tokenized in the subsequent processing procedure,
+these attributes are broadcasted along the tokenized sentence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>example</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Object</span></code>) – An <a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a> object, which should have attributes that are able to be filled in the template.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.process_batch">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">process_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.process_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.process_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>All template should rewrite this method to process the batch input
+such as substituting embeddings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>A save method API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A path to save your template.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.safe_on_text_set">
+<span class="sig-name descname"><span class="pre">safe_on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.safe_on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.safe_on_text_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>With this wrapper function, setting text inside <code class="docutils literal notranslate"><span class="pre">on_text_set()</span></code>
+will not trigger <code class="docutils literal notranslate"><span class="pre">on_text_set()</span></code> again to prevent endless recursion.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.on_text_set">
+<span class="sig-name descname"><span class="pre">on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.on_text_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>A hook to do something when template text was set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.from_file">
+<span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separator</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the template from a local file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The path of the local template file.</p></li>
+<li><p><strong>choice</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – The id-th line of the file.</p></li>
+<li><p><strong>separator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – A sparator to delimit the text in the file. Default to ” “</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.from_config">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yacs.config.CfgNode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>load a template from template’s configuration node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – the sub-configuration of template, i.e. config[config.template]
+if config is a global config node.</p></li>
+<li><p><strong>kwargs</strong> – Other kwargs that might be used in initialize the verbalizer.
+The actual value should match the arguments of __init__ functions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Verbalizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for all the verbalizers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PreTrainedTokenizer</span></code>) – A tokenizer to appoint the vocabulary and the tokenization strategy.</p></li>
+<li><p><strong>classes</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Sequence[str]</span></code>) – A sequence of classes that need to be projected.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.label_words">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">label_words</span></span><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.label_words" title="Permalink to this definition">¶</a></dt>
+<dd><p>Label words means the words in the vocabulary projected by the labels.
+E.g. if we want to establish a projection in sentiment classification: positive <span class="math notranslate nohighlight">\(\rightarrow\)</span> {<cite>wonderful</cite>, <cite>good</cite>},
+in this case, <cite>wonderful</cite> and <cite>good</cite> are label words.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.on_label_words_set">
+<span class="sig-name descname"><span class="pre">on_label_words_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.on_label_words_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.on_label_words_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>A hook to do something when textual label words were set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.generate_parameters">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">generate_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.generate_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.generate_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>The verbalizer can be seen as an extra layer on top of the originial
+pre-trained models. In manual verbalizer, it is a fixed one-hot vector of dimension
+vocab_size, with the position of the label word being 1 and 0 everywhere else.
+In other situation, the parameters may be a continuous vector over the
+vocab, with each dimension representing a weight of that token.
+Moreover, the parameters may be set to trainable to allow label words selection.</p>
+<p>Therefore, this function serves as an abstract methods for generating the parameters
+of the verbalizer, and must be instantiated in any derived class.</p>
+<p>Note that the parameters need to be registered as a part of pytorch’s module to
+It can be acheived by wrapping a tensor using nn.Parameter().</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.register_calibrate_logits">
+<span class="sig-name descname"><span class="pre">register_calibrate_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.register_calibrate_logits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.register_calibrate_logits" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function aims to register logits that need to be calibrated, and detach the orginal logits from the current graph.
+See XX for more details.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.process_logits">
+<span class="sig-name descname"><span class="pre">process_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.process_logits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.process_logits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract method for process logits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The current logits generated by pre-trained language models.</p></li>
+<li><p><strong>batch</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">InputFeatures</span></code>) – The input features of the data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.aggregate">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_words_logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.aggregate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>To aggregate logits on multiple label words into the label’s logits
+Basic aggregator: mean of each label words’ logits to a label’s logits
+Can be re-implemented in advanced verbaliezer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>label_words_logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The logits of the label words only.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The final logits calculated by the label words.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.normalize">
+<span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given logits regarding the entire vocab, calculate the probs over the label words set by softmax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Tensor</span></code>) – The logits of the entire vocab.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The probability distribution over the label words set.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.project">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.project" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method receives input logits of shape (batch_size, vocab_size), and use the
+parameters of this verbalizer to project the logits over entire vocab into the
+logits of labels words.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Tensor</span></code>) – The logits over entire vocab generated by the pre-trained lanuage model with shape [<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>, <code class="docutils literal notranslate"><span class="pre">vocab_size</span></code>]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The normalized probs (sum to 1) of each label .</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.handle_multi_token">
+<span class="sig-name descname"><span class="pre">handle_multi_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_words_logits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.handle_multi_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.handle_multi_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Support multiple methods to handle the multi tokens produced by the tokenizer.
+We suggest using ‘first’ or ‘max’ if the some parts of the tokenization is not meaningful.
+Can broadcast to 3-d tensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>label_words_logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.from_config">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yacs.config.CfgNode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>load a verbalizer from verbalizer’s configuration node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – the sub-configuration of verbalizer, i.e. config[config.verbalizer]
+if config is a global config node.</p></li>
+<li><p><strong>kwargs</strong> – Other kwargs that might be used in initialize the verbalizer.
+The actual value should match the arguments of __init__ functions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.from_file">
+<span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the predefined label words from verbalizer file.
+Currently support three types of file format:
+1. a .jsonl or .json file, in which is a single verbalizer
+in dict format.
+2. a .jsonal or .json file, in which is a list of verbalizers in dict format
+3.  a .txt or a .csv file, in which is the label words of a class are listed in line,
+seperated by commas. Begin a new verbalizer by an empty line.
+This format is recommended when you don’t know the name of each class.</p>
+<p>The details of verbalizer format can be seen in <a class="reference internal" href="../notes/verbalizer.html#how-to-write-a-verbalizer"><span class="std std-ref">How to Write a Verbalizer?</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The path of the local template file.</p></li>
+<li><p><strong>choice</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – The choice of verbalizer in a file containing
+multiple verbalizers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><cite>self</cite> object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="root.html#id0" title="openprompt.prompt_base.Template">Template</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="pipeline-base">
+<h2>Pipeline Base<a class="headerlink" href="#pipeline-base" title="Permalink to this headline">¶</a></h2>
+<p>Base classes of <code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptDataLoader</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptModel</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptForClassification</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptForGeneration</span></code>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptDataLoader">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">PromptDataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.utils.data.dataset.Dataset</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="root.html#id0" title="openprompt.prompt_base.Template"><span class="pre">openprompt.prompt_base.Template</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_length</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teacher_forcing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_max_length</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predict_eos_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate_method</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'tail'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptDataLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptDataLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>PromptDataLoader wraps the orginal dataset. The input data is firstly wrapped with the
+prompt’s template, and then is tokenized by a wrapperd-tokenizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">List</span></code>) – Either a DatasetObject or a list containing the input examples.</p></li>
+<li><p><strong>template</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Template</span></code>) – A derived class of of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Template</span></code></p></li>
+<li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedTokenizer</span></code>) – The pretrained tokenizer.</p></li>
+<li><p><strong>max_seq_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – The max sequence length of the input ids. It’s used to trucate sentences.</p></li>
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional) – The batch_size of data loader</p></li>
+<li><p><strong>teacher_forcing</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – Whether to fill the mask with target text. Set to true in training generation model.</p></li>
+<li><p><strong>decoder_max_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – the decoder maximum length of an encoder-decoder model.</p></li>
+<li><p><strong>predict_eos_token</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – Whether to predict the &lt;eos&gt; token. Suggest to set to true in generation.</p></li>
+<li><p><strong>truncate_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – the truncate method to use. select from <cite>head</cite>, <cite>tail</cite>, <cite>balanced</cite>.</p></li>
+<li><p><strong>kwargs</strong> – Other kwargs that might be passed into a tokenizer wrapper.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptDataLoader.wrap">
+<span class="sig-name descname"><span class="pre">wrap</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptDataLoader.wrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptDataLoader.wrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple interface to pass the examples to prompt, and wrap the text with template.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptDataLoader.tokenize">
+<span class="sig-name descname"><span class="pre">tokenize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptDataLoader.tokenize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptDataLoader.tokenize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pass the wraped text into a prompt-specialized tokenizer,
+the true PretrainedTokenizer inside the tokenizer is flexible, e.g. AlBert, Bert, T5,…</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptModel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">PromptModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.utils.dummy_pt_objects.PreTrainedModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="root.html#id0" title="openprompt.prompt_base.Template"><span class="pre">openprompt.prompt_base.Template</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptModel" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">PromptModel</span></code> is the encapsulation of <code class="docutils literal notranslate"><span class="pre">Template</span></code> and the <code class="docutils literal notranslate"><span class="pre">pre-trained</span> <span class="pre">model</span></code>,
+with OpenPrompt, these modules could be flexibly combined. And this class is the base class of <code class="docutils literal notranslate"><span class="pre">PromptForClassification</span></code> and <code class="docutils literal notranslate"><span class="pre">PromptForGeneration</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PreTrainedModel</span></code>) – The pre-trained language model for the current prompt-learning task.</p></li>
+<li><p><strong>template</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Template</span></code>) – The <code class="docutils literal notranslate"><span class="pre">Template</span></code> object to warp the input data.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptModel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptModel.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a forward method to make wrapped input data go through the model, and return the output logits.
+Typically, this function aims to predict the <code class="docutils literal notranslate"><span class="pre">&lt;mask&gt;</span></code> position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>(</strong> (<em>batch</em>) – obj:InputFeatures): The input features of batchified data sequences.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptModel.prepare_model_inputs">
+<span class="sig-name descname"><span class="pre">prepare_model_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptModel.prepare_model_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptModel.prepare_model_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Will be used in generation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForClassification">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">PromptForClassification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.utils.dummy_pt_objects.PreTrainedModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="root.html#id0" title="openprompt.prompt_base.Template"><span class="pre">openprompt.prompt_base.Template</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbalizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="root.html#openprompt.prompt_base.Verbalizer" title="openprompt.prompt_base.Verbalizer"><span class="pre">openprompt.prompt_base.Verbalizer</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForClassification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForClassification" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">PromptModel</span></code> with a classification head on top. The classification head will map
+the logits in all position of the sequence (return value of a PromptModel) into the
+logits of the labels, using a verbalizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedModel</span></code>) – A pre-traiend model you decide to use for classification, e.g. BERT.</p></li>
+<li><p><strong>template</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Template</span></code>) – A <code class="docutils literal notranslate"><span class="pre">Template</span></code> object you use to wrap the input text for classification, e.g. <code class="docutils literal notranslate"><span class="pre">ManualTemplate</span></code>.</p></li>
+<li><p><strong>verbalizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Verbalizer</span></code>) – A <code class="docutils literal notranslate"><span class="pre">Verbalizer</span></code> object you use to project the lables to label words for classification, e.g. <code class="docutils literal notranslate"><span class="pre">ManualVerbalizer</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForClassification.device">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">device</span></span><a class="headerlink" href="#openprompt.pipeline_base.PromptForClassification.device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register the device parameter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForClassification.extract_logits">
+<span class="sig-name descname"><span class="pre">extract_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForClassification.extract_logits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForClassification.extract_logits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get logits of all &lt;mask&gt; token
+Project the logits of shape
+(batch_size, max_seq_length, vocab_size)
+into logits of shape (if num_mask_token &gt; 1)
+(batch_size, num_mask_token, vocab_size)
+or into logits of shape (if num_mask_token = 1)
+(batch_size, vocab_size).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The original logits of the whole sequence.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The extracted logits of <code class="docutils literal notranslate"><span class="pre">&lt;mask&gt;</span></code> tokens.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForClassification.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForClassification.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForClassification.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>keys in batch:</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForClassification.tokenizer">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">tokenizer</span></span><a class="headerlink" href="#openprompt.pipeline_base.PromptForClassification.tokenizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility property, to get the tokenizer more easily.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForGeneration">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">PromptForGeneration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.utils.dummy_pt_objects.PreTrainedModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="root.html#id0" title="openprompt.prompt_base.Template"><span class="pre">openprompt.prompt_base.Template</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yacs.config.CfgNode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForGeneration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForGeneration" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">PromptModel</span></code> with generation loss caculation and generation utils integrated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedModel</span></code>) – A pre-traiend model you decide to use for generation, e.g. GPT.</p></li>
+<li><p><strong>template</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Template</span></code>) – A <code class="docutils literal notranslate"><span class="pre">Template</span></code> object you use to wrap the input text for classification, e.g. <code class="docutils literal notranslate"><span class="pre">PrefixTemplate</span></code>.</p></li>
+<li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Tokenizer</span></code>) – A <code class="docutils literal notranslate"><span class="pre">Tokenizer</span></code> of the current model.</p></li>
+<li><p><strong>gen_config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – The generation configs to pass into <a class="reference external" href="https://huggingface.co/transformers/_modules/transformers/generation_utils.html#GenerationMixin.generate">GenerationMixin.generate</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForGeneration.shift_logits_and_labels">
+<span class="sig-name descname"><span class="pre">shift_logits_and_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForGeneration.shift_logits_and_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForGeneration.shift_logits_and_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left shift the label, and make label of the positions that are
+not loss position to -100, which is the ignore index in pytorch’s
+loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – </p></li>
+<li><p><strong>(</strong> (<em>batch</em>) – obj:InputFeatures): The input features of batchified data sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>shift_input_ids (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[int]</span></code>):</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>shift_logits (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForGeneration.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForGeneration.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForGeneration.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the forward method of the generation in prompt-learning framework.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>(</strong> (<em>batch</em>) – obj:InputFeatures): The input features of batchified data sequences.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>obj:torch.Tensor): The loss of the current generation procedure.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>loss(</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForGeneration.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">generation_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForGeneration.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForGeneration.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function wraps the generate() methods in parent class <code class="docutils literal notranslate"><span class="pre">GenerationMixin</span></code>.
+Forward uses the <code class="docutils literal notranslate"><span class="pre">PretrainedModel</span></code>’s forward method.
+generation_kwargs include all the parameters that are passed in to
+<code class="docutils literal notranslate"><span class="pre">transformers.generation_util.GenerationMixin.generate</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>(</strong> (<em>batch</em>) – obj:InputFeatures): The input features of batchified data sequences.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>obj:List[torch.Tensor]): The raw sequences generated by the generation model.
+generated_sentences (:obj:List[torch.Tensor]): The generated sentences that have been post-processed.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>output_sequences (</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForGeneration.post_processing">
+<span class="sig-name descname"><span class="pre">post_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_sequences</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForGeneration.post_processing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForGeneration.post_processing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post-process the sequences generated by the generation model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_sequences</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The raw sequences generated by the generation model.</p></li>
+<li><p><strong>input_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – The length of the input sequence.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The generated sentences that have been post-processed.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForGeneration.prepare_inputs_for_generation">
+<span class="sig-name descname"><span class="pre">prepare_inputs_for_generation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">model_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForGeneration.prepare_inputs_for_generation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForGeneration.prepare_inputs_for_generation" title="Permalink to this definition">¶</a></dt>
+<dd><p>When the <cite>past</cite> not in model_kwargs, we prepare the input from scratch.
+When <cite>past</cite> is in model_kwargs, we don’t need to prepare the template wrapped input,
+instead we use the inner pretrain_models’ function to prepare the next step’s input.
+<cite>model_kwargs</cite> includes all the argument passed in the <cite>batch</cite>: InputFeatures, except <cite>input_ids</cite>
+, as long as they do not conflict with keywords in <code class="docutils literal notranslate"><span class="pre">generation_kwargs</span></code>.    if ‘past’ not in model_kwargs: # the past_key_value not in model_kwargs, then we need to prepare input from scrath
+, as long as they do not conflict with keywords in <a href="#id1"><span class="problematic" id="id2">``</span></a>generation_kwargs’’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input_ids</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – Indices of input sequence tokens in the vocabulary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../notes/faq.html" class="btn btn-neutral float-left" title="FAQ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="template.html" class="btn btn-neutral float-right" title="Templates" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openprompt.data_utils.text_classification_dataset &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/js/custom.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>openprompt.data_utils.text_classification_dataset</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openprompt.data_utils.text_classification_dataset</h1><div class="highlight"><pre>
+<span></span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This file contains the logic for loading data for all TextClassification tasks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">from</span> <span class="nn">openprompt.utils.logging</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputExample</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils.data_processor</span> <span class="kn">import</span> <span class="n">DataProcessor</span>
+
+
+
+
+
+<div class="viewcode-block" id="AgnewsProcessor"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.text_classification_dataset.AgnewsProcessor">[docs]</a><span class="k">class</span> <span class="nc">AgnewsProcessor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `AG News &lt;https://arxiv.org/pdf/1509.01626.pdf&gt;`_ is a News Topic classification dataset</span>
+<span class="sd">    </span>
+<span class="sd">    we use dataset provided by `LOTClass &lt;https://github.com/yumeng5/LOTClass&gt;`_</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ..  code-block:: python</span>
+
+<span class="sd">        from openprompt.data_utils.text_classification_dataset import PROCESSORS</span>
+
+<span class="sd">        base_path = &quot;datasets/TextClassification&quot;</span>
+
+<span class="sd">        dataset_name = &quot;agnews&quot;</span>
+<span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
+<span class="sd">        processor = PROCESSORS[dataset_name.lower()]()</span>
+<span class="sd">        trainvalid_dataset = processor.get_train_examples(dataset_path)</span>
+<span class="sd">        test_dataset = processor.get_test_examples(dataset_path)</span>
+
+<span class="sd">        assert processor.get_num_labels() == 4</span>
+<span class="sd">        assert processor.get_labels() == [&quot;World&quot;, &quot;Sports&quot;, &quot;Business&quot;, &quot;Tech&quot;]</span>
+<span class="sd">        assert len(trainvalid_dataset) == 120000</span>
+<span class="sd">        assert len(test_dataset) == 7600</span>
+<span class="sd">        assert test_dataset[0].text_a == &quot;Fears for T N pension after talks&quot;</span>
+<span class="sd">        assert test_dataset[0].text_b == &quot;Unions representing workers at Turner   Newall say they are &#39;disappointed&#39; after talks with stricken parent firm Federal Mogul.&quot;</span>
+<span class="sd">        assert test_dataset[0].label == 2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;World&quot;</span><span class="p">,</span> <span class="s2">&quot;Sports&quot;</span><span class="p">,</span> <span class="s2">&quot;Business&quot;</span><span class="p">,</span> <span class="s2">&quot;Tech&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="AgnewsProcessor.get_examples"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.text_classification_dataset.AgnewsProcessor.get_examples">[docs]</a>    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.csv&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">))</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
+                <span class="n">label</span><span class="p">,</span> <span class="n">headline</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">row</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="n">headline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="n">text_b</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">text_b</span><span class="o">=</span><span class="n">text_b</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">examples</span></div></div>
+    
+<div class="viewcode-block" id="DBpediaProcessor"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.text_classification_dataset.DBpediaProcessor">[docs]</a><span class="k">class</span> <span class="nc">DBpediaProcessor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `Dbpedia &lt;https://aclanthology.org/L16-1532.pdf&gt;`_ is a Wikipedia Topic Classification dataset.</span>
+
+<span class="sd">    we use dataset provided by `LOTClass &lt;https://github.com/yumeng5/LOTClass&gt;`_</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ..  code-block:: python</span>
+
+<span class="sd">        from openprompt.data_utils.text_classification_dataset import PROCESSORS</span>
+
+<span class="sd">        base_path = &quot;datasets/TextClassification&quot;</span>
+
+<span class="sd">        dataset_name = &quot;dbpedia&quot;</span>
+<span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
+<span class="sd">        processor = PROCESSORS[dataset_name.lower()]()</span>
+<span class="sd">        trainvalid_dataset = processor.get_train_examples(dataset_path)</span>
+<span class="sd">        test_dataset = processor.get_test_examples(dataset_path)</span>
+
+<span class="sd">        assert processor.get_num_labels() == 14</span>
+<span class="sd">        assert len(trainvalid_dataset) == 560000</span>
+<span class="sd">        assert len(test_dataset) == 70000</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;company&quot;</span><span class="p">,</span> <span class="s2">&quot;school&quot;</span><span class="p">,</span> <span class="s2">&quot;artist&quot;</span><span class="p">,</span> <span class="s2">&quot;athlete&quot;</span><span class="p">,</span> <span class="s2">&quot;politics&quot;</span><span class="p">,</span> <span class="s2">&quot;transportation&quot;</span><span class="p">,</span> <span class="s2">&quot;building&quot;</span><span class="p">,</span> <span class="s2">&quot;river&quot;</span><span class="p">,</span> <span class="s2">&quot;village&quot;</span><span class="p">,</span> <span class="s2">&quot;animal&quot;</span><span class="p">,</span> <span class="s2">&quot;plant&quot;</span><span class="p">,</span> <span class="s2">&quot;album&quot;</span><span class="p">,</span> <span class="s2">&quot;film&quot;</span><span class="p">,</span> <span class="s2">&quot;book&quot;</span><span class="p">,]</span>
+
+<div class="viewcode-block" id="DBpediaProcessor.get_examples"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.text_classification_dataset.DBpediaProcessor.get_examples">[docs]</a>    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">label_file</span>  <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_labels.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">)),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> 
+        <span class="n">labels</span>  <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">label_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">)),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fin</span><span class="p">):</span>
+                <span class="n">splited</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;. &quot;</span><span class="p">)</span>
+                <span class="n">text_a</span><span class="p">,</span> <span class="n">text_b</span> <span class="o">=</span> <span class="n">splited</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">splited</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="n">text_a</span><span class="o">+</span><span class="s2">&quot;.&quot;</span>
+                <span class="n">text_b</span> <span class="o">=</span> <span class="s2">&quot;. &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_b</span><span class="p">)</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">text_b</span><span class="o">=</span><span class="n">text_b</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">examples</span></div></div>
+    
+
+<div class="viewcode-block" id="ImdbProcessor"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.text_classification_dataset.ImdbProcessor">[docs]</a><span class="k">class</span> <span class="nc">ImdbProcessor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `IMDB &lt;https://ai.stanford.edu/~ang/papers/acl11-WordVectorsSentimentAnalysis.pdf&gt;`_ is a Movie Review Sentiment Classification dataset.</span>
+
+<span class="sd">    we use dataset provided by `LOTClass &lt;https://github.com/yumeng5/LOTClass&gt;`_</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ..  code-block:: python</span>
+
+<span class="sd">        from openprompt.data_utils.text_classification_dataset import PROCESSORS</span>
+
+<span class="sd">        base_path = &quot;datasets/TextClassification&quot;</span>
+
+<span class="sd">        dataset_name = &quot;imdb&quot;</span>
+<span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
+<span class="sd">        processor = PROCESSORS[dataset_name.lower()]()</span>
+<span class="sd">        trainvalid_dataset = processor.get_train_examples(dataset_path)</span>
+<span class="sd">        test_dataset = processor.get_test_examples(dataset_path)</span>
+
+<span class="sd">        assert processor.get_num_labels() == 2</span>
+<span class="sd">        assert len(trainvalid_dataset) == 25000</span>
+<span class="sd">        assert len(test_dataset) == 25000</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;negative&quot;</span><span class="p">,</span> <span class="s2">&quot;positive&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ImdbProcessor.get_examples"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.text_classification_dataset.ImdbProcessor.get_examples">[docs]</a>    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">label_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_labels.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">)),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> 
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">label_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">)),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fin</span><span class="p">):</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">examples</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_test_labels_only</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">dirname</span><span class="p">):</span>
+        <span class="n">label_file</span>  <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_labels.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">)),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> 
+        <span class="n">labels</span>  <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">label_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">labels</span></div>
+   
+
+<span class="k">class</span> <span class="nc">AmazonProcessor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `Amazon &lt;https://cs.stanford.edu/people/jure/pubs/reviews-recsys13.pdf&gt;`_ is a Product Review Sentiment Classification dataset.</span>
+
+<span class="sd">    we use dataset provided by `LOTClass &lt;https://github.com/yumeng5/LOTClass&gt;`_</span>
+
+<span class="sd">    Examples: # TODO implement this</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bad&quot;</span><span class="p">,</span> <span class="s2">&quot;good&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">label_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_labels.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">)),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> 
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">label_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> 
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sample a mid-size test set for effeciecy, use sampled_test_idx.txt&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span><span class="s2">&quot;sampled_test_idx.txt&quot;</span><span class="p">),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sampleidxfile</span><span class="p">:</span>
+                <span class="n">sampled_idx</span> <span class="o">=</span> <span class="n">sampleidxfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="n">sampled_idx</span> <span class="o">=</span> <span class="n">sampled_idx</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">sampled_idx</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sampled_idx</span><span class="p">])</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">)),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fin</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">split</span><span class="o">==</span><span class="s1">&#39;test&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">idx</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sampled_idx</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">examples</span>
+
+
+<span class="k">class</span> <span class="nc">SST2Processor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    #TODO test needed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;negative&quot;</span><span class="p">,</span> <span class="s2">&quot;positive&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.tsv&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">example_json</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="n">example_json</span><span class="p">[</span><span class="s1">&#39;sentence&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">example_json</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">examples</span>
+
+<span class="n">PROCESSORS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;agnews&quot;</span><span class="p">:</span> <span class="n">AgnewsProcessor</span><span class="p">,</span>
+    <span class="s2">&quot;dbpedia&quot;</span><span class="p">:</span> <span class="n">DBpediaProcessor</span><span class="p">,</span>
+    <span class="s2">&quot;amazon&quot;</span> <span class="p">:</span> <span class="n">AmazonProcessor</span><span class="p">,</span>
+    <span class="s2">&quot;imdb&quot;</span><span class="p">:</span> <span class="n">ImdbProcessor</span><span class="p">,</span>
+    <span class="s2">&quot;sst-2&quot;</span><span class="p">:</span> <span class="n">SST2Processor</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openprompt.data_utils.data_sampler &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/js/custom.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>openprompt.data_utils.data_sampler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openprompt.data_utils.data_sampler</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data.dataset</span> <span class="kn">import</span> <span class="n">Subset</span>
+<span class="kn">from</span> <span class="nn">openprompt.utils.logging</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+
+
+
+<div class="viewcode-block" id="FewShotSampler"><a class="viewcode-back" href="../../../modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler">[docs]</a><span class="k">class</span> <span class="nc">FewShotSampler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Few-shot learning is an important scenario for prompt-learning, this is a sampler that samples few examples over each class.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_examples_total(:obj:`int`, optional): Sampling strategy ``I``: Use total number of examples for few-shot sampling.</span>
+<span class="sd">        num_examples_per_label(:obj:`int`, optional): Sampling strategy ``II``: Use the number of examples for each label for few-shot sampling.</span>
+<span class="sd">        also_sample_dev(:obj:`bool`, optional): Whether to apply the sampler to the dev data.</span>
+<span class="sd">        num_examples_total_dev(:obj:`int`, optional): Sampling strategy ``I``: Use total number of examples for few-shot sampling.</span>
+<span class="sd">        num_examples_per_label_dev(:obj:`int`, optional): Sampling strategy ``II``: Use the number of examples for each label for few-shot sampling.</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">num_examples_total</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">num_examples_per_label</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">also_sample_dev</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">num_examples_total_dev</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">num_examples_per_label_dev</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="p">):</span>
+        <span class="k">if</span> <span class="n">num_examples_total</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_examples_per_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_examples_total and num_examples_per_label can&#39;t be both None.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">num_examples_total</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_examples_per_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_examples_total and num_examples_per_label can&#39;t be both set.&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">also_sample_dev</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">num_examples_total_dev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_examples_per_label_dev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_examples_total and num_examples_per_label can&#39;t be both set.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">num_examples_total_dev</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_examples_per_label_dev</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;specify neither num_examples_total_dev nor num_examples_per_label_dev,</span><span class="se">\</span>
+<span class="s2">                                set to default (equal to train set setting).&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_total_dev</span> <span class="o">=</span> <span class="n">num_examples_total</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label_dev</span> <span class="o">=</span> <span class="n">num_examples_per_label</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_total_dev</span>  <span class="o">=</span> <span class="n">num_examples_total_dev</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label_dev</span> <span class="o">=</span> <span class="n">num_examples_per_label_dev</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_total</span> <span class="o">=</span> <span class="n">num_examples_total</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label</span> <span class="o">=</span> <span class="n">num_examples_per_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">also_sample_dev</span> <span class="o">=</span> <span class="n">also_sample_dev</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">train_dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span>
+                 <span class="n">valid_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        The ``__call__`` function of the few-shot sampler.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            train_dataset (:obj:`Union[Dataset, List]`): The train datset for the sampler.</span>
+<span class="sd">            valid_dataset (:obj:`Union[Dataset, List]`, optional): The valid datset for the sampler. Default to None.</span>
+<span class="sd">            seed (:obj:`int`, optional): The random seed for the sampling.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`(Union[Dataset, List], Union[Dataset, List])`: The sampled dataset (train_dataset, valid_dataset), whose type is identical to the input.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">valid_dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">sample_twice</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">train_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">also_sample_dev</span><span class="p">:</span>
+                <span class="n">valid_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample</span><span class="p">(</span><span class="n">valid_dataset</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">train_dataset</span><span class="p">,</span> <span class="n">valid_dataset</span>
+    
+    <span class="k">def</span> <span class="nf">_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span> 
+                <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                <span class="n">sample_twice</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+               <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;label&#39;</span><span class="p">),</span> <span class="s2">&quot;sample by label requires the data has a &#39;label&#39; attribute.&quot;</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+            <span class="n">selected_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_per_label</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">selected_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_total</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_total</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">sample_twice</span><span class="p">:</span>
+            <span class="n">selected_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span>
+            <span class="n">remain_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selected_set</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label_dev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;label&#39;</span><span class="p">),</span> <span class="s2">&quot;sample by label requires the data has a &#39;label&#39; attribute.&quot;</span>
+                <span class="n">remain_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">idx</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selected_set</span><span class="p">]</span>
+                <span class="n">selected_ids_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_per_label</span><span class="p">(</span><span class="n">remain_ids</span><span class="p">,</span> <span class="n">remain_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label_dev</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">selected_ids_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_total</span><span class="p">(</span><span class="n">remain_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_total_dev</span><span class="p">)</span>
+        
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">Subset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">selected_ids</span><span class="p">),</span> <span class="n">Subset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">selected_ids_dev</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selected_ids</span><span class="p">],</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selected_ids_dev</span><span class="p">]</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">Subset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">selected_ids</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selected_ids</span><span class="p">]</span>
+        
+    
+<div class="viewcode-block" id="FewShotSampler.sample_total"><a class="viewcode-back" href="../../../modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_total">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sample_total</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">num_examples_total</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Use the total number of examples for few-shot sampling (Strategy ``I``).</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            indices(:obj:`List`): The random indices of the whole datasets.</span>
+<span class="sd">            num_examples_total(:obj:`int`): The total number of examples.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`List`: The selected indices with the size of ``num_examples_total``.</span>
+<span class="sd">            </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[:</span><span class="n">num_examples_total</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Selected examples (mixed) </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">selected_ids</span></div>
+
+<div class="viewcode-block" id="FewShotSampler.sample_per_label"><a class="viewcode-back" href="../../../modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_per_label">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sample_per_label</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">num_examples_per_label</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Use the number of examples per class for few-shot sampling (Strategy ``II``). </span>
+<span class="sd">        If the number of examples is not enough, a warning will pop up.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            indices(:obj:`List`): The random indices of the whole datasets.</span>
+<span class="sd">            labels(:obj:`List`): The list of the labels.</span>
+<span class="sd">            num_examples_per_label(:obj:`int`): The total number of examples for each class.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`List`: The selected indices with the size of ``num_examples_total``.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">ids_per_label</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">selected_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+            <span class="n">ids_per_label</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">ids_per_label</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">num_examples_per_label</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Not enough examples of label </span><span class="si">{}</span><span class="s2"> can be sampled&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+            <span class="n">selected_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tmp</span><span class="p">[:</span><span class="n">num_examples_per_label</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span>
+        <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">selected_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>    
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Selected examples </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">selected_ids</span></div></div>
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

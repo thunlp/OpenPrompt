@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Write a Template? &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/js/custom.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to Write a Verbalizer?" href="verbalizer.html" />
+    <link rel="prev" title="Introduction with an Example" href="examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to Write a Template?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#examples-of-templates">Examples of Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-attributes">Basic Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#meta-information">Meta Information</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>How to Write a Template?</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/template.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="how-to-write-a-template">
+<span id="tutorial-template"></span><h1>How to Write a Template?<a class="headerlink" href="#how-to-write-a-template" title="Permalink to this headline">¶</a></h1>
+<p>As we stated, template (which could be specific textual tokens or abstract new tokens, the only difference is the initialization)
+is one of the most important module in a prompt-leanring framework.  In this tutorial, we introduce how to write a template and set the corresponding attributes for a <code class="docutils literal notranslate"><span class="pre">Template</span></code> class.</p>
+<p>First, let’s take a look what template could look like.</p>
+<section id="examples-of-templates">
+<h2>Examples of Templates<a class="headerlink" href="#examples-of-templates" title="Permalink to this headline">¶</a></h2>
+<p>This is a template:</p>
+<div class="highlight-python notranslate" id="template-1"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; It was a &lt;mask&gt; .&quot;</span>
+</pre></div>
+</div>
+<p>This is also a template:</p>
+<div class="highlight-python notranslate" id="template-2"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; &lt;new&gt; &lt;new&gt; &lt;new&gt; &lt;new&gt; &lt;mask&gt; &lt;new&gt; &lt;new&gt; .&quot;</span>
+</pre></div>
+</div>
+<p>This is also a template:</p>
+<div class="highlight-python notranslate" id="template-3"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; In this sentence, &lt;meta:entity&gt; is a &lt;mask&gt; .&quot;</span>
+</pre></div>
+</div>
+<p>This is also a template:</p>
+<div class="highlight-python notranslate" id="template-4"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; the &lt;mask&gt; &lt;meta:head&gt; &lt;mask&gt; &lt;mask&gt; &lt;mask&gt; the &lt;mask&gt; &lt;meta:tail&gt; .&quot;</span>
+</pre></div>
+</div>
+<p>This is also a template:</p>
+<div class="highlight-python notranslate" id="template-5"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; Question: &lt;text_b&gt; ? &lt;soft&gt;the Answer &lt;soft&gt;is &lt;mask&gt; .&quot;</span>
+</pre></div>
+</div>
+<p>Kind of confusing? Don’t worry, we will handle it step by step.</p>
+</section>
+<section id="basic-attributes">
+<h2>Basic Attributes<a class="headerlink" href="#basic-attributes" title="Permalink to this headline">¶</a></h2>
+<p>A template should firstly consider the original input, which is defaultly denoted as <code class="docutils literal notranslate"><span class="pre">text_a</span></code>.
+For tasks with multiple input text (or you can segment the text into multiple pieces), use other placeholders such as <code class="docutils literal notranslate"><span class="pre">text_b</span></code>.</p>
+<p>When defining a template, a series basic attributes may need to be considered.
+A template should contain at least one masked token that need to be predicted by PLMs, typically denoted as <code class="docutils literal notranslate"><span class="pre">&lt;mask&gt;</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">loss_ids</span></code> denotes which tokens’ loss are computed.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;it&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">]</span>
+<span class="n">loss_ids</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span>         <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">1</span>       <span class="p">,</span> <span class="mi">0</span>  <span class="p">]</span>
+</pre></div>
+</div>
+<p>New tokens and soft tokens are tokens that will be optimized separately from the PLM, where new tokens are randomly initialized, and soft tokens are initialized by specific tokens in the vocabulary.
+New tokens are denoted by <code class="docutils literal notranslate"><span class="pre">new_ids</span></code> and soft tokens are denoted by <code class="docutils literal notranslate"><span class="pre">soft_ids</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;new&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;new&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;soft&gt;a&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">]</span>
+<span class="n">new_ids</span> <span class="p">:</span> <span class="p">[</span><span class="mi">0</span>         <span class="p">,</span> <span class="mi">1</span>      <span class="p">,</span> <span class="mi">1</span>      <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">0</span>       <span class="p">,</span> <span class="mi">0</span>        <span class="p">,</span> <span class="mi">0</span>  <span class="p">]</span>
+<span class="n">soft_ids</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span>         <span class="p">,</span> <span class="mi">0</span>      <span class="p">,</span> <span class="mi">0</span>      <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">0</span>       <span class="p">,</span> <span class="mi">1</span>        <span class="p">,</span> <span class="mi">0</span>  <span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="meta-information">
+<h2>Meta Information<a class="headerlink" href="#meta-information" title="Permalink to this headline">¶</a></h2>
+<p>In the <a class="reference internal" href="../modules/data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a> class, we leave a <code class="docutils literal notranslate"><span class="pre">meta</span></code> API to store arbitrary extra information for the input example.</p>
+<p>For example, for a relation extraction task, you want to add different head and tail entities in different input examples.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;text_a&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;In this sentence, the relation of&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;meta:head&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;meta:tail&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;mask&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>In this case, with an <a class="reference internal" href="../modules/data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="n">guid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">text_a</span> <span class="o">=</span> <span class="s2">&quot;Albert Einstein was born in Germany.&quot;</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;head&quot;</span><span class="p">:</span> <span class="s2">&quot;Albert Einstein&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tail&quot;</span><span class="p">:</span> <span class="s2">&quot;Germany&quot;</span>
+    <span class="p">}</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The complete prompted example becomes</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="s2">&quot;Albert Einstein was born in Germany. In this sentence, the relation of Albert Einstein and Germany is &lt;mask&gt; .&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="examples.html" class="btn btn-neutral float-left" title="Introduction with an Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="verbalizer.html" class="btn btn-neutral float-right" title="How to Write a Verbalizer?" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

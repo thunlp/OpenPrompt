@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openprompt.data_utils.data_processor &mdash; OpenPrompt v0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/js/custom.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>openprompt.data_utils.data_processor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openprompt.data_utils.data_processor</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputExample</span>
+
+<div class="viewcode-block" id="DataProcessor"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor">[docs]</a><span class="k">class</span> <span class="nc">DataProcessor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    labels of the dataset is optional </span>
+
+<span class="sd">    here&#39;s the examples of loading the labels:</span>
+
+<span class="sd">    :obj:`I`: ``DataProcessor(labels = [&#39;positive&#39;, &#39;negative&#39;])``</span>
+
+<span class="sd">    :obj:`II`: ``DataProcessor(labels_path = &#39;datasets/labels.txt&#39;)``</span>
+<span class="sd">    labels file should have label names seperated by any blank characters, such as</span>
+
+<span class="sd">    ..  code-block:: </span>
+
+<span class="sd">        positive neutral</span>
+<span class="sd">        negative</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        labels (:obj:`Sequence[Any]`, optional): class labels of the dataset. Defaults to None.</span>
+<span class="sd">        labels_path (:obj:`str`, optional): Defaults to None. If set and :obj:`labels` is None, load labels from :obj:`labels_path`. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">labels_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="p">):</span>
+        <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
+        <span class="k">elif</span> <span class="n">labels_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">labels_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">labels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_labels&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;DataProcessor doesn&#39;t set labels or label_mapping yet&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span>
+        
+    <span class="nd">@labels</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">labels</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_label_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">)}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">label_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_labels&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;DataProcessor doesn&#39;t set labels or label_mapping yet&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_mapping</span>
+
+    <span class="nd">@label_mapping</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">label_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_mapping</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">label_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_label_mapping</span> <span class="o">=</span> <span class="n">label_mapping</span>
+
+<div class="viewcode-block" id="DataProcessor.get_label_id"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_label_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_label_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;get label id of the corresponding label</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            label: label in dataset</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: the index of label</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_mapping</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="DataProcessor.get_labels"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_labels">[docs]</a>    <span class="k">def</span> <span class="nf">get_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;get labels of the dataset</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Any]: labels of the dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span></div>
+    
+<div class="viewcode-block" id="DataProcessor.get_num_labels"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_num_labels">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get the number of labels in the dataset</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: number of labels in the dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataProcessor.get_train_examples"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_train_examples">[docs]</a>    <span class="k">def</span> <span class="nf">get_train_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InputExample</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get train examples from the training file under :obj:`data_dir`</span>
+
+<span class="sd">        call ``get_examples(data_dir, &quot;train&quot;)``, see :py:meth:`~openprompt.data_utils.data_processor.DataProcessor.get_examples`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_examples</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataProcessor.get_dev_examples"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_dev_examples">[docs]</a>    <span class="k">def</span> <span class="nf">get_dev_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">InputExample</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get dev examples from the development file under :obj:`data_dir`</span>
+
+<span class="sd">        call ``get_examples(data_dir, &quot;dev&quot;)``, see :py:meth:`~openprompt.data_utils.data_processor.DataProcessor.get_examples`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_examples</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;dev&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataProcessor.get_test_examples"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_test_examples">[docs]</a>    <span class="k">def</span> <span class="nf">get_test_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">InputExample</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get test examples from the test file under :obj:`data_dir`</span>
+
+<span class="sd">        call ``get_examples(data_dir, &quot;test&quot;)``, see :py:meth:`~openprompt.data_utils.data_processor.DataProcessor.get_examples`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_examples</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataProcessor.get_unlabeled_examples"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_unlabeled_examples">[docs]</a>    <span class="k">def</span> <span class="nf">get_unlabeled_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">InputExample</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get unlabeled examples from the unlabeled file under :obj:`data_dir`</span>
+
+<span class="sd">        call ``get_examples(data_dir, &quot;unlabeled&quot;)``, see :py:meth:`~openprompt.data_utils.data_processor.DataProcessor.get_examples`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_examples</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;unlabeled&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataProcessor.get_examples"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_examples">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">InputExample</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;get the :obj:`split` of dataset under :obj:`data_dir`</span>
+
+<span class="sd">        :obj:`data_dir` is the base path of the dataset, for example:</span>
+
+<span class="sd">        training file could be located in ``data_dir/train.txt``</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_dir (str): the base path of the dataset</span>
+<span class="sd">            split (str): ``train`` / ``dev`` / ``test`` / ``unlabeled``</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[InputExample]: return a list of :py:class:`~openprompt.data_utils.data_utils.InputExample`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
