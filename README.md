@@ -14,7 +14,7 @@
   <a href="#Overview">Overview</a> •
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
-  <a href="https://openprompt.readthedocs.io">Docs</a> • 
+  <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> • 
 
 </p>
 
