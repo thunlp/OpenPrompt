@@ -2,8 +2,10 @@ Utils Functions
 ==================================
 
 
-.. autoclass:: openprompt.utils.utils
-   :members:
+.. contents:: Contents
+    :local:
+
+.. currentmodule:: openprompt.utils
 
 
 Calibration
