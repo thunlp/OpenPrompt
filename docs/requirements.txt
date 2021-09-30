@@ -1,4 +1,11 @@
 sphinx==3.5.4
 sphinx-rtd-theme==1.0.0
 sphinx-copybutton
+torch==1.9.0
+transformers==4.10.0
+sentencepiece==0.1.96
+scikit-learn==0.24.2
+tqdm==4.62.2
+nltk
+yacs
 
