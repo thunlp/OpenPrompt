@@ -52,10 +52,11 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git add .
-          if [[ git status --porcelain ]]; then
-            git commit -m "update docs"
+          changes=`git status --porcelain`
+          if [[ -z ${changes} ]]; then
+            echo "no changes"
           else
-            echo "No changes"
+            git commit -m "update docs"
           fi
           
       - name: Push changes
