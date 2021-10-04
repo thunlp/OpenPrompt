@@ -13,14 +13,21 @@ plm:
       type: 
       num_warmup_steps: 500
 
+reproduce:
+  seed: 42
+
+dataloader:
+  max_seq_length: 512
+
 train:
   batch_size: 2
+  num_epochs: 10
 
 test:
-  batch_size: 8
+  batch_size: 2
 
-valid:
-  batch_size: 8
+dev:
+  batch_size: 2
 
 
 
@@ -39,9 +46,12 @@ ptr_verbalizer:
   file_path: scripts/RelationClassification/TACRED/ptr_verbalizer.jsonl
   
 environment:
-  num_gpus: 1
+  num_gpus: 4
   cuda_visible_devices:
     - 0
+    - 1
+    - 2
+    - 3
   local_rank: 0 
 
 classification:
@@ -55,7 +65,7 @@ few_shot:
   
 sampling_from_train:
   parent_config: few_shot_sampling
-  num_examples_per_label: 8
+  num_examples_per_label: 32
   also_sample_dev: True
-  num_examples_per_label_dev: 8
+  num_examples_per_label_dev: 32
   seed: 123
