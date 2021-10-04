@@ -62,6 +62,13 @@ def load_dataset(config: CfgNode, return_class=True):
     except FileNotFoundError:
         logger.warning("Has no test dataset.")
         test_dataset = None
+    # checking whether donwloaded.
+    if (train_dataset is None) and \
+       (valid_dataset is None) and \
+       (test_dataset is None):
+        logger.error("Dataset is empty. Either there is no download or the path is wrong. "+ \
+        "If not downloaded, please `cd datasets/` and `bash download_xxx.sh`")
+        exit()
     if return_class:
         return train_dataset, valid_dataset, test_dataset, processor
     else:
