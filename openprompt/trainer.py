@@ -1,11 +1,12 @@
-
 import os
 import sys
-
-from torch.utils.data import dataloader
 sys.path.append(".")
 
-from typing import Callable, Union
+from torch.utils.data import dataloader
+
+
+from openprompt.utils.utils import load_checkpoint, save_checkpoint
+from typing import Callable, OrderedDict, Union
 from torch.nn.parallel.data_parallel import DataParallel
 from openprompt.pipeline_base import PromptForClassification, PromptForGeneration
 from tqdm import tqdm
@@ -19,7 +20,90 @@ from transformers import  AdamW, get_linear_schedule_with_warmup
 
 
 
-class ClassificationRunner(object):
+class BaseRunner(object):
+    r"""A base runner for training without training tricks.
+    Applying training tricks such as ensemble of template or verbalizer, 
+    or self-training can use other runner class. 
+    This class is specially implemented for classification.
+    For generation task, though it can be integrated in this class
+    via `task` option, we keep it as another class for simplicity.
+
+    Args:
+        prompt_model (:obj:`Union[DataParallel, PromptForClassification]`): One ``PromptModel`` object.
+        train_dataloader (:obj:`PromptDataloader`, optional): The dataloader to bachify and process the training data.
+        valid_dataloader (:obj:`PromptDataloader`, optionla): The dataloader to bachify and process the val data.
+        test_dataloader (:obj:`PromptDataloader`, optional): The dataloader to bachify and process the test data.
+        config (:obj:`CfgNode`): A configuration object.
+        loss_function (:obj:`Callable`, optional): The loss function in the training process.
+    """
+    def __init__(self, 
+                 prompt_model: Union[DataParallel, PromptForClassification],
+                 train_dataloader: Optional[PromptDataLoader] = None,
+                 valid_dataloader: Optional[PromptDataLoader] = None,
+                 test_dataloader: Optional[PromptDataLoader] = None,
+                 config: CfgNode = None,
+                 ):
+        self.prompt_model = prompt_model
+        self.inner_model = prompt_model.module if isinstance(prompt_model, DataParallel) else prompt_model
+        self.train_dataloader = train_dataloader
+        self.valid_dataloader = valid_dataloader
+        self.test_dataloader = test_dataloader
+        self.config = config
+        self.config_optimize()
+    
+    def config_loss_function(self,):
+        raise NotImplementedError
+    
+    def config_optimize(self,):
+        raise NotImplementedError
+ 
+    def evaluate(self, dataloader, split, post_evaluate_hook=None):
+        raise NotImplementedError
+
+    def train_epoch(self, epoch):
+        raise NotImplementedError
+    
+    def prompt_initialize(self):
+        r"""Some initialization works
+        """
+        pass
+
+    def run(self):
+        self.prompt_initialize()
+        max_score = None
+        for epoch in range(self.config.train.num_epochs):
+            total_loss = self.train_epoch(epoch)
+            scores = self.evaluate(self.valid_dataloader, "Valid")
+            model_state_dict = self.inner_model.state_dict()
+            if self.config.plm.optimize.freeze_para:
+                model_state_dict.pop('plm')
+            state_dict = {
+                "epoch": epoch+1,
+                "state_dict": self.inner_model.state_dict(),
+                "optimizer": [opt.state_dict() if isinstance(opt, torch.optim.Optimizer) else None for opt in self.optimizers] ,
+                "scheduler": self.schedulers,
+                "scores": scores
+            }
+            cur_score = scores.popitem()[1]
+
+            is_best = ((cur_score - max_score)>=0) == \
+                self.config.checkpoint.higher_better if max_score is not None else True
+            if is_best:
+                max_score = cur_score
+            save_checkpoint(state_dict = state_dict, 
+                            is_best=(is_best and self.config.checkpoint.save_best), 
+                            save_path=self.config.logging.path)
+        state_dict = load_checkpoint(load_path=self.config.logging.path,
+                        load_best = self.config.checkpoint.save_best,
+                        map_location="cpu", # cpu to prevent CUDA out of memory.
+                        )
+        self.inner_model.load_state_dict(state_dict['state_dict'])
+        self.inner_model.to("cuda:{}".format(self.config.environment.local_rank))
+        self.evaluate(self.test_dataloader, "Test")
+
+
+
+class ClassificationRunner(BaseRunner):
     r"""A runner for simple training without training tricks.
     Applying training tricks such as ensemble of template or verbalizer, 
     or self-training can use other runner class. 
@@ -43,17 +127,16 @@ class ClassificationRunner(object):
                  config: CfgNode = None,
                  loss_function: Optional[Callable] = None,
                  ):
-        self.prompt_model = prompt_model
-        self.inner_model = prompt_model.module if isinstance(prompt_model, DataParallel) else prompt_model
-        self.train_dataloader = train_dataloader
-        self.valid_dataloader = valid_dataloader
-        self.test_dataloader = test_dataloader
-        self.config = config
+        super().__init__(prompt_model=prompt_model,
+                         train_dataloader=train_dataloader,
+                         valid_dataloader=valid_dataloader,
+                         test_dataloader=test_dataloader,
+                         config=config)
+
         if loss_function is None:
             self.config_loss_function()
         else:
             self.loss_function = loss_function
-        self.config_optimize()
     
     def config_loss_function(self,):
         r"""config the loss function if it's not passed.
@@ -157,35 +240,44 @@ class ClassificationRunner(object):
                 preds.extend(pred.cpu().tolist())
                 labels.extend(batch['label'].cpu().tolist())
         self.prompt_model.train()
-        scores = {}
+        scores = OrderedDict()
         scores_str = ""
         for metric in self.config.classification.metric:
             score = classification_metrics(preds, labels, metric)
             scores[metric] = score
             scores_str += "{}: {}\n".format(metric, score)
-        logger.info("{} Performance: {}".format(split, scores_str))
+        logger.info("{} Performance: {}".format(split, scores_str.strip()))
+        return scores
 
     def train_epoch(self, epoch):
         self.prompt_model.train()
         self.prompt_model.zero_grad()
+        accumulation_steps = self.config.train.gradient_accumulation_step
         total_loss = 0.0
-        for batch in tqdm(self.train_dataloader, desc="Train"):
-            for optimizer in self.optimizers:
-                if optimizer is not None:
-                    optimizer.zero_grad()
+        pbar = tqdm(self.train_dataloader, desc="Train epoch {}".format(epoch))
+        for i, batch in enumerate(pbar):
             batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
             logits = self.prompt_model(batch)
             loss = self.loss_function(logits, batch['label'])
-            total_loss += loss.item()
+            loss = loss / accumulation_steps
             loss.backward()
-            for optimizer in self.optimizers:
-                if optimizer is not None:
-                    optimizer.step()
-
-            for scheduler in self.schedulers:
-                if scheduler is not None:
-                    scheduler.step()
+            if (i+1) % accumulation_steps == 0:  
+                # do optimizer step
+                for optimizer in self.optimizers:
+                    if optimizer is not None:
+                        optimizer.step()
+                for scheduler in self.schedulers:
+                    if scheduler is not None:
+                        scheduler.step() 
+                # zero_grad         
+                self.prompt_model.zero_grad()
+                for optimizer in self.optimizers:
+                    if optimizer is not None:
+                        optimizer.zero_grad()            
+            total_loss += loss.item()
+            pbar.set_postfix(loss = loss.item())
         logger.info("Epoch {}, loss: {:.4f}".format(epoch, total_loss))
+        return total_loss
     
     def prompt_initialize(self):
         verbalizer_config = self.config[self.config.verbalizer]
@@ -216,15 +308,8 @@ class ClassificationRunner(object):
             if hasattr(self.inner_model.template, "optimize_to_initialize" ):
                 self.inner_model.template.optimize_to_initialize()
 
-    def run(self):
-        self.prompt_initialize()
-        for epoch in range(self.config.train.num_epochs):
-             self.train_epoch(epoch)
-             self.evaluate(self.valid_dataloader, "Valid")
-        self.evaluate(self.test_dataloader, "Test")
 
-
-class GenerationRunner(object):
+class GenerationRunner(BaseRunner):
     r"""A runner for simple training without training tricks.
     Applying training tricks such as ensemble of template or verbalizer, 
     or self-training can use other runner class. 
@@ -244,21 +329,16 @@ class GenerationRunner(object):
                  test_dataloader: Optional[PromptDataLoader] = None,
                  config: CfgNode = None,
                  ):
-        self.prompt_model = prompt_model
-        self.inner_model = prompt_model.module if isinstance(prompt_model, DataParallel) else prompt_model
-        self.train_dataloader = train_dataloader
-        self.valid_dataloader = valid_dataloader
-        self.test_dataloader = test_dataloader
-        self.config = config
-        self.config_optimize()
+        super().__init__(prompt_model=prompt_model,
+                         train_dataloader=train_dataloader,
+                         valid_dataloader=valid_dataloader,
+                         test_dataloader=test_dataloader,
+                         config=config)
     
     def config_loss_function(self,):
-        r"""config the loss function if it's not passed.
+        r""" No need to config loss_function in generation.
         """
-        if self.config.classification.loss_function == "cross_entropy":
-            self.loss_function = torch.nn.CrossEntropyLoss()
-        else:
-            raise NotImplementedError
+        pass
     
     def config_optimize(self,):
         r"""config the optimizer and scheduler for 1. model 2. template 3. verbalizer
@@ -316,51 +396,56 @@ class GenerationRunner(object):
         self.schedulers = [self.model_scheduler, self.template_scheduler]
 
     def evaluate(self, dataloader, split, post_evaluate_hook=None):
-        if not os.path.exists(self.config.generation.result_path):
-            raise FileNotFoundError("Can't find {}".format(self.config.generation.result_path))
-
-        # TODO: allow more flexible file name
-        ret_file_name= os.path.join(self.config.generation.result_path,"{}_{}.txt".format(self.config.template, split))
-        fout = open(ret_file_name,'w')
+        ret_file_name= os.path.join(self.config.logging.path,"{}_generated_text.txt".format(split))
+        
         tgt_texts = []
         generated_sentences_all = []
-        logger.info("Begin generation, result written at {}".format(ret_file_name))
         for batch in tqdm(dataloader, desc=split):
             batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
             output_sequences, generated_sentences = self.inner_model.generate(batch)
             tgt_texts.extend(batch['tgt_text'])
             generated_sentences_all.extend(generated_sentences)
-            for i in range(len(batch['tgt_text'])):
-                fout.write("[Gold]:"+batch['tgt_text'][i]+"\n")
-                fout.write("[Gen]: "+generated_sentences[i]+"\n\n")
+            
+        fout = open(ret_file_name,'w')
+        for i in range(len(tgt_texts)):
+            fout.write("[Gold]:"+ tgt_texts[i]+"\n")
+            fout.write("[Gen]: "+ generated_sentences_all[i]+"\n\n")
         fout.close()
-        score = generation_metric(tgt_texts, generated_sentences_all)
-        logger.info("Evaluate Bleu score: {:.3f}.".format(score*100))
+
+        scores = OrderedDict()
+        scores_str = ""
+        for metric in self.config.generation.metric:
+            score = generation_metric(tgt_texts, generated_sentences_all, metric)
+            scores[metric] = score
+            scores_str += "{}: {}\n".format(metric, score)
+        logger.info("{} Performance: {}".format(split, scores_str.strip()))
+        return scores
 
     def train_epoch(self, epoch):
         self.prompt_model.train()
         self.prompt_model.zero_grad()
+        accumulation_steps = self.config.train.gradient_accumulation_step
         total_loss = 0.0
-        for batch in tqdm(self.train_dataloader, desc="Train"):
-            for optimizer in self.optimizers:
-                if optimizer is not None:
-                    optimizer.zero_grad()
+        pbar = tqdm(self.train_dataloader, desc="Train epoch {}".format(epoch))
+        for i, batch in enumerate(pbar):
             batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
             loss = self.prompt_model(batch).sum()  #TODO： parallel doesn't aggregate the result for some reason. to fix.
-            total_loss += loss.item()
+            loss = loss / accumulation_steps
             loss.backward()
-            for optimizer in self.optimizers:
-                if optimizer is not None:
-                    optimizer.step()
-
-            for scheduler in self.schedulers:
-                if scheduler is not None:
-                    scheduler.step()
+            if (i+1) % accumulation_steps == 0:  
+                # do optimizer step
+                for optimizer in self.optimizers:
+                    if optimizer is not None:
+                        optimizer.step()
+                for scheduler in self.schedulers:
+                    if scheduler is not None:
+                        scheduler.step() 
+                # zero_grad         
+                self.prompt_model.zero_grad()
+                for optimizer in self.optimizers:
+                    if optimizer is not None:
+                        optimizer.zero_grad()    
+            total_loss += loss.item()
+            pbar.set_postfix(loss = loss.item())
         logger.info("Epoch {}, loss: {:.4f}".format(epoch, total_loss))
-    
-    def run(self):
-        # currently no methods support automatic template initialization for generation
-        for epoch in range(self.config.train.num_epochs):
-             self.train_epoch(epoch)
-             self.evaluate(self.valid_dataloader, "Valid")
-        self.evaluate(self.test_dataloader, "Test")
+        return total_loss

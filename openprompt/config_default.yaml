@@ -16,7 +16,8 @@ reproduce:  # seed for reproduction
   cuda_seed: -1 # seed for cuda
 
 plm:   # plm parameters 
-  model_name: 
+  model_name: # the model name, e.g. bert, roberta, gpt2, ...
+              # for all the available model, please check the ./plms directory.
   model_path:
   optimize: 
     freeze_para: False
@@ -29,51 +30,94 @@ plm:   # plm parameters
       type:      # by default, it will choose get_linear_schedule_with_warmup
       num_warmup_steps: 500
 
+## LOGGIN and CHECKPOINTING ##################################################
+## in logging, each experiment will create a seperate folder for saving log.txt
+## , (full) config.json, and the checkpoint (if use the same path). 
+## logging is in the following format：
+## ./log
+##  - DIR_NAME_1
+##    - log.txt
+##    - config.yaml
+##    - checkpoint.pt
+##    - ...
+##  - DIR_NAME_2
+##    - ...
+##
+logging:
+  path_base: ./logs # the path base of all the logs.
+  file_level: NOTSET # make sure it's an option of logging package
+  console_level: INFO # make sure it's an option of logging package
+  unique_string:  # the generated (or usr defined) unique string for one experiment. 
+  unique_string_keys: # used to generate the unique string for saving 
+    - dataset.name
+    - plm.model_path # only keep the last folder name in code, 
+        # .i.e ../.cache/roberta-large/ will save as roberta-large 
+    - template
+    - verbalizer
+    - datetime  # a 12-digit string recording the date time of running the experiment, i.e., YYMMDDHHMMSS.
+  datetime_format: "%y%m%d%H%M%S" # only useful when unique_string_keys includes `datetime`.
+     #  make sure it's a valid format for datetime package.
+  path: # always keep none to let the config generate a full path according to 
+         # path_base and unique_string.
+  overwrite: True # if a same log path exists, overwrite it.
+
+checkpoint: # checkpoint use the same directory as logging.
+  save_lastest: False # Normaly set to False to reduce memory use, set
+                    # to true to allow resuming learning process.
+  save_best: False   # Keep saving the epoch of the best-performance. 
+  higher_better: True # is the metric to determine best checkpoint highter better?
+
+
 ## PIPELINE #######################################################
 
 train:
-  num_epochs: 5
-  batch_size: 2
-  shuffle_data: True
-  teacher_forcing: False
-
+  num_epochs: 5 # the number of training epochs.
+  batch_size: 2 # the batch_size.
+  shuffle_data: True # whether shuffle the training data.
+  teacher_forcing: False # whether perform teacher forcing in training.
+                      # if true, the desired prediction on each mask will
+                      # be filled in the mask.
+  gradient_accumulation_step: 1 # update weight  every N step of training.
+                      # set 1 to disable gradient accumulation.
+  
 dev:
-  batch_size: 2
-  shuffle_data: False
+  batch_size: 2 # evaluationn batch_size, can be a bit larger than training batch_size
+  shuffle_data: False # whether to perform data shuffling in evaluation
 
 test:
-  batch_size: 2
-  shuffle_data: False
+  batch_size: 2 # evaluationn batch_size, can be a bit larger than training batch_size
+  shuffle_data: False # whether to perform data shuffling in evaluation
   
 ## TASK ##########################################################@
 task: classification
 
-
 classification:
   parent_config: task
-  metric: 
-    - micro-f1
+  metric:  # the first one will be the main  to determine checkpoint.
+    - micro-f1  # whether the higher metric value is better.
   loss_function: cross_entropy ## the loss function for classification
 
 generation: # Adding any arguments for generation here.
   parent_config: task
   max_length: 512   # the max_length of the generated sentence. INCLUDING the input_ids. So: generation.max_length > dataloader.max_seq_length
-  result_path:   # the path to save the generated sentences.
-  
+  metric:
+    - sentence_bleu
 
 relation_classification:
   parent_config: task
 
 ## DATASET #########################################################
 dataset:
-  name:
-  path:
+  name:   # the name of the dataset, for the supported choices,
+          # please see the processors in ./data_utils/ 
+  path:  # whether is the dataset saved in your local machine.
 
 ## DATALOADER ######################################################
 dataloader:
-  max_seq_length: 256
-  decoder_max_length: 256
-  predict_eos_token: False  # necessary to set to true in generation.
+  max_seq_length: 256 # max_seq_length 
+  decoder_max_length: 256 # the decoder max length to truncate decoder input sequence
+                    # if it is an encoder-decoder architecture. Note that it's not equavalent
+                    # to generation.max_length which is used merely in the generation phase.
   truncate_method: "head" # choosing from balanced, head, tail
 
 ## LEARINING SETTING  ####################################################

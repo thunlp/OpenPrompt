@@ -270,6 +270,29 @@ class PromptForClassification(nn.Module):
         r'''Utility property, to get the tokenizer more easily.
         '''
         return self.verbalizer.tokenizer
+    
+    def state_dict(self):
+        r""" Save the model using template and verbalizer's save methods.
+        Args:
+            path (:obj:`str`): the full path of the checkpoint.
+            save_plm (:obj:`bool`): whether saving the pretrained language model.
+            kwargs: other information, such as the achieved metric value. 
+        """
+        _state_dict = {}
+        _state_dict['plm'] = self.model.state_dict()
+        _state_dict['template'] = self.template.state_dict()
+        _state_dict['verbalizer'] = self.verbalizer.state_dict()
+        return _state_dict
+    
+    def load_state_dict(self, state_dict):
+        if 'plm' in state_dict:
+            self.model.load_state_dict(state_dict['plm'])
+        self.template.load_state_dict(state_dict['template'])
+        self.verbalizer.load_state_dict(state_dict['verbalizer'])
+
+
+
+
 
 
 class PromptForGeneration(nn.Module, GenerationMixin):
@@ -475,5 +498,21 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             model_inputs = self.prompt_model.prepare_model_inputs(batch)
             model_kwargs["encoder_outputs"] = encoder(return_dict=True, **model_inputs)
         return model_kwargs
-
+    
+    def state_dict(self):
+        r""" Save the model using template and verbalizer's save methods.
+        Args:
+            path (:obj:`str`): the full path of the checkpoint.
+            save_plm (:obj:`bool`): whether saving the pretrained language model.
+            kwargs: other information, such as the achieved metric value. 
+        """
+        _state_dict = {}
+        _state_dict['plm'] = self.model.state_dict()
+        _state_dict['template'] = self.template.state_dict()
+        return _state_dict
+    
+    def load_state_dict(self, state_dict):
+        if 'plm' in state_dict:
+            self.model.load_state_dict(state_dict['plm'])
+        self.template.load_state_dict(state_dict['template'])
 

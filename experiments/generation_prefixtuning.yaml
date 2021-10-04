@@ -6,23 +6,20 @@ task: generation
 
 train:
   num_epochs: 5
-  batch_size: 2
+  batch_size: 3
   teacher_forcing: True
+  gradient_accumulation_step: 2
 
   
 generation: # Adding any arguments for generation here.
   parent_config: task
   max_length: 512
-  result_path: ./outputs/generation/webnlg/
 
 plm:
   model_name: gpt2
   model_path: gpt2-medium
   optimize: 
-    freeze_para: False
-
-dataloader:
-  predict_eos_token: True # this is necessary for generation.
+    freeze_para: True
 
 ## LEARINING SETTING  ####################################################
 learning_setting: full # selecting from "full", "zero-shot", "few-shot"
@@ -52,7 +49,7 @@ prefix_tuning_template:
     <text_b>: text_b
   prefix_dropout: 0.0
   optimize:
-    lr: 0.0004
+    lr: 0.00005
 
 
 

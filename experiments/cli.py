@@ -1,3 +1,4 @@
+import os
 import sys
 sys.path.append(".")
 
@@ -29,6 +30,8 @@ import logging
 
 
 
+
+
 def get_config():
     parser = argparse.ArgumentParser("classification config")
     parser.add_argument('--config_yaml', type=str, help='the configuration file for this experiment.')
@@ -47,15 +50,26 @@ def build_dataloader(dataset, template, tokenizer, config, split):
                                 shuffle=config[split].shuffle_data,
                                 teacher_forcing=config[split].teacher_forcing \
                                     if hasattr(config[split],'teacher_forcing') else None,
+                                predict_eos_token=True if config.task=="generation" else False,
                                 **config.dataloader
                                 )
     return dataloader
 
+def save_config_to_yaml(config):
+    from contextlib import redirect_stdout
+    saved_yaml_path = os.path.join(config.logging.path, "config.yaml")
+
+    with open(saved_yaml_path, 'w') as f:
+        with redirect_stdout(f): print(config.dump())
+    logger.info("Config saved as {}".format(saved_yaml_path))
 
 
 def main():
-    init_logger(log_file_level=logging.DEBUG, log_level=logging.INFO)
     config = get_config()
+    # init logger, create log dir and set log level, etc.
+    init_logger(config=config)
+    # save config to the logger directory
+    save_config_to_yaml(config)
     # set seed
     set_seed(config)
     # load the pretrained models, its model, tokenizer, and config.
@@ -63,7 +77,6 @@ def main():
     # load dataset. The valid_dataset can be None
     train_dataset, valid_dataset, test_dataset, Processor = load_dataset(config)
     
-
     if config.task == "classification":
         # define prompt
         template = load_template(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config)
