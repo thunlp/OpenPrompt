@@ -19,6 +19,8 @@ plm:   # plm parameters
   model_name: # the model name, e.g. bert, roberta, gpt2, ...
               # for all the available model, please check the ./plms directory.
   model_path:
+  specials_to_add:
+    - <pad> # always need to add pad token, if the tokenizer doesn't have one.
   optimize: 
     freeze_para: False
     no_decay:
@@ -62,9 +64,9 @@ logging:
   overwrite: True # if a same log path exists, overwrite it.
 
 checkpoint: # checkpoint use the same directory as logging.
-  save_lastest: False # Normaly set to False to reduce memory use, set
+  save_lastest: True # Normaly set to False to reduce memory use, set
                     # to true to allow resuming learning process.
-  save_best: False   # Keep saving the epoch of the best-performance. 
+  save_best: True   # Keep saving the epoch of the best-performance. 
   higher_better: True # is the metric to determine best checkpoint highter better?
 
 
@@ -99,9 +101,27 @@ classification:
 
 generation: # Adding any arguments for generation here.
   parent_config: task
-  max_length: 512   # the max_length of the generated sentence. INCLUDING the input_ids. So: generation.max_length > dataloader.max_seq_length
   metric:
     - sentence_bleu
+  max_length: 512   # the max_length of the generated sentence. INCLUDING the input_ids. So: generation.max_length > dataloader.max_seq_length
+  max_new_tokens:
+  min_length: 5
+  temperature: 1.0
+  do_sample: False
+  top_k: 0
+  top_p: 0.9
+  repetition_penalty: 1.0 ##args.repetition_penalty,
+  num_beams: 5
+  bad_words_ids: 
+    - 
+      - 628
+      - 198
+
+  
+
+
+  
+  
 
 relation_classification:
   parent_config: task
@@ -205,8 +225,17 @@ prefix_tuning_template:
     <text_a>: text_a
     <text_b>: text_b
   prefix_dropout: 0.0
-  optimize:
-    lr: 0.0001
-    
-
-
+  mid_dim: 512
+  optimize: 
+    name: AdamW  # TODO: curently not in use. 
+    lr: 0.00005
+    betas: 
+      - 0.9
+      - 0.999
+    eps: 0.00000001
+    weight_decay: 0.0
+    no_decay: 
+      - bias
+      - LayerNorm.weight
+    scheduler: 
+      num_warmup_steps: 0

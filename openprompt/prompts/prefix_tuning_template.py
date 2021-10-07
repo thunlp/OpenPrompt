@@ -45,13 +45,14 @@ class PrefixTuningTemplate(Template):
                  num_token: Optional[int] = 5,
                  placeholder_mapping: dict = {'<text_a>':'text_a', '<text_b>':'text_b'},
                  prefix_dropout: Optional[float] = 0.0,
+                 mid_dim: Optional[int] =  512,
                 ):
         super().__init__(tokenizer=tokenizer,
                          mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
-        self.raw_embedding = model.get_input_embeddings()
+        raw_embedding = model.get_input_embeddings()
         self.mapping_hook = mapping_hook
-        self.embedding_size = self.raw_embedding.weight.shape[-1]
+        self.embedding_size = raw_embedding.weight.shape[-1]
         self.num_token = num_token
         self.config = plm_config
 
@@ -65,7 +66,7 @@ class PrefixTuningTemplate(Template):
             self.n_layer = self.config.n_layer
             self.n_embd = self.config.n_embd
             self.n_head = self.config.n_head
-        self.mid_dim = self.n_embd  # TODO to be modified
+        self.mid_dim = mid_dim
 
         self.match_n_layer = self.n_layer
         self.match_n_head = self.n_head
@@ -107,6 +108,7 @@ class PrefixTuningTemplate(Template):
 
             return (past_key_values, decoder_past_key_values)
         
+        
         return (past_key_values,)
 
     def generate_parameters(self) -> None:
@@ -119,8 +121,8 @@ class PrefixTuningTemplate(Template):
         self.control_trans = nn.Sequential(
             nn.Linear(self.n_embd, self.mid_dim),
             nn.Tanh(),
-            nn.Linear(self.mid_dim, self.mid_dim),
-            nn.Tanh(),
+            # nn.Linear(self.mid_dim, self.mid_dim),
+            # nn.Tanh(),
             nn.Linear(self.mid_dim, self.n_layer * 2 * self.n_embd))
 
         if self.config.is_encoder_decoder:
@@ -203,22 +205,17 @@ class PrefixTuningTemplate(Template):
             self.backup_decoder_cross_attn_forward_functions = backup_decoder_cross_attn_forward_functions
 
         elif isinstance(model, GPT2LMHeadModel):
-            backup_block_forward_functions = []
-            for i, layer_module in enumerate(model.transformer.h):
-                backup_block_forward_functions.append(layer_module.attn.forward)
-                def modified_block_forward(*args, **kwargs):
-                    layer_id = kwargs.pop('layer_id')
-                    if kwargs['layer_past'] is None:
-                        kwargs['layer_past'] = self.past_key_values[0][layer_id]
-                    am = kwargs['attention_mask']
-                    kwargs['attention_mask'] = torch.cat([torch.ones((*am.shape[:-1],self.num_token), dtype = am.dtype,device=am.device), am], dim=-1)
-                    if isinstance(kwargs['layer_past'], tuple):
-                        assert kwargs['layer_past'][0].size(-2) + args[0].size(-2) == kwargs['attention_mask'].size(-1), "Size not match {} + {} != {}".format(kwargs['layer_past'].size(), args[0].size(-2), kwargs['attention_mask'].size())
-                    else:
-                        assert kwargs['layer_past'].size(-2) + args[0].size(-2) == kwargs['attention_mask'].size(-1), "Size not match {} + {} != {}".format(kwargs['layer_past'].size(), args[0].size(-2),  kwargs['attention_mask'].size())
-                    return backup_block_forward_functions[layer_id](*args, **kwargs)
-                layer_module.attn.forward = partial(modified_block_forward, layer_id=i)
-            self.backup_block_forward_functions = backup_block_forward_functions
+            backup_gpt_model_forward = model.transformer.forward
+            def modified_model_forward(*args, **kwargs):
+                am = kwargs['attention_mask']
+                batch_size, seq_len = am.shape
+                if kwargs['past_key_values'] is None:
+                    kwargs['past_key_values'] = self.past_key_values[0]
+                if kwargs['token_type_ids'] is not None:
+                    kwargs['token_type_ids'] = None
+                kwargs['attention_mask'] = torch.cat([torch.ones((batch_size,self.num_token), dtype = am.dtype,device=am.device), am], dim=-1)
+                return backup_gpt_model_forward(*args, **kwargs)
+            model.transformer.forward = modified_model_forward
         else:
             raise NotImplementedError
         self.plm_modified = True

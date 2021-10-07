@@ -1,6 +1,6 @@
-
 from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
 from typing import *
+from openprompt.utils.logging import logger
 
 def classification_metrics(preds: Sequence[int],
                            labels: Sequence[int],
@@ -39,7 +39,7 @@ def generation_metric(hypos,
 
     Args:
         hypos (:obj:`str`) : the generated sentence.
-        refs (:obj:`str`) : the referenced (ground-truth) sentence.
+        refs (:obj:`list(str)`) : the referenced (ground-truth) sentence.
         metric (:obj:`str`, `optional`) : the type of metric option
 
     Returns:
@@ -54,9 +54,17 @@ def generation_metric(hypos,
         scores = []
         
         for ref, hypo in zip(refs, hypos):
-            ref = word_tokenize(ref)
+            tokenized_rs = []
+            ref = ref.split("\n")
+            for r in ref:
+                tokenized_rs.append(word_tokenize(r))
             hypo = word_tokenize(hypo)
-            scores.append(sentence_bleu([ref], hypo, smoothing_function=smoothie))
+            try:
+                sc = sentence_bleu(tokenized_rs, hypo, smoothing_function=smoothie)
+            except ValueError:
+                logger.warning("math domain error in bleu, set to 0.0. generated sentence: {}".format(hypo))
+                sc = 0.0
+            scores.append(sc)
         score = sum(scores)/len(scores)
         return score
     else:
