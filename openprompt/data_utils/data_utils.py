@@ -173,7 +173,7 @@ class InputFeatures(dict):
         for key in self.tensorable_keys:
             value = getattr(self, key)
             if value is not None:
-                setattr(self, key, torch.tensor(value))
+                    setattr(self, key, torch.tensor(value))
         return self
     
     def to(self, device: str = "cuda:0"):

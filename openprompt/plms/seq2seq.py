@@ -112,7 +112,7 @@ class T5TokenizerWrapper(TokenizerWrapper):
         # create special input ids
         encoder_inputs['attention_mask'] = [1] *len(encoder_inputs['input_ids'])
         # padding
-        encoder_inputs = self.padding(input_dict=encoder_inputs, max_len=self.max_seq_length)
+        encoder_inputs = self.padding(input_dict=encoder_inputs, max_len=self.max_seq_length, pad_id_for_inputs=self.tokenizer.pad_token_id)
 
         all_input_ids = {**encoder_inputs, **decoder_inputs}
         return all_input_ids

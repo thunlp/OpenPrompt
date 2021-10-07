@@ -328,7 +328,10 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         for key in gen_config:
             setattr(self.config, key, gen_config[key])
 
-        
+    @property
+    def device(self):
+        return self.model.device
+
     def shift_logits_and_labels(self, 
                                 logits, 
                                 batch: InputFeatures):
@@ -371,8 +374,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         logits, labels = self.shift_logits_and_labels(logits, batch)
         batch_size, seq_len, vocab_size = logits.shape
         loss = self.loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
-        loss = loss.view(batch_size, -1).sum(dim=-1) #TODO support more objective
-        loss = loss.sum()
+        loss = loss.view(batch_size, -1).sum(dim=-1) #TODO support more objectives
+        loss = loss.mean()
         return loss
     
     
@@ -401,8 +404,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             input_length = batch['decoder_input_ids'].size(1)
         else:
             input_length = batch['input_ids'].size(1)
-        
-        output_sequences = super().generate(**batch, **generation_kwargs, pad_token_id=self.tokenizer.eos_token_id)
+        input_generation_kwargs = {key: value for key,value in generation_kwargs.items() if key in signature(GenerationMixin.generate).args}
+        output_sequences = super().generate(**batch, **input_generation_kwargs, pad_token_id=self.tokenizer.pad_token_id, eos_token_id=self.tokenizer.eos_token_id)
         self.forward = forward_backup
         generated_sentences = self.post_processing(output_sequences=output_sequences, input_length=input_length)
         return output_sequences, generated_sentences
@@ -423,7 +426,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         for seq in output_sequences:
             # Decode text
             seq = seq[input_length:]
-            text_output = self.tokenizer.decode(seq,skip_special_tokens=True, clean_up_tokenization_spaces=True)
+            text_output = self.tokenizer.decode(seq, skip_special_tokens=True, clean_up_tokenization_spaces=True)
             idx = text_output.find(self.tokenizer.eos_token)
             if idx >= 0:
                 text_output = text_output[:idx]
@@ -515,4 +518,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         if 'plm' in state_dict:
             self.model.load_state_dict(state_dict['plm'])
         self.template.load_state_dict(state_dict['template'])
-
+    
+    def _reorder_cache(self, past, beam_idx):
+        r"""Use the plm's default _reorder_cache function
+        """
+        return self.model._reorder_cache(past, beam_idx)

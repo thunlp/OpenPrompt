@@ -53,8 +53,6 @@ def get_conditional_config(config):
     return config
 
 
-                
-
 _VALID_TYPES = {tuple, list, str, int, float, bool, type(None)}
 
 
