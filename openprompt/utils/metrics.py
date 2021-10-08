@@ -47,6 +47,13 @@ def generation_metric(hypos,
     """
     if metric == "sentence_bleu":
         # a simple criterion to visualize the performance, not rigorous.
+        import nltk
+        try:
+            nltk_path = str(nltk.data.find("tokenizers/punkt"))
+            logger.info(f"using nltk from: {nltk_path}")
+        except LookupError:
+            nltk.download('punkt')
+
         from nltk.translate.bleu_score import sentence_bleu
         from nltk.tokenize import word_tokenize
         from nltk.translate.bleu_score import SmoothingFunction

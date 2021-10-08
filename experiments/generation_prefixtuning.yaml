@@ -12,6 +12,11 @@ train:
 
 dataloader:
   max_seq_length: 160
+
+environment:
+  num_gpus: 1
+  cuda_visible_devices:
+    - 0
   
 generation: # Adding any arguments for generation here.
   parent_config: task
