@@ -25,6 +25,7 @@ plm:   # plm parameters
       - LayerNorm.weight
     lr: 0.0005
     weight_decay: 0.01
+    adam_eps: 1.0E-8
     scheduler:
       type:      # by default, it will choose get_linear_schedule_with_warmup
       num_warmup_steps: 500
@@ -36,6 +37,8 @@ train:
   batch_size: 2
   shuffle_data: True
   teacher_forcing: False
+  accumulation_steps: 1
+  max_grad_norm: -1.0 # <0 for unlimited gradients norm
 
 dev:
   batch_size: 2

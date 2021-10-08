@@ -92,7 +92,7 @@ class ManualTemplate(Template):
             raise TypeError("InputExample")        
 
 
-    def process_batch(self, batch: InputFeatures)->InputFeatures:
+    def process_batch(self, batch: Union[Dict, InputFeatures])->InputFeatures:
         r"""In manual_template, the batch need not to be processed.
         """
         return batch

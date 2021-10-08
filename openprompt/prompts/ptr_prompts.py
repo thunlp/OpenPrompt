@@ -7,8 +7,8 @@ from torch import nn
 from typing import *
 from transformers import PreTrainedModel
 from transformers.tokenization_utils import PreTrainedTokenizer
-from openprompt import Template, Verbalizer
-from openprompt.prompts import ManualTemplate, ManualVerbalizer, PtuningTemplate
+from openprompt import Verbalizer
+from openprompt.prompts import One2oneVerbalizer, PtuningTemplate
 
 class PTRTemplate(PtuningTemplate):
     """
@@ -36,22 +36,17 @@ class PTRTemplate(PtuningTemplate):
                          new_token=new_token,
                          placeholder_mapping=placeholder_mapping)
 
-    def on_text_set(self):
-        r"""
-        when template text was set, generate parameter needed in p-tuning input embedding phrase
-        """
-        super().on_text_set()
-        self.mask_count = 0
-        for token in self.text:
-            if token == self.mask_token:
-                self.mask_count += 1
-
+# TODO docs
 class PTRVerbalizer(Verbalizer):
     """
+    In `PTR <https://arxiv.org/pdf/2105.11259.pdf>`, each prompt has more than one `<mask>` tokens.
+    Different `<mask>` tokens have different label words.
+    The final label is predicted jointly by these label words using logic rules.
+
     Args: 
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
         classes (:obj:`Sequence[str]`): A sequence of classes that need to be projected.
-        label_words (:obj:`Union[Sequence[str], Mapping[str, str]]`, optional): The label words that are projected by the labels.
+        label_words (:obj:`Union[Sequence[Sequence[str]], Mapping[str, Sequence[str]]]`, optional): The label words that are projected by the labels.
     """
     def __init__(self,
                  tokenizer: PreTrainedTokenizer,
@@ -63,6 +58,9 @@ class PTRVerbalizer(Verbalizer):
         self.label_words = label_words
 
     def on_label_words_set(self):
+        """
+        Prepare One2oneVerbalizer for each `<mask>` seperately
+        """
         super().on_label_words_set()
 
         self.num_masks = len(self.label_words[0])
@@ -75,7 +73,7 @@ class PTRVerbalizer(Verbalizer):
         ] # [num_masks, label_size of the corresponding mask]
 
         self.verbalizers = nn.ModuleList([
-            ManualVerbalizer(tokenizer=self.tokenizer, label_words=labels)
+            One2oneVerbalizer(tokenizer=self.tokenizer, label_words=labels, post_log_softmax = False)
             for labels in self.sub_labels
         ]) # [num_masks]
 
@@ -86,19 +84,37 @@ class PTRVerbalizer(Verbalizer):
 
     def process_logits(self,
                        logits: torch.Tensor, # [batch_size, num_masks, vocab_size]
-                       batch: InputFeatures,
+                       batch: Union[Dict, InputFeatures],
                        **kwargs):
+        """
+        1) Process vocab logits of each `<mask>` into label logits of each `<mask>`
+
+        2) Combine these logits into a single label logits of the whole task
+
+        Args:
+            logits (:obj:`torch.Tensor`): vocab logits of each `<mask>` (shape: `[batch_size, num_masks, vocab_size]`)
+
+        Returns:
+            :obj:`torch.Tensor`: logits (label logits of whole task (shape: `[batch_size, label_size of the whole task]`))
+        """
         each_logits = [ # logits of each verbalizer
-            self.verbalizers[i].process_logits(logits=logits[:, i, :], batch=batch, **kwargs)
+            self.verbalizers[i].process_logits(logits = logits[:, i, :], batch = batch, **kwargs)
             for i in range(self.num_masks)
         ] # num_masks * [batch_size, label_size of the corresponding mask]
 
-        label_logits = [ # (logits of each label) of each mask
+        label_logits = [
             logits[:, self.label_mappings[j]]
             for j, logits in enumerate(each_logits)
-        ] # num_masks * [batch_size, label_size of the whole mask]
+        ]
 
-        label_logits = sum(label_logits) # [batch_size, label_size of the whole mask]
-        # TODO test needed
+        logsoftmax = nn.functional.log_softmax(sum(label_logits), dim=-1)
 
-        return label_logits
+        if 'label' in batch:
+            each_logsoftmax = [ # (logits of each label) of each mask
+                nn.functional.log_softmax(logits, dim=-1)[:, self.label_mappings[j]]
+                for j, logits in enumerate(each_logits)
+            ] # num_masks * [batch_size, label_size of the whole task]
+
+            return logsoftmax + sum(each_logsoftmax) / len(each_logits) # [batch_size, label_size of the whole task]
+
+        return logsoftmax

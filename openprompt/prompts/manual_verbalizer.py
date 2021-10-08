@@ -22,6 +22,7 @@ class ManualVerbalizer(Verbalizer):
         label_words (:obj:`Union[Sequence[str], Mapping[str, str]]`, optional): The label words that are projected by the labels.
         prefix (:obj:`str`, optional): The prefix string of the verbalizer (used in PLMs like RoBERTa, which is sensitive to prefix space)
         multi_token_handler (:obj:`str`, optional): The handling strategy for multiple tokens produced by the tokenizer.
+        post_log_softmax (:obj:`bool`, optional): Whether to apply log softmax post processing on label_logits. Default to True.
     """
     def __init__(self, 
                  tokenizer: PreTrainedTokenizer,
@@ -30,11 +31,13 @@ class ManualVerbalizer(Verbalizer):
                  label_words: Optional[Union[Sequence[str], Mapping[str, str]]] = None,
                  prefix: Optional[str] = " ",
                  multi_token_handler: Optional[str] = "first",
+                 post_log_softmax: Optional[bool] = True,
                 ):
         super().__init__(tokenizer=tokenizer, num_classes=num_classes, classes=classes)
         self.prefix = prefix
         self.multi_token_handler = multi_token_handler
         self.label_words = label_words
+        self.post_log_softmax = post_log_softmax
 
     def on_label_words_set(self):
         super().on_label_words_set()
@@ -120,9 +123,15 @@ class ManualVerbalizer(Verbalizer):
 
     def process_logits(self, logits: torch.Tensor, **kwargs):
         r"""A whole framework to process the original logits over the vocabulary, which contains four steps: 
+
         (1) Project the logits into logits of label words
-        (2) Normalize over all label words
-        (3) Calibrate (optional)
+
+        if self.post_log_softmax is True:
+
+            (2) Normalize over all label words
+
+            (3) Calibrate (optional)
+
         (4) Aggregate (for multiple label words)
 
         Args:
@@ -134,15 +143,16 @@ class ManualVerbalizer(Verbalizer):
         # project
         label_words_logits = self.project(logits, **kwargs)  #Output: (batch_size, num_classes) or  (batch_size, num_classes, num_label_words_per_label)
 
-        # normalize
-        label_words_probs = self.normalize(label_words_logits)
+        if self.post_log_softmax:
+            # normalize
+            label_words_probs = self.normalize(label_words_logits)
 
-        # calibrate
-        if  hasattr(self, "_calibrate_logits") and self._calibrate_logits is not None:
-            label_words_probs = self.calibrate(label_words_probs=label_words_probs)
+            # calibrate
+            if  hasattr(self, "_calibrate_logits") and self._calibrate_logits is not None:
+                label_words_probs = self.calibrate(label_words_probs=label_words_probs)
 
-        # convert to logits
-        label_words_logits = torch.log(label_words_probs+1e-15)
+            # convert to logits
+            label_words_logits = torch.log(label_words_probs+1e-15)
 
         # aggreate
         label_logits = self.aggregate(label_words_logits)

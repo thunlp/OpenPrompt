@@ -103,16 +103,16 @@ def main():
     test_dataloader = build_dataloader(test_dataset, template, plm_tokenizer, config, "test")
     # test_dataloader = valid_dataloader  # if the test size is big, replace it with valid_dataloader for debugging.
     if config.task == "classification":
-        runner = ClassificationRunner(prompt_model=prompt_model,
-                                train_dataloader=train_dataloader,
-                                valid_dataloader=valid_dataloader,
-                                test_dataloader=test_dataloader,
+        runner = ClassificationRunner(prompt_model = prompt_model,
+                                train_dataloader = train_dataloader,
+                                valid_dataloader = valid_dataloader,
+                                test_dataloader = test_dataloader,
                                 config = config)
     elif config.task == "generation":
-        runner = GenerationRunner(prompt_model=prompt_model,
-                                train_dataloader=train_dataloader,
-                                valid_dataloader=valid_dataloader,
-                                test_dataloader=test_dataloader,
+        runner = GenerationRunner(prompt_model = prompt_model,
+                                train_dataloader = train_dataloader,
+                                valid_dataloader = valid_dataloader,
+                                test_dataloader = test_dataloader,
                                 config = config)
     else:
         raise NotImplementedError

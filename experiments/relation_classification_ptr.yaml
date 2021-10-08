@@ -9,6 +9,7 @@ plm:
     freeze_para: False
     lr: 0.00003
     weight_decay: 0.01
+    adam_eps: 1.0E-6
     scheduler:
       type: 
       num_warmup_steps: 500
@@ -20,14 +21,16 @@ dataloader:
   max_seq_length: 512
 
 train:
-  batch_size: 2
-  num_epochs: 10
+  batch_size: 8
+  num_epochs: 5
+  accumulation_steps: 8
+  max_grad_norm: 1.0
 
 test:
-  batch_size: 2
+  batch_size: 8
 
 dev:
-  batch_size: 2
+  batch_size: 8
 
 
 
@@ -46,18 +49,15 @@ ptr_verbalizer:
   file_path: scripts/RelationClassification/TACRED/ptr_verbalizer.jsonl
   
 environment:
-  num_gpus: 4
+  num_gpus: 1
   cuda_visible_devices:
     - 0
-    - 1
-    - 2
-    - 3
   local_rank: 0 
 
 classification:
   loss_function: nll_loss
 
-learning_setting: few_shot
+learning_setting: full
 
 few_shot:
   parent_config: learning_setting
