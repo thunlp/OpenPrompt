@@ -8,7 +8,7 @@ train:
   num_epochs: 5
   batch_size: 2
   teacher_forcing: True
-  gradient_accumulation_step: 2
+  gradient_accumulation_steps: 2
 
 generation: # Adding any arguments for generation here.
   parent_config: task

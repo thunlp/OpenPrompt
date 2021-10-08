@@ -13,7 +13,7 @@ def config_experiment_dir(config):
     Then create the directory.
     """
     if not os.path.exists(config.logging.path_base):
-        raise NotADirectoryError("No logging base directory")
+        raise NotADirectoryError(f"logging base directory `{config.logging.path_base}` not found")
     
     # generate unique string
     temp_strs = []

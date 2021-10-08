@@ -96,7 +96,7 @@ def load_plm(config: CfgNode):
 
 def add_special_tokens(model: PreTrainedModel, 
                        tokenizer: PreTrainedTokenizer,
-                       specials_to_add: Optional[List[str]] = ['<pad>']):
+                       specials_to_add: Optional[List[str]] = None):
     r"""add the special_tokens to tokenizer if the special token
     is not in the tokenizer. 
 

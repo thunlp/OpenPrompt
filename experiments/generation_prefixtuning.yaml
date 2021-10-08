@@ -8,10 +8,16 @@ train:
   num_epochs: 5
   batch_size: 5
   teacher_forcing: True
-  gradient_accumulation_step: 1
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
 
 dataloader:
   max_seq_length: 160
+
+environment:
+  num_gpus: 1
+  cuda_visible_devices:
+    - 0
   
 generation: # Adding any arguments for generation here.
   parent_config: task
@@ -57,7 +63,7 @@ prefix_tuning_template:
     betas: 
       - 0.9
       - 0.999
-    eps: 0.00000001
+    eps: 1.0E-8
     scheduler: 
       num_warmup_steps: 0
   

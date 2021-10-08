@@ -22,12 +22,17 @@ plm:   # plm parameters
   specials_to_add:
     - <pad> # always need to add pad token, if the tokenizer doesn't have one.
   optimize: 
+    name: AdamW  # TODO: curently not in use. 
     freeze_para: False
     no_decay:
       - bias
       - LayerNorm.weight
     lr: 0.0005
     weight_decay: 0.01
+    betas: 
+      - 0.9
+      - 0.999
+    eps: 1.0E-8
     scheduler:
       type:      # by default, it will choose get_linear_schedule_with_warmup
       num_warmup_steps: 500
@@ -79,9 +84,10 @@ train:
   teacher_forcing: False # whether perform teacher forcing in training.
                       # if true, the desired prediction on each mask will
                       # be filled in the mask.
-  gradient_accumulation_step: 1 # update weight  every N step of training.
+  gradient_accumulation_steps: 1 # update weight  every N step of training.
                       # set 1 to disable gradient accumulation.
-  
+  max_grad_norm: -1.0 # <0 for unlimited gradients norm
+
 dev:
   batch_size: 2 # evaluationn batch_size, can be a bit larger than training batch_size
   shuffle_data: False # whether to perform data shuffling in evaluation
@@ -232,7 +238,7 @@ prefix_tuning_template:
     betas: 
       - 0.9
       - 0.999
-    eps: 0.00000001
+    eps: 1.0E-8
     weight_decay: 0.0
     no_decay: 
       - bias
