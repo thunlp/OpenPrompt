@@ -136,9 +136,12 @@ class TokenizerWrapper:
 
     @staticmethod
     def padding(input_dict: Dict,
-                max_len: int) -> None:
+                max_len: int, pad_id_for_inputs: int=0, pad_id_for_others: int=0) -> None:
         for key, value in input_dict.items():
-            input_dict[key].extend([0]*(max_len-len(value)))
+            if 'input' in key:
+                input_dict[key].extend([pad_id_for_inputs]*(max_len-len(value)))
+            else:
+                input_dict[key].extend([pad_id_for_others]*(max_len-len(value)))
         return input_dict
 
 

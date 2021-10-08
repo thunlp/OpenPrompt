@@ -6,10 +6,11 @@ plm:
   model_name: roberta
   model_path: roberta-large
   optimize:
+    name: AdamW
     freeze_para: False
     lr: 0.00003
     weight_decay: 0.01
-    adam_eps: 1.0E-6
+    eps: 1.0E-6
     scheduler:
       type: 
       num_warmup_steps: 500
@@ -21,9 +22,9 @@ dataloader:
   max_seq_length: 512
 
 train:
-  batch_size: 8
+  batch_size: 16
   num_epochs: 5
-  accumulation_steps: 8
+  gradient_accumulation_steps: 4
   max_grad_norm: 1.0
 
 test:
@@ -49,9 +50,10 @@ ptr_verbalizer:
   file_path: scripts/RelationClassification/TACRED/ptr_verbalizer.jsonl
   
 environment:
-  num_gpus: 1
+  num_gpus: 2
   cuda_visible_devices:
-    - 0
+    - 2
+    - 7
   local_rank: 0 
 
 classification:

@@ -8,11 +8,11 @@ train:
   num_epochs: 5
   batch_size: 2
   teacher_forcing: True
+  gradient_accumulation_steps: 2
 
 generation: # Adding any arguments for generation here.
   parent_config: task
   max_length: 512
-  result_path: ./outputs/generation/webnlg/
 
 plm:
   model_name: gpt2
@@ -21,21 +21,18 @@ plm:
     freeze_para: False
 
 ## LEARINING SETTING  ####################################################
-learning_setting: full # selecting from "full", "zero-shot", "few-shot"
+learning_setting: full # selecting from "full", "zero_shot", "few_shot"
 
-# few_shot:
-#   parent_config: learning_setting
-#   few_shot_sampling: sampling_from_train
+few_shot:
+  parent_config: learning_setting
+  few_shot_sampling: sampling_from_train
   
-# sampling_from_train:
-#   parent_config: few_shot_sampling
-#   num_examples_per_label: 100
-#   also_sample_dev: True
-#   num_examples_per_label_dev: 100
-#   seed: 123
-
-dataloader:
-  predict_eos_token: True
+sampling_from_train:
+  parent_config: few_shot_sampling
+  num_examples_per_label: 100
+  also_sample_dev: True
+  num_examples_per_label_dev: 100
+  seed: 123
 
 template: manual_template
 verbalizer: 

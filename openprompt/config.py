@@ -33,7 +33,7 @@ def get_conditional_config(config):
             deeper_config[key] = config[key]
             config.pop(key)
     
-    # depth search over all config nodes 
+    # breadth first search over all config nodes 
     queue = [config]
     
     while len(queue) > 0:
@@ -45,7 +45,8 @@ def get_conditional_config(config):
                 leaf[1] in deeper_config.keys():
                 retrieved = deeper_config[leaf[1]]
                 setattr(config, leaf[1], retrieved)
-                if isinstance(retrieved, CfgNode):
+                if isinstance(retrieved, CfgNode): 
+                    # also BFS the newly added CfgNode.
                     queue.append(retrieved)
             elif isinstance(leaf[1], CfgNode):
                 queue.append(leaf[1])

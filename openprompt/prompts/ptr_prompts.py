@@ -36,7 +36,7 @@ class PTRTemplate(PtuningTemplate):
                          new_token=new_token,
                          placeholder_mapping=placeholder_mapping)
 
-# TODO docs
+
 class PTRVerbalizer(Verbalizer):
     """
     In `PTR <https://arxiv.org/pdf/2105.11259.pdf>`, each prompt has more than one `<mask>` tokens.

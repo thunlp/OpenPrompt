@@ -1,3 +1,4 @@
+import os
 import sys
 sys.path.append(".")
 
@@ -16,7 +17,7 @@ from openprompt.plms import get_model_class
 from openprompt import PromptDataLoader, PromptModel
 from openprompt.prompts import load_template, load_verbalizer
 from openprompt.data_utils import FewShotSampler
-from openprompt.utils.logging import init_logger, logger
+from openprompt.utils.logging import config_experiment_dir, init_logger, logger
 from openprompt.utils.metrics import classification_metrics
 from openprompt.utils.calibrate import calibrate
 from transformers import  AdamW, get_constant_schedule_with_warmup, get_linear_schedule_with_warmup
@@ -29,14 +30,20 @@ import logging
 
 
 
+
+
 def get_config():
     parser = argparse.ArgumentParser("classification config")
-    parser.add_argument('--config_yaml', type=str, help='the configuration file for this experiment.')
+    parser.add_argument("--config_yaml", type=str, help='the configuration file for this experiment.')
+    parser.add_argument("--resume", action="store_true", help='whether to resume a training from the latest checkpoint.\
+           It will fall back to run from initialization if no lastest checkpoint are found.')
+    parser.add_argument("--test", action="store_true", help='whether to resume a training from the latest checkpoint.\
+           It will fall back to run from initialization if no lastest checkpoint are found.') #
     args = parser.parse_args()
     config = get_yaml_config(args.config_yaml)
     check_config_conflicts(config)
     logger.info("CONFIGS:\n{}\n{}\n".format(config, "="*40))
-    return config
+    return config, args
 
 
 def build_dataloader(dataset, template, tokenizer, config, split):
@@ -47,15 +54,31 @@ def build_dataloader(dataset, template, tokenizer, config, split):
                                 shuffle=config[split].shuffle_data,
                                 teacher_forcing=config[split].teacher_forcing \
                                     if hasattr(config[split],'teacher_forcing') else None,
+                                predict_eos_token=True if config.task=="generation" else False,
                                 **config.dataloader
                                 )
     return dataloader
 
+def save_config_to_yaml(config):
+    from contextlib import redirect_stdout
+    saved_yaml_path = os.path.join(config.logging.path, "config.yaml")
+    with open(saved_yaml_path, 'w') as f:
+        with redirect_stdout(f): print(config.dump())
+    logger.info("Config saved as {}".format(saved_yaml_path))
 
 
 def main():
-    init_logger(log_file_level=logging.DEBUG, log_level=logging.INFO)
-    config = get_config()
+    config, args = get_config()
+    # init logger, create log dir and set log level, etc.
+    if not args.resume:
+        EXP_PATH = config_experiment_dir(config)
+    else:
+        EXP_PATH = config.logging.path
+    
+    init_logger(EXP_PATH+"/log.txt", config.logging.file_level, config.logging.console_level)
+    # save config to the logger directory
+    if not args.resume:
+        save_config_to_yaml(config)
     # set seed
     set_seed(config)
     # load the pretrained models, its model, tokenizer, and config.
@@ -63,7 +86,6 @@ def main():
     # load dataset. The valid_dataset can be None
     train_dataset, valid_dataset, test_dataset, Processor = load_dataset(config)
     
-
     if config.task == "classification":
         # define prompt
         template = load_template(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config)
@@ -116,7 +138,13 @@ def main():
                                 config = config)
     else:
         raise NotImplementedError
-    runner.run()
+    if not args.resume:
+        runner.run()
+    else:
+        if args.test: #
+            runner.test()#
+        else:#
+            runner.resume()
 
 
 
