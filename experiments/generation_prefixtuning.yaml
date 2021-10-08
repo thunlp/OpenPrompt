@@ -9,6 +9,7 @@ train:
   batch_size: 5
   teacher_forcing: True
   gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
 
 dataloader:
   max_seq_length: 160

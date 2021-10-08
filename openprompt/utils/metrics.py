@@ -68,7 +68,7 @@ def generation_metric(hypos,
             hypo = word_tokenize(hypo)
             try:
                 sc = sentence_bleu(tokenized_rs, hypo, smoothing_function=smoothie)
-            except ValueError:
+            except ValueError: # TODO ZeroDivisionError
                 logger.warning("math domain error in bleu, set to 0.0. generated sentence: {}".format(hypo))
                 sc = 0.0
             scores.append(sc)

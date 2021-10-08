@@ -347,7 +347,7 @@ class ClassificationRunner(BaseRunner):
                         optimizer.zero_grad()
                 total_loss += sum_loss
                 sum_loss = 0.
-        logger.info("Epoch {}, avg_loss: {:.4f}".format(epoch, total_loss / self.train_steps_per_epoch))
+        logger.info("Epoch {}, avg_loss: {:.4f}, total_loss: {:.4f}".format(epoch, total_loss / self.train_steps_per_epoch, total_loss))
         return total_loss
     
     def prompt_initialize(self):
@@ -536,6 +536,6 @@ class GenerationRunner(BaseRunner):
                         optimizer.zero_grad()
                 total_loss += sum_loss
                 sum_loss = 0.
-        logger.info("Epoch {}, avg_loss: {:.4f}".format(epoch, total_loss / self.train_steps_per_epoch))
+        logger.info("Epoch {}, avg_loss: {:.4f}, total_loss: {:.4f}".format(epoch, total_loss / self.train_steps_per_epoch, total_loss))
         
         return total_loss
