@@ -3,6 +3,11 @@ DIR="./TextClassification"
 mkdir $DIR
 cd $DIR
 
+rm -rf mnli
+wget --content-disposition # TODO https://cloud.tsinghua.edu.cn/f/TODO
+tar -zxvf mnli.tar.gz
+rm -rf mnli.tar.gz
+
 rm -rf agnews
 wget --content-disposition https://cloud.tsinghua.edu.cn/f/27c27ad244404e368ee7/?dl=1
 tar -zxvf agnews.tar.gz

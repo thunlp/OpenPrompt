@@ -1,267 +1,254 @@
 
-import copy
-import json
-import pickle
-from typing import *
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-import torch
+"""
+This file contains the logic for loading data for all TextClassification tasks.
+"""
+
+import os
+import json, csv
+from abc import ABC, abstractmethod
+from collections import defaultdict, Counter
+from typing import List, Dict, Callable
+
 from openprompt.utils.logging import logger
 
-from typing import Union
+from openprompt.data_utils import InputExample
+from openprompt.data_utils.data_processor import DataProcessor
 
 
+class MnliProcessor(DataProcessor):
+    def __init__(self):
+        super().__init__()
+        self.labels = ["contradiction", "entailment", "neutral"]
+
+    def get_examples(self, data_dir, split):
+        path = os.path.join(data_dir, "{}.csv".format(split))
+        examples = []
+        with open(path, encoding='utf8') as f:
+            reader = csv.reader(f, delimiter=',')
+            for idx, row in enumerate(reader):
+
+                label, headline, body = row
+                text_a = headline.replace('\\', ' ')
+                text_b = body.replace('\\', ' ')
+                example = InputExample(
+                    guid=str(idx), text_a=text_a, text_b=text_b, label=int(label)-1)
+                examples.append(example)
+                
+        return examples
 
 
-
-
-
-class InputExample(object):
-    """A raw input example consisting of segments of text,
-    a label for classification task or a target sequence of generation task.
-    Other desired information can be passed via meta.
-    
-    Args:
-        guid : A unique identifier of the example.
-        text_a (:obj:`str`): The placeholder for sequence of text.
-        text_b (:obj:`str`, optional): A secend sequence of text, which is not always neccessary.
-        label (:obj:`int`, optional): The label id of the example in classification task.
-        tgt_text (:obj:`Union[str,List[str]]`, optional):  The target sequence of the example in a generation task..
-        meta (:obj:`Dict`, optional): An optional dictionary to store arbitrary extra information for the example.
+class AgnewsProcessor(DataProcessor):
     """
-
-    def __init__(self,
-                 guid,
-                 text_a,
-                 text_b = "",
-                 label = None,
-                 meta: Optional[Dict] = None,
-                 tgt_text: Optional[Union[str,List[str]]] = None
-                ):
-
-        self.guid = guid
-        self.text_a = text_a
-        self.text_b = text_b
-        self.label = label
-        self.meta = meta if meta else {}
-        self.tgt_text = tgt_text
-
-    def __repr__(self):
-        return str(self.to_json_string())
-
-    def to_dict(self):
-        r"""Serialize this instance to a Python dictionary."""
-        output = copy.deepcopy(self.__dict__)
-        return output
-
-    def to_json_string(self):
-        r"""Serialize this instance to a JSON string."""
-        return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
+    `AG News <https://arxiv.org/pdf/1509.01626.pdf>`_ is a News Topic classification dataset
     
-    def keys(self, keep_none=False):
-        return [key for key in self.__dict__.keys() if getattr(self, key) is not None]
-
-    @staticmethod
-    def load_examples(path: str) -> List['InputExample']:
-        """Load a set of input examples from a file"""
-        with open(path, 'rb') as fh:
-            return pickle.load(fh)
-
-    @staticmethod
-    def save_examples(examples: List['InputExample'], path: str) -> None:
-        """Save a set of input examples to a file"""
-        with open(path, 'wb') as fh:
-            pickle.dump(examples, fh)
-
-
-class InputFeatures(dict):
-    """
-    The class for input to the PLM and Prompts. To make users explicitly know the available keys, 
-    we define a dict with a set of predefined possible keys. The default value to any key is None.
-    When use it as a dict, all the keys whose values are None are invisible.
-
-    This class support most of the dict's operation (See Examples). It can also be consumed by 
-    pytorch's default_collate in DataLoader. 
-    Also a :py:meth:`to_tensor()` method is build to convert the values into torch.Tensor for torch's input. 
+    we use dataset provided by `LOTClass <https://github.com/yumeng5/LOTClass>`_
 
     Examples:
 
-    ..  code-block:: python 
+    ..  code-block:: python
 
-        in_feat = InputFeatures(**{'input_ids':[1,4,5], 'new_token_ids': [3,4,5]})  # init from dict
-        print(in_feat.keys())       # ['input_ids, 'new_token_ids']
-        in_feat['label'] = 3        # can assign value like normal dict
-        print(in_feat.keys())       # ['input_ids','label', 'new_token_ids'] (Note that it's also ordered)
-        print(in_feat['label'])     # 3
-        in_feat['alice'] = 0        # KeyError: Key alice not in predefined set of keys
-        in_feat.values()            # [[1,4,5], 3, [3,4,5]]  (Note that it's also ordered)
-        [in_feat[key] for key in in_feat]   # [[1,4,5], 3, [3,4,5]]
-        new_dict= {**in_feat, 'new_key':2}  # new_dict is {'input_ids': [1, 4, 5], 'label': 3, 'new_token_ids': [3, 4, 5], 'new_key': 2}
+        from openprompt.data_utils.text_classification_dataset import PROCESSORS
 
-    Args:
-        input_ids: Indices of input sequence tokens in the vocabulary.
-        attention_mask: Mask to avoid performing attention on padding token indices.
-            Mask values selected in ``[0, 1]``: Usually ``1`` for tokens that are NOT MASKED, ``0`` for MASKED (padded)
-            tokens.
-        token_type_ids: (Optional) Segment token indices to indicate first and second
-            portions of the inputs. Only some models use them.
-        label: (Optional) Label corresponding to the input. Int for classification problems,
-            float for regression problems.
+        base_path = "datasets/TextClassification"
+
+        dataset_name = "agnews"
+        dataset_path = os.path.join(base_path, dataset_name)
+        processor = PROCESSORS[dataset_name.lower()]()
+        trainvalid_dataset = processor.get_train_examples(dataset_path)
+        test_dataset = processor.get_test_examples(dataset_path)
+
+        assert processor.get_num_labels() == 4
+        assert processor.get_labels() == ["World", "Sports", "Business", "Tech"]
+        assert len(trainvalid_dataset) == 120000
+        assert len(test_dataset) == 7600
+        assert test_dataset[0].text_a == "Fears for T N pension after talks"
+        assert test_dataset[0].text_b == "Unions representing workers at Turner   Newall say they are 'disappointed' after talks with stricken parent firm Federal Mogul."
+        assert test_dataset[0].label == 2
     """
-    tensorable_keys = ['input_ids', 'inputs_embeds', 'attention_mask', 'token_type_ids', 'label',
-        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 'new_token_ids',
-        'past_key_values', 'loss_ids']
-    all_keys = ['input_ids', 'inputs_embeds', 'attention_mask', 'token_type_ids', 'label',
-        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 'new_token_ids',
-        'past_key_values', 'loss_ids', 'guid', 'tgt_text']
-    non_tensorable_keys = []
 
-    def __init__(self, 
-                input_ids: Optional[Union[List, torch.Tensor]] = None,
-                inputs_embeds: Optional[torch.Tensor] = None,
-                attention_mask: Optional[Union[List[int], torch.Tensor]] = None,
-                token_type_ids: Optional[Union[List[int], torch.Tensor]] = None,
-                label: Optional[Union[int, torch.Tensor]] = None,
-                decoder_input_ids: Optional[Union[List, torch.Tensor]] = None,
-                decoder_inputs_embeds: Optional[torch.Tensor] = None,
-                soft_token_ids: Optional[Union[List, torch.Tensor]] = None,
-                new_token_ids: Optional[Union[List, torch.Tensor]] = None,
-                past_key_values: Optional[torch.Tensor] = None,  # for prefix_tuning
-                loss_ids: Optional[Union[List, torch.Tensor]] = None,
-                guid: Optional[str] = None,
-                tgt_text: Optional[str] = None,
-                use_cache: Optional[bool] = None,
-                **kwargs):
+    def __init__(self):
+        super().__init__()
+        self.labels = ["World", "Sports", "Business", "Tech"]
 
-        self.input_ids = input_ids
-        self.inputs_embeds = inputs_embeds
-        self.attention_mask = attention_mask
-        self.token_type_ids = token_type_ids
-        self.label = label
-        self.decoder_input_ids = decoder_input_ids
-        self.decoder_inputs_embeds = decoder_inputs_embeds
-        self.soft_token_ids = soft_token_ids
-        self.new_token_ids = new_token_ids
-        self.past_key_values = past_key_values
-        self.loss_ids = loss_ids
-        self.guid = guid
-        self.tgt_text = tgt_text
-        self.use_cache = use_cache
-
-        for k in kwargs.keys():
-            setattr(self, k, kwargs[k])
-
-    @classmethod
-    def add_tensorable_keys(cls, *args):
-        cls.tensorable_keys.extend(args)
-        
-    @classmethod
-    def add_not_tensorable_keys(cls, *args):
-        cls.not_tensorable_keys.extend(args)
+    def get_examples(self, data_dir, split):
+        path = os.path.join(data_dir, "{}.csv".format(split))
+        examples = []
+        with open(path, encoding='utf8') as f:
+            reader = csv.reader(f, delimiter=',')
+            for idx, row in enumerate(reader):
+                label, headline, body = row
+                text_a = headline.replace('\\', ' ')
+                text_b = body.replace('\\', ' ')
+                example = InputExample(guid=str(idx), text_a=text_a, text_b=text_b, label=int(label)-1)
+                examples.append(example)
+        return examples
     
-    @classmethod
-    def add_keys(cls, *args):
-        cls.all_keys.extend(args)
+class DBpediaProcessor(DataProcessor):
+    """
+    `Dbpedia <https://aclanthology.org/L16-1532.pdf>`_ is a Wikipedia Topic Classification dataset.
 
-    def __repr__(self):
-        return str(self.to_json_string())
+    we use dataset provided by `LOTClass <https://github.com/yumeng5/LOTClass>`_
+
+    Examples:
+
+    ..  code-block:: python
+
+        from openprompt.data_utils.text_classification_dataset import PROCESSORS
+
+        base_path = "datasets/TextClassification"
+
+        dataset_name = "dbpedia"
+        dataset_path = os.path.join(base_path, dataset_name)
+        processor = PROCESSORS[dataset_name.lower()]()
+        trainvalid_dataset = processor.get_train_examples(dataset_path)
+        test_dataset = processor.get_test_examples(dataset_path)
+
+        assert processor.get_num_labels() == 14
+        assert len(trainvalid_dataset) == 560000
+        assert len(test_dataset) == 70000
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.labels = ["company", "school", "artist", "athlete", "politics", "transportation", "building", "river", "village", "animal", "plant", "album", "film", "book",]
+
+    def get_examples(self, data_dir, split):
+        examples = []
+        label_file  = open(os.path.join(data_dir,"{}_labels.txt".format(split)),'r') 
+        labels  = [int(x.strip()) for x in label_file.readlines()]
+        with open(os.path.join(data_dir,'{}.txt'.format(split)),'r') as fin:
+            for idx, line in enumerate(fin):
+                splited = line.strip().split(". ")
+                text_a, text_b = splited[0], splited[1:]
+                text_a = text_a+"."
+                text_b = ". ".join(text_b)
+                example = InputExample(guid=str(idx), text_a=text_a, text_b=text_b, label=int(labels[idx]))
+                examples.append(example)
+        return examples
     
-    def __len__(self):
-        return len(self.keys())
 
-    def to_tensor(self, device: str = 'cuda'):
-        """inplace operation, convert all tensorable features into :obj:`torch.tensor`"""
-        for key in self.tensorable_keys:
-            value = getattr(self, key)
-            if value is not None:
-                setattr(self, key, torch.tensor(value))
-        return self
-    
-    def to(self, device: str = "cuda:0"):
-        r"""move the tensor keys to runtime device, such as gpu:0
-        """
-        for key in self.tensorable_keys:
-            value = getattr(self, key)
-            if value is not None:
-                setattr(self, key, value.to(device))
-        return self
+class ImdbProcessor(DataProcessor):
+    """
+    `IMDB <https://ai.stanford.edu/~ang/papers/acl11-WordVectorsSentimentAnalysis.pdf>`_ is a Movie Review Sentiment Classification dataset.
 
-    def to_json_string(self, keep_none=False):
-        """Serializes this instance to a JSON string."""
-        data = {}
-        for key in self.all_keys:
-            value = getattr(self, key)
-            if isinstance(value, torch.Tensor):   
-                data[key] =  value.detach().cpu().tolist()
-            elif value is None and keep_none:
-                data[key] = None
-            else:
-                data[key] = value
-        return json.dumps(data) + "\n"
-    
-    def keys(self, keep_none=False) -> List[str]:
-        """get all keys of the InputFeatures
+    we use dataset provided by `LOTClass <https://github.com/yumeng5/LOTClass>`_
 
-        Args:
-            keep_none (:obj:`bool`, optional): whether to keep the predefined keys whose value is none. Defaults to False.
+    Examples:
 
-        Returns:
-            :obj:`List[str]`: keys of the InputFeatures
-        """
-        if keep_none:
-            return self.all_keys
-        else:
-            return [key for key in self.all_keys if getattr(self, key) is not None]
-    
-    def to_dict(self, keep_none=False) -> Dict[str, Any]:
-        """get the dict of mapping from keys to values of the InputFeatures
+    ..  code-block:: python
 
-        Args:
-            keep_none (:obj:`bool`, optional): whether to keep the predefined keys whose value is none. Defaults to False.
+        from openprompt.data_utils.text_classification_dataset import PROCESSORS
 
-        Returns:
-            :obj:`Dict[str, Any]`: dict of mapping from keys to values of the InputFeatures
-        """
-        data = {}
-        for key in self.all_keys:
-            value = getattr(self, key)
-            if value is not None:
-                data[key] =  value
-            elif value is None and keep_none:
-                data[key] = None
-        return data
-    
-    def __getitem__(self, key):
-        return getattr(self, key)
-    
-    def __iter__(self):
-        return iter(self.keys())
-    
-    def __setitem__(self, key, item):
-        if key not in self.all_keys:
-            raise KeyError("Key {} not in predefined set of keys".format(key))
-        setattr(self, key, item)
+        base_path = "datasets/TextClassification"
 
-    def values(self, keep_none=False) -> List[Any]:
-        """get the values with respect to the keys  of the InputFeatures
+        dataset_name = "imdb"
+        dataset_path = os.path.join(base_path, dataset_name)
+        processor = PROCESSORS[dataset_name.lower()]()
+        trainvalid_dataset = processor.get_train_examples(dataset_path)
+        test_dataset = processor.get_test_examples(dataset_path)
 
-        Args:
-            keep_none (:obj:`bool`, optional): whether to keep the predefined keys whose value is none. Defaults to False.
+        assert processor.get_num_labels() == 2
+        assert len(trainvalid_dataset) == 25000
+        assert len(test_dataset) == 25000
+    """
 
-        Returns:
-            :obj:`List[Any]`: the values with respect to the keys of the InputFeatures
-        """
-        return [getattr(self, key) for key in self.keys(keep_none=keep_none)]
-    
-    def __contains__(self, key, keep_none=False):
-        return key in self.keys(keep_none)
-    
-    def items(self,):
-        """get the (key, value) pairs  of the InputFeatures
+    def __init__(self):
+        super().__init__()
+        self.labels = ["negative", "positive"]
 
-        Args:
-            keep_none (:obj:`bool`, optional): whether to keep the predefined keys whose value is none. Defaults to False.
+    def get_examples(self, data_dir, split):
+        examples = []
+        label_file = open(os.path.join(data_dir, "{}_labels.txt".format(split)), 'r') 
+        labels = [int(x.strip()) for x in label_file.readlines()]
+        with open(os.path.join(data_dir, '{}.txt'.format(split)),'r') as fin:
+            for idx, line in enumerate(fin):
+                text_a = line.strip()
+                example = InputExample(guid=str(idx), text_a=text_a, label=int(labels[idx]))
+                examples.append(example)
+        return examples
 
-        Returns:
-            :obj:`List[Any]`: the (key, value) pairs of the InputFeatures
-        """
-        return [(key, self.__getitem__(key)) for key in self.keys()]
+
+    @staticmethod
+    def get_test_labels_only(data_dir, dirname):
+        label_file  = open(os.path.join(data_dir,dirname,"{}_labels.txt".format('test')),'r') 
+        labels  = [int(x.strip()) for x in label_file.readlines()]
+        return labels
+   
+
+class AmazonProcessor(DataProcessor):
+    """
+    `Amazon <https://cs.stanford.edu/people/jure/pubs/reviews-recsys13.pdf>`_ is a Product Review Sentiment Classification dataset.
+
+    we use dataset provided by `LOTClass <https://github.com/yumeng5/LOTClass>`_
+
+    Examples: # TODO implement this
+    """
+
+    def __init__(self):
+        raise NotImplementedError
+        super().__init__()
+        self.labels = ["bad", "good"]
+
+    def get_examples(self, data_dir, split):
+        examples = []
+        label_file = open(os.path.join(data_dir, "{}_labels.txt".format(split)), 'r') 
+        labels = [int(x.strip()) for x in label_file.readlines()]
+        if split == "test": 
+            logger.info("Sample a mid-size test set for effeciecy, use sampled_test_idx.txt")
+            with open(os.path.join(self.args.data_dir,self.dirname,"sampled_test_idx.txt"),'r') as sampleidxfile:
+                sampled_idx = sampleidxfile.readline()
+                sampled_idx = sampled_idx.split()
+                sampled_idx = set([int(x) for x in sampled_idx])
+
+        with open(os.path.join(data_dir,'{}.txt'.format(split)),'r') as fin:
+            for idx, line in enumerate(fin):
+                if split=='test':
+                    if idx not in sampled_idx:
+                        continue
+                text_a = line.strip()
+                example = InputExample(guid=str(idx), text_a=text_a, label=int(labels[idx]))
+                examples.append(example)
+        return examples
+
+
+class SST2Processor(DataProcessor):
+    """
+    #TODO test needed
+    """
+
+    def __init__(self):
+        raise NotImplementedError
+        super().__init__()
+        self.labels = ["negative", "positive"]
+
+    def get_examples(self, data_dir, split):
+        examples = []
+        path = os.path.join(data_dir,"{}.tsv".format(split))
+        with open(path, 'r') as f:
+            reader = csv.DictReader(f, delimiter='\t')
+            for idx, example_json in enumerate(reader):
+                text_a = example_json['sentence'].strip()
+                example = InputExample(guid=str(idx), text_a=text_a, label=int(example_json['label']))
+                examples.append(example)
+        return examples
+
+PROCESSORS = {
+    "agnews": AgnewsProcessor,
+    "dbpedia": DBpediaProcessor,
+    "amazon" : AmazonProcessor,
+    "imdb": ImdbProcessor,
+    "sst-2": SST2Processor,
+    "mnli": MnliProcessor
+}
