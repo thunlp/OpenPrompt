@@ -20,7 +20,10 @@ class PrefixTuningTemplate(Template):
     wrap the input sentences with the template. The new tokens are always prepended to
     the language model. A mapping is used to map the new_tokens embeddings in to the
     past_key_value, and then input into the language model. The mask token of this 
-    template is automatically the last token.
+    template is automatically the last token. Currently, our implementation of 
+    prefix_tuning doens't support adding past_key_values to the encoder side of an 
+    encoder_decoder architecture such as T5 without modifying the T5 source code. 
+    (T5's source code doens't support adding past_key_values to the encoder in their code base. )
 
     Args:
         model (:obj:`PreTrainedModel`): The pre-trained model.
@@ -96,20 +99,7 @@ class PrefixTuningTemplate(Template):
         past_key_values = self.dropout(past_key_values)
         past_key_values = past_key_values.permute([2, 0, 3, 1, 4]).split(2)
 
-        if self.config.is_encoder_decoder:
-            decoder_input_tokens = self.decoder_input_tokens.unsqueeze(0).expand(batch_size, -1)
-            decoder_temp_control = self.decoder_wte(decoder_input_tokens)
-            decoder_past_key_values = self.decoder_control_trans(decoder_temp_control) #bsz, seqlen, layer*emb
-            _, decoder_seqlen, _ = decoder_past_key_values.shape
-            decoder_past_key_values = decoder_past_key_values.view(batch_size, decoder_seqlen, self.match_n_decoder_layer * 2, self.match_n_head,
-                                                self.match_n_embd)
-            decoder_past_key_values = self.dropout(decoder_past_key_values)
-            decoder_past_key_values = decoder_past_key_values.permute([2, 0, 3, 1, 4]).split(2)
-
-            return (past_key_values, decoder_past_key_values)
-        
-        
-        return (past_key_values,)
+        return past_key_values
 
     def generate_parameters(self) -> None:
         r"""
@@ -121,19 +111,7 @@ class PrefixTuningTemplate(Template):
         self.control_trans = nn.Sequential(
             nn.Linear(self.n_embd, self.mid_dim),
             nn.Tanh(),
-            # nn.Linear(self.mid_dim, self.mid_dim),
-            # nn.Tanh(),
             nn.Linear(self.mid_dim, self.n_layer * 2 * self.n_embd))
-
-        if self.config.is_encoder_decoder:
-            self.decoder_input_tokens = nn.Parameter(torch.arange(self.num_token).long(), requires_grad=False) # to allow automatic devicing
-            self.decoder_wte = nn.Embedding(self.num_token, self.n_embd)
-            self.decoder_control_trans = nn.Sequential(
-            nn.Linear(self.n_embd, self.mid_dim),
-            nn.Tanh(),
-            nn.Linear(self.mid_dim, self.mid_dim),
-            nn.Tanh(),
-            nn.Linear(self.mid_dim, self.n_decoder_layer * 2 * self.n_embd))
 
 
     def wrap_one_example(self, example) -> List[Dict]:
@@ -152,87 +130,9 @@ class PrefixTuningTemplate(Template):
         """
         batch_size = batch['input_ids'].size(0)
         past_key_values = self.get_past_key_values(batch_size)
-        self.past_key_values = past_key_values
+        # self.past_key_values = past_key_values
+        if 'attention_mask' in batch:
+            am = batch['attention_mask']
+            batch['attention_mask'] = torch.cat([torch.ones((batch_size,self.num_token), dtype = am.dtype,device=am.device), am], dim=-1)
+        batch['past_key_values'] = past_key_values
         return batch
-
-    
-    def modify_plm(self, model):
-        if self.plm_modified:
-            return None
-        if isinstance(model, T5ForConditionalGeneration):
-            backup_encoder_forward_functions = []
-            for i, layer_module in enumerate(model.encoder.block):
-                backup_encoder_forward_functions.append(layer_module.layer[0].forward)
-                def modified_encoder_forward(*args, **kwargs):
-                    layer_id = kwargs.pop('layer_id')
-                    if kwargs['past_key_value'] is None:
-                        kwargs['past_key_value'] = self.past_key_values[0][layer_id]
-                    if kwargs['attention_mask'] is not None:
-                        am = kwargs['attention_mask']
-                        kwargs['attention_mask'] = torch.cat([torch.ones((*am.shape[:-1],self.num_token), dtype = am.dtype,device=am.device), am], dim=-1)
-                    return backup_encoder_forward_functions[layer_id](*args, **kwargs)
-                layer_module.layer[0].forward = partial(modified_encoder_forward, layer_id=i)
-
-            backup_decoder_self_attn_forward_functions = []
-            backup_decoder_cross_attn_forward_functions = []
-            for i, layer_module in enumerate(model.decoder.block):
-                backup_decoder_self_attn_forward_functions.append(layer_module.layer[0].forward)
-                def modified_decoder_self_attn_forward(*args, **kwargs):
-                    layer_id = kwargs.pop('layer_id')
-                    if kwargs['past_key_value'] is None:
-                        kwargs['past_key_value'] = self.past_key_values[1][layer_id]
-                    if kwargs['past_key_value'][0].size(-2) + args[0].size(-2) == kwargs['attention_mask'].size(-1):
-                        pass
-                    elif kwargs['past_key_value'][0].size(-2) + args[0].size(-2) == kwargs['attention_mask'].size(-1) +self.num_token:
-                        am = kwargs['attention_mask']
-                        kwargs['attention_mask'] = torch.cat([torch.ones((*am.shape[:-1],self.num_token), dtype = am.dtype,device=am.device), am], dim=-1)
-                    else:
-                        raise RuntimeError("Size not match: past length: {}, inputlength:{},\
-                             attention mask length {}".format(kwargs['past_key_value'][0].size(-2), 
-                             args[0].size(-2),kwargs['attention_mask'].size(-1)))
-                    return backup_decoder_self_attn_forward_functions[layer_id](*args, **kwargs)
-                layer_module.layer[0].forward = partial(modified_decoder_self_attn_forward, layer_id=i)
-
-                backup_decoder_cross_attn_forward_functions.append(layer_module.layer[1].forward)
-                def modified_decoder_cross_attn_forward(*args, **kwargs):
-                    layer_id = kwargs.pop('layer_id')
-                    # kwargs['past_key_value'] = None #self.past_key_values[1][layer_id]
-                    return backup_decoder_cross_attn_forward_functions[layer_id](*args, **kwargs)
-                layer_module.layer[1].forward = partial(modified_decoder_cross_attn_forward, layer_id=i)
-            
-            self.backup_encoder_forward_functions = backup_encoder_forward_functions
-            self.backup_decoder_self_attn_forward_functions = backup_decoder_self_attn_forward_functions
-            self.backup_decoder_cross_attn_forward_functions = backup_decoder_cross_attn_forward_functions
-
-        elif isinstance(model, GPT2LMHeadModel):
-            backup_gpt_model_forward = model.transformer.forward
-            def modified_model_forward(*args, **kwargs):
-                am = kwargs['attention_mask']
-                batch_size, seq_len = am.shape
-                if kwargs['past_key_values'] is None:
-                    kwargs['past_key_values'] = self.past_key_values[0]
-                if kwargs['token_type_ids'] is not None:
-                    kwargs['token_type_ids'] = None
-                kwargs['attention_mask'] = torch.cat([torch.ones((batch_size,self.num_token), dtype = am.dtype,device=am.device), am], dim=-1)
-                return backup_gpt_model_forward(*args, **kwargs)
-            model.transformer.forward = modified_model_forward
-        else:
-            raise NotImplementedError
-        self.plm_modified = True
-
-    def retrieve_plm(self, model):
-        if not self.plm_modified:
-            return None
-        if isinstance(model, T5ForConditionalGeneration):
-            for i, layer_module in enumerate(model.encoder.block):
-                layer_module.layer[0].forward = self.backup_encoder_forward_functions[i]
-            for i, layer_module in enumerate(model.decoder.block):
-                layer_module.layer[0].forward = self.backup_decoder_self_attn_forward_functions[i]
-                layer_module.layer[1].forward = self.backup_decoder_cross_attn_forward_functions[i]
-        elif isinstance(model, GPT2LMHeadModel):
-            for i, layer_module in enumerate(model.transformer.h):
-                layer_module.attn.forward = self.backup_block_forward_functions[i]
-        else:
-            raise NotImplementedError
-        self.plm_modified = False
-

@@ -50,7 +50,8 @@ class MLMTokenizerWrapper(TokenizerWrapper):
         encoder_inputs = self.add_special_tokens(encoder_inputs=encoder_inputs)
         # create special input ids
         encoder_inputs['attention_mask'] = [1] *len(encoder_inputs['input_ids'])
-        encoder_inputs['token_type_ids'] = [0] *len(encoder_inputs['input_ids'])
+        if self.create_token_type_ids:
+            encoder_inputs['token_type_ids'] = [0] *len(encoder_inputs['input_ids'])
         # padding
         encoder_inputs = self.padding(input_dict=encoder_inputs, max_len=self.max_seq_length, pad_id_for_inputs=self.tokenizer.pad_token_id)
 

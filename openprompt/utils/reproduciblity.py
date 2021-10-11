@@ -29,7 +29,7 @@ def set_seed(config):
         np.random.seed(numpy_seed)
     if torch_seed >= 0:
         torch.manual_seed(torch_seed)
-    if config.environment.num_gpus and cuda_seed >= 0:
+    if config.environment.num_gpus>0 and cuda_seed >= 0:
         torch.cuda.manual_seed_all(cuda_seed)
     
 

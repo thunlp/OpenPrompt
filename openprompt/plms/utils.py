@@ -18,8 +18,10 @@ class TokenizerWrapper:
                  max_seq_length: int,
                  tokenizer: PreTrainedTokenizer,
                  truncate_method: Optional[str] = 'tail',
+                 create_token_type_ids: Optional[str] = False,
                  **kwargs):
         self.max_seq_length = max_seq_length
+        
         self.tokenizer = tokenizer
         if truncate_method=='tail':
             self.truncate_fct = self.truncate_from_tail
@@ -29,6 +31,8 @@ class TokenizerWrapper:
             self.truncate_fct = self.balanced_truncate
         else:
             raise NotImplementedError
+        
+        self.create_token_type_ids = create_token_type_ids
         
         self.template_mask_token = '<mask>'
         self.template_eos_token = '<eos>'

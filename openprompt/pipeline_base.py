@@ -161,9 +161,6 @@ class PromptModel(nn.Module):
         self.model = model
         self.template = template
 
-        if hasattr(self.template, 'modify_plm'):
-            self.template.modify_plm(self.model)
-
         # get model's forward function's keywords
         self.forward_keys = signature(self.model.forward).args
         
@@ -328,6 +325,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         self.config = model.config
         for key in gen_config:
             setattr(self.config, key, gen_config[key])
+        self.in_generation_function = False
 
     @property
     def device(self):
@@ -360,9 +358,23 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         shift_input_ids = torch.where(shift_loss_ids>0, shift_input_ids, -100)
         return shift_logits, shift_input_ids
 
-    def forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
+    def forward(self, *args, **kwargs):
+        r"""In generation process, it will use the plm's forward function.
+        This is because, in the first step we will directly call the process_batch function to 
+        generate initial input with the template, after that the all template
+        have been processed into the past_key_value,
+        then we can use the normal generation function. 
+        In learning process, the forward is linked to ``_forward`` functions.
+        in which the loss will be calcated for all the postions in the same time. 
+        """
+        if self.in_generation_function:
+            return self.prompt_model.model.forward(*args, **kwargs)
+        else:
+            return self._forward(*args, **kwargs)
+
+    def _forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
         r""" 
-        This is the forward method of the generation in prompt-learning framework. 
+        This is the forward method of the training of generation in prompt-learning framework. 
         
         Args:
             batch (:obj:`Union[Dict, InputFeatures]`): The input features of batchified data sequences.
@@ -370,6 +382,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         Returns:
             loss(:obj:torch.Tensor): The loss of the current generation procedure.
         """
+        
         outputs = self.prompt_model(batch)
         logits = outputs.logits
         logits, labels = self.shift_logits_and_labels(logits, batch)
@@ -394,10 +407,6 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             generated_sentences (:obj:List[torch.Tensor]): The generated sentences that have been post-processed.
         """
         self.generate_ith_token = 0
-        forward_backup = self.forward
-        self.forward = self.prompt_model.model.forward # replace the forward function, will be used in generation_utils.py self()
-        # if hasattr(self.template, 'modify_plm'): # modify plm if needed
-        #     self.template.modify_plm(self.model)
         if self.config.is_encoder_decoder:
             loss_ids_start = batch['loss_ids'].argmax(dim=-1)
             assert loss_ids_start.min() == loss_ids_start.max(), "The generation start from different position in a batch."
@@ -406,8 +415,9 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         else:
             input_length = batch['input_ids'].size(1)
         input_generation_kwargs = {key: value for key,value in generation_kwargs.items() if key in signature(GenerationMixin.generate).args}
+        self.in_generation_function = True
         output_sequences = super().generate(**batch, **input_generation_kwargs, pad_token_id=self.tokenizer.pad_token_id, eos_token_id=self.tokenizer.eos_token_id)
-        self.forward = forward_backup
+        self.in_generation_function = False
         generated_sentences = self.post_processing(output_sequences=output_sequences, input_length=input_length)
         return output_sequences, generated_sentences
     
@@ -481,7 +491,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             for key in self.last_model_inputs:
                 if key in model_kwargs:
                     model_kwargs[key] = self.last_model_inputs[key]
-       
+        
         model_kwargs = super(PromptForGeneration, PromptForGeneration)._update_model_kwargs_for_generation(outputs=outputs, model_kwargs=model_kwargs, is_encoder_decoder=is_encoder_decoder)
         self.generate_ith_token += 1
         return model_kwargs

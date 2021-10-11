@@ -142,14 +142,6 @@ class BaseRunner(object):
         # load state to model
         self.inner_model.load_state_dict(state_dict['state_dict'])
         self.inner_model.to("cuda:{}".format(self.config.environment.local_rank))
-        # load state to optimizers
-        # for optimizer, op_state in zip(self.optimizers, state_dict['optimizer']):
-        #     if isinstance(optimizer, torch.optim.Optimizer):
-        #         optimizer.load_state_dict(op_state)
-        # for scheduler, sc_state in zip(self.schedulers, state_dict['scheduler']):
-        #     if isinstance(scheduler, torch.optim.lr_scheduler._LRScheduler):
-        #         scheduler.load_state_dict(sc_state)
-        # test
         self.evaluate(self.test_dataloader, "Test")
 
 
@@ -513,7 +505,8 @@ class GenerationRunner(BaseRunner):
         pbar = tqdm(self.train_dataloader, desc="Train epoch {}".format(epoch))
         for step, batch in enumerate(pbar):
             batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
-            loss = self.prompt_model(batch).mean()  #TODO： parallel doesn't aggregate the result for some reason. to fix.
+            loss = self.prompt_model(batch).mean()  #TODO：unbanlanced batch chunks
+
             if self.config.train.gradient_accumulation_steps > 1:
                 loss = loss / self.config.train.gradient_accumulation_steps
             sum_loss += loss.item()
@@ -537,5 +530,4 @@ class GenerationRunner(BaseRunner):
                 total_loss += sum_loss
                 sum_loss = 0.
         logger.info("Epoch {}, avg_loss: {:.4f}, total_loss: {:.4f}".format(epoch, total_loss / self.train_steps_per_epoch, total_loss))
-        
         return total_loss

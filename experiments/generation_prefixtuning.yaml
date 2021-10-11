@@ -30,7 +30,7 @@ plm:
     freeze_para: True
 
 ## LEARINING SETTING  ####################################################
-learning_setting: full # selecting from "full", "zero-shot", "few-shot"
+learning_setting: full # selecting from "full", "zero_shot", "few_shot"
 
 # few_shot:
 #   parent_config: learning_setting
@@ -42,7 +42,8 @@ learning_setting: full # selecting from "full", "zero-shot", "few-shot"
 #   also_sample_dev: True
 #   num_examples_per_label_dev: 100
 #   seed: 123
-
+reproduce:  # seed for reproduction 
+  seed: 100
 
 template: prefix_tuning_template
 verbalizer: 
