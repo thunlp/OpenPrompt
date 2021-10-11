@@ -35,7 +35,7 @@ learning_setting: full # selecting from "full", "zero_shot", "few_shot"
 # few_shot:
 #   parent_config: learning_setting
 #   few_shot_sampling: sampling_from_train
-  
+
 # sampling_from_train:
 #   parent_config: few_shot_sampling
 #   num_examples_per_label: 100
