@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openprompt.data_utils.conditional_generation_dataset &mdash; OpenPrompt v0.0.1 documentation</title>
+  <title>openprompt.data_utils.conditional_generation_dataset &mdash; OpenPrompt v0.0.1-beta documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../../index.html" class="icon icon-home"> OpenPrompt
           </a>
               <div class="version">
-                v0.0.1
+                v0.0.1-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -159,6 +159,7 @@
         <span class="n">full_rela_lst</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">full_src_lst</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">full_tgt_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">guid_lst</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">example</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines_dict</span><span class="p">[</span><span class="s1">&#39;entries&#39;</span><span class="p">]):</span>
             <span class="n">sents</span> <span class="o">=</span> <span class="n">example</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)][</span><span class="s1">&#39;lexicalisations&#39;</span><span class="p">]</span>
@@ -172,18 +173,32 @@
                 <span class="n">temp_triples</span> <span class="o">+=</span> <span class="s1">&#39; | &#39;</span>
                 <span class="n">temp_triples</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> : </span><span class="si">{}</span><span class="s1"> : </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subj</span><span class="p">,</span> <span class="n">rela</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">sents</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">sent</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;good&#39;</span><span class="p">:</span>
-                    <span class="n">full_tgt_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sent</span><span class="p">[</span><span class="s2">&quot;lex&quot;</span><span class="p">])</span>
-                    <span class="n">full_src_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_triples</span><span class="p">)</span>
-                    <span class="n">full_rela_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rela_lst</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">split</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">sents</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">sent</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;good&#39;</span><span class="p">:</span>
+                        <span class="n">full_tgt_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sent</span><span class="p">[</span><span class="s2">&quot;lex&quot;</span><span class="p">])</span>
+                        <span class="n">full_src_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_triples</span><span class="p">)</span>
+                        <span class="n">full_rela_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rela_lst</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">full_src_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_triples</span><span class="p">)</span>
+                <span class="n">full_rela_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rela_lst</span><span class="p">)</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">sent</span> <span class="ow">in</span> <span class="n">sents</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">sent</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;good&#39;</span><span class="p">:</span>
+                        <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sent</span><span class="p">[</span><span class="s2">&quot;lex&quot;</span><span class="p">])</span>
+                <span class="n">full_tgt_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">))</span>
 
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_rela_lst</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_src_lst</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_rela_lst</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_tgt_lst</span><span class="p">)</span>
         
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">tgt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">full_src_lst</span><span class="p">,</span> <span class="n">full_tgt_lst</span><span class="p">)):</span>
-            <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">tgt_text</span><span class="o">=</span><span class="n">tgt</span><span class="p">)</span>
-            <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">split</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">tgt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">full_src_lst</span><span class="p">,</span> <span class="n">full_tgt_lst</span><span class="p">)):</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">tgt_text</span><span class="o">=</span><span class="n">tgt</span><span class="p">)</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">tgt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">full_src_lst</span><span class="p">,</span> <span class="n">full_tgt_lst</span><span class="p">)):</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">tgt_text</span><span class="o">=</span><span class="n">tgt</span><span class="p">)</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">examples</span></div>
 
     

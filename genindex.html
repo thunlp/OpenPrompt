@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; OpenPrompt v0.0.1 documentation</title>
+  <title>Index &mdash; OpenPrompt v0.0.1-beta documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> OpenPrompt
           </a>
               <div class="version">
-                v0.0.1
+                v0.0.1-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -335,10 +335,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.label_words">label_words (Verbalizer property)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.label_words">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_utils.html#openprompt.data_utils.data_utils.InputExample.load_examples">load_examples() (InputExample static method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/base.html#openprompt.pipeline_base.PromptForClassification.load_state_dict">load_state_dict() (PromptForClassification method)</a>
+
+      <ul>
+        <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.load_state_dict">(PromptForGeneration method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -395,8 +401,6 @@
       <li><a href="modules/template.html#openprompt.prompts.prefix_tuning_template.PrefixTuningTemplate.on_text_set">on_text_set() (PrefixTuningTemplate method)</a>
 
       <ul>
-        <li><a href="modules/template.html#openprompt.prompts.ptr_prompts.PTRTemplate.on_text_set">(PTRTemplate method)</a>
-</li>
         <li><a href="modules/template.html#openprompt.prompts.ptuning_prompts.PtuningTemplate.on_text_set">(PtuningTemplate method)</a>
 </li>
         <li><a href="modules/base.html#openprompt.prompt_base.Template.on_text_set">(Template method)</a>, <a href="modules/root.html#id11">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.on_text_set">[2]</a>
@@ -474,6 +478,8 @@
         <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.project">(Verbalizer method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.project">[1]</a>
 </li>
       </ul></li>
+      <li><a href="modules/trainer.html#openprompt.trainer.ClassificationRunner.prompt_initialize">prompt_initialize() (ClassificationRunner method)</a>
+</li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptDataLoader">PromptDataLoader (class in openprompt.pipeline_base)</a>
 </li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForClassification">PromptForClassification (class in openprompt.pipeline_base)</a>
@@ -522,16 +528,22 @@
 </li>
       <li><a href="modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_total">sample_total() (FewShotSampler static method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/base.html#openprompt.prompt_base.Template.save">save() (Template method)</a>, <a href="modules/root.html#id8">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.save">[2]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_utils.html#openprompt.data_utils.data_utils.InputExample.save_examples">save_examples() (InputExample static method)</a>
 </li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.SemEvalProcessor">SemEvalProcessor (class in openprompt.data_utils.relation_classification_dataset)</a>
 </li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.shift_logits_and_labels">shift_logits_and_labels() (PromptForGeneration method)</a>
 </li>
+      <li><a href="modules/base.html#openprompt.pipeline_base.PromptForClassification.state_dict">state_dict() (PromptForClassification method)</a>
+
+      <ul>
+        <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.state_dict">(PromptForGeneration method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 

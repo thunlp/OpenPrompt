@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trainer &mdash; OpenPrompt v0.0.1 documentation</title>
+  <title>Trainer &mdash; OpenPrompt v0.0.1-beta documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> OpenPrompt
           </a>
               <div class="version">
-                v0.0.1
+                v0.0.1-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -132,6 +132,12 @@ via <cite>task</cite> option, we keep it as another class for simplicity.</p>
 <dd><p>config the optimizer and scheduler for 1. model 2. template 3. verbalizer</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.trainer.ClassificationRunner.prompt_initialize">
+<span class="sig-name descname"><span class="pre">prompt_initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/trainer.html#ClassificationRunner.prompt_initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.trainer.ClassificationRunner.prompt_initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Some initialization works</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -158,7 +164,7 @@ This class is specially implemented for generation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.trainer.GenerationRunner.config_loss_function">
 <span class="sig-name descname"><span class="pre">config_loss_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/trainer.html#GenerationRunner.config_loss_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.trainer.GenerationRunner.config_loss_function" title="Permalink to this definition">¶</a></dt>
-<dd><p>config the loss function if it’s not passed.</p>
+<dd><p>No need to config loss_function in generation.</p>
 </dd></dl>
 
 <dl class="py method">

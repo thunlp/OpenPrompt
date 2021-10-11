@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openprompt.data_utils.data_sampler &mdash; OpenPrompt v0.0.1 documentation</title>
+  <title>openprompt.data_utils.data_sampler &mdash; OpenPrompt v0.0.1-beta documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../../index.html" class="icon icon-home"> OpenPrompt
           </a>
               <div class="version">
-                v0.0.1
+                v0.0.1-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -178,7 +178,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;label&#39;</span><span class="p">),</span> <span class="s2">&quot;sample by label requires the data has a &#39;label&#39; attribute.&quot;</span>
             <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
-            <span class="n">selected_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_per_label</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label</span><span class="p">)</span>
+            <span class="n">selected_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_per_label</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label</span><span class="p">)</span> <span class="c1"># TODO fix: use num_examples_per_label_dev for dev</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">selected_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_total</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_total</span><span class="p">)</span>
         

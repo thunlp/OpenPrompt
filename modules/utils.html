@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Utils Functions &mdash; OpenPrompt v0.0.1 documentation</title>
+  <title>Utils Functions &mdash; OpenPrompt v0.0.1-beta documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> OpenPrompt
           </a>
               <div class="version">
-                v0.0.1
+                v0.0.1-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -104,13 +104,13 @@
 <span id="calibration"></span><h2><a class="toc-backref" href="#id2">Calibration</a><a class="headerlink" href="#module-openprompt.utils.calibrate" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openprompt.utils.calibrate.pmi_calibrate">
-<span class="sig-name descname"><span class="pre">pmi_calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptModel" title="openprompt.pipeline_base.PromptModel"><span class="pre">openprompt.pipeline_base.PromptModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_length</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/utils/calibrate.html#pmi_calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.utils.calibrate.pmi_calibrate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pmi_calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="base.html#openprompt.pipeline_base.PromptModel" title="openprompt.pipeline_base.PromptModel"><span class="pre">openprompt.pipeline_base.PromptModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_length</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/utils/calibrate.html#pmi_calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.utils.calibrate.pmi_calibrate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pmi calibrate. See <a class="reference external" href="https://arxiv.org/pdf/2104.08315.pdf">Paper</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prompt_model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptForClassification</span></code>) – the PromptForClassification model.</p></li>
-<li><p><strong>max_seq_length</strong> – (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>): the truncation parameters for dataloader.</p></li>
+<li><p><strong>max_seq_length</strong> – (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>): the truncation parameters for dataloader.</p></li>
 </ul>
 </dd>
 </dl>
@@ -118,14 +118,14 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openprompt.utils.calibrate.contextualized_calibrate">
-<span class="sig-name descname"><span class="pre">contextualized_calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">torch.utils.data.dataset.Dataset</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_length</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/utils/calibrate.html#contextualized_calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.utils.calibrate.contextualized_calibrate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">contextualized_calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">torch.utils.data.dataset.Dataset</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_seq_length</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/utils/calibrate.html#contextualized_calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.utils.calibrate.contextualized_calibrate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contextualized calibrate. See <a class="reference external" href="https://arxiv.org/abs/2108.02035">Paper</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prompt_model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PromptForClassification</span></code>) – the PromptForClassification model.</p></li>
 <li><p><strong>context</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List</span></code>) – the context dataset, if use the training dataset to do contextualized calibrate.</p></li>
-<li><p><strong>max_seq_length</strong> – (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>): the truncation parameters for dataloader.</p></li>
+<li><p><strong>max_seq_length</strong> – (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>): the truncation parameters for dataloader.</p></li>
 </ul>
 </dd>
 </dl>

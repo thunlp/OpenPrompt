@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openprompt.prompts.manual_verbalizer &mdash; OpenPrompt v0.0.1 documentation</title>
+  <title>openprompt.prompts.manual_verbalizer &mdash; OpenPrompt v0.0.1-beta documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../../index.html" class="icon icon-home"> OpenPrompt
           </a>
               <div class="version">
-                v0.0.1
+                v0.0.1-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -111,6 +111,7 @@
 <span class="sd">        label_words (:obj:`Union[Sequence[str], Mapping[str, str]]`, optional): The label words that are projected by the labels.</span>
 <span class="sd">        prefix (:obj:`str`, optional): The prefix string of the verbalizer (used in PLMs like RoBERTa, which is sensitive to prefix space)</span>
 <span class="sd">        multi_token_handler (:obj:`str`, optional): The handling strategy for multiple tokens produced by the tokenizer.</span>
+<span class="sd">        post_log_softmax (:obj:`bool`, optional): Whether to apply log softmax post processing on label_logits. Default to True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
@@ -119,11 +120,13 @@
                  <span class="n">label_words</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
                  <span class="n">multi_token_handler</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span>
+                 <span class="n">post_log_softmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                 <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">multi_token_handler</span> <span class="o">=</span> <span class="n">multi_token_handler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span> <span class="o">=</span> <span class="n">label_words</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_log_softmax</span> <span class="o">=</span> <span class="n">post_log_softmax</span>
 
 <div class="viewcode-block" id="ManualVerbalizer.on_label_words_set"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.manual_verbalizer.ManualVerbalizer.on_label_words_set">[docs]</a>    <span class="k">def</span> <span class="nf">on_label_words_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">on_label_words_set</span><span class="p">()</span>
@@ -209,9 +212,15 @@
 
 <div class="viewcode-block" id="ManualVerbalizer.process_logits"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.manual_verbalizer.ManualVerbalizer.process_logits">[docs]</a>    <span class="k">def</span> <span class="nf">process_logits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;A whole framework to process the original logits over the vocabulary, which contains four steps: </span>
+
 <span class="sd">        (1) Project the logits into logits of label words</span>
-<span class="sd">        (2) Normalize over all label words</span>
-<span class="sd">        (3) Calibrate (optional)</span>
+
+<span class="sd">        if self.post_log_softmax is True:</span>
+
+<span class="sd">            (2) Normalize over all label words</span>
+
+<span class="sd">            (3) Calibrate (optional)</span>
+
 <span class="sd">        (4) Aggregate (for multiple label words)</span>
 
 <span class="sd">        Args:</span>
@@ -223,15 +232,16 @@
         <span class="c1"># project</span>
         <span class="n">label_words_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1">#Output: (batch_size, num_classes) or  (batch_size, num_classes, num_label_words_per_label)</span>
 
-        <span class="c1"># normalize</span>
-        <span class="n">label_words_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">label_words_logits</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_log_softmax</span><span class="p">:</span>
+            <span class="c1"># normalize</span>
+            <span class="n">label_words_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">label_words_logits</span><span class="p">)</span>
 
-        <span class="c1"># calibrate</span>
-        <span class="k">if</span>  <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_calibrate_logits&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calibrate_logits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">label_words_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">label_words_probs</span><span class="o">=</span><span class="n">label_words_probs</span><span class="p">)</span>
+            <span class="c1"># calibrate</span>
+            <span class="k">if</span>  <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_calibrate_logits&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calibrate_logits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">label_words_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">label_words_probs</span><span class="o">=</span><span class="n">label_words_probs</span><span class="p">)</span>
 
-        <span class="c1"># convert to logits</span>
-        <span class="n">label_words_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">label_words_probs</span><span class="o">+</span><span class="mf">1e-15</span><span class="p">)</span>
+            <span class="c1"># convert to logits</span>
+            <span class="n">label_words_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">label_words_probs</span><span class="o">+</span><span class="mf">1e-15</span><span class="p">)</span>
 
         <span class="c1"># aggreate</span>
         <span class="n">label_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">label_words_logits</span><span class="p">)</span>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openprompt.data_utils.text_classification_dataset &mdash; OpenPrompt v0.0.1 documentation</title>
+  <title>openprompt.data_utils.text_classification_dataset &mdash; OpenPrompt v0.0.1-beta documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../../index.html" class="icon icon-home"> OpenPrompt
           </a>
               <div class="version">
-                v0.0.1
+                v0.0.1-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -116,6 +116,27 @@
 <span class="kn">from</span> <span class="nn">openprompt.data_utils.data_processor</span> <span class="kn">import</span> <span class="n">DataProcessor</span>
 
 
+<span class="k">class</span> <span class="nc">MnliProcessor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+    <span class="c1"># TODO Test needed</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;contradiction&quot;</span><span class="p">,</span> <span class="s2">&quot;entailment&quot;</span><span class="p">,</span> <span class="s2">&quot;neutral&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.csv&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">))</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
+
+                <span class="n">label</span><span class="p">,</span> <span class="n">headline</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">row</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="n">headline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="n">text_b</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span>
+                    <span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">text_b</span><span class="o">=</span><span class="n">text_b</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+                
+        <span class="k">return</span> <span class="n">examples</span>
 
 
 
@@ -320,6 +341,7 @@
     <span class="s2">&quot;amazon&quot;</span> <span class="p">:</span> <span class="n">AmazonProcessor</span><span class="p">,</span>
     <span class="s2">&quot;imdb&quot;</span><span class="p">:</span> <span class="n">ImdbProcessor</span><span class="p">,</span>
     <span class="s2">&quot;sst-2&quot;</span><span class="p">:</span> <span class="n">SST2Processor</span><span class="p">,</span>
+    <span class="s2">&quot;mnli&quot;</span><span class="p">:</span> <span class="n">MnliProcessor</span><span class="p">,</span>
 <span class="p">}</span>
 </pre></div>
 

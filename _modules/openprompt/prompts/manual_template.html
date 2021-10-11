@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openprompt.prompts.manual_template &mdash; OpenPrompt v0.0.1 documentation</title>
+  <title>openprompt.prompts.manual_template &mdash; OpenPrompt v0.0.1-beta documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../../index.html" class="icon icon-home"> OpenPrompt
           </a>
               <div class="version">
-                v0.0.1
+                v0.0.1-beta
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -181,7 +181,7 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;InputExample&quot;</span><span class="p">)</span>        </div>
 
 
-<div class="viewcode-block" id="ManualTemplate.process_batch"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.manual_template.ManualTemplate.process_batch">[docs]</a>    <span class="k">def</span> <span class="nf">process_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">InputFeatures</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">InputFeatures</span><span class="p">:</span>
+<div class="viewcode-block" id="ManualTemplate.process_batch"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.manual_template.ManualTemplate.process_batch">[docs]</a>    <span class="k">def</span> <span class="nf">process_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">InputFeatures</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;In manual_template, the batch need not to be processed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">batch</span></div>
