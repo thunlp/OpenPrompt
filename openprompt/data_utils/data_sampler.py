@@ -89,7 +89,7 @@ class FewShotSampler(object):
         if self.num_examples_per_label is not None:
             assert hasattr(data[0], 'label'), "sample by label requires the data has a 'label' attribute."
             labels = [x.label for x in data]
-            selected_ids = self.sample_per_label(indices, labels, self.num_examples_per_label)
+            selected_ids = self.sample_per_label(indices, labels, self.num_examples_per_label) # TODO fix: use num_examples_per_label_dev for dev
         else:
             selected_ids = self.sample_total(indices, self.num_examples_total)
         

@@ -88,7 +88,7 @@ class PtuningTemplate(ManualTemplate):
             self.new_mlp_head = nn.Sequential(
                 nn.Linear(self.embedding_size, self.embedding_size),
                 nn.ReLU(),
-                nn.Linear(2*self.embedding_size, self.embedding_size)
+                nn.Linear(self.embedding_size, self.embedding_size)
             )
         else:
             raise ValueError("unknown prompt_enocder_type")

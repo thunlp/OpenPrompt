@@ -6,14 +6,22 @@ task: generation
 
 train:
   num_epochs: 5
-  batch_size: 3
+  batch_size: 5
   teacher_forcing: True
-  gradient_accumulation_step: 2
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
 
+dataloader:
+  max_seq_length: 160
+
+environment:
+  num_gpus: 1
+  cuda_visible_devices:
+    - 0
   
 generation: # Adding any arguments for generation here.
   parent_config: task
-  max_length: 512
+  max_length: 320
 
 plm:
   model_name: gpt2
@@ -22,7 +30,7 @@ plm:
     freeze_para: True
 
 ## LEARINING SETTING  ####################################################
-learning_setting: full # selecting from "full", "zero-shot", "few-shot"
+learning_setting: full # selecting from "full", "zero_shot", "few_shot"
 
 # few_shot:
 #   parent_config: learning_setting
@@ -34,7 +42,8 @@ learning_setting: full # selecting from "full", "zero-shot", "few-shot"
 #   also_sample_dev: True
 #   num_examples_per_label_dev: 100
 #   seed: 123
-
+reproduce:  # seed for reproduction 
+  seed: 100
 
 template: prefix_tuning_template
 verbalizer: 
@@ -48,8 +57,17 @@ prefix_tuning_template:
     <text_a>: text_a
     <text_b>: text_b
   prefix_dropout: 0.0
-  optimize:
+  mid_dim: 512
+  optimize: 
+    name: AdamW
     lr: 0.00005
+    betas: 
+      - 0.9
+      - 0.999
+    eps: 1.0E-8
+    scheduler: 
+      num_warmup_steps: 0
+  
 
 
 

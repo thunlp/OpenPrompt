@@ -25,6 +25,7 @@ class LMTokenizerWrapper(TokenizerWrapper):
                  **kwargs):
         super().__init__(max_seq_length=max_seq_length, tokenizer=tokenizer,truncate_method=truncate_method)
         self.predict_eos = predict_eos_token
+
     @property
     def num_special_tokens_to_add(self):
         if not hasattr(self, '_num_specials'):
@@ -87,9 +88,10 @@ class LMTokenizerWrapper(TokenizerWrapper):
         encoder_inputs = self.add_special_tokens(encoder_inputs=encoder_inputs)
         # create special input ids
         encoder_inputs['attention_mask'] = [1] *len(encoder_inputs['input_ids'])
-        encoder_inputs['token_type_ids'] = [0] *len(encoder_inputs['input_ids'])
+        if self.create_token_type_ids:
+            encoder_inputs['token_type_ids'] = [0] *len(encoder_inputs['input_ids'])
         
-        encoder_inputs = self.padding(input_dict=encoder_inputs, max_len=self.max_seq_length)
+        encoder_inputs = self.padding(input_dict=encoder_inputs, max_len=self.max_seq_length, pad_id_for_inputs=self.tokenizer.pad_token_id)
         encoder_inputs = dict(encoder_inputs)
         return encoder_inputs
     

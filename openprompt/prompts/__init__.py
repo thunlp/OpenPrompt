@@ -7,6 +7,7 @@ from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.utils.dummy_pt_objects import PreTrainedModel
 from .manual_template import ManualTemplate
 from .manual_verbalizer import ManualVerbalizer
+from .one2one_verbalizer import One2oneVerbalizer
 from .automatic_verbalizer import AutomaticVerbalizer
 from .prefix_tuning_template import PrefixTuningTemplate
 from .knowledgeable_verbalizer import KnowledgeableVerbalizer
@@ -14,7 +15,6 @@ from .ptuning_prompts import PtuningTemplate
 from .ptr_prompts import PTRTemplate, PTRVerbalizer
 from .knowledgeable_verbalizer import KnowledgeableVerbalizer
 from .prefix_tuning_template import PrefixTuningTemplate
-from .one2one_verbalizer import One2oneVerbalizer
 from .soft_manual_prompts import SoftManualTemplate
 
 TEMPLATE_CLASS = {

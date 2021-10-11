@@ -5,6 +5,7 @@ from transformers.tokenization_utils import PreTrainedTokenizer
 from openprompt.plms.utils import TokenizerWrapper
 from typing import List, Dict, Optional
 from collections import defaultdict
+from openprompt.utils.logging import logger
 
 class T5TokenizerWrapper(TokenizerWrapper):
     r"""
@@ -27,6 +28,8 @@ class T5TokenizerWrapper(TokenizerWrapper):
         self.decoder_max_length = decoder_max_length
         self.decode_from_pad = decode_from_pad
         self.predict_eos = predict_eos_token
+        if self.create_token_type_ids:
+            logger.warning("token_type_ids is not valid in T5. will be depreciated.")
 
     def mask_token(self,i):
         return self.tokenizer.additional_special_tokens[i]
@@ -112,7 +115,7 @@ class T5TokenizerWrapper(TokenizerWrapper):
         # create special input ids
         encoder_inputs['attention_mask'] = [1] *len(encoder_inputs['input_ids'])
         # padding
-        encoder_inputs = self.padding(input_dict=encoder_inputs, max_len=self.max_seq_length)
+        encoder_inputs = self.padding(input_dict=encoder_inputs, max_len=self.max_seq_length, pad_id_for_inputs=self.tokenizer.pad_token_id)
 
         all_input_ids = {**encoder_inputs, **decoder_inputs}
         return all_input_ids

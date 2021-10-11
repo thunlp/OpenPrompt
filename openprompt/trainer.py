@@ -68,10 +68,11 @@ class BaseRunner(object):
         """
         pass
 
-    def run(self):
-        self.prompt_initialize()
-        max_score = None
-        for epoch in range(self.config.train.num_epochs):
+    def run(self, start_epoch: int=0, max_score: float=0.0):
+        if start_epoch == 0:
+            self.prompt_initialize()
+            max_score = None
+        for epoch in range(start_epoch, self.config.train.num_epochs):
             total_loss = self.train_epoch(epoch)
             scores = self.evaluate(self.valid_dataloader, "Valid")
             model_state_dict = self.inner_model.state_dict()
@@ -81,8 +82,9 @@ class BaseRunner(object):
                 "epoch": epoch+1,
                 "state_dict": self.inner_model.state_dict(),
                 "optimizer": [opt.state_dict() if isinstance(opt, torch.optim.Optimizer) else None for opt in self.optimizers] ,
-                "scheduler": self.schedulers,
-                "scores": scores
+                "scheduler": [sch.state_dict() if isinstance(sch, torch.optim.lr_scheduler._LRScheduler) else None for sch in self.schedulers],
+                "scores": scores,
+                "max_score": max_score
             }
             cur_score = scores.popitem()[1]
 
@@ -100,6 +102,48 @@ class BaseRunner(object):
         self.inner_model.load_state_dict(state_dict['state_dict'])
         self.inner_model.to("cuda:{}".format(self.config.environment.local_rank))
         self.evaluate(self.test_dataloader, "Test")
+
+    def resume(self, ):
+        logger.info("Resume Training ...")
+        try:
+            state_dict = load_checkpoint(load_path=self.config.logging.path,
+                    load_best = False,
+                    map_location="cpu", # cpu to prevent CUDA out of memory.
+                    )
+        except FileNotFoundError:
+            logger.warning("No checkpoint found in {}, start from scratch.".format(self.config.logging.path))
+            self.run()
+            return 
+        
+        # load state to model
+        self.inner_model.load_state_dict(state_dict['state_dict'])
+        self.inner_model.to("cuda:{}".format(self.config.environment.local_rank))
+        # load state to optimizers
+        for optimizer, op_state in zip(self.optimizers, state_dict['optimizer']):
+            if isinstance(optimizer, torch.optim.Optimizer):
+                optimizer.load_state_dict(op_state)
+        for scheduler, sc_state in zip(self.schedulers, state_dict['scheduler']):
+            if isinstance(scheduler, torch.optim.lr_scheduler._LRScheduler):
+                scheduler.load_state_dict(sc_state)
+        # run
+        self.run(start_epoch=state_dict['epoch'], max_score=state_dict['max_score'])
+        
+    def test(self, ):
+        logger.info("Resume Training and direct test...")
+        try:
+            state_dict = load_checkpoint(load_path=self.config.logging.path,
+                    load_best = False,
+                    map_location="cpu", # cpu to prevent CUDA out of memory.
+                    )
+        except FileNotFoundError:
+            logger.error("No checkpoint found in {}, can't test.".format(self.config.logging.path))
+            exit()
+        
+        # load state to model
+        self.inner_model.load_state_dict(state_dict['state_dict'])
+        self.inner_model.to("cuda:{}".format(self.config.environment.local_rank))
+        self.evaluate(self.test_dataloader, "Test")
+
 
 
 
@@ -153,7 +197,8 @@ class ClassificationRunner(BaseRunner):
         
         """
         
-        num_training_steps = len(self.train_dataloader)*self.config.train.num_epochs
+        self.train_steps_per_epoch = len(self.train_dataloader) // self.config.train.gradient_accumulation_steps
+        num_training_steps = self.train_steps_per_epoch * self.config.train.num_epochs
 
         if not self.config.plm.optimize.freeze_para:
             no_decay = self.config.plm.optimize.no_decay
@@ -163,11 +208,18 @@ class ClassificationRunner(BaseRunner):
                 {'params': [p for n, p in self.inner_model.model.named_parameters() if any(nd in n for nd in no_decay)],'weight_decay': 0.0}
             ]
 
-            self.model_optimizer = AdamW(optimizer_grouped_parameters, lr = self.config.plm.optimize.lr)
+            self.model_optimizer = AdamW(
+                optimizer_grouped_parameters,
+                lr = self.config.plm.optimize.lr,
+                betas = self.config.plm.optimize.betas,
+                eps = self.config.plm.optimize.eps
+            )
             if self.config.plm.optimize.scheduler is not None:
-                self.model_scheduler = get_linear_schedule_with_warmup(self.model_optimizer, 
-                                    num_warmup_steps=self.config.plm.optimize.scheduler.num_warmup_steps, 
-                                    num_training_steps=num_training_steps)
+                self.model_scheduler = get_linear_schedule_with_warmup(
+                    self.model_optimizer, 
+                    num_warmup_steps = self.config.plm.optimize.scheduler.num_warmup_steps, 
+                    num_training_steps = num_training_steps
+                )
             else:
                 self.model_scheduler = None
         else:
@@ -185,9 +237,11 @@ class ClassificationRunner(BaseRunner):
                 # using default gradient descent optimizer.
                 self.template_optimizer = AdamW(self.inner_model.template.parameters(), lr = template_config.optimize.lr)
                 if hasattr(template_config.optimize, "scheduler") and template_config.optimize.scheduler is not None:
-                    self.template_scheduler = get_linear_schedule_with_warmup(self.template_optimizer, 
-                                    num_warmup_steps=template_config.optimize.scheduler.num_warmup_steps, 
-                                    num_training_steps=num_training_steps)
+                    self.template_scheduler = get_linear_schedule_with_warmup(
+                        self.template_optimizer, 
+                        num_warmup_steps = template_config.optimize.scheduler.num_warmup_steps, 
+                        num_training_steps = num_training_steps
+                    )
                 else:
                     self.template_scheduler = None
             else:
@@ -210,9 +264,11 @@ class ClassificationRunner(BaseRunner):
                 # using default gradient descent optimizer.
                 self.verbalizer_optimizer = AdamW(self.inner_model.verbalizer.parameters(), lr = verbalizer_config.optimize.lr)
                 if hasattr(verbalizer_config.optimize, "scheduler") and verbalizer_config.optimize.scheduler is not None:
-                    self.verbalizer_scheduler = get_linear_schedule_with_warmup(self.verbalizer_optimizer, 
-                                    num_warmup_steps=verbalizer_config.optimize.scheduler.num_warmup_steps, 
-                                    num_training_steps=num_training_steps)
+                    self.verbalizer_scheduler = get_linear_schedule_with_warmup(
+                        self.verbalizer_optimizer, 
+                        num_warmup_steps = verbalizer_config.optimize.scheduler.num_warmup_steps, 
+                        num_training_steps = num_training_steps
+                    )
                 else:
                     self.verbalizer_scheduler = None
             else:
@@ -235,10 +291,12 @@ class ClassificationRunner(BaseRunner):
         with torch.no_grad():
             for batch in tqdm(dataloader, desc=split):
                 batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
+                label = batch['label'].cpu().tolist()
+                batch.pop('label')
                 logits = self.prompt_model(batch)
                 pred = torch.argmax(logits, dim=-1)
                 preds.extend(pred.cpu().tolist())
-                labels.extend(batch['label'].cpu().tolist())
+                labels.extend(label)
         self.prompt_model.train()
         scores = OrderedDict()
         scores_str = ""
@@ -252,31 +310,36 @@ class ClassificationRunner(BaseRunner):
     def train_epoch(self, epoch):
         self.prompt_model.train()
         self.prompt_model.zero_grad()
-        accumulation_steps = self.config.train.gradient_accumulation_step
         total_loss = 0.0
+        sum_loss = 0.0
         pbar = tqdm(self.train_dataloader, desc="Train epoch {}".format(epoch))
-        for i, batch in enumerate(pbar):
+        for step, batch in enumerate(pbar):
             batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
             logits = self.prompt_model(batch)
             loss = self.loss_function(logits, batch['label'])
-            loss = loss / accumulation_steps
+            if self.config.train.gradient_accumulation_steps > 1:
+                loss = loss / self.config.train.gradient_accumulation_steps
+            sum_loss += loss.item()
             loss.backward()
-            if (i+1) % accumulation_steps == 0:  
-                # do optimizer step
+
+            if (step+1) % self.config.train.gradient_accumulation_steps == 0:
+                pbar.set_postfix({ 'loss': sum_loss })
+                if self.config.train.max_grad_norm > 0:
+                    torch.nn.utils.clip_grad_norm_(self.prompt_model.parameters(), self.config.train.max_grad_norm)
                 for optimizer in self.optimizers:
                     if optimizer is not None:
                         optimizer.step()
+
                 for scheduler in self.schedulers:
                     if scheduler is not None:
-                        scheduler.step() 
-                # zero_grad         
-                self.prompt_model.zero_grad()
+                        scheduler.step()
+
                 for optimizer in self.optimizers:
                     if optimizer is not None:
-                        optimizer.zero_grad()            
-            total_loss += loss.item()
-            pbar.set_postfix(loss = loss.item())
-        logger.info("Epoch {}, loss: {:.4f}".format(epoch, total_loss))
+                        optimizer.zero_grad()
+                total_loss += sum_loss
+                sum_loss = 0.
+        logger.info("Epoch {}, avg_loss: {:.4f}, total_loss: {:.4f}".format(epoch, total_loss / self.train_steps_per_epoch, total_loss))
         return total_loss
     
     def prompt_initialize(self):
@@ -345,7 +408,8 @@ class GenerationRunner(BaseRunner):
         
         """
         
-        num_training_steps = len(self.train_dataloader)*self.config.train.num_epochs
+        self.train_steps_per_epoch = len(self.train_dataloader) // self.config.train.gradient_accumulation_steps
+        num_training_steps = self.train_steps_per_epoch * self.config.train.num_epochs
 
         if not self.config.plm.optimize.freeze_para:
             no_decay = self.config.plm.optimize.no_decay
@@ -357,9 +421,11 @@ class GenerationRunner(BaseRunner):
 
             self.model_optimizer = AdamW(optimizer_grouped_parameters, lr = self.config.plm.optimize.lr)
             if self.config.plm.optimize.scheduler is not None:
-                self.model_scheduler = get_linear_schedule_with_warmup(self.model_optimizer, 
-                                    num_warmup_steps=self.config.plm.optimize.scheduler.num_warmup_steps, 
-                                    num_training_steps=num_training_steps)
+                self.model_scheduler = get_linear_schedule_with_warmup(
+                    self.model_optimizer, 
+                    num_warmup_steps = self.config.plm.optimize.scheduler.num_warmup_steps, 
+                    num_training_steps = num_training_steps
+                )
             else:
                 self.model_scheduler = None
         else:
@@ -375,11 +441,23 @@ class GenerationRunner(BaseRunner):
         if template_config.optimize is not None:
             if not hasattr(self.inner_model.template, "optimize"):
                 # using default gradient descent optimizer.
-                self.template_optimizer = AdamW(self.inner_model.template.parameters(), lr = template_config.optimize.lr)
+                no_decay = template_config.optimize.no_decay
+                weight_decay = template_config.optimize.weight_decay
+                optimizer_grouped_parameters = [
+                    {'params': [p for n, p in self.inner_model.template.named_parameters() if (not any(nd in n for nd in no_decay)) and p.requires_grad],'weight_decay': weight_decay},
+                    {'params': [p for n, p in self.inner_model.template.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad],'weight_decay': 0.0}
+                ]
+
+                self.template_optimizer = AdamW(self.inner_model.template.parameters(), 
+                                                lr = template_config.optimize.lr,
+                                                betas = template_config.optimize.betas,
+                                                eps = template_config.optimize.eps)
                 if hasattr(template_config.optimize, "scheduler") and template_config.optimize.scheduler is not None:
-                    self.template_scheduler = get_linear_schedule_with_warmup(self.template_optimizer, 
-                                    num_warmup_steps=template_config.optimize.scheduler.num_warmup_steps, 
-                                    num_training_steps=num_training_steps)
+                    self.template_scheduler = get_linear_schedule_with_warmup(
+                        self.template_optimizer, 
+                        num_warmup_steps = template_config.optimize.scheduler.num_warmup_steps, 
+                        num_training_steps = num_training_steps
+                    )
                 else:
                     self.template_scheduler = None
             else:
@@ -391,7 +469,6 @@ class GenerationRunner(BaseRunner):
         else:
             self.template_optimizer = None
             self.template_scheduler = None
-        
         self.optimizers = [self.model_optimizer, self.template_optimizer]
         self.schedulers = [self.model_scheduler, self.template_scheduler]
 
@@ -402,20 +479,19 @@ class GenerationRunner(BaseRunner):
         generated_sentences_all = []
         for batch in tqdm(dataloader, desc=split):
             batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
-            output_sequences, generated_sentences = self.inner_model.generate(batch)
+            output_sequences, generated_sentences = self.inner_model.generate(batch, **self.config.generation)
             tgt_texts.extend(batch['tgt_text'])
             generated_sentences_all.extend(generated_sentences)
             
         fout = open(ret_file_name,'w')
-        for i in range(len(tgt_texts)):
-            fout.write("[Gold]:"+ tgt_texts[i]+"\n")
-            fout.write("[Gen]: "+ generated_sentences_all[i]+"\n\n")
+        for i in range(len(generated_sentences_all)):
+            fout.write(generated_sentences_all[i]+"\n")
         fout.close()
 
         scores = OrderedDict()
         scores_str = ""
         for metric in self.config.generation.metric:
-            score = generation_metric(tgt_texts, generated_sentences_all, metric)
+            score = generation_metric(generated_sentences_all, tgt_texts, metric)
             scores[metric] = score
             scores_str += "{}: {}\n".format(metric, score)
         logger.info("{} Performance: {}".format(split, scores_str.strip()))
@@ -424,28 +500,34 @@ class GenerationRunner(BaseRunner):
     def train_epoch(self, epoch):
         self.prompt_model.train()
         self.prompt_model.zero_grad()
-        accumulation_steps = self.config.train.gradient_accumulation_step
         total_loss = 0.0
+        sum_loss = 0.0
         pbar = tqdm(self.train_dataloader, desc="Train epoch {}".format(epoch))
-        for i, batch in enumerate(pbar):
+        for step, batch in enumerate(pbar):
             batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
-            loss = self.prompt_model(batch).sum()  #TODO： parallel doesn't aggregate the result for some reason. to fix.
-            loss = loss / accumulation_steps
+            loss = self.prompt_model(batch).mean()  #TODO：unbanlanced batch chunks
+
+            if self.config.train.gradient_accumulation_steps > 1:
+                loss = loss / self.config.train.gradient_accumulation_steps
+            sum_loss += loss.item()
             loss.backward()
-            if (i+1) % accumulation_steps == 0:  
-                # do optimizer step
+
+            if (step+1) % self.config.train.gradient_accumulation_steps == 0:
+                pbar.set_postfix({ 'loss': sum_loss })
+                if self.config.train.max_grad_norm > 0:
+                    torch.nn.utils.clip_grad_norm_(self.prompt_model.parameters(), self.config.train.max_grad_norm)
                 for optimizer in self.optimizers:
                     if optimizer is not None:
                         optimizer.step()
+
                 for scheduler in self.schedulers:
                     if scheduler is not None:
-                        scheduler.step() 
-                # zero_grad         
-                self.prompt_model.zero_grad()
+                        scheduler.step()
+
                 for optimizer in self.optimizers:
                     if optimizer is not None:
-                        optimizer.zero_grad()    
-            total_loss += loss.item()
-            pbar.set_postfix(loss = loss.item())
-        logger.info("Epoch {}, loss: {:.4f}".format(epoch, total_loss))
+                        optimizer.zero_grad()
+                total_loss += sum_loss
+                sum_loss = 0.
+        logger.info("Epoch {}, avg_loss: {:.4f}, total_loss: {:.4f}".format(epoch, total_loss / self.train_steps_per_epoch, total_loss))
         return total_loss

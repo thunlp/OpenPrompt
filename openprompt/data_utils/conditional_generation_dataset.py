@@ -70,6 +70,7 @@ class WebNLGProcessor(DataProcessor):
         full_rela_lst = []
         full_src_lst = []
         full_tgt_lst = []
+        guid_lst = []
 
         for i, example in enumerate(lines_dict['entries']):
             sents = example[str(i + 1)]['lexicalisations']
@@ -83,18 +84,32 @@ class WebNLGProcessor(DataProcessor):
                 temp_triples += ' | '
                 temp_triples += '{} : {} : {}'.format(subj, rela, obj)
 
-            for sent in sents:
-                if sent["comment"] == 'good':
-                    full_tgt_lst.append(sent["lex"])
-                    full_src_lst.append(temp_triples)
-                    full_rela_lst.append(rela_lst)
+            if split.lower() == "train":
+                for sent in sents:
+                    if sent["comment"] == 'good':
+                        full_tgt_lst.append(sent["lex"])
+                        full_src_lst.append(temp_triples)
+                        full_rela_lst.append(rela_lst)
+            else:
+                full_src_lst.append(temp_triples)
+                full_rela_lst.append(rela_lst)
+                temp = []
+                for sent in sents:
+                    if sent["comment"] == 'good':
+                        temp.append(sent["lex"])
+                full_tgt_lst.append("\n".join(temp))
 
         assert len(full_rela_lst) == len(full_src_lst)
         assert len(full_rela_lst) == len(full_tgt_lst)
         
-        for i, (src, tgt) in enumerate(zip(full_src_lst, full_tgt_lst)):
-            example = InputExample(guid=str(i), text_a=src, tgt_text=tgt)
-            examples.append(example)
+        if split.lower() == "train":
+            for i, (src, tgt) in enumerate(zip(full_src_lst, full_tgt_lst)):
+                example = InputExample(guid=str(i), text_a=src, tgt_text=tgt)
+                examples.append(example)
+        else:
+            for i, (src, tgt) in enumerate(zip(full_src_lst, full_tgt_lst)):
+                example = InputExample(guid=str(i), text_a=src, tgt_text=tgt)
+                examples.append(example)
         return examples
 
     

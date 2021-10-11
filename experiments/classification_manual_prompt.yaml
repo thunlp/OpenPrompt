@@ -19,7 +19,7 @@ train:
 test:
   batch_size: 8
 
-valid:
+dev:
   batch_size: 8
 
 

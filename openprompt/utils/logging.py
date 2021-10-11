@@ -5,7 +5,7 @@ import datetime
 
 logger = logging.getLogger()
 
-def config_logger(config):
+def config_experiment_dir(config):
     r""" Automatic generate log directory for experiments.
     First generate the unique_string of one experiment, if the user
     didn't specify one, according
@@ -13,7 +13,7 @@ def config_logger(config):
     Then create the directory.
     """
     if not os.path.exists(config.logging.path_base):
-        raise NotADirectoryError("No logging base directory")
+        raise NotADirectoryError(f"logging base directory `{config.logging.path_base}` not found")
     
     # generate unique string
     temp_strs = []
@@ -56,25 +56,18 @@ def config_logger(config):
             raise FileExistsError("Log dir {} exists and can't overwrite!")
     else:
         os.mkdir(config.logging.path)
-
-    kwargs = {}
-    kwargs['log_file'] = os.path.join(config.logging.path, "log.txt")
-    kwargs['log_file_level'] = getattr(logging, config.logging.file_level)
-    kwargs['log_level'] = getattr(logging, config.logging.console_level)
-    return kwargs
+    return config.logging.path
 
  
 def init_logger(
-    config=None,
-    log_file=None,
+    log_file,
     log_file_level=logging.NOTSET,
     log_level=logging.INFO,
-):
-    if config is not None:
-        kwargs = config_logger(config)
-        logger = init_logger(**kwargs)
-        return logger
-        
+):  
+    if isinstance(log_file_level, str):
+        log_file_level = getattr(logging, log_file_level)
+    if isinstance(log_level, str):
+        log_level = getattr(logging, log_level)
     log_format = logging.Formatter("[\033[032m%(asctime)s\033[0m %(levelname)s] %(module)s.%(funcName)s %(message)s")
     logger = logging.getLogger()
     logger.setLevel(log_level)

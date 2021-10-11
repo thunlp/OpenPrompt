@@ -18,8 +18,10 @@ class TokenizerWrapper:
                  max_seq_length: int,
                  tokenizer: PreTrainedTokenizer,
                  truncate_method: Optional[str] = 'tail',
+                 create_token_type_ids: Optional[str] = False,
                  **kwargs):
         self.max_seq_length = max_seq_length
+        
         self.tokenizer = tokenizer
         if truncate_method=='tail':
             self.truncate_fct = self.truncate_from_tail
@@ -29,6 +31,8 @@ class TokenizerWrapper:
             self.truncate_fct = self.balanced_truncate
         else:
             raise NotImplementedError
+        
+        self.create_token_type_ids = create_token_type_ids
         
         self.template_mask_token = '<mask>'
         self.template_eos_token = '<eos>'
@@ -136,9 +140,12 @@ class TokenizerWrapper:
 
     @staticmethod
     def padding(input_dict: Dict,
-                max_len: int) -> None:
+                max_len: int, pad_id_for_inputs: int=0, pad_id_for_others: int=0) -> None:
         for key, value in input_dict.items():
-            input_dict[key].extend([0]*(max_len-len(value)))
+            if 'input' in key:
+                input_dict[key].extend([pad_id_for_inputs]*(max_len-len(value)))
+            else:
+                input_dict[key].extend([pad_id_for_others]*(max_len-len(value)))
         return input_dict
 
 

@@ -86,12 +86,12 @@ class PromptDataLoader(object):
         self.wrap()
         self.tokenize()
 
-        def prompt_collate_fct(batch: List[InputFeatures]):
+        def prompt_collate_fct(batch: List[Union[Dict, InputFeatures]]):
             r'''
             This function is used to collate the current prompt.
 
             Args:
-                batch (:obj:`List[InputFeatures]`): A batch of the current data.
+                batch (:obj:`List[Union[Dict, InputFeatures]]`): A batch of the current data.
 
             Returns:
                 :obj:`InputFeatures`: Return the :py:class:`~openprompt.data_utils.data_utils.InputFeatures of the current batch of data.
@@ -161,9 +161,6 @@ class PromptModel(nn.Module):
         self.model = model
         self.template = template
 
-        if hasattr(self.template, 'modify_plm'):
-            self.template.modify_plm(self.model)
-
         # get model's forward function's keywords
         self.forward_keys = signature(self.model.forward).args
         
@@ -173,7 +170,7 @@ class PromptModel(nn.Module):
         Typically, this function aims to predict the ``<mask>`` position. 
 
         Args:
-            batch (:obj:InputFeatures): The input features of batchified data sequences.
+            batch (:obj:`Union[Dict, InputFeatures]`): The input features of batchified data sequences.
         """
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
@@ -221,7 +218,7 @@ class PromptForClassification(nn.Module):
 
     def extract_logits(self,
                        logits: torch.Tensor,
-                       batch: InputFeatures):
+                       batch: Union[Dict, InputFeatures]):
         r"""Get logits of all <mask> token
         Project the logits of shape
         (batch_size, max_seq_length, vocab_size)
@@ -232,6 +229,7 @@ class PromptForClassification(nn.Module):
 
         Args:
             logits (:obj:`torch.Tensor`): The original logits of the whole sequence.
+            batch (:obj:`Union[Dict, InputFeatures]`): The original batch
         
         Returns:
             :obj:`torch.Tensor`: The extracted logits of ``<mask>`` tokens.
@@ -243,7 +241,7 @@ class PromptForClassification(nn.Module):
             logits = logits.view(logits.shape[0], logits.shape[2])
         return logits
         
-    def forward(self, batch: InputFeatures) -> torch.Tensor:
+    def forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
         r""" keys in batch: 
         """
         outputs = self.prompt_model(batch)
@@ -259,7 +257,7 @@ class PromptForClassification(nn.Module):
     def predict(self):
         pass
     
-    def forward_without_verbalize(self, batch: InputFeatures) -> torch.Tensor:
+    def forward_without_verbalize(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
         outputs = self.prompt_model(batch)
         logits = outputs.logits
         logits = self.extract_logits(logits, batch)
@@ -327,8 +325,12 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         self.config = model.config
         for key in gen_config:
             setattr(self.config, key, gen_config[key])
+        self.in_generation_function = False
 
-        
+    @property
+    def device(self):
+        return self.model.device
+
     def shift_logits_and_labels(self, 
                                 logits, 
                                 batch: InputFeatures):
@@ -356,23 +358,38 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         shift_input_ids = torch.where(shift_loss_ids>0, shift_input_ids, -100)
         return shift_logits, shift_input_ids
 
-    def forward(self, batch: InputFeatures) -> torch.Tensor:
+    def forward(self, *args, **kwargs):
+        r"""In generation process, it will use the plm's forward function.
+        This is because, in the first step we will directly call the process_batch function to 
+        generate initial input with the template, after that the all template
+        have been processed into the past_key_value,
+        then we can use the normal generation function. 
+        In learning process, the forward is linked to ``_forward`` functions.
+        in which the loss will be calcated for all the postions in the same time. 
+        """
+        if self.in_generation_function:
+            return self.prompt_model.model.forward(*args, **kwargs)
+        else:
+            return self._forward(*args, **kwargs)
+
+    def _forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
         r""" 
-        This is the forward method of the generation in prompt-learning framework. 
+        This is the forward method of the training of generation in prompt-learning framework. 
         
         Args:
-            batch (:obj:InputFeatures): The input features of batchified data sequences.
+            batch (:obj:`Union[Dict, InputFeatures]`): The input features of batchified data sequences.
         
         Returns:
             loss(:obj:torch.Tensor): The loss of the current generation procedure.
         """
+        
         outputs = self.prompt_model(batch)
         logits = outputs.logits
         logits, labels = self.shift_logits_and_labels(logits, batch)
         batch_size, seq_len, vocab_size = logits.shape
         loss = self.loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
-        loss = loss.view(batch_size, -1).sum(dim=-1) #TODO support more objective
-        loss = loss.sum()
+        loss = loss.view(batch_size, -1).sum(dim=-1) #TODO support more objectives
+        loss = loss.mean()
         return loss
     
     
@@ -383,17 +400,13 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         ``transformers.generation_util.GenerationMixin.generate``
     
         Args:
-            batch (:obj:InputFeatures): The input features of batchified data sequences.
+            batch (:obj:`Union[Dict, InputFeatures]`): The input features of batchified data sequences.
         
         Returns:
             output_sequences (:obj:List[torch.Tensor]): The raw sequences generated by the generation model.
             generated_sentences (:obj:List[torch.Tensor]): The generated sentences that have been post-processed.
         """
         self.generate_ith_token = 0
-        forward_backup = self.forward
-        self.forward = self.prompt_model.model.forward # replace the forward function, will be used in generation_utils.py self()
-        # if hasattr(self.template, 'modify_plm'): # modify plm if needed
-        #     self.template.modify_plm(self.model)
         if self.config.is_encoder_decoder:
             loss_ids_start = batch['loss_ids'].argmax(dim=-1)
             assert loss_ids_start.min() == loss_ids_start.max(), "The generation start from different position in a batch."
@@ -401,9 +414,10 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             input_length = batch['decoder_input_ids'].size(1)
         else:
             input_length = batch['input_ids'].size(1)
-        
-        output_sequences = super().generate(**batch, **generation_kwargs, pad_token_id=self.tokenizer.eos_token_id)
-        self.forward = forward_backup
+        input_generation_kwargs = {key: value for key,value in generation_kwargs.items() if key in signature(GenerationMixin.generate).args}
+        self.in_generation_function = True
+        output_sequences = super().generate(**batch, **input_generation_kwargs, pad_token_id=self.tokenizer.pad_token_id, eos_token_id=self.tokenizer.eos_token_id)
+        self.in_generation_function = False
         generated_sentences = self.post_processing(output_sequences=output_sequences, input_length=input_length)
         return output_sequences, generated_sentences
     
@@ -423,7 +437,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         for seq in output_sequences:
             # Decode text
             seq = seq[input_length:]
-            text_output = self.tokenizer.decode(seq,skip_special_tokens=True, clean_up_tokenization_spaces=True)
+            text_output = self.tokenizer.decode(seq, skip_special_tokens=True, clean_up_tokenization_spaces=True)
             idx = text_output.find(self.tokenizer.eos_token)
             if idx >= 0:
                 text_output = text_output[:idx]
@@ -477,7 +491,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             for key in self.last_model_inputs:
                 if key in model_kwargs:
                     model_kwargs[key] = self.last_model_inputs[key]
-       
+        
         model_kwargs = super(PromptForGeneration, PromptForGeneration)._update_model_kwargs_for_generation(outputs=outputs, model_kwargs=model_kwargs, is_encoder_decoder=is_encoder_decoder)
         self.generate_ith_token += 1
         return model_kwargs
@@ -515,4 +529,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         if 'plm' in state_dict:
             self.model.load_state_dict(state_dict['plm'])
         self.template.load_state_dict(state_dict['template'])
-
+    
+    def _reorder_cache(self, past, beam_idx):
+        r"""Use the plm's default _reorder_cache function
+        """
+        return self.model._reorder_cache(past, beam_idx)
