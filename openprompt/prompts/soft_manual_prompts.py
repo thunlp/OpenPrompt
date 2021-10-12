@@ -31,7 +31,6 @@ class SoftManualTemplate(ManualTemplate):
                          mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.raw_embedding = model.get_input_embeddings()
-        self.raw_embedding.weight.requires_grad_(False) # TODO check if this valid by changing to True
         self.embedding_size = self.raw_embedding.weight.shape[-1]
         self.soft_token = soft_token
     
@@ -43,7 +42,7 @@ class SoftManualTemplate(ManualTemplate):
         idx = []
         num_soft_token = 0
         for token in self.text:
-            if token == self.soft_token:
+            if token.startswith(self.soft_token):
                 num_soft_token += 1
                 idx.append(num_soft_token)
             else:
@@ -69,12 +68,13 @@ class SoftManualTemplate(ManualTemplate):
                 count += 1
                 orig = token.split(self.soft_token)[1]
                 if orig == "":
-                    raise ValueError("hard prompt not given")
+                    # raise ValueError("hard prompt not given")
+                    continue
                 token_ids = self.tokenizer(" " + orig, add_special_tokens=False)["input_ids"] # TODO no prefix space option
                 if len(token_ids) > 1:
                     logger.warning("""soft prompt's hard prompt {} tokenize to more than one tokens: {}
                         By default we use the first token""".format(orig, self.tokenizer.convert_ids_to_tokens(token_ids)))
-                self.soft_embedding.weight.data[count, :] = self.raw_embedding.weight.data[token_ids[0], :].clone() # TODO check this
+                self.soft_embedding.weight.data[count, :] = self.raw_embedding.weight.data[token_ids[0], :].clone().detach().requires_grad_(True)# TODO check this
 
     def process_batch(self, batch: Union[Dict, InputFeatures]) -> Union[Dict, InputFeatures]:
         """
