@@ -27,12 +27,12 @@ class SoftManualTemplate(ManualTemplate):
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
         super().__init__(tokenizer=tokenizer, 
-                         text=text,
                          mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.raw_embedding = model.get_input_embeddings()
         self.embedding_size = self.raw_embedding.weight.shape[-1]
         self.soft_token = soft_token
+        self.text = text
     
     def get_default_soft_token_ids(self) -> List[int]:
         r"""get the soft token indices for the template
