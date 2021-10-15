@@ -1,4 +1,3 @@
-## load数据，对每一个batch包装template，返回的和普通data_loader一样
 from transformers.configuration_utils import PretrainedConfig
 from transformers.generation_utils import GenerationMixin
 import torch
