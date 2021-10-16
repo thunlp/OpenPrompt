@@ -4,7 +4,7 @@ mkdir $DIR
 cd $DIR
 
 rm -rf mnli
-wget --content-disposition # TODO https://cloud.tsinghua.edu.cn/f/TODO
+wget --content-disposition https://cloud.tsinghua.edu.cn/f/ac761f94ab194483b3ba/?dl=1
 tar -zxvf mnli.tar.gz
 rm -rf mnli.tar.gz
 

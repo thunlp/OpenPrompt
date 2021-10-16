@@ -1,4 +1,3 @@
-## load数据，对每一个batch包装template，返回的和普通data_loader一样
 from transformers.configuration_utils import PretrainedConfig
 from transformers.generation_utils import GenerationMixin
 import torch
@@ -125,8 +124,8 @@ class PromptDataLoader(object):
         r"""Pass the wraped text into a prompt-specialized tokenizer, 
            the true PretrainedTokenizer inside the tokenizer is flexible, e.g. AlBert, Bert, T5,...
         """
-        # for idx, wrapped_example in tqdm(enumerate(self.wrapped_dataset),desc='tokenizing'):
-        for idx, wrapped_example in enumerate(self.wrapped_dataset):
+        for idx, wrapped_example in tqdm(enumerate(self.wrapped_dataset),desc='tokenizing'):
+        # for idx, wrapped_example in enumerate(self.wrapped_dataset):
             inputfeatures = InputFeatures(**self.tokenizer_wrapper.tokenize_one_example(wrapped_example, self.teacher_forcing), **wrapped_example[1]).to_tensor()
             self.tensor_dataset.append(inputfeatures)
         

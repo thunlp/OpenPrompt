@@ -13,15 +13,19 @@ plm:
       type: 
       num_warmup_steps: 500
 
+dataloader:
+  max_seq_length: 128
+
 train:
   num_epochs: 30
-  batch_size: 32
+  batch_size: 30
+  gradient_accumulation_steps: 1
 
 test:
-  batch_size: 32
+  batch_size: 10
 
 valid:
-  batch_size: 32
+  batch_size: 10
 
 
 template: soft_manual_template
@@ -29,34 +33,27 @@ verbalizer: manual_verbalizer
 
 
 soft_manual_template:
-  choice: 0
+  choice: 1
   file_path: scripts/TextClassification/mnli/soft_manual_template.txt
   optimize:
-    freeze_para: True
     lr: 0.003
-    weight_decay: 0.01
+    weight_decay: 0.0
     scheduler:
-      type: 
-      num_warmup_steps: 50
+      num_warmup_steps: 0
 
 manual_verbalizer:
   choice: 0
   file_path: scripts/TextClassification/mnli/multiwords_verbalizer.jsonl
-  optimize:
-    freeze_para: True
-    lr: 0.003
-    weight_decay: 0.01
-    scheduler:
-      type: 
-      num_warmup_steps: 50
   
 environment:
-  num_gpus: 1
+  num_gpus: 3
   cuda_visible_devices:
+    - 0
+    - 1
     - 2
-  local_rank: 0 
+  local_rank: 0
 
-learning_setting: full #few_shot
+learning_setting: full
 
 # few_shot:
 #   parent_config: learning_setting
@@ -64,10 +61,10 @@ learning_setting: full #few_shot
   
 # sampling_from_train:
 #   parent_config: few_shot_sampling
-#   num_examples_per_label: 10
-#   also_sample_dev: True
-#   num_examples_per_label_dev: 10
-#   seed: 123
+#   num_examples_per_label: 10000
+#   also_sample_dev: False
+  # num_examples_per_label_dev: 
+  # seed: 123
 
 task: classification
 classification:

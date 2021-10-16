@@ -321,7 +321,6 @@ class ClassificationRunner(BaseRunner):
                 loss = loss / self.config.train.gradient_accumulation_steps
             sum_loss += loss.item()
             loss.backward()
-
             if (step+1) % self.config.train.gradient_accumulation_steps == 0:
                 pbar.set_postfix({ 'loss': sum_loss })
                 if self.config.train.max_grad_norm > 0:
@@ -506,7 +505,6 @@ class GenerationRunner(BaseRunner):
         for step, batch in enumerate(pbar):
             batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
             loss = self.prompt_model(batch).mean()  #TODO：unbanlanced batch chunks
-
             if self.config.train.gradient_accumulation_steps > 1:
                 loss = loss / self.config.train.gradient_accumulation_steps
             sum_loss += loss.item()

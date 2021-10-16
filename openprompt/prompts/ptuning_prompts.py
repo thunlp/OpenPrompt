@@ -32,13 +32,13 @@ class PtuningTemplate(ManualTemplate):
                  placeholder_mapping: dict = {'<text_a>':'text_a', '<text_b>':'text_b'},
                 ):
         super().__init__(tokenizer=tokenizer, 
-                         text=text,
                          mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.raw_embedding = model.get_input_embeddings()
         self.prompt_encoder_type = prompt_encoder_type
         self.embedding_size = self.raw_embedding.weight.shape[-1]
         self.new_token = new_token
+        self.text = text
 
     def get_default_new_token_ids(self) -> List[int]:
         r"""get the new token indices for the template
@@ -70,6 +70,7 @@ class PtuningTemplate(ManualTemplate):
         if self.num_new_token == 0:
             return
         self.new_embedding = nn.Embedding(self.num_new_token, self.embedding_size)
+        self.new_ids = nn.Parameter(torch.LongTensor(list(range(self.num_new_token))), requires_grad = False)
         if self.prompt_encoder_type == "lstm":
             self.new_lstm_head = nn.LSTM(
                 input_size = self.embedding_size,
@@ -103,7 +104,7 @@ class PtuningTemplate(ManualTemplate):
         inputs_embeds = self.raw_embedding(batch['input_ids'])
 
         if self.num_new_token != 0:
-            new_embeds = self.new_embedding(torch.LongTensor(list(range(self.num_new_token))).cuda()).unsqueeze(0)
+            new_embeds = self.new_embedding(self.new_ids).unsqueeze(0)
             if self.prompt_encoder_type == "lstm":
                 new_embeds = self.new_lstm_head(new_embeds)[0]
             new_embeds = self.new_mlp_head(new_embeds)
