@@ -316,8 +316,7 @@ It can be acheived by wrapping a tensor using nn.Parameter().</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.register_calibrate_logits">
 <span class="sig-name descname"><span class="pre">register_calibrate_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.register_calibrate_logits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.register_calibrate_logits" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function aims to register logits that need to be calibrated, and detach the orginal logits from the current graph.
-See XX for more details.</p>
+<dd><p>This function aims to register logits that need to be calibrated, and detach the orginal logits from the current graph.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -551,11 +550,11 @@ logits of the labels, using a verbalizer.</p>
 <span class="sig-name descname"><span class="pre">extract_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForClassification.extract_logits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForClassification.extract_logits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get logits of all &lt;mask&gt; token
 Project the logits of shape
-(batch_size, max_seq_length, vocab_size)
+(<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>, <code class="docutils literal notranslate"><span class="pre">vocab_size</span></code>)
 into logits of shape (if num_mask_token &gt; 1)
-(batch_size, num_mask_token, vocab_size)
-or into logits of shape (if num_mask_token = 1)
-(batch_size, vocab_size).</p>
+(<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">num_mask_token</span></code>, <code class="docutils literal notranslate"><span class="pre">vocab_size</span></code>)
+or into logits of shape (if <code class="docutils literal notranslate"><span class="pre">num_mask_token</span></code> = 1)
+(<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">vocab_size</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

@@ -309,11 +309,11 @@
                        <span class="n">batch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">]):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get logits of all &lt;mask&gt; token</span>
 <span class="sd">        Project the logits of shape</span>
-<span class="sd">        (batch_size, max_seq_length, vocab_size)</span>
+<span class="sd">        (``batch_size``, ``max_seq_length``, ``vocab_size``)</span>
 <span class="sd">        into logits of shape (if num_mask_token &gt; 1)</span>
-<span class="sd">        (batch_size, num_mask_token, vocab_size)</span>
-<span class="sd">        or into logits of shape (if num_mask_token = 1)</span>
-<span class="sd">        (batch_size, vocab_size).</span>
+<span class="sd">        (``batch_size``, ``num_mask_token``, ``vocab_size``)</span>
+<span class="sd">        or into logits of shape (if ``num_mask_token`` = 1)</span>
+<span class="sd">        (``batch_size``, ``vocab_size``).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            logits (:obj:`torch.Tensor`): The original logits of the whole sequence.</span>
