@@ -1,8 +1,8 @@
-
 from typing import OrderedDict
 from yacs.config import CfgNode, _merge_a_into_b
 import os
-from collections import defaultdict
+from collections import defaultdict 
+from .default_config import get_default_config
 
 def get_config_from_file(path):
     cfg = CfgNode(new_allowed=True)
@@ -11,9 +11,10 @@ def get_config_from_file(path):
 
 def get_yaml_config(usr_config_path, default_config_path = "config_default.yaml"):
     # get default config
-    cwd = os.path.dirname(__file__)
-    default_config_path = os.path.join(cwd, default_config_path)
-    config = get_config_from_file(default_config_path)
+    # cwd = os.path.dirname(__file__)
+    # default_config_path = os.path.join(cwd, default_config_path)
+    # config = get_config_from_file(default_config_path)
+    config = get_default_config()
 
     # get user config
     usr_config = get_config_from_file(usr_config_path)
@@ -68,4 +69,3 @@ def convert_cfg_to_dict(cfg_node, key_list=[]):
         for k, v in cfg_dict.items():
             cfg_dict[k] = convert_cfg_to_dict(v, key_list + [k])
         return cfg_dict
-    
