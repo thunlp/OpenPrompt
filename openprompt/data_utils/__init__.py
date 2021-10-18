@@ -15,6 +15,7 @@ from .superglue_dataset import PROCESSORS as SUPERGLUE_PROCESSORS
 from .relation_classification_dataset import PROCESSORS as RC_PROCESSORS
 from .lama_dataset import PROCESSORS as LAMA_PROCESSORS
 from .conditional_generation_dataset import PROCESSORS as CG_PROCESSORS
+from .lmbff_dataset import PROCESSORS as LMBFF_PROCESSORS
 
 from openprompt.utils.logging import logger
 
@@ -27,6 +28,7 @@ PROCESSORS = {
     **LAMA_PROCESSORS,
     **CG_PROCESSORS,
     **LAMA_PROCESSORS,
+    **LMBFF_PROCESSORS,
 }
 
 
