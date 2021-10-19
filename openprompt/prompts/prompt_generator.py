@@ -31,7 +31,8 @@ class TemplateGenerator:
                  max_length: Optional[int] = 20,
                  target_number: Optional[int] = 2,
                  beam_width: Optional[int] = 100,
-                 length_limit: Optional[List[int]] = None):
+                 length_limit: Optional[List[int]] = None, 
+                 forbidden_word_ids: Optional[List[int]] = []):
         self.template_generate_model = template_generate_model
         self.tokenizer = tokenizer
         self.target_number = target_number # number of parts to generate in one sample
@@ -41,7 +42,7 @@ class TemplateGenerator:
         self.probs_buffer, self.labels_buffer = None, None
 
         # Forbid single space token, "....", and ".........."
-        self.forbidden_word_ids = [self.tokenizer.convert_tokens_to_ids(t) for t in [' ', '....', '..........']]
+        self.forbidden_word_ids = forbidden_word_ids
         self.sent_end_id = self.tokenizer.convert_tokens_to_ids('.')
 
         self.input_ids_buffer, self.attention_mask_buffer, self.labels_buffer = None, None, None
@@ -190,19 +191,21 @@ class T5TemplateGenerator(TemplateGenerator):
                  max_length: Optional[int] = 20,
                  target_number: Optional[int] = 2,
                  beam_width: Optional[int] = 100,
-                 length_limit: Optional[List[int]] = None):
+                 length_limit: Optional[List[int]] = None,
+                 forbidden_word_ids: Optional[List[int]] = [3, 19794, 22354]):
         super().__init__(template_generate_model = template_generate_model,
                         tokenizer = tokenizer,
                         max_length = max_length,
                         target_number= target_number,
                         beam_width = beam_width,
-                        length_limit = length_limit)
+                        length_limit = length_limit,
+                        forbidden_word_ids = forbidden_word_ids)
 
     def get_part_token_id(self, part_id):
         return self.tokenizer._convert_token_to_id('<extra_id_0>') - part_id
 
     def convert_template(self, generate_text_list):
-        text_list = ' '.join(generate_text_list).replace('<extra_id_0>', '<text_a>').replace('<extra_id_1>', '<mask>').replace('<extra_id_2>', '<text_b>').replace('</s>', '').replace('▁', '_').strip().split(' ')
+        text_list = self.tokenizer.convert_tokens_to_string(generate_text_list).replace('<extra_id_0>', '<text_a>').replace('<extra_id_1>', ' <mask>').replace('<extra_id_2>', ' <text_b>').replace('</s>', '').replace('  ', ' ').split(' ')
         # incase no <extra_id_1> (generation stop by maximum length)
         if '<mask>' not in text_list:
             text_list.append('<mask>')
