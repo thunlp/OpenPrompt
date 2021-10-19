@@ -4,6 +4,8 @@ sys.path.append(".")
 
 
 from openprompt.trainer import ClassificationRunner, GenerationRunner
+from openprompt.lm_bff_trainer import LMBFFClassificationRunner
+from openprompt.prompts import T5TemplateGenerator, VerbalizerGenerator
 from typing import Union
 from torch.nn.parallel.data_parallel import DataParallel
 from re import template
@@ -15,7 +17,7 @@ import torch
 from openprompt.utils.reproduciblity import set_seed
 from openprompt.plms import get_model_class
 from openprompt import PromptDataLoader, PromptModel
-from openprompt.prompts import load_template, load_verbalizer
+from openprompt.prompts import load_template, load_verbalizer, load_template_generator, load_verbalizer_generator
 from openprompt.data_utils import FewShotSampler
 from openprompt.utils.logging import config_experiment_dir, init_logger, logger
 from openprompt.utils.metrics import classification_metrics
@@ -71,6 +73,7 @@ def main():
     config, args = get_config()
     # init logger, create log dir and set log level, etc.
     if not args.resume:
+        config.logging.path_base = os.path.join(sys.path[0], config.logging.path_base)
         EXP_PATH = config_experiment_dir(config)
     else:
         EXP_PATH = config.logging.path
@@ -87,14 +90,24 @@ def main():
     train_dataset, valid_dataset, test_dataset, Processor = load_dataset(config)
     
     if config.task == "classification":
-        # define prompt
-        template = load_template(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config)
-        verbalizer = load_verbalizer(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config, classes=Processor.labels)
-        # load prompt’s pipeline model
+        if config.classification.auto_t or config.classification.auto_v:
+            template_generate_model, template_generate_tokenizer, template_generate_config = load_plm(config.template_generator)
+            template_generate_model = model_to_device(template_generate_model, config.environment)
+            verbalizer = load_verbalizer(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config, classes=Processor.labels)
+            template = load_template(config=config, model=template_generate_model, tokenizer=template_generate_tokenizer, plm_config=template_generate_config, verbalizer=verbalizer)
+            template_generator = load_template_generator(config=config, template_generate_model=template_generate_model, tokenizer=template_generate_tokenizer)
+            verbalizer_generator = load_verbalizer_generator(config=config, model=plm_model, tokenizer=plm_tokenizer)
+        else:
+            # define prompt
+            template = load_template(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config)
+            verbalizer = load_verbalizer(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config, classes=Processor.labels)
+            # load prompt’s pipeline model
         prompt_model = PromptForClassification(plm_model, template, verbalizer)
+            
     elif config.task == "generation":
         template = load_template(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config)
         prompt_model = PromptForGeneration(plm_model, template, gen_config=config.generation)
+
     # move the model to device:
     prompt_model = model_to_device(prompt_model, config.environment)
 
@@ -124,18 +137,33 @@ def main():
     valid_dataloader = build_dataloader(valid_dataset, template, plm_tokenizer, config, "dev")
     test_dataloader = build_dataloader(test_dataset, template, plm_tokenizer, config, "test")
     # test_dataloader = valid_dataloader  # if the test size is big, replace it with valid_dataloader for debugging.
+    # test_dataset = valid_dataset
     if config.task == "classification":
-        runner = ClassificationRunner(prompt_model = prompt_model,
-                                train_dataloader = train_dataloader,
-                                valid_dataloader = valid_dataloader,
-                                test_dataloader = test_dataloader,
-                                config = config)
+        if config.classification.auto_t or config.classification.auto_v:
+            runner = LMBFFClassificationRunner(train_dataset = train_dataset, 
+                                        valid_dataset = valid_dataset, 
+                                        test_dataset = test_dataset, 
+                                        model= plm_model, 
+                                        tokenizer = plm_tokenizer, 
+                                        template_generator_tokenizer = template_generate_tokenizer,
+                                        initial_template = template,
+                                        initial_verbalizer = verbalizer,
+                                        template_generator = template_generator,
+                                        verbalizer_generator = verbalizer_generator,
+                                        config = config)
+        else:
+            runner = ClassificationRunner(prompt_model = prompt_model,
+                                    train_dataloader = train_dataloader,
+                                    valid_dataloader = valid_dataloader,
+                                    test_dataloader = test_dataloader,
+                                    config = config)
     elif config.task == "generation":
         runner = GenerationRunner(prompt_model = prompt_model,
                                 train_dataloader = train_dataloader,
                                 valid_dataloader = valid_dataloader,
                                 test_dataloader = test_dataloader,
                                 config = config)
+        
     else:
         raise NotImplementedError
     if not args.resume:
