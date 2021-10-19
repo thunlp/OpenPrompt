@@ -1,0 +1,85 @@
+dataset:
+  name: sst-2
+  path: ../datasets/original/SST-2
+
+task: classification
+
+plm:
+  model_name: roberta
+  model_path: roberta-large
+  optimize:
+    freeze_para: False
+    lr: 0.00003
+    weight_decay: 0.01
+    scheduler:
+      type: 
+      num_warmup_steps: 500
+
+template_generator:
+  plm:
+    model_name: t5
+    model_path: t5-3b
+  max_length: 20
+  target_number: 2
+  beam_width: 100
+  length_limit: 
+
+verbalizer_generator:
+  candidate_num: 1
+  label_word_num_per_class: 1
+  score_fct: llr
+  normalize: True
+
+classification:
+  metric: 
+    - micro-f1
+    - accuracy
+  loss_function: cross_entropy
+  auto_t: True 
+  auto_v: False
+  generation_epoch: 10
+
+
+train:
+  num_epochs: 10 # the number of training epochs.
+  batch_size: 2
+
+test:
+  batch_size: 8
+
+dev:
+  batch_size: 8
+
+
+
+template: lmbff_template
+verbalizer: manual_verbalizer
+
+
+lmbff_template:
+  choice: 0
+  file_path: ../datasets/original/glue-sst-2-small/initial_template.txt
+
+manual_verbalizer:
+  choice: 0
+  file_path: ../datasets/original/glue-sst-2-small/initial_verbalizer.txt
+  
+environment:
+  num_gpus: 1
+  cuda_visible_devices:
+    - 0
+  local_rank: 0 
+
+learning_setting: few_shot
+
+few_shot:
+  parent_config: learning_setting
+  few_shot_sampling: sampling_from_train
+  
+sampling_from_train:
+  parent_config: few_shot_sampling
+  num_examples_per_label: 16
+  also_sample_dev: True
+  num_examples_per_label_dev: 16
+  seed: 123
+
