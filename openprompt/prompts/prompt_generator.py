@@ -13,6 +13,7 @@ import itertools
 import numpy as np
 from ..utils import signature
 from ..config import convert_cfg_to_dict
+from torch.nn.parallel import DataParallel
 
 
 class TemplateGenerator:
@@ -68,11 +69,13 @@ class TemplateGenerator:
         
     @abstractmethod
     def get_templates(self):
+        inner_model = self.template_generate_model.module if isinstance(self.template_generate_model, DataParallel) else self.template_generate_model
         input_ids = self.input_ids_buffer
         attention_mask = self.attention_mask_buffer
 
         ori_decoder_input_ids = torch.zeros((input_ids.size(0), self.max_length)).long()
-        ori_decoder_input_ids[..., 0] = self.template_generate_model.config.decoder_start_token_id
+        ori_decoder_input_ids[..., 0] = inner_model.config.decoder_start_token_id
+
 
         # decoder_input_ids: decoder inputs for next regressive generation
         # ll: log likelihood
@@ -106,7 +109,7 @@ class TemplateGenerator:
                 # Gather results across all input sentences, and sort generated tokens by log likelihood
                 aggr_output = aggr_output.mean(0)
                 log_denominator = torch.logsumexp(aggr_output[i], -1).item()
-                ids = list(range(self.template_generate_model.config.vocab_size))
+                ids = list(range(inner_model.config.vocab_size))
                 ids.sort(key=lambda x: aggr_output[i][x].item(), reverse=True)
                 ids = ids[:self.beam_width+3]
                 
@@ -340,6 +343,7 @@ class VerbalizerGenerator:
         neg_score = torch.sum(torch.log(1 - probs +1e-15) * scale_factor, dim=0)
         return pos_score + neg_score
     
+    @classmethod
     def from_config(cls, config, **kwargs,):
         init_args = signature(cls.__init__).args
         _init_dict = {**convert_cfg_to_dict(config), **kwargs}

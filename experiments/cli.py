@@ -91,7 +91,6 @@ def main():
     
     if config.task == "classification":
         if config.classification.auto_t or config.classification.auto_v:
-            plm_model = model_to_device(plm_model, config.environment)
             template_generate_model, template_generate_tokenizer, template_generate_config = load_plm(config.template_generator)
             template_generate_model = model_to_device(template_generate_model, config.environment)
             verbalizer = load_verbalizer(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config, classes=Processor.labels)

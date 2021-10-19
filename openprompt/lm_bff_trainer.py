@@ -105,6 +105,7 @@ class LMBFFClassificationRunner:
         valid_dataloader = PromptDataLoader(self.valid_dataset, best_template, self.tokenizer)
         test_dataloader = PromptDataLoader(self.test_dataset, best_template, self.tokenizer)
         model = PromptForClassification(copy.deepcopy(self.model), best_template, best_verbalizer)
+        model = model_to_device(model, self.config.environment)
         runner = ClassificationRunner(model, train_dataloader, valid_dataloader, test_dataloader, config=self.config)
         runner.run()
 
@@ -137,7 +138,7 @@ class LMBFFClassificationRunner:
 
     def _train_eval(self, template, verbalizer, train_dataloader, valid_dataloader):
         model = PromptForClassification(copy.deepcopy(self.model), template, verbalizer) 
-        model_to_device(model, self.config.environment)
+        model = model_to_device(model, self.config.environment)
         runner = ClassificationRunner(model, train_dataloader, valid_dataloader, config=self.config)
         best_score = 0.0
         for epoch in range(self.max_epoch):
