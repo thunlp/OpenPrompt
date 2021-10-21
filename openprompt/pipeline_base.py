@@ -65,13 +65,13 @@ class PromptDataLoader(object):
         tokenizer_wrapper_class = get_tokenizer_wrapper(tokenizer)
         tokenizer_wrapper_init_keys = signature(tokenizer_wrapper_class.__init__).args
         prepare_kwargs = {
-                        "max_seq_length":max_seq_length,
-                        "truncate_method":truncate_method,
-                        "decoder_max_length":decoder_max_length,
-                        "predict_eos_token":predict_eos_token,
-                        "tokenizer": tokenizer,
-                        **kwargs,
-                        }
+            "max_seq_length" : max_seq_length,
+            "truncate_method" : truncate_method,
+            "decoder_max_length" : decoder_max_length,
+            "predict_eos_token" : predict_eos_token,
+            "tokenizer" : tokenizer,
+            **kwargs,
+        }
         to_pass_kwargs = {key: prepare_kwargs[key] for key in prepare_kwargs if key in tokenizer_wrapper_init_keys}
         
 
@@ -101,11 +101,12 @@ class PromptDataLoader(object):
             return_dict = {key: default_collate([d[key] for d in batch]) for key in elem}
             return InputFeatures(**return_dict)
 
-        self.dataloader = DataLoader(self.tensor_dataset, 
-                                     batch_size = self.batch_size,
-                                     shuffle = self.shuffle,
-                                     collate_fn = prompt_collate_fct
-                                    )
+        self.dataloader = DataLoader(
+            self.tensor_dataset, 
+            batch_size = self.batch_size,
+            shuffle = self.shuffle,
+            collate_fn = prompt_collate_fct
+        )
     
     
     def wrap(self):
@@ -129,13 +130,6 @@ class PromptDataLoader(object):
             inputfeatures = InputFeatures(**self.tokenizer_wrapper.tokenize_one_example(wrapped_example, self.teacher_forcing), **wrapped_example[1]).to_tensor()
             self.tensor_dataset.append(inputfeatures)
         
-
-
-    def __getitem__(self, idx):
-        r"""simulate the ``torch.utils.data.Dataset``'s behavior.
-        """
-        return self.tensor_dataset[idx]
-    
     def __len__(self):
         return  len(self.dataloader)
 
@@ -149,19 +143,25 @@ class PromptModel(nn.Module):
     with OpenPrompt, these modules could be flexibly combined. And this class is the base class of ``PromptForClassification`` and ``PromptForGeneration``
 
     Args:
-        model (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.
+        plm (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.
         template (:obj:`Template`): The ``Template`` object to warp the input data.
+        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
     '''
     def __init__(self,
-                 model: PreTrainedModel, 
+                 plm: PreTrainedModel, 
                  template: Template,
-                 ):
+                 freeze_plm: bool = False
+                ):
         super().__init__()
-        self.model = model
+        self.plm = plm
         self.template = template
+        self.freeze_plm = freeze_plm
+        if freeze_plm:
+            for param in self.plm.parameters():
+                param.requires_grad = False
 
         # get model's forward function's keywords
-        self.forward_keys = signature(self.model.forward).args
+        self.forward_keys = signature(self.plm.forward).args
         
     def forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
         r""" 
@@ -173,7 +173,7 @@ class PromptModel(nn.Module):
         """
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
-        outputs =  self.model(**input_batch)
+        outputs = self.plm(**input_batch)
         return outputs
     
     def prepare_model_inputs(self, batch: Union[Dict, InputFeatures]) -> Dict:
@@ -183,37 +183,38 @@ class PromptModel(nn.Module):
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
         return input_batch
 
-    
-
-
 class PromptForClassification(nn.Module):
     r'''``PromptModel`` with a classification head on top. The classification head will map
     the logits in all position of the sequence (return value of a PromptModel) into the
     logits of the labels, using a verbalizer. 
 
     Args:
-        model (:obj:`PretrainedModel`): A pre-traiend model you decide to use for classification, e.g. BERT.
+        plm (:obj:`PretrainedModel`): A pre-traiend model you decide to use for classification, e.g. BERT.
         template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``ManualTemplate``.
         verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the lables to label words for classification, e.g. ``ManualVerbalizer``.
+        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
     '''
     def __init__(self,
-                 model: PreTrainedModel, 
+                 plm: PreTrainedModel, 
                  template: Template,
                  verbalizer: Verbalizer,
                  ):
         super().__init__()
-        self.model = model
-        self.template = template
-        self.prompt_model = PromptModel(model, template)
+        self.prompt_model = PromptModel(plm, template)
         self.verbalizer = verbalizer
 
+    @property
+    def plm(self):
+        return self.prompt_model.plm
+    
+    @property
+    def template(self):
+        return self.prompt_model.template
 
     @property
     def device(self,):
-        r"""
-        Register the device parameter.
-        """
-        return self.model.device
+        r"""Register the device parameter."""
+        return self.plm.device
 
     def extract_logits(self,
                        logits: torch.Tensor,
@@ -248,9 +249,6 @@ class PromptForClassification(nn.Module):
         logits = self.extract_logits(logits, batch)
         label_words_logits = self.verbalizer.process_logits(logits=logits, batch=batch)
 
-        if 'label' in batch:
-            pass #TODO add caculate label loss here
-
         return label_words_logits
     
     def predict(self):
@@ -276,13 +274,14 @@ class PromptForClassification(nn.Module):
             kwargs: other information, such as the achieved metric value. 
         """
         _state_dict = {}
-        _state_dict['plm'] = self.model.state_dict()
+        if not self.freeze_plm:
+            _state_dict['plm'] = self.plm.state_dict()
         _state_dict['template'] = self.template.state_dict()
         _state_dict['verbalizer'] = self.verbalizer.state_dict()
         return _state_dict
     
     def load_state_dict(self, state_dict):
-        if 'plm' in state_dict:
+        if 'plm' in state_dict and not self.freeze_plm:
             self.model.load_state_dict(state_dict['plm'])
         self.template.load_state_dict(state_dict['template'])
         self.verbalizer.load_state_dict(state_dict['verbalizer'])
@@ -297,38 +296,44 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
 
     Args:
-        model (:obj:`PretrainedModel`): A pre-traiend model you decide to use for generation, e.g. GPT.
+        plm (:obj:`PretrainedModel`): A pre-traiend model you decide to use for generation, e.g. GPT.
         template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``PrefixTemplate``.
         tokenizer (:obj:`Tokenizer`): A ``Tokenizer`` of the current model.
         gen_config (:obj:`CfgNode`): The generation configs to pass into `GenerationMixin.generate <https://huggingface.co/transformers/_modules/transformers/generation_utils.html#GenerationMixin.generate>`_
     '''
 
     def __init__(self,
-                 model: PreTrainedModel, 
+                 plm: PreTrainedModel, 
                  template: Template,
                  gen_config: CfgNode,
                  tokenizer: Optional[PreTrainedTokenizer] = None,
                 ):
                  
         super().__init__()
-        self.model = model
-        self.template = template
         if tokenizer is None:
-            assert self.template.tokenizer is not None, "Tokenizer can't be set from input args or template"
+            assert template.tokenizer is not None, "Tokenizer can't be set from input args or template"
             self.tokenizer = template.tokenizer
         else:
             self.tokenizer = tokenizer
-        self.prompt_model = PromptModel(model, template)
+        self.prompt_model = PromptModel(plm, template)
 
         self.loss_fct = nn.CrossEntropyLoss(reduction='none')
-        self.config = model.config
+        self.config = plm.config
         for key in gen_config:
             setattr(self.config, key, gen_config[key])
         self.in_generation_function = False
 
     @property
+    def plm(self):
+        return self.prompt_model.plm
+    
+    @property
+    def template(self):
+        return self.prompt_model.template
+
+    @property
     def device(self):
-        return self.model.device
+        return self.plm.device
 
     def shift_logits_and_labels(self, 
                                 logits, 
@@ -367,7 +372,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         in which the loss will be calcated for all the postions in the same time. 
         """
         if self.in_generation_function:
-            return self.prompt_model.model.forward(*args, **kwargs)
+            return self.plm.forward(*args, **kwargs)
         else:
             return self._forward(*args, **kwargs)
 
@@ -417,6 +422,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         self.in_generation_function = True
         output_sequences = super().generate(**batch, **input_generation_kwargs, pad_token_id=self.tokenizer.pad_token_id, eos_token_id=self.tokenizer.eos_token_id)
         self.in_generation_function = False
+        output_sequences = output_sequences.cpu().tolist()
         generated_sentences = self.post_processing(output_sequences=output_sequences, input_length=input_length)
         return output_sequences, generated_sentences
     
@@ -431,7 +437,6 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             Returns:
                 :obj:`List`: The generated sentences that have been post-processed.
         """
-        output_sequences = output_sequences.cpu().tolist()
         generated_sentences = []
         for seq in output_sequences:
             # Decode text
@@ -465,7 +470,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             batch = InputFeatures(input_ids=input_ids, **model_kwargs)
             model_inputs = self.prompt_model.prepare_model_inputs(batch)
         else: # generating the subsequence generation can use the default setting
-            model_inputs = self.prompt_model.model.prepare_inputs_for_generation(input_ids, **model_kwargs)
+            model_inputs = self.plm.prepare_inputs_for_generation(input_ids, **model_kwargs)
         self.last_model_inputs = model_inputs  # to update the model_kwargs in _update_model_kwargs_for_generation, in-place operation.
         return model_inputs
     
@@ -501,7 +506,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
     ) -> Dict[str, Any]:
         if "encoder_outputs" not in model_kwargs:
             # retrieve encoder hidden states
-            encoder = self.prompt_model.model.get_encoder()
+            encoder = self.plm.get_encoder()
             encoder_kwargs = {
                 argument: value
                 for argument, value in model_kwargs.items()
@@ -520,16 +525,17 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             kwargs: other information, such as the achieved metric value. 
         """
         _state_dict = {}
-        _state_dict['plm'] = self.model.state_dict()
+        if not self.freeze_plm:
+            _state_dict['plm'] = self.model.state_dict()
         _state_dict['template'] = self.template.state_dict()
         return _state_dict
     
     def load_state_dict(self, state_dict):
-        if 'plm' in state_dict:
+        if 'plm' in state_dict and not self.freeze_plm:
             self.model.load_state_dict(state_dict['plm'])
         self.template.load_state_dict(state_dict['template'])
     
     def _reorder_cache(self, past, beam_idx):
         r"""Use the plm's default _reorder_cache function
         """
-        return self.model._reorder_cache(past, beam_idx)
+        return self.plm._reorder_cache(past, beam_idx)
