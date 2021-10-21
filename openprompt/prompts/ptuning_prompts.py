@@ -100,7 +100,6 @@ class PtuningTemplate(ManualTemplate):
         for normal tokens, use the embedding layer of PLM
         for new tokens, use a brand new embedding layer, with MLP or LSTM head
         """
-        # print(batch) # for debug
         inputs_embeds = self.raw_embedding(batch['input_ids'])
 
         if self.num_new_token != 0:

@@ -48,7 +48,7 @@ promptVerbalizer = ManualVerbalizer(
 from openprompt import PromptForClassification
 promptModel = PromptForClassification(
     template = promptTemplate,
-    model = bertModel,
+    plm = bertModel,
     verbalizer = promptVerbalizer,
 )
 

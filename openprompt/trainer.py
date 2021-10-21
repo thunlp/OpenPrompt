@@ -6,7 +6,11 @@ from torch.utils.data import dataloader
 
 
 from openprompt.utils.utils import load_checkpoint, save_checkpoint
-from typing import Callable, OrderedDict, Union
+from typing import Callable, Union
+try:
+    from typing import OrderedDict
+except ImportError:
+    from collections import OrderedDict
 from torch.nn.parallel.data_parallel import DataParallel
 from openprompt.pipeline_base import PromptForClassification, PromptForGeneration
 from tqdm import tqdm
