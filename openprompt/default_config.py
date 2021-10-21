@@ -1,11 +1,4 @@
-try:
-    from typing import OrderedDict
-except ImportError:
-    from collections import OrderedDict
-from yacs.config import CfgNode, _merge_a_into_b
-import os
-from collections import defaultdict 
-
+from yacs.config import CfgNode
 
 def get_default_config():
     # OpenPrompt's default configuration options
@@ -59,7 +52,7 @@ def get_default_config():
     ##    - ...
     ##
     cfg.logging = CfgNode(new_allowed=True)
-    cfg.logging.path_base = './logs' # the path base of all the logs.
+    cfg.logging.path_base = 'logs' # the path base of all the logs.
     cfg.logging.file_level = 'NOTSET' # make sure it's an option of logging package
     cfg.logging.console_level = 'INFO' # make sure it's an option of logging package
     cfg.logging.unique_string = None  # the generated (or usr defined) unique string for one experiment. 
