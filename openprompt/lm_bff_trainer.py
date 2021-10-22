@@ -84,6 +84,8 @@ class LMBFFClassificationRunner:
                 data = data.to("cuda:{}".format(self.config.environment.local_rank))
             template_generator.register_buffer(data.input_ids, data.attention_mask, data.label) 
         template_texts = template_generator.generate() # [['text_a', '<mask>', ...]]
+        template_generator.release_memory()
+        del template_generator, model
         return template_texts
     
     def _auto_v(self, dataset, template):
@@ -100,6 +102,8 @@ class LMBFFClassificationRunner:
                 data = data.to("cuda:{}".format(self.config.environment.local_rank))
             verbalizer_generator.register_buffer(data)
         label_words_list = verbalizer_generator.generate() # List[List[str]]
+        verbalizer_generator.release_memory()
+        del verbalizer_generator, model
         return label_words_list
 
     def run(self):

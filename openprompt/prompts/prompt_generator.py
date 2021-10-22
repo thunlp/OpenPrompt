@@ -178,6 +178,9 @@ class TemplateGenerator:
         init_dict = {key: _init_dict[key] for key in _init_dict if key in init_args}
         template_generator = cls(**init_dict)
         return template_generator
+    
+    def release_memory(self):
+        self.template_generate_model = self.template_generate_model.cpu()
         
 
 class T5TemplateGenerator(TemplateGenerator):
@@ -353,3 +356,6 @@ class VerbalizerGenerator:
         init_dict = {key: _init_dict[key] for key in _init_dict if key in init_args}
         verbalizer_generator = cls(**init_dict)
         return verbalizer_generator
+    
+    def release_memory(self):
+        self.model = self.model.cpu()
