@@ -18,8 +18,6 @@ import numpy as np
 import torch.nn.functional as F
 
 
-
-
 class Template(nn.Module):
     r'''
     Base class for all the templates. 
@@ -377,7 +375,6 @@ class Verbalizer(nn.Module):
     def register_calibrate_logits(self, logits: torch.Tensor):
         r"""
         This function aims to register logits that need to be calibrated, and detach the orginal logits from the current graph.
-        See XX for more details.
         """
         if logits.requires_grad:
             logits = logits.detach()

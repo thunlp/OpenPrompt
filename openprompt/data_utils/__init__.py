@@ -15,6 +15,7 @@ from .superglue_dataset import PROCESSORS as SUPERGLUE_PROCESSORS
 from .relation_classification_dataset import PROCESSORS as RC_PROCESSORS
 from .lama_dataset import PROCESSORS as LAMA_PROCESSORS
 from .conditional_generation_dataset import PROCESSORS as CG_PROCESSORS
+from .lmbff_dataset import PROCESSORS as LMBFF_PROCESSORS
 
 from openprompt.utils.logging import logger
 
@@ -27,10 +28,11 @@ PROCESSORS = {
     **LAMA_PROCESSORS,
     **CG_PROCESSORS,
     **LAMA_PROCESSORS,
+    **LMBFF_PROCESSORS,
 }
 
 
-def load_dataset(config: CfgNode, return_class=True):
+def load_dataset(config: CfgNode, return_class=True, test=False):
     r"""A plm loader using a global config.
     It will load the train, valid, and test set (if exists) simulatenously.
     
@@ -47,21 +49,25 @@ def load_dataset(config: CfgNode, return_class=True):
     """
     dataset_config = config.dataset
     processor = PROCESSORS[dataset_config.name.lower()]()
-    try:
-        train_dataset = processor.get_train_examples(dataset_config.path)
-    except FileNotFoundError:
-        logger.warning("Has no training dataset.")
-        train_dataset = None
-    try:
-        valid_dataset = processor.get_dev_examples(dataset_config.path)
-    except FileNotFoundError:
-        logger.warning("Has no valid dataset.")
-        valid_dataset = None
+
+    train_dataset = None
+    valid_dataset = None
+    if not test:
+        try:
+            train_dataset = processor.get_train_examples(dataset_config.path)
+        except FileNotFoundError:
+            logger.warning("Has no training dataset.")
+        try:
+            valid_dataset = processor.get_dev_examples(dataset_config.path)
+        except FileNotFoundError:
+            logger.warning("Has no validation dataset.")
+
+    test_dataset = None
     try:
         test_dataset = processor.get_test_examples(dataset_config.path)
     except FileNotFoundError:
         logger.warning("Has no test dataset.")
-        test_dataset = None
+
     # checking whether donwloaded.
     if (train_dataset is None) and \
        (valid_dataset is None) and \

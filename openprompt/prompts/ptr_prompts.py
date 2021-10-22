@@ -109,7 +109,7 @@ class PTRVerbalizer(Verbalizer):
 
         logsoftmax = nn.functional.log_softmax(sum(label_logits), dim=-1)
 
-        if 'label' in batch:
+        if 'label' in batch: # TODO not an elegant solution
             each_logsoftmax = [ # (logits of each label) of each mask
                 nn.functional.log_softmax(logits, dim=-1)[:, self.label_mappings[j]]
                 for j, logits in enumerate(each_logits)

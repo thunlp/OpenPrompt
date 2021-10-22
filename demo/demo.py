@@ -155,7 +155,7 @@ if __name__ == "__main__":
             label_words = {
                 "positive": ["great", "wonderful", "well", "good", "nice"],
                 "negative": ["bad", "terrible", "ugly", "horrible"]
-            },
+            }
         classes = list(label_words.keys())
         from openprompt.prompts import ManualVerbalizer
         verbalizer = ManualVerbalizer(

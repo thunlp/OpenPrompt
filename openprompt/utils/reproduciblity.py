@@ -2,37 +2,22 @@
 import random
 import numpy as np
 import torch
+from openprompt.utils.logging import logger
+from typing import *
 
-def set_seed(config):
+
+def set_seed(seed:Optional[int] = None):
     """set seed for reproducibility
 
     Args:
-        global config object
+        seed (:obj:`int`): the seed to seed everything for reproducibility. if None, do nothing.
     """
-    reproduce_config = config.reproduce
-    random_seed = reproduce_config.seed
-    numpy_seed = reproduce_config.seed
-    torch_seed = reproduce_config.seed
-    cuda_seed = reproduce_config.seed
-    if reproduce_config.random_seed >= 0:
-        random_seed = reproduce_config.random_seed
-    if reproduce_config.numpy_seed >= 0:
-        numpy_seed = reproduce_config.numpy_seed
-    if reproduce_config.torch_seed >= 0:
-        torch_seed = reproduce_config.torch_seed
-    if reproduce_config.cuda_seed >= 0:
-        cuda_seed = reproduce_config.cuda_seed
-
-    if random_seed >= 0:
-        random.seed(random_seed)
-    if numpy_seed >= 0:
-        np.random.seed(numpy_seed)
-    if torch_seed >= 0:
-        torch.manual_seed(torch_seed)
-    if config.environment.num_gpus>0 and cuda_seed >= 0:
-        torch.cuda.manual_seed_all(cuda_seed)
-    
-
+    if seed:
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        logger.info(f"Global seed set to {seed}")
 
 
     

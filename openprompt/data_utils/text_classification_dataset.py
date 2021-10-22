@@ -27,6 +27,27 @@ from openprompt.data_utils import InputExample
 from openprompt.data_utils.data_processor import DataProcessor
 
 
+class MnliProcessor(DataProcessor):
+    # TODO Test needed
+    def __init__(self):
+        super().__init__()
+        self.labels = ["contradiction", "entailment", "neutral"]
+
+    def get_examples(self, data_dir, split):
+        path = os.path.join(data_dir, "{}.csv".format(split))
+        examples = []
+        with open(path, encoding='utf8') as f:
+            reader = csv.reader(f, delimiter=',')
+            for idx, row in enumerate(reader):
+
+                label, headline, body = row
+                text_a = headline.replace('\\', ' ')
+                text_b = body.replace('\\', ' ')
+                example = InputExample(
+                    guid=str(idx), text_a=text_a, text_b=text_b, label=int(label)-1)
+                examples.append(example)
+                
+        return examples
 
 
 
@@ -231,4 +252,5 @@ PROCESSORS = {
     "amazon" : AmazonProcessor,
     "imdb": ImdbProcessor,
     "sst-2": SST2Processor,
+    "mnli": MnliProcessor,
 }

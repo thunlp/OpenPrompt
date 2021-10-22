@@ -1,0 +1,2 @@
+<text_a> <text_b> <soft> <soft> <soft> <soft> <soft> <soft> <soft> <soft> <mask>
+<text_a> <text_b> <soft>Does <soft>the <soft>first <soft>sentence <soft>entails <soft>the <soft>second <soft>? <mask> <soft>.
