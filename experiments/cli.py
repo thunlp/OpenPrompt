@@ -133,6 +133,9 @@ def main():
     print("metric:", res)
 
 def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = None, test_dataset = None, resume = None, test = None, zero = False):
+    if not os.path.exists(EXP_PATH):
+        os.mkdir(EXP_PATH)
+    config.logging.path = EXP_PATH
     # set seed
     set_seed(config.reproduce.seed)
 
@@ -162,12 +165,9 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
         raise NotImplementedError(f"config.task {config.task} is not implemented yet. Only classification and generation are supported.")
 
     # process data and get data_loader
-    if train_dataset:
-        train_dataloader = build_dataloader(train_dataset, template, plm_tokenizer, config, "train")
-    if valid_dataset:
-        valid_dataloader = build_dataloader(valid_dataset, template, plm_tokenizer, config, "dev")
-    if test_dataset:
-        test_dataloader = build_dataloader(test_dataset, template, plm_tokenizer, config, "test")
+    train_dataloader = build_dataloader(train_dataset, template, plm_tokenizer, config, "train") if train_dataset else None
+    valid_dataloader = build_dataloader(valid_dataset, template, plm_tokenizer, config, "dev") if valid_dataset else None
+    test_dataloader = build_dataloader(test_dataset, template, plm_tokenizer, config, "test") if test_dataset else None
 
     if config.task == "classification":
         if config.classification.auto_t or config.classification.auto_v:

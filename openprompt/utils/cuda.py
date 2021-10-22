@@ -1,4 +1,5 @@
 import torch
+from openprompt.utils.logging import logger
 
 def model_to_device(model, config):
     r"""
@@ -11,8 +12,10 @@ def model_to_device(model, config):
         local_rank_device = "cuda:{}".format(config.local_rank)
         model = model.to(local_rank_device)
         model = torch.nn.parallel.DataParallel(model, output_device=local_rank_device)
+        logger.info("Using DataParallel")
     elif config.num_gpus>0:
         model = model.cuda()
+        logger.info("Using cuda of single gpu")
     else:
-        pass
+        logger.info("Using cpu")
     return model

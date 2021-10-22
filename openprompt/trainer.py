@@ -55,8 +55,7 @@ class BaseRunner(object):
         self.valid_dataloader = valid_dataloader
         self.test_dataloader = test_dataloader
 
-        self.configure_optimizers()
-        self.model = model_to_device(self.model, config.environment)
+        self.wrap_model()
 
         self.cur_epoch = 0
         self.best_score = None
@@ -86,6 +85,9 @@ class BaseRunner(object):
         effective_accum = self.config.environment.num_gpus * self.config.train.gradient_accumulation_steps
         return (batches // effective_accum)
 
+    def wrap_model(self):
+        self.model = model_to_device(self.model, self.config.environment)
+
     @property
     def inner_model(self):
         return self.model.module if isinstance(self.model, DataParallel) else self.model
@@ -107,8 +109,8 @@ class BaseRunner(object):
             no_decay = self.config.plm.optimize.no_decay
             weight_decay = self.config.plm.optimize.weight_decay
             optimizer_grouped_parameters = [
-                {'params': [p for n, p in self.model.plm.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
-                {'params': [p for n, p in self.model.plm.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+                {'params': [p for n, p in self.inner_model.plm.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
+                {'params': [p for n, p in self.inner_model.plm.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
             ]
 
             plm_optimizer = AdamW(
@@ -131,10 +133,10 @@ class BaseRunner(object):
 
         template_config = self.config[self.config.template]
         if hasattr(template_config, "optimize") and template_config.optimize is not None: # TODO should add optimize config in each yaml
-            if not hasattr(self.model.template, "optimize"):
+            if not hasattr(self.inner_model.template, "optimize"):
                 # using default gradient descent optimizer.
                 optimizer_grouped_parameters = [
-                    {'params': [p for name, p in self.model.template.named_parameters() if 'raw_embedding' not in name]}
+                    {'params': [p for name, p in self.inner_model.template.named_parameters() if 'raw_embedding' not in name]}
                 ]
                 template_optimizer = AdamW(optimizer_grouped_parameters, lr = template_config.optimize.lr)
                 optimizers.append(template_optimizer)
@@ -148,16 +150,16 @@ class BaseRunner(object):
             else:
                 template_optimizer = Dummy()
                 # resemble a pytorch optimizer for unified training.
-                setattr(template_optimizer, "step", self.model.template.optimize)
+                setattr(template_optimizer, "step", self.inner_model.template.optimize)
                 setattr(template_optimizer, "zero_grad", lambda:None)
                 optimizers.append(template_optimizer)
 
-        if hasattr(self.model, "verbalizer") and self.model.verbalizer:
+        if hasattr(self.inner_model, "verbalizer") and self.inner_model.verbalizer:
             verbalizer_config = self.config[self.config.verbalizer]
             if hasattr(verbalizer_config, "optimize") and verbalizer_config.optimize is not None:
-                if not hasattr(self.model.verbalizer, "optimize"):
+                if not hasattr(self.inner_model.verbalizer, "optimize"):
                     # using default gradient descent optimizer.
-                    verbalizer_optimizer = AdamW(self.model.verbalizer.parameters(), lr = verbalizer_config.optimize.lr)
+                    verbalizer_optimizer = AdamW(self.inner_model.verbalizer.parameters(), lr = verbalizer_config.optimize.lr)
                     optimizers.append(verbalizer_optimizer)
                     if hasattr(verbalizer_config.optimize, "scheduler") and verbalizer_config.optimize.scheduler is not None:
                         verbalizer_scheduler = get_linear_schedule_with_warmup(
@@ -169,7 +171,7 @@ class BaseRunner(object):
                 else:
                     verbalizer_optimizer = Dummy()
                     # resemble a pytorch optimizer for unified training.
-                    setattr(verbalizer_optimizer, "step", self.model.verbalizer.optimize)
+                    setattr(verbalizer_optimizer, "step", self.inner_model.verbalizer.optimize)
                     setattr(verbalizer_optimizer, "zero_grad", lambda:None)
                     optimizers.append(verbalizer_optimizer)
 
@@ -190,7 +192,6 @@ class BaseRunner(object):
         # load state to model
         self.model = self.inner_model
         self.model.load_state_dict(state_dict['state_dict'])
-        self.model = model_to_device(self.model, self.config.environment)
 
         if load_state:
             # load state to optimizers
@@ -203,7 +204,7 @@ class BaseRunner(object):
                         scheduler.load_state_dict(sc_state)
 
             # load training state
-            self.cur_epoch = state_dict['cur_epoch']
+            self.cur_epoch = state_dict['cur_epoch'] + 1
             self.best_score = state_dict['best_score']
             self.global_step = state_dict['global_step']
         logger.info(f"Load Checkpoint finished, the current validation metric: {state_dict['validation_metric']}")
@@ -297,6 +298,8 @@ class BaseRunner(object):
         pass
 
     def fit(self, ckpt: Optional[str] = None):
+        self.configure_optimizers()
+
         if ckpt:
             if not self.load_checkpoint(ckpt):
                 logger.warning("Train from scratch instead ...")
