@@ -31,7 +31,8 @@ class TemplateGenerator:
                  max_length: Optional[int] = 20,
                  target_number: Optional[int] = 2,
                  beam_width: Optional[int] = 100,
-                 length_limit: Optional[List[int]] = None):
+                 length_limit: Optional[List[int]] = None, 
+                 forbidden_word_ids: Optional[List[int]] = []):
         self.template_generate_model = template_generate_model
         self.tokenizer = tokenizer
         self.target_number = target_number # number of parts to generate in one sample
@@ -41,7 +42,7 @@ class TemplateGenerator:
         self.probs_buffer, self.labels_buffer = None, None
 
         # Forbid single space token, "....", and ".........."
-        self.forbidden_word_ids = [self.tokenizer.convert_tokens_to_ids(t) for t in [' ', '....', '..........']]
+        self.forbidden_word_ids = forbidden_word_ids
         self.sent_end_id = self.tokenizer.convert_tokens_to_ids('.')
 
         self.input_ids_buffer, self.attention_mask_buffer, self.labels_buffer = None, None, None
@@ -177,8 +178,6 @@ class TemplateGenerator:
         init_dict = {key: _init_dict[key] for key in _init_dict if key in init_args}
         template_generator = cls(**init_dict)
         return template_generator
-
-
         
 
 class T5TemplateGenerator(TemplateGenerator):
@@ -190,22 +189,26 @@ class T5TemplateGenerator(TemplateGenerator):
                  max_length: Optional[int] = 20,
                  target_number: Optional[int] = 2,
                  beam_width: Optional[int] = 100,
-                 length_limit: Optional[List[int]] = None):
+                 length_limit: Optional[List[int]] = None,
+                 forbidden_word_ids: Optional[List[int]] = [3, 19794, 22354]):
         super().__init__(template_generate_model = template_generate_model,
                         tokenizer = tokenizer,
                         max_length = max_length,
                         target_number= target_number,
                         beam_width = beam_width,
-                        length_limit = length_limit)
+                        length_limit = length_limit,
+                        forbidden_word_ids = forbidden_word_ids)
 
     def get_part_token_id(self, part_id):
         return self.tokenizer._convert_token_to_id('<extra_id_0>') - part_id
 
     def convert_template(self, generate_text_list):
-        text_list = ' '.join(generate_text_list).replace('<extra_id_0>', '<text_a>').replace('<extra_id_1>', '<mask>').replace('<extra_id_2>', '<text_b>').replace('</s>', '').replace('▁', '_').strip().split(' ')
+        text_list = self.tokenizer.convert_tokens_to_string(generate_text_list).replace('<extra_id_0>', '<text_a>').replace('<extra_id_1>', ' <mask>').replace('<extra_id_2>', ' <text_b>').replace('</s>', '').replace('  ', ' ').split(' ')
         # incase no <extra_id_1> (generation stop by maximum length)
         if '<mask>' not in text_list:
             text_list.append('<mask>')
+        if '<text_b>' not in text_list:
+            text_list.append('<text_b>')
         return text_list
 
 
@@ -251,7 +254,8 @@ class VerbalizerGenerator:
     def register_buffer(self, data):
         self.model.eval()
         with torch.no_grad():
-            forward_keys = signature(self.model.forward).args
+            inner_model = self.model.module if isinstance(self.model, DataParallel) else self.model
+            forward_keys = signature(inner_model.forward).args
             input_batch = {key: data[key] for key in data if key in forward_keys}
             logits = self.model.forward(**input_batch).logits[data['loss_ids']==1]
         logits = F.softmax(logits.detach(),dim=-1)
@@ -267,14 +271,13 @@ class VerbalizerGenerator:
                                             words_per_label=self.label_word_num_per_class, 
                                                         score_fct=self.score_fct,
                                                         normalize=self.normalize)
-        self.label_words = [[(self.tokenizer.convert_ids_to_tokens(i)).replace('▁', '') for i in ids] for ids in self.label_words_ids]
+        self.label_words = [[self.tokenizer.convert_ids_to_tokens(i).strip('Ġ') for i in ids ] for ids in self.label_words_ids]
         self._show_verbalizer()
         return self.label_words
         
             
     def _show_verbalizer(self):
-        tokens = [self.tokenizer.convert_ids_to_tokens(i) for i in self.label_words_ids]
-        logger.info("Verbalizer is {}".format(tokens))
+        logger.info("Verbalizer is {}".format(self.label_words))
 
 
     def _find_verbalizer(self, words_per_label: int = 1, normalize: bool = True,
