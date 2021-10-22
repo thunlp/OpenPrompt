@@ -107,6 +107,7 @@ This part contains the attributes of ``train``, ``dev`` and ``test``.
     - **batch_size**: The batch size during training. 
     - **shuffle_data**: If True, the data will be shuffled during training.
     - **teacher_forcing**: If True, the teach forcing method will be used during training.
+    - **clean**: If True, not saving checkpoints and not logging tensorboard. However, test will use the last model but not the best model in validation.
 - **dev**
     - **batch_size**: The batch size during validation. 
     - **shuffle_data**: If True, the data will be shuffled during validation.
@@ -123,6 +124,7 @@ Example:
         batch_size: 2
         shuffle_data: False
         teacher_forcing: False
+        clean: False
 
     dev:
         batch_size: 2
@@ -196,7 +198,9 @@ Configuration about the learning settings, including ``full``, ``few-shot`` and 
         num_examples_per_label: 10
         also_sample_dev: True
         num_examples_per_label_dev: 10
-        seed: 123
+        seed:
+            - 123
+            - 456
 
 
 Prompt-specific Config

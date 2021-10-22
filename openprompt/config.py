@@ -12,11 +12,7 @@ def get_config_from_file(path):
     cfg.merge_from_file(path)
     return cfg
 
-def get_yaml_config(usr_config_path, default_config_path = "config_default.yaml"):
-    # get default config
-    # cwd = os.path.dirname(__file__)
-    # default_config_path = os.path.join(cwd, default_config_path)
-    # config = get_config_from_file(default_config_path)
+def get_yaml_config(usr_config_path):
     config = get_default_config()
 
     # get user config

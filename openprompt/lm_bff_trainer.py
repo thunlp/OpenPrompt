@@ -31,14 +31,12 @@ class LMBFFClassificationRunner:
         self.model = model
         self.tokenizer = tokenizer
         self.template_generator_tokenizer = template_generator_tokenizer
-        self.max_epoch = config.classification.generation_epoch
         self.train_dataset = train_dataset
         self.valid_dataset = valid_dataset
         self.test_dataset = test_dataset
         self.template_generator = template_generator
         self.verbalizer_generator = verbalizer_generator
         self.config = config
-        self.metric = self.config.classification.metric[0]
         self.initial_template = initial_template
         self.initial_verbalizer = initial_verbalizer
         self.auto_t = config.classification.auto_t
@@ -101,8 +99,9 @@ class LMBFFClassificationRunner:
         valid_dataloader = PromptDataLoader(self.valid_dataset, best_template, self.tokenizer)
         test_dataloader = PromptDataLoader(self.test_dataset, best_template, self.tokenizer)
         model = PromptForClassification(copy.deepcopy(self.model), best_template, best_verbalizer)
-        runner = ClassificationRunner(model, config=self.config, train_dataloader=train_dataloader, valid_dataloader=valid_dataloader,test_dataloader=test_dataloader)
-        runner.run()
+        runner = ClassificationRunner(model, config=self.config, train_dataloader=train_dataloader, valid_dataloader=valid_dataloader, test_dataloader=test_dataloader)
+        runner.clean = False
+        return runner.run()
 
 
     def _get_best_template_text(self, template_texts_candidates, verbalizer):
@@ -134,11 +133,6 @@ class LMBFFClassificationRunner:
     def _train_eval(self, template, verbalizer, train_dataloader, valid_dataloader):
         model = PromptForClassification(copy.deepcopy(self.model), template, verbalizer) 
         runner = ClassificationRunner(model, config=self.config, train_dataloader=train_dataloader, valid_dataloader=valid_dataloader)
-        best_score = 0.0
-        for epoch in range(self.max_epoch):
-            runner.train_epoch(epoch)
-            scores = runner.evaluate(valid_dataloader, 'Valid')
-            score = scores[self.metric]
-            if score > best_score:
-                best_score = score
+        runner.clean = True
+        best_score = runner.fit()
         return best_score

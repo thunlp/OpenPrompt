@@ -50,9 +50,8 @@ ptr_verbalizer:
   file_path: scripts/RelationClassification/TACRED/ptr_verbalizer.jsonl
   
 environment:
-  num_gpus: 2
+  num_gpus: 1
   cuda_visible_devices:
-    - 0
     - 1
   local_rank: 0 
 
@@ -70,4 +69,5 @@ sampling_from_train:
   num_examples_per_label: 32
   also_sample_dev: True
   num_examples_per_label_dev: 32
-  seed: 123
+  seed:
+    - 123

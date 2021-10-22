@@ -86,6 +86,7 @@ def get_default_config():
     cfg.train.gradient_accumulation_steps = 1 # update weight  every N step of training.
                         # set 1 to disable gradient accumulation.
     cfg.train.max_grad_norm = -1.0 # <0 for unlimited gradients norm
+    cfg.train.clean = False # set to True for not saving checkpoint and no tensorboard logging
 
     cfg.dev = CfgNode(new_allowed=True)
     cfg.dev.batch_size = 2 # evaluationn batch_size, can be a bit larger than training batch_size
@@ -141,7 +142,7 @@ def get_default_config():
     cfg.generation.top_p = 0.9
     cfg.generation.repetition_penalty = 1.0 ##args.repetition_penalty,
     cfg.generation.num_beams = 5
-    cfg.generation.bad_words_ids = [628, 198] 
+    cfg.generation.bad_words_ids = [[628, 198]]
 
 
     cfg.relation_classification = CfgNode(new_allowed=True)
@@ -176,7 +177,7 @@ def get_default_config():
     cfg.sampling_from_train.num_examples_per_label = 10
     cfg.sampling_from_train.also_sample_dev = True
     cfg.sampling_from_train.num_examples_per_label_dev = 10
-    cfg.sampling_from_train.seed = 123
+    cfg.sampling_from_train.seed = [123]
 
     ## CALIBRATION ###########################################################
     cfg.calibrate = None # leave blank to use no calibrate

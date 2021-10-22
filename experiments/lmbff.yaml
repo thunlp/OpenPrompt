@@ -43,6 +43,7 @@ classification:
 train:
   num_epochs: 10 # the number of training epochs.
   batch_size: 2
+  clean: True
 
 test:
   batch_size: 8
@@ -81,5 +82,6 @@ sampling_from_train:
   num_examples_per_label: 16
   also_sample_dev: True
   num_examples_per_label_dev: 16
-  seed: 123
+  seed:
+    - 123
 

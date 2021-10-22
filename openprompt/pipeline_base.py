@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader
 from openprompt.plms import get_tokenizer_wrapper
 from yacs.config import CfgNode
 from openprompt.utils.logging import logger
+from transformers import  AdamW, get_linear_schedule_with_warmup
 
 
 
@@ -183,6 +184,7 @@ class PromptModel(nn.Module):
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
         return input_batch
 
+
 class PromptForClassification(nn.Module):
     r'''``PromptModel`` with a classification head on top. The classification head will map
     the logits in all position of the sequence (return value of a PromptModel) into the
@@ -199,7 +201,7 @@ class PromptForClassification(nn.Module):
                  template: Template,
                  verbalizer: Verbalizer,
                  freeze_plm: bool = False,
-                 ):
+                ):
         super().__init__()
         self.prompt_model = PromptModel(plm, template, freeze_plm)
         self.verbalizer = verbalizer
@@ -268,12 +270,7 @@ class PromptForClassification(nn.Module):
         return self.verbalizer.tokenizer
     
     def state_dict(self):
-        r""" Save the model using template and verbalizer's save methods.
-        Args:
-            path (:obj:`str`): the full path of the checkpoint.
-            save_plm (:obj:`bool`): whether saving the pretrained language model.
-            kwargs: other information, such as the achieved metric value. 
-        """
+        """ Save the model using template, plm and verbalizer's save methods."""
         _state_dict = {}
         if not self.prompt_model.freeze_plm:
             _state_dict['plm'] = self.plm.state_dict()
@@ -282,14 +279,11 @@ class PromptForClassification(nn.Module):
         return _state_dict
     
     def load_state_dict(self, state_dict):
+        """ Load the model using template, plm and verbalizer's load methods."""
         if 'plm' in state_dict and not self.prompt_model.freeze_plm:
             self.plm.load_state_dict(state_dict['plm'])
         self.template.load_state_dict(state_dict['template'])
         self.verbalizer.load_state_dict(state_dict['verbalizer'])
-
-
-
-
 
 
 class PromptForGeneration(nn.Module, GenerationMixin):
@@ -307,9 +301,9 @@ class PromptForGeneration(nn.Module, GenerationMixin):
     def __init__(self,
                  plm: PreTrainedModel, 
                  template: Template,
-                 gen_config: CfgNode,
-                 tokenizer: Optional[PreTrainedTokenizer] = None,
                  freeze_plm: bool = False,
+                 gen_config: Optional[CfgNode] = None,
+                 tokenizer: Optional[PreTrainedTokenizer] = None,
                 ):
                  
         super().__init__()
@@ -322,8 +316,9 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
         self.loss_fct = nn.CrossEntropyLoss(reduction='none')
         self.config = plm.config
-        for key in gen_config:
-            setattr(self.config, key, gen_config[key])
+        if gen_config:
+            for key in gen_config:
+                setattr(self.config, key, gen_config[key])
         self.in_generation_function = False
 
     @property
@@ -521,19 +516,15 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         return model_kwargs
     
     def state_dict(self):
-        r""" Save the model using template and verbalizer's save methods.
-        Args:
-            path (:obj:`str`): the full path of the checkpoint.
-            save_plm (:obj:`bool`): whether saving the pretrained language model.
-            kwargs: other information, such as the achieved metric value. 
-        """
+        """ Save the model using template and plm's save methods. """
         _state_dict = {}
         if not self.prompt_model.freeze_plm:
-            _state_dict['plm'] = self.model.state_dict()
+            _state_dict['plm'] = self.plm.state_dict()
         _state_dict['template'] = self.template.state_dict()
         return _state_dict
     
     def load_state_dict(self, state_dict):
+        """ Load the model using template and plm's load methods. """
         if 'plm' in state_dict and not self.prompt_model.freeze_plm:
             self.plm.load_state_dict(state_dict['plm'])
         self.template.load_state_dict(state_dict['template'])

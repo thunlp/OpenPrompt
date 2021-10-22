@@ -17,6 +17,7 @@ from openprompt.config import get_yaml_config
 from openprompt.plms import load_plm
 from openprompt.data_utils import load_dataset
 from openprompt.utils.utils import check_config_conflicts
+from openprompt.utils.cuda import model_to_device
 
 
 def get_config():
@@ -85,7 +86,7 @@ def main():
     elif config.learning_setting == 'few_shot':
         if config.few_shot.few_shot_sampling is None:
             raise ValueError("use few_shot setting but config.few_shot.few_shot_sampling is not specified")
-        seeds = [config.sampling_from_train.seed] # TODO change yaml seed to list of seed and remove the '[' and ']' in this line
+        seeds = config.sampling_from_train.seed
         res = 0
         for seed in seeds:
             if not args.test:
@@ -156,11 +157,10 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
             
     elif config.task == "generation":
         template = load_template(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config)
-        prompt_model = PromptForGeneration(plm_model, template, gen_config=config.generation, freeze_plm = config.plm.optimize.freeze_para)
+        prompt_model = PromptForGeneration(plm_model, template, freeze_plm = config.plm.optimize.freeze_para, gen_config = config.generation)
     else:
         raise NotImplementedError(f"config.task {config.task} is not implemented yet. Only classification and generation are supported.")
 
-    # TODO move inside runner
     # process data and get data_loader
     if train_dataset:
         train_dataloader = build_dataloader(train_dataset, template, plm_tokenizer, config, "train")
@@ -206,9 +206,9 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
     elif test:
         res = runner.test(ckpt = 'best')
     elif resume:
-        runner.run(ckpt = 'last')
+        res = runner.run(ckpt = 'last')
     else:
-        runner.run()
+        res = runner.run()
     return res
 
 
