@@ -55,19 +55,11 @@ Specifically, seeds for all potential randomness.
 Example:
 
 - **seed**: If seed this seed, and other seeds are unset, then all the seeds will use this value.
-- **random_seed**: The seed for the ``ramdom`` package. 
-- **torch_seed**: The seed for the ``pytorch`` package.
-- **numpy_seed**:  The seed for the ``numpy`` package.
-- **cuda_seed**:  The seed for ``CUDA``.
 
 .. code-block:: yaml
 
     reproduce:
         seed: 100
-        random_seed: -1
-        torch_seed: -1
-        numpy_seed: -1
-        cuda_seed: -1
 
 
 PLM

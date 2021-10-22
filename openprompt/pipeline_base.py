@@ -198,9 +198,10 @@ class PromptForClassification(nn.Module):
                  plm: PreTrainedModel, 
                  template: Template,
                  verbalizer: Verbalizer,
+                 freeze_plm: bool = False,
                  ):
         super().__init__()
-        self.prompt_model = PromptModel(plm, template)
+        self.prompt_model = PromptModel(plm, template, freeze_plm)
         self.verbalizer = verbalizer
 
     @property
@@ -274,15 +275,15 @@ class PromptForClassification(nn.Module):
             kwargs: other information, such as the achieved metric value. 
         """
         _state_dict = {}
-        if not self.freeze_plm:
+        if not self.prompt_model.freeze_plm:
             _state_dict['plm'] = self.plm.state_dict()
         _state_dict['template'] = self.template.state_dict()
         _state_dict['verbalizer'] = self.verbalizer.state_dict()
         return _state_dict
     
     def load_state_dict(self, state_dict):
-        if 'plm' in state_dict and not self.freeze_plm:
-            self.model.load_state_dict(state_dict['plm'])
+        if 'plm' in state_dict and not self.prompt_model.freeze_plm:
+            self.plm.load_state_dict(state_dict['plm'])
         self.template.load_state_dict(state_dict['template'])
         self.verbalizer.load_state_dict(state_dict['verbalizer'])
 
@@ -300,6 +301,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``PrefixTemplate``.
         tokenizer (:obj:`Tokenizer`): A ``Tokenizer`` of the current model.
         gen_config (:obj:`CfgNode`): The generation configs to pass into `GenerationMixin.generate <https://huggingface.co/transformers/_modules/transformers/generation_utils.html#GenerationMixin.generate>`_
+        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
     '''
 
     def __init__(self,
@@ -307,6 +309,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
                  template: Template,
                  gen_config: CfgNode,
                  tokenizer: Optional[PreTrainedTokenizer] = None,
+                 freeze_plm: bool = False,
                 ):
                  
         super().__init__()
@@ -315,7 +318,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             self.tokenizer = template.tokenizer
         else:
             self.tokenizer = tokenizer
-        self.prompt_model = PromptModel(plm, template)
+        self.prompt_model = PromptModel(plm, template, freeze_plm)
 
         self.loss_fct = nn.CrossEntropyLoss(reduction='none')
         self.config = plm.config
@@ -525,14 +528,14 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             kwargs: other information, such as the achieved metric value. 
         """
         _state_dict = {}
-        if not self.freeze_plm:
+        if not self.prompt_model.freeze_plm:
             _state_dict['plm'] = self.model.state_dict()
         _state_dict['template'] = self.template.state_dict()
         return _state_dict
     
     def load_state_dict(self, state_dict):
-        if 'plm' in state_dict and not self.freeze_plm:
-            self.model.load_state_dict(state_dict['plm'])
+        if 'plm' in state_dict and not self.prompt_model.freeze_plm:
+            self.plm.load_state_dict(state_dict['plm'])
         self.template.load_state_dict(state_dict['template'])
     
     def _reorder_cache(self, past, beam_idx):

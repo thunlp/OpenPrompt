@@ -12,10 +12,6 @@ import warnings
 from .trainer import ClassificationRunner
 from yacs.config import CfgNode
 from openprompt.utils.logging import logger
-from openprompt.utils.cuda import model_to_device
-
-
-
 class LMBFFClassificationRunner:
     def __init__(self,
                 train_dataset: List[InputExample],
@@ -105,8 +101,7 @@ class LMBFFClassificationRunner:
         valid_dataloader = PromptDataLoader(self.valid_dataset, best_template, self.tokenizer)
         test_dataloader = PromptDataLoader(self.test_dataset, best_template, self.tokenizer)
         model = PromptForClassification(copy.deepcopy(self.model), best_template, best_verbalizer)
-        model = model_to_device(model, self.config.environment)
-        runner = ClassificationRunner(model, train_dataloader, valid_dataloader, test_dataloader, config=self.config)
+        runner = ClassificationRunner(model, config=self.config, train_dataloader=train_dataloader, valid_dataloader=valid_dataloader,test_dataloader=test_dataloader)
         runner.run()
 
 
@@ -138,8 +133,7 @@ class LMBFFClassificationRunner:
 
     def _train_eval(self, template, verbalizer, train_dataloader, valid_dataloader):
         model = PromptForClassification(copy.deepcopy(self.model), template, verbalizer) 
-        model = model_to_device(model, self.config.environment)
-        runner = ClassificationRunner(model, train_dataloader, valid_dataloader, config=self.config)
+        runner = ClassificationRunner(model, config=self.config, train_dataloader=train_dataloader, valid_dataloader=valid_dataloader)
         best_score = 0.0
         for epoch in range(self.max_epoch):
             runner.train_epoch(epoch)

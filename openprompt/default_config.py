@@ -13,11 +13,7 @@ def get_default_config():
                     # The following should holds: local_rank < len(cuda_visible_devices)
 
     cfg.reproduce = CfgNode(new_allowed=True) # seed for reproduction 
-    cfg.reproduce.seed = 100  # a seed for all random part
-    cfg.reproduce.random_seed = -1 # seed for random package
-    cfg.reproduce.torch_seed = -1 # seed for pytorch
-    cfg.reproduce.numpy_seed = -1 # seed for numpy 
-    cfg.reproduce.cuda_seed = -1 # seed for cuda
+    cfg.reproduce.seed = 100  # a seed for all everything
 
     # PLM PARAMETERS
     ##################################
