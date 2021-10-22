@@ -90,17 +90,16 @@ def main():
     train_dataset, valid_dataset, test_dataset, Processor = load_dataset(config)
     
     if config.task == "classification":
-        if config.classification.auto_t or config.classification.auto_v:
+        verbalizer = load_verbalizer(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config, classes=Processor.labels)
+        template_generate_model, template_generate_tokenizer = None, None
+        if config.classification.auto_t:
             template_generate_model, template_generate_tokenizer, template_generate_config = load_plm(config.template_generator)
-            template_generate_model = model_to_device(template_generate_model, config.environment)
-            verbalizer = load_verbalizer(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config, classes=Processor.labels)
             template = load_template(config=config, model=template_generate_model, tokenizer=template_generate_tokenizer, plm_config=template_generate_config, verbalizer=verbalizer)
-            template_generator = load_template_generator(config=config, template_generate_model=template_generate_model, tokenizer=template_generate_tokenizer)
-            verbalizer_generator = load_verbalizer_generator(config=config, model=plm_model, tokenizer=plm_tokenizer)
+
         else:
             # define prompt
             template = load_template(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config)
-            verbalizer = load_verbalizer(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config, classes=Processor.labels)
+            
             # load prompt’s pipeline model
         prompt_model = PromptForClassification(plm_model, template, verbalizer)
             
@@ -145,11 +144,10 @@ def main():
                                         test_dataset = test_dataset, 
                                         model= plm_model, 
                                         tokenizer = plm_tokenizer, 
-                                        template_generator_tokenizer = template_generate_tokenizer,
+                                        template_generate_tokenizer = template_generate_tokenizer,
+                                        template_generate_model = template_generate_model,
                                         initial_template = template,
                                         initial_verbalizer = verbalizer,
-                                        template_generator = template_generator,
-                                        verbalizer_generator = verbalizer_generator,
                                         config = config)
         else:
             runner = ClassificationRunner(prompt_model = prompt_model,

@@ -178,8 +178,6 @@ class TemplateGenerator:
         init_dict = {key: _init_dict[key] for key in _init_dict if key in init_args}
         template_generator = cls(**init_dict)
         return template_generator
-
-
         
 
 class T5TemplateGenerator(TemplateGenerator):
@@ -209,6 +207,8 @@ class T5TemplateGenerator(TemplateGenerator):
         # incase no <extra_id_1> (generation stop by maximum length)
         if '<mask>' not in text_list:
             text_list.append('<mask>')
+        if '<text_b>' not in text_list:
+            text_list.append('<text_b>')
         return text_list
 
 
@@ -254,7 +254,8 @@ class VerbalizerGenerator:
     def register_buffer(self, data):
         self.model.eval()
         with torch.no_grad():
-            forward_keys = signature(self.model.forward).args
+            inner_model = self.model.module if isinstance(self.model, DataParallel) else self.model
+            forward_keys = signature(inner_model.forward).args
             input_batch = {key: data[key] for key in data if key in forward_keys}
             logits = self.model.forward(**input_batch).logits[data['loss_ids']==1]
         logits = F.softmax(logits.detach(),dim=-1)
@@ -270,14 +271,13 @@ class VerbalizerGenerator:
                                             words_per_label=self.label_word_num_per_class, 
                                                         score_fct=self.score_fct,
                                                         normalize=self.normalize)
-        self.label_words = [[(self.tokenizer.convert_ids_to_tokens(i)).replace('▁', '') for i in ids] for ids in self.label_words_ids]
+        self.label_words = [[self.tokenizer.convert_ids_to_tokens(i).strip('Ġ') for i in ids ] for ids in self.label_words_ids]
         self._show_verbalizer()
         return self.label_words
         
             
     def _show_verbalizer(self):
-        tokens = [self.tokenizer.convert_ids_to_tokens(i) for i in self.label_words_ids]
-        logger.info("Verbalizer is {}".format(tokens))
+        logger.info("Verbalizer is {}".format(self.label_words))
 
 
     def _find_verbalizer(self, words_per_label: int = 1, normalize: bool = True,
