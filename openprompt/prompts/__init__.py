@@ -16,11 +16,13 @@ from .ptr_prompts import PTRTemplate, PTRVerbalizer
 from .knowledgeable_verbalizer import KnowledgeableVerbalizer
 from .prefix_tuning_template import PrefixTuningTemplate
 from .soft_manual_prompts import SoftManualTemplate
+from .soft_template import SoftTemplate
 
 TEMPLATE_CLASS = {
     'manual_template': ManualTemplate,
     'ptuning_template': PtuningTemplate,
     'soft_manual_template': SoftManualTemplate,
+    'soft_template': SoftTemplate,
     'ptr_template': PTRTemplate,
     'prefix_tuning_template': PrefixTuningTemplate,
     #'lmbff': LMBFFTemplate

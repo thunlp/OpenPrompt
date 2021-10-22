@@ -6,3 +6,4 @@ tqdm==4.62.2
 nltk
 yacs
 dill
+datasets

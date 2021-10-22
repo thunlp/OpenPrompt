@@ -16,8 +16,7 @@ from openprompt.prompts import *
 from openprompt.utils.logging import logger
 from openprompt.utils.metrics import classification_metrics, generation_metric
 from transformers import  AdamW, get_linear_schedule_with_warmup
-
-
+from transformers.optimization import  Adafactor, AdafactorSchedule
 
 
 class BaseRunner(object):
@@ -235,15 +234,21 @@ class ClassificationRunner(BaseRunner):
         if hasattr(template_config, "optimize") and template_config.optimize is not None:
             if not hasattr(self.inner_model.template, "optimize"):
                 # using default gradient descent optimizer.
-                self.template_optimizer = AdamW(self.inner_model.template.parameters(), lr = template_config.optimize.lr)
-                if hasattr(template_config.optimize, "scheduler") and template_config.optimize.scheduler is not None:
-                    self.template_scheduler = get_linear_schedule_with_warmup(
-                        self.template_optimizer, 
-                        num_warmup_steps = template_config.optimize.scheduler.num_warmup_steps, 
-                        num_training_steps = num_training_steps
-                    )
-                else:
-                    self.template_scheduler = None
+                if template_config.optimize.name.lower() == "adamw":
+                    self.template_optimizer = AdamW(self.inner_model.template.parameters(), lr = template_config.optimize.lr)
+                
+                    if hasattr(template_config.optimize, "scheduler") and template_config.optimize.scheduler is not None:
+                        self.template_scheduler = get_linear_schedule_with_warmup(
+                            self.template_optimizer, 
+                            num_warmup_steps = template_config.optimize.scheduler.num_warmup_steps, 
+                            num_training_steps = num_training_steps
+                        )
+                    else:
+                        self.template_scheduler = None
+                elif template_config.optimize.name.lower() == "adafactor":
+                    self.template_optimizer = Adafactor(self.inner_model.template.parameters(), lr=template_config.optimize.lr, weight_decay=1e-5, relative_step=False, scale_parameter=False, warmup_init=False)
+                    self.template_scheduler = AdafactorSchedule(self.template_optimizer)
+                
             else:
                 self.template_optimizer = Dummy()
                 # resemble a pytorch optimizer for unified training.
@@ -284,6 +289,7 @@ class ClassificationRunner(BaseRunner):
         self.optimizers = [self.model_optimizer, self.template_optimizer, self.verbalizer_optimizer]
         self.schedulers = [self.model_scheduler, self.template_scheduler, self.verbalizer_scheduler]
     
+
     def evaluate(self, dataloader, split, post_evaluate_hook=None):
         preds = []
         labels = []

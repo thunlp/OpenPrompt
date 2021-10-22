@@ -1,23 +1,15 @@
 from yacs.config import CfgNode
-from .data_utils import InputExample, InputFeatures
-from .data_sampler import FewShotSampler
-from .data_processor import DataProcessor
-from .lama_dataset import LAMAProcessor
-from .relation_classification_dataset import TACREDProcessor, TACREVProcessor, ReTACREDProcessor, SemEvalProcessor
-from .superglue_dataset import WicProcessor, RteProcessor, CbProcessor, WscProcessor, BoolQProcessor, CopaProcessor, MultiRcProcessor, RecordProcessor
-from .typing_dataset import FewNERDProcessor
-from .text_classification_dataset import AgnewsProcessor, DBpediaProcessor, ImdbProcessor, AmazonProcessor
-from .conditional_generation_dataset import WebNLGProcessor
-
 from .typing_dataset import PROCESSORS as TYPING_PROCESSORS
 from .text_classification_dataset import PROCESSORS as TC_PROCESSORS
 from .superglue_dataset import PROCESSORS as SUPERGLUE_PROCESSORS
 from .relation_classification_dataset import PROCESSORS as RC_PROCESSORS
 from .lama_dataset import PROCESSORS as LAMA_PROCESSORS
 from .conditional_generation_dataset import PROCESSORS as CG_PROCESSORS
-
+from .utils import InputExample, InputFeatures
+from .data_sampler import FewShotSampler
+# support loading transformers datasets from https://huggingface.co/docs/datasets/
 from openprompt.utils.logging import logger
-
+from openprompt.data_utils.huggingface_dataset import PROCESSORS as HF_PROCESSORS
 
 PROCESSORS = {
     **TYPING_PROCESSORS,
@@ -27,8 +19,8 @@ PROCESSORS = {
     **LAMA_PROCESSORS,
     **CG_PROCESSORS,
     **LAMA_PROCESSORS,
+    **HF_PROCESSORS,
 }
-
 
 def load_dataset(config: CfgNode, return_class=True):
     r"""A plm loader using a global config.
@@ -46,6 +38,7 @@ def load_dataset(config: CfgNode, return_class=True):
         :obj:"
     """
     dataset_config = config.dataset
+
     processor = PROCESSORS[dataset_config.name.lower()]()
     try:
         train_dataset = processor.get_train_examples(dataset_config.path)
@@ -73,3 +66,4 @@ def load_dataset(config: CfgNode, return_class=True):
         return train_dataset, valid_dataset, test_dataset, processor
     else:
         return  train_dataset, valid_dataset, test_dataset
+

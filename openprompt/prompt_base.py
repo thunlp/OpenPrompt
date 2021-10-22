@@ -6,10 +6,9 @@ from transformers.utils.dummy_pt_objects import PreTrainedModel
 from openprompt.utils.utils import signature
 
 from yacs.config import CfgNode
-from openprompt.data_utils.data_utils import InputFeatures
+from openprompt.data_utils import InputFeatures, InputExample
 import torch
 import torch.nn as nn
-from openprompt.data_utils import InputExample
 from typing import *
 from transformers.tokenization_utils import PreTrainedTokenizer
 

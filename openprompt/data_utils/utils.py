@@ -10,11 +10,6 @@ from openprompt.utils.logging import logger
 from typing import Union
 
 
-
-
-
-
-
 class InputExample(object):
     """A raw input example consisting of segments of text,
     a label for classification task or a target sequence of generation task.

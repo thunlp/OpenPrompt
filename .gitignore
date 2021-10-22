@@ -17,3 +17,4 @@ _build/
 outputs/
 log.txt
 examples/
+hyperopt/

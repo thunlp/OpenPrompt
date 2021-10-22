@@ -1,6 +1,6 @@
 
 import json
-from openprompt.data_utils.data_utils import InputFeatures
+from openprompt.data_utils import InputFeatures
 import os
 import torch
 from torch import nn

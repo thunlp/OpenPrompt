@@ -5,7 +5,7 @@ from transformers.models.gpt2.configuration_gpt2 import GPT2Config
 from transformers.models.t5.configuration_t5 import T5Config
 from transformers.models.t5.modeling_t5 import T5ForConditionalGeneration
 from transformers.models.gpt2.modeling_gpt2 import GPT2LMHeadModel
-from openprompt.data_utils.data_utils import InputFeatures
+from openprompt.data_utils import InputFeatures
 import os
 import torch
 from torch import nn
@@ -77,7 +77,7 @@ class PrefixTuningTemplate(Template):
         self.prefix_dropout = prefix_dropout
         self.dropout = nn.Dropout(self.prefix_dropout)
 
-        self.default_text1 = "<text_a> <eos> <mask> <eos>".split()
+        self.default_text1 = "<text_a> <eos> <mask> <eos>".split()  #TODO whether <eos> should be added here?
         self.default_text2 = "<text_a> <text_b> <eos> <mask> <eos>".split()
 
         self.text = text

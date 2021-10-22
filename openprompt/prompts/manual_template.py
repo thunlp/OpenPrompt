@@ -3,7 +3,7 @@ from openprompt.utils.logging import logger
 
 
 
-from openprompt.data_utils.data_utils import InputExample, InputFeatures
+from openprompt.data_utils import InputExample, InputFeatures
 from typing import *
 
 from transformers.tokenization_utils import PreTrainedTokenizer

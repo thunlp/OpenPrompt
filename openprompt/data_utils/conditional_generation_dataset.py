@@ -14,7 +14,7 @@
 This file contains the logic for loading data for all Conditional Generation tasks.
 """
 
-from openprompt.data_utils import InputExample
+from openprompt.data_utils.utils import InputExample
 import os
 import json, csv
 from abc import ABC, abstractmethod
@@ -22,8 +22,6 @@ from collections import defaultdict, Counter
 from typing import List, Dict, Callable
 
 from openprompt.utils.logging import logger
-
-from openprompt.data_utils import InputExample
 from openprompt.data_utils.data_processor import DataProcessor
 
 

@@ -1,0 +1,63 @@
+dataset:
+  name: super_glue.boolq
+  path: /mnt/sfs_turbo/hsd/data/ # dataset in huggingface doesn't need path
+
+plm:
+  model_name: t5
+  model_path: ../plm_cache/t5.1.1.lm100k.large/
+  optimize:
+    freeze_para: True
+    lr: 1.0e-5
+    weight_decay: 0.0
+    scheduler:
+      type: 
+      num_warmup_steps: 500
+
+dataloader:
+  max_seq_length: 256 # max_seq_length 
+  decoder_max_length: 256 # the decoder max length to truncate decoder input sequence
+                    # if it is an encoder-decoder architecture. Note that it's not equavalent
+                    # to generation.max_length which is used merely in the generation phase.
+  truncate_method: "head" # choosing from balanced, head, tail
+
+train:
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  max_grad_norm: 1.0
+
+
+test:
+  batch_size: 8
+
+dev:
+  batch_size: 8
+
+
+template: soft_template
+verbalizer: manual_verbalizer
+
+
+
+soft_template:
+  text: 
+  num_tokens: 20
+  initialize_from_vocab: true
+  random_range: 0.5
+  optimize: 
+    name: Adafactor
+    lr: 0.03
+
+
+manual_verbalizer:
+  choice: 0
+  file_path: scripts/SuperGLUE/BoolQ/manual_verbalizer.txt
+  
+environment:
+  num_gpus: 1
+  cuda_visible_devices:
+  local_rank: 0 
+
+learning_setting: full
+
+
+

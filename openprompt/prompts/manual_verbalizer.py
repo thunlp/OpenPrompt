@@ -1,7 +1,7 @@
 import json
 from transformers.tokenization_utils import PreTrainedTokenizer
 from yacs.config import CfgNode
-from openprompt.data_utils.data_utils import InputFeatures
+from openprompt.data_utils import InputFeatures
 import re
 from openprompt import Verbalizer
 from typing import *

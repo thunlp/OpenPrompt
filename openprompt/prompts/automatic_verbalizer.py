@@ -1,5 +1,5 @@
 from transformers.tokenization_utils import PreTrainedTokenizer
-from openprompt.data_utils.data_utils import InputFeatures
+from openprompt.data_utils import InputFeatures
 from openprompt import Verbalizer
 from typing import List, Optional, Dict
 import torch
