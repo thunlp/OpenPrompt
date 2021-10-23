@@ -20,7 +20,7 @@ from openprompt.data_utils.data_processor import DataProcessor
 class SSTDataProcessor(DataProcessor):
     def __init__(self):
         super().__init__()
-        self.labels = [1, 0]
+        self.labels = [0, 1]
     
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.tsv")
