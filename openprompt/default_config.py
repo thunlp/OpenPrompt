@@ -107,7 +107,6 @@ def get_default_config():
     # LMBFF-classification config ###########################################################W
     cfg.classification.auto_t = False
     cfg.classification.auto_v = False 
-    cfg.classification.generation_epoch = 10
 
     cfg.template_generator = CfgNode(new_allowed=True)
     cfg.template_generator.plm = CfgNode(new_allowed=True)

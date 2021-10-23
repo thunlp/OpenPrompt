@@ -12,6 +12,24 @@ import warnings
 from .trainer import ClassificationRunner
 from yacs.config import CfgNode
 from openprompt.utils.logging import logger
+from openprompt.utils.cuda import model_to_device
+from openprompt.prompts import load_template_generator, load_verbalizer_generator
+
+
+def build_dataloader(dataset, template, tokenizer, config, split):
+    dataloader = PromptDataLoader(dataset=dataset, 
+                                template=template, 
+                                tokenizer=tokenizer, 
+                                batch_size=config[split].batch_size,
+                                shuffle=config[split].shuffle_data,
+                                teacher_forcing=config[split].teacher_forcing \
+                                    if hasattr(config[split],'teacher_forcing') else None,
+                                predict_eos_token=True if config.task=="generation" else False,
+                                **config.dataloader
+                                )
+    return dataloader
+
+
 class LMBFFClassificationRunner:
     def __init__(self,
                 train_dataset: List[InputExample],
@@ -19,23 +37,21 @@ class LMBFFClassificationRunner:
                 test_dataset: List[InputExample],
                 model: PreTrainedModel, 
                 tokenizer: PreTrainedTokenizer,
-                template_generator_tokenizer: PreTrainedTokenizer, 
+                template_generate_tokenizer: PreTrainedTokenizer, 
+                template_generate_model: PreTrainedModel,
                 initial_template: Union[LMBFFTemplate, ManualTemplate],
                 initial_verbalizer: ManualVerbalizer = None,
-                template_generator: TemplateGenerator = None,
-                verbalizer_generator: VerbalizerGenerator = None,
                 config: CfgNode = None):
         r"""
         This class implements the LM-BFF in paper (https://arxiv.org/pdf/2012.15723.pdf)
         """
         self.model = model
         self.tokenizer = tokenizer
-        self.template_generator_tokenizer = template_generator_tokenizer
+        self.template_generate_tokenizer = template_generate_tokenizer
+        self.template_generate_model = template_generate_model
         self.train_dataset = train_dataset
         self.valid_dataset = valid_dataset
         self.test_dataset = test_dataset
-        self.template_generator = template_generator
-        self.verbalizer_generator = verbalizer_generator
         self.config = config
         self.initial_template = initial_template
         self.initial_verbalizer = initial_verbalizer
@@ -56,30 +72,39 @@ class LMBFFClassificationRunner:
             warnings.warn("auto_t and auto_v are both False, the trainer will degenerate to a simple classification trainer")
         
     
-    def _auto_t(self, dataset, template, verbalizer):
+    def _auto_t(self, dataset, template):
         logger.info("performing auto-t...")
-        if self.template_generator is None:
-            raise ValueError("no template_generator available")
-        dataloader = PromptDataLoader(dataset, template, self.template_generator_tokenizer, batch_size=len(dataset)) # register all data at once
+        if self.template_generate_model is None or self.template_generate_tokenizer is None:
+            raise ValueError("template_generate_model or template_generate_tokenizer is None !")
+        model = model_to_device(self.template_generate_model, self.config.environment)
+        template_generator = load_template_generator(config=self.config, template_generate_model=model, tokenizer=self.template_generate_tokenizer)
+        dataloader = PromptDataLoader(dataset, template, self.template_generate_tokenizer, batch_size=len(dataset)) # register all data at once
         for data in dataloader:
-            data = data.to("cuda:{}".format(self.config.environment.local_rank))
-            self.template_generator.register_buffer(data.input_ids, data.attention_mask, data.label) 
-        template_texts = self.template_generator.generate() # [['text_a', '<mask>', ...]]
-        best_template_text = self._get_best_template_text(template_texts, verbalizer)
-        return best_template_text
+            if self.config.environment.num_gpus > 0:
+                data = data.to("cuda:{}".format(self.config.environment.local_rank))
+            template_generator.register_buffer(data.input_ids, data.attention_mask, data.label) 
+        template_texts = template_generator.generate() # [['text_a', '<mask>', ...]]
+        template_generator.release_memory()
+        del template_generator, model
+        return template_texts
     
-    def _auto_v(self, dataset, template, verbalizer, batch_size=32):
+    def _auto_v(self, dataset, template):
         logger.info("performing auto-v...")
-        if self.verbalizer_generator is None:
+        model = copy.deepcopy(self.model)
+        model = model_to_device(model, self.config.environment)
+        verbalizer_generator = load_verbalizer_generator(config=self.config, model=model, tokenizer=self.tokenizer)
+        if verbalizer_generator is None:
             raise ValueError("no verbalizer_generator available")
-        dataloader = PromptDataLoader(dataset, template, self.tokenizer, batch_size=batch_size)
+        dataloader = PromptDataLoader(dataset, template, self.tokenizer, batch_size=len(dataset))
         for data in dataloader:
             data = template.process_batch(data)
-            data = data.to("cuda:{}".format(self.config.environment.local_rank))
-            self.verbalizer_generator.register_buffer(data)
-        label_words_list = self.verbalizer_generator.generate() # List[List[str]]
-        best_label_words = self._get_best_label_words(label_words_list, template, verbalizer)
-        return best_label_words
+            if self.config.environment.num_gpus > 0:
+                data = data.to("cuda:{}".format(self.config.environment.local_rank))
+            verbalizer_generator.register_buffer(data)
+        label_words_list = verbalizer_generator.generate() # List[List[str]]
+        verbalizer_generator.release_memory()
+        del verbalizer_generator, model
+        return label_words_list
 
     def run(self):
         '''
@@ -89,15 +114,17 @@ class LMBFFClassificationRunner:
         best_template = self.initial_template
         best_verbalizer = self.initial_verbalizer
         if self.auto_t:
-            best_template_text = self._auto_t(self.train_dataset, self.initial_template, best_verbalizer)
+            template_texts = self._auto_t(self.train_dataset, self.initial_template)
+            best_template_text = self._get_best_template_text(template_texts, best_verbalizer)
             best_template = ManualTemplate(self.tokenizer, best_template_text)
         if self.auto_v:
-            best_label_words = self._auto_v(self.train_dataset, best_template, best_verbalizer)
+            label_words_list = self._auto_v(self.train_dataset, best_template)
+            best_label_words = self._get_best_label_words(label_words_list, best_template, best_verbalizer)
             best_verbalizer.label_words = best_label_words
         
-        train_dataloader = PromptDataLoader(self.train_dataset, best_template, self.tokenizer)
-        valid_dataloader = PromptDataLoader(self.valid_dataset, best_template, self.tokenizer)
-        test_dataloader = PromptDataLoader(self.test_dataset, best_template, self.tokenizer)
+        train_dataloader = build_dataloader(self.train_dataset, best_template, self.tokenizer, self.config, 'train')
+        valid_dataloader = build_dataloader(self.valid_dataset, best_template, self.tokenizer, self.config, 'dev')
+        test_dataloader = build_dataloader(self.test_dataset, best_template, self.tokenizer, self.config, 'test')
         model = PromptForClassification(copy.deepcopy(self.model), best_template, best_verbalizer)
         runner = ClassificationRunner(model, config=self.config, train_dataloader=train_dataloader, valid_dataloader=valid_dataloader, test_dataloader=test_dataloader)
         runner.clean = False
@@ -108,13 +135,14 @@ class LMBFFClassificationRunner:
         best_metrics = 0.0
         best_template_text = None
         for template_text in template_texts_candidates:
-            print(template_text)
             template = ManualTemplate(self.tokenizer, template_text)
-            train_dataloader = PromptDataLoader(self.train_dataset, template, self.tokenizer)
-            valid_dataloader = PromptDataLoader(self.valid_dataset, template, self.tokenizer)
+            train_dataloader = build_dataloader(self.train_dataset, template, self.tokenizer, self.config, 'train')
+            valid_dataloader = build_dataloader(self.valid_dataset, template, self.tokenizer, self.config, 'dev')
             score = self._train_eval(template, verbalizer, train_dataloader, valid_dataloader)
             if score > best_metrics:
+                best_metrics = score
                 best_template_text = template_text
+                logger.info('best template:' + str(best_template_text))
         return best_template_text
     
     def _get_best_label_words(self, verbalizer_labelwords_candidates, template, verbalizer):
@@ -123,15 +151,17 @@ class LMBFFClassificationRunner:
         best_label_words = None
         for label_words in verbalizer_labelwords_candidates:
             current_verbalizer.label_words = label_words
-            train_dataloader = PromptDataLoader(self.train_dataset, template, self.tokenizer)
-            valid_dataloader = PromptDataLoader(self.valid_dataset, template, self.tokenizer)
+            train_dataloader = build_dataloader(self.train_dataset, template, self.tokenizer, self.config, 'train')
+            valid_dataloader = build_dataloader(self.valid_dataset, template, self.tokenizer, self.config, 'dev')
             score = self._train_eval(template, current_verbalizer, train_dataloader, valid_dataloader)
             if score > best_metrics:
+                best_metrics = score
                 best_label_words = label_words
+                logger.info('best label words:' + str(best_label_words))
         return best_label_words
 
     def _train_eval(self, template, verbalizer, train_dataloader, valid_dataloader):
-        model = PromptForClassification(copy.deepcopy(self.model), template, verbalizer) 
+        model = PromptForClassification(copy.deepcopy(self.model), template, verbalizer)
         runner = ClassificationRunner(model, config=self.config, train_dataloader=train_dataloader, valid_dataloader=valid_dataloader)
         runner.clean = True
         best_score = runner.fit()
