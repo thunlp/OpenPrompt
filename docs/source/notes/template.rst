@@ -27,7 +27,7 @@ This is also a template:
 .. _template_2:
 .. code-block:: python
 
-    "<text_a> <new> <new> <new> <new> <mask> <new> <new> ."
+    "<text_a> <soft> <soft> <soft> <soft> <mask> <soft> <soft> ."
 
 
 This is also a template:
@@ -72,14 +72,13 @@ The ``loss_ids`` denotes which tokens' loss are computed.
     loss_ids: [0         , 0   , 0   , 1       , 0  ]
 
 
-New tokens and soft tokens are tokens that will be optimized separately from the PLM, where new tokens are randomly initialized, and soft tokens are initialized by specific tokens in the vocabulary.
-New tokens are denoted by ``new_ids`` and soft tokens are denoted by ``soft_ids``.
+Soft tokens are tokens that are optimized separately from the PLM.
+Soft tokens are denoted by ``soft_token_ids``, where ``<soft>`` is randomly initialized and ``<soft>a`` is initialized to ``a``'s embedding.
 
 .. code-block:: python
     
-    template: ['<text_a>', '<new>', '<new>', 'is', '<mask>', '<soft>a', '.']
-    new_ids : [0         , 1      , 1      , 0   , 0       , 0        , 0  ]
-    soft_ids: [0         , 0      , 0      , 0   , 0       , 1        , 0  ]
+    template:       ['<text_a>', '<soft>', '<soft>', 'is', '<mask>', '<soft>a', '.']
+    soft_token_ids: [0         , 1       , 1       , 0   , 0       , 1        , 0  ]
 
 
 Meta Information

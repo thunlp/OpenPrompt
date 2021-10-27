@@ -78,20 +78,13 @@ class Template(nn.Module):
         ]
         return idx
 
-    def get_default_new_token_ids(self) -> List[int]:
-        r'''
-        Sometimes tokens in the template are not from the vocabulary, 
-        but a sequence of newly iniliazed tokens (ones may say, soft-encoding).
-        In this case, you need to implement this function.
-
-        Raises:
-            NotImplementedError: if needed, add ``new_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.
-        '''
-        raise NotImplementedError
-
     def get_default_soft_token_ids(self) -> List[int]:
         r'''
         This function identifies which tokens are soft tokens.
+
+        Sometimes tokens in the template are not from the vocabulary, 
+        but a sequence of soft tokens.
+        In this case, you need to implement this function
 
         Raises:
             NotImplementedError: if needed, add ``soft_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.

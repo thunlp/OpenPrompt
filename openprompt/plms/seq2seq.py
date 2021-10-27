@@ -88,7 +88,7 @@ class T5TokenizerWrapper(TokenizerWrapper):
                     else:
                         raise KeyError("This tokenize doesn't specify{} token.".format(piece['text']))
 
-                if 'new_token_ids' in piece and piece['new_token_ids']!=0:
+                if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                     encode_text =  [0] # can be replace by any token, since these token will use their own embeddings
                 else: 
                     encode_text = self.tokenizer.encode(add_prefix_space + piece['text'], add_special_tokens=False)

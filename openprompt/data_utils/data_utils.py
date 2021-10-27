@@ -87,15 +87,15 @@ class InputFeatures(dict):
 
     ..  code-block:: python 
 
-        in_feat = InputFeatures(**{'input_ids':[1,4,5], 'new_token_ids': [3,4,5]})  # init from dict
-        print(in_feat.keys())       # ['input_ids, 'new_token_ids']
+        in_feat = InputFeatures(**{'input_ids':[1,4,5], 'soft_token_ids': [3,4,5]})  # init from dict
+        print(in_feat.keys())       # ['input_ids, 'soft_token_ids']
         in_feat['label'] = 3        # can assign value like normal dict
-        print(in_feat.keys())       # ['input_ids','label', 'new_token_ids'] (Note that it's also ordered)
+        print(in_feat.keys())       # ['input_ids','label', 'soft_token_ids'] (Note that it's also ordered)
         print(in_feat['label'])     # 3
         in_feat['alice'] = 0        # KeyError: Key alice not in predefined set of keys
         in_feat.values()            # [[1,4,5], 3, [3,4,5]]  (Note that it's also ordered)
         [in_feat[key] for key in in_feat]   # [[1,4,5], 3, [3,4,5]]
-        new_dict= {**in_feat, 'new_key':2}  # new_dict is {'input_ids': [1, 4, 5], 'label': 3, 'new_token_ids': [3, 4, 5], 'new_key': 2}
+        new_dict= {**in_feat, 'new_key':2}  # new_dict is {'input_ids': [1, 4, 5], 'label': 3, 'soft_token_ids': [3, 4, 5], 'new_key': 2}
 
     Args:
         input_ids: Indices of input sequence tokens in the vocabulary.
@@ -108,10 +108,10 @@ class InputFeatures(dict):
             float for regression problems.
     """
     tensorable_keys = ['input_ids', 'inputs_embeds', 'attention_mask', 'token_type_ids', 'label',
-        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 'new_token_ids',
+        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 
         'past_key_values', 'loss_ids']
     all_keys = ['input_ids', 'inputs_embeds', 'attention_mask', 'token_type_ids', 'label',
-        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 'new_token_ids',
+        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 
         'past_key_values', 'loss_ids', 'guid', 'tgt_text']
     non_tensorable_keys = []
 
@@ -124,7 +124,6 @@ class InputFeatures(dict):
                 decoder_input_ids: Optional[Union[List, torch.Tensor]] = None,
                 decoder_inputs_embeds: Optional[torch.Tensor] = None,
                 soft_token_ids: Optional[Union[List, torch.Tensor]] = None,
-                new_token_ids: Optional[Union[List, torch.Tensor]] = None,
                 past_key_values: Optional[torch.Tensor] = None,  # for prefix_tuning
                 loss_ids: Optional[Union[List, torch.Tensor]] = None,
                 guid: Optional[str] = None,
@@ -140,7 +139,6 @@ class InputFeatures(dict):
         self.decoder_input_ids = decoder_input_ids
         self.decoder_inputs_embeds = decoder_inputs_embeds
         self.soft_token_ids = soft_token_ids
-        self.new_token_ids = new_token_ids
         self.past_key_values = past_key_values
         self.loss_ids = loss_ids
         self.guid = guid

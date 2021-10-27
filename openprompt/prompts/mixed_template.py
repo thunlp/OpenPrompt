@@ -15,34 +15,49 @@ from openprompt.prompts import ManualTemplate, ManualVerbalizer
 import torch
 from torch import nn
 
-class SoftManualTemplate(ManualTemplate):
-    registered_inputflag_names = ["soft_token_ids", "loss_ids", "shortenable_ids"]
+class MixedTemplate(ManualTemplate):
+    """Mixed of manual token, trainable token and trainable that initialized with given hard token
+
+    Args:
+        model (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.
+        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
+        prompt_encoder_type (:obj:`str`): head above the embedding layer of trainable tokens. Can be ``mlp`` or ``None``
+        text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.
+        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``<mask>``
+        mixed_token_start (:obj:`str`, optional): The special mark for the start of the trainable token. Default to ``{``
+        mixed_token_end (:obj:`str`, optional): The special mark for the end of the trainable token. Default to ``}``
+        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{'<text_a>': 'text_a', '<text_b>': 'text_b'}``
+    """
+    registered_inputflag_names = ["trainable_token_ids", "loss_ids", "shortenable_ids"]
+
 
     def __init__(self,
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  text: Optional[str] = None,
-                 mask_token: str = '<mask>',
-                 soft_token: str = '<soft>',
-                 placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
+                 prompt_encoder_type: Optional[str] = None,
+                 mask_token: Optional[str] = '<mask>',
+                 trainable_token: Optional[str] = '<train>',
+                 placeholder_mapping: dict = {'<text_a>':'text_a', '<text_b>':'text_b'},
                 ):
         super().__init__(tokenizer=tokenizer, 
                          mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.raw_embedding = model.get_input_embeddings()
         self.embedding_size = self.raw_embedding.weight.shape[-1]
-        self.soft_token = soft_token
+        self.trainable_token = self.trainable_token
+        self.prompt_encoder_type = prompt_encoder_type
         self.text = text
     
-    def get_default_soft_token_ids(self) -> List[int]:
-        r"""get the soft token indices for the template
-        e.g. when self.text is ['<text_a>', '<soft>It', '<soft>is', '<mask>', '.'],
-        output is [0, 1, 2, 0, 0]
+    def get_default_trainable_token_ids(self) -> List[int]:
+        r"""get the trainable token indices for the template
+        e.g. when self.text is ['<train>1', '<text_a>', '<train>2:is', '<train>1', '<mask>', '.'],
+        output is [1, 0, 2, 1, 0, 0]
         """
         idx = []
         num_soft_token = 0
         for token in self.text:
-            if token.startswith(self.soft_token):
+            if token.startswith(self.soft_):
                 num_soft_token += 1
                 idx.append(num_soft_token)
             else:
