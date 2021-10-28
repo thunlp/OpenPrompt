@@ -23,9 +23,13 @@ from openprompt.utils.cuda import model_to_device
 def get_config():
     parser = argparse.ArgumentParser("classification config")
     parser.add_argument("--config_yaml", type=str, help='the configuration file for this experiment.')
-    parser.add_argument("--resume", type=str, help='a specified logging path to resume training.\
-           It will fall back to run from initialization if no lastest checkpoint are found.')
-    parser.add_argument("--test", type=str, help='a specified logging path to test')
+    parser.add_argument("--resume", type=str, help="""
+        a specified logging path to resume training.
+        It will fall back to run from initialization if no lastest checkpoint are found.
+        should be the log base path but not the exact ckpt path
+        e.g. logs/agnews_bert-large-cased_manual_template_manual_verbalizer_211028105617
+    """)
+    parser.add_argument("--test", type=str, help='a specified log base path to test, usage is similar to --resume')
     args = parser.parse_args()
     config = get_yaml_config(args.config_yaml)
     check_config_conflicts(config)

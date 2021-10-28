@@ -1,0 +1,1 @@
+ A {"mask"} news : {"placeholder": "text_a"} {"placeholder": "text_b"}

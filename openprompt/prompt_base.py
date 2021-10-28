@@ -42,7 +42,7 @@ class Template(nn.Module):
         self.placeholder_mapping = placeholder_mapping
         self._in_on_text_set = False
 
-    def get_default_loss_ids(self):
+    def get_default_loss_ids(self) -> List[int]:
         r'''Get the loss indices for the template using mask.
         E.g. when self.text is ``['<text_a>', 'it', 'is', '<mask>', '.']``, output is ``[0, 0, 0, 1, 0]``.
 
@@ -105,10 +105,10 @@ class Template(nn.Module):
         text = self.text.copy()
         for placeholder_token in self.placeholder_mapping:
             for i in range(len(text)):
-                text[i] = text[i].replace(placeholder_token, getattr(example, self.placeholder_mapping[placeholder_token]))
+                text[i] = " " + text[i].replace(placeholder_token, getattr(example, self.placeholder_mapping[placeholder_token]))
         for key, value in example.meta.items():
             for i in range(len(text)):
-                text[i] = text[i].replace("<meta:"+key+">", value)
+                text[i] = " " + text[i].replace("<meta:"+key+">", value)
         return text
     
     # @abstractmethod
@@ -147,7 +147,7 @@ class Template(nn.Module):
                     v = getattr(self, inputflag_name)
                 elif hasattr(self, "get_default_"+inputflag_name):
                     v = getattr(self, "get_default_"+inputflag_name)()
-                    setattr(self, inputflag_name, v) # cache TODO test this
+                    setattr(self, inputflag_name, v) # cache 
                 else:
                     raise ValueError("""
                     Template's inputflag '{}' is registered but not initialize.
@@ -194,8 +194,6 @@ class Template(nn.Module):
         self._text = text
         if text is None:
             return
-        if (not isinstance(text, list)) and (not isinstance(text, tuple)):
-            raise ValueError("Template text must be a list or a tuple")
         if not self._in_on_text_set:
             self.safe_on_text_set()
         # else:
@@ -205,7 +203,7 @@ class Template(nn.Module):
         r"""With this wrapper function, setting text inside ``on_text_set()``
             will not trigger ``on_text_set()`` again to prevent endless recursion.
         """
-        self._in_on_text_sett = True
+        self._in_on_text_set = True
         self.on_text_set()
         self._in_on_text_set = False
    
@@ -231,6 +229,7 @@ class Template(nn.Module):
         with open(path, 'r') as fin:
             text = fin.readlines()[choice]
             text = text.strip().split(separator)
+            logger.info(f"using template: {text}")
         self.text = text
         return self
 

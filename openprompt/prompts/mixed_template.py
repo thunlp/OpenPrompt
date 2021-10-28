@@ -1,8 +1,7 @@
 
 import os
+import string
 from openprompt.utils.logging import logger
-
-
 
 from openprompt.data_utils.data_utils import InputExample, InputFeatures
 from typing import *
@@ -34,16 +33,20 @@ class MixedTemplate(Template):
                  mixed_token_start: Optional[str] = '{',
                  mixed_token_end: Optional[str] = '}',
                 ):
-
-        self.tokenizer = self.tokenizer
+        
+        super().__init__(tokenizer)
 
         self.raw_embedding = model.get_input_embeddings()
         self.embedding_size = self.raw_embedding.weight.shape[-1]
+
+        self.mixed_token_start = mixed_token_start
+        self.mixed_token_end = mixed_token_end
+
         self.text = text
 
-    def get_default_loss_ids(self):
+    def get_default_loss_ids(self) -> List[int]:
         '''Get the loss indices for the template using mask.
-        e.g. when self.text is ``'{"placeholder": "text_a"}. {"meta": "word"} is {"mask": True}.'``,
+        e.g. when self.text is ``'{"placeholder": "text_a"}. {"meta": "word"} is {"mask"}.'``,
         output is ``[0, 0, 0, 0, 1, 0]``.
 
         Returns:
@@ -57,9 +60,10 @@ class MixedTemplate(Template):
     def get_default_shortenable_ids(self) -> List[int]:
         """Every template needs shortenable_ids, denoting which part of the template can be trucate to fit
         the language model's ``max_seq_length``. Default: the input text is shortenable, while the template text and other
-        special tokens are not shortenable. As far as we are concerned, almost every template will use this default setting. 
-        e.g. when self.text is ``'{"placeholder": "text_a"}. {"meta": "word"} is {"mask": True}.'``,
-        output is ``[1, 0, 0, 0, 0, 0]``.
+        special tokens are not shortenable. 
+
+        e.g. when self.text is ``'{"placeholder": "text_a"} {"placeholder": "text_b", "shortenable": False} {"meta": "word"} is {"mask"}.'``,
+        output is ``[1, 0, 0, 0, 0, 0, 0]``.
         
         Returns:
             :obj:`List[int]`: A list of integers in the range ``[0, 1]``:
@@ -67,7 +71,13 @@ class MixedTemplate(Template):
             - 1 for the input tokens.
             - 0 for the template sequence tokens.
         """
-        return [1 if 'placeholder' in d else 0 for d in self.text]
+        idx = []
+        for d in self.text:
+            if 'shortenable' in d:
+                idx.append(1 if d['shortenable'] else 0)
+            else:
+                idx.append(1 if 'placeholder' in d else 0)
+        return idx
 
     def get_default_soft_token_ids(self) -> List[int]:
         return self.soft_token_ids
@@ -78,10 +88,10 @@ class MixedTemplate(Template):
         ``"soft_id"`` can be used to reference the previous soft token, which means these tokens use the same embeddings.
         **Note that ``"soft_id"`` should have index start from 1 but not 0**
 
-        e.g. when self.text is ``'{"soft": None} {"soft": "the", "soft_id": 1} {"soft": None} {"soft": "it", "soft_id": 3} {"soft_id": 1} {"soft": "was"} {"mask": True}'``,
+        e.g. when self.text is ``'{"soft": None} {"soft": "the", "soft_id": 1} {"soft": None} {"soft": "it", "soft_id": 3} {"soft_id": 1} {"soft": "was"} {"mask"}'``,
         output is [1, 2, 3, 4, 2, 5, 0]
 
-        TODO
+        TODO document here
         """
         num_soft_token = 0
         text = []
@@ -94,34 +104,45 @@ class MixedTemplate(Template):
                 soft_token_ids.append(0)
                 continue
 
+            old_num = num_soft_token
+
             if "soft_id" in d:
                 if not isinstance(d["soft_id"], int) or d["soft_id"] <= 0:
                     raise ValueError(f'soft_id should be integer greater than zero, but get {d["soft_id"]}')
                 if d["soft_id"] in idx_mp:
-                    previous_ids = idx_mp[d["soft_id"]]
+                    id_list = idx_mp[d["soft_id"]]
                     text.extend([{"soft"} for _ in range(len(id_list))])
-                    soft_token_ids.extend(previous_ids)
+                    soft_token_ids.extend(id_list)
                     continue
                 else:
                     if "soft" not in d: d["soft"] = None
-                    old_num = num_soft_token
 
             if d["soft"] is None:
-                num_soft_token += 1
+                if "duplicate" in d:
+                    if "same" in d and d["same"]:
+                        num_soft_token += 1
+                        id_list = [num_soft_token for _ in range(len(d["duplicate"]))]
+                    else:
+                        num_soft_token += d["duplicate"]
+                        id_list = list(range(old_num+1, num_soft_token+1))
+                else:
+                    num_soft_token += 1
+                    id_list = [num_soft_token]
+
             else:
-                token_ids = self.tokenizer(d["add_prefix"] + d["soft"], add_special_tokens=False)["input_ids"]
-                if len(token_ids) > 1 and d.get("single_token", "True"):
-                    logger.warning(f"""
-                    soft prompt's hard prompt {d["soft"]} tokenize to more than one tokens: {self.tokenizer.convert_ids_to_tokens(token_ids)}
-                    By default we use the first token {self.tokenizer.convert_ids_to_tokens(token_ids)[0]}.
-                    You can use {{"soft": "complicated", "single_token": False}} to support multiple tokens
-                    """)
-                    token_ids = token_ids[:1]
+                token_ids = self.tokenizer(d["add_prefix_space"] + d["soft"], add_special_tokens=False)["input_ids"]
+                # if len(token_ids) > 1 and d.get("single_token", "True"):
+                #     logger.warning(f"""
+                #     soft prompt's hard prompt {d["soft"]} tokenize to more than one tokens: {self.tokenizer.convert_ids_to_tokens(token_ids)}
+                #     By default we use the first token {self.tokenizer.convert_ids_to_tokens(token_ids)[0]}.
+                #     You can use {{"soft": "complicated", "single_token": False}} to support multiple tokens
+                #     """)
+                #     token_ids = token_ids[:1]
                 num_soft_token += len(token_ids)
-                for idx, soft_id in enumerate(list(range(old_num+1, num_soft_token+1))):
+                id_list = list(range(old_num+1, num_soft_token+1))
+                for idx, soft_id in enumerate(id_list):
                     emb_mp[soft_id] = token_ids[idx]
 
-            id_list = list(range(old_num+1, num_soft_token+1))
             text.extend([{"soft"} for _ in range(len(id_list))])
             soft_token_ids.extend(id_list)
 
@@ -145,15 +166,12 @@ class MixedTemplate(Template):
                 raise ValueError(f'post_processing of {d["post_processing"]} is not supported yet')
 
     def parse_text(self, text: str) -> List[Dict]:
-        if not isinstance(text, str):
-            raise ValueError("text of mixed_template should be str type")
-
         parsed = []
         i = 0
         while i < len(text):
-            d = {"add_prefix": ' ' if (i > 0 and text[i-1] == ' ') else ''}
+            d = {"add_prefix_space": ' ' if (i > 0 and text[i-1] == ' ') else ''}
             while i < len(text) and text[i] == ' ':
-                d["add_prefix"] = ' '
+                d["add_prefix_space"] = ' '
                 i = i + 1
             if i == len(text): break
 
@@ -163,7 +181,7 @@ class MixedTemplate(Template):
                     if text[j] == self.mixed_token_start:
                         break
                     j = j + 1
-                d["text"] = text[i:j]
+                d["text"] = text[i:j].rstrip(' ')
                 i = j
 
             else:
@@ -176,7 +194,10 @@ class MixedTemplate(Template):
                     raise ValueError(f"mixed_token_start {self.mixed_token_start} at position {i} has no corresponding mixed_token_end {self.mixed_token_end}")
                 dict_str = '{'+text[i+1:j]+'}'
                 try:
-                    d.update(eval(dict_str))
+                    val = eval(dict_str)
+                    if isinstance(val, set):
+                        val = {k: None for k in val}
+                    d.update(val)
                 except:
                     import traceback
                     print(traceback.format_exc())
@@ -187,6 +208,7 @@ class MixedTemplate(Template):
             parsed.append(d)
 
         return parsed
+
 
     def on_text_set(self):
         """
@@ -200,26 +222,26 @@ class MixedTemplate(Template):
         self.text = self.parse_text(self.text)
         self.prepare()
 
+
     def incorporate_text_example(self,
                                  example: InputExample
                                 ):
         text = self.text.copy()
         for i, d in enumerate(text):
             if 'placeholder' in d:
-                text[i] = d.get("post_processing", lambda x:x)(
-                    getattr(example, self.placeholder_mapping[d['placeholder']])
-                )
+                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example, d['placeholder']))
             elif 'meta' in d:
-                text[i] = d.get("post_processing", lambda x:x)(
-                    getattr(example.meta, d['meta'])
-                )
+                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example.meta, d['meta']))
             elif 'soft' in d:
                 text[i] = ''; # unused
+            elif 'mask' in d:
+                text[i] = '<mask>'
             elif 'text' in d:
-                text[i] = d['text']
+                text[i] = d["add_prefix_space"] + d['text']
             else:
                 raise ValueError(f'can not parse {d}')
         return text
+
 
     def process_batch(self, batch: Union[Dict, InputFeatures]) -> Union[Dict, InputFeatures]:
         """
@@ -247,6 +269,7 @@ class MixedTemplate(Template):
             choice (:obj:`int`): The id-th line of the file.
         '''
         with open(path, 'r') as fin:
-            text = fin.readlines()[choice]
+            text = fin.readlines()[choice].rstrip()
+            logger.info(f"using template: {text}")
         self.text = text
         return self

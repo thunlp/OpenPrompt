@@ -69,14 +69,13 @@ class LMTokenizerWrapper(TokenizerWrapper):
             if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                 encode_text =  [0] # can be replace by any token, since these token will use their own embeddings
             else: 
-                add_prefix = piece.get('add_prefix', ' ') # whether to add prefix space 
-                encode_text = self.tokenizer.encode(add_prefix + piece['text'], add_special_tokens=False)
+                encode_text = self.tokenizer.encode(piece['text'], add_special_tokens=False)
             
             encoding_length = len(encode_text)
             
             encoder_inputs['input_ids'].append(encode_text)
             for key in piece:
-                if key!='text':
+                if key not in ['text']:
                     encoder_inputs[key].append([piece[key]]*encoding_length)
 
         encoder_inputs = self.truncate(encoder_inputs=encoder_inputs)

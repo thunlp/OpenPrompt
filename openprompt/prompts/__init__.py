@@ -7,6 +7,7 @@ from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.utils.dummy_pt_objects import PreTrainedModel
 from .manual_template import ManualTemplate
 from .manual_verbalizer import ManualVerbalizer
+from .mixed_template import MixedTemplate
 from .one2one_verbalizer import One2oneVerbalizer
 from .automatic_verbalizer import AutomaticVerbalizer
 from .prefix_tuning_template import PrefixTuningTemplate
@@ -21,6 +22,7 @@ from .prompt_generator import T5TemplateGenerator, TemplateGenerator, Verbalizer
 
 TEMPLATE_CLASS = {
     'manual_template': ManualTemplate,
+    'mixed_template': MixedTemplate,
     'ptuning_template': PtuningTemplate,
     'soft_manual_template': SoftManualTemplate,
     'ptr_template': PTRTemplate,
