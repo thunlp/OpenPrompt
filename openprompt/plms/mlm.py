@@ -27,15 +27,14 @@ class MLMTokenizerWrapper(TokenizerWrapper):
         '''
         wrapped_example, others = wrapped_example
         encoder_inputs = defaultdict(list)
-        add_prefix_space = " " # Whether adding a space before the first word.
         for piece in wrapped_example:
             if piece['loss_ids']==1:
                 encode_text = [self.mask_token_ids]
             elif 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                 encode_text = [0] # can be replace by any token, since these token will use their own embeddings
             else:
-                encode_text = self.tokenizer.encode(add_prefix_space+piece['text'], add_special_tokens=False)
-            add_prefix_space = " "
+                add_prefix = piece.get('add_prefix', ' ') # whether to add prefix space 
+                encode_text = self.tokenizer.encode(add_prefix + piece['text'], add_special_tokens=False)
             encoding_length = len(encode_text)
             encoder_inputs['input_ids'].append(encode_text)
             for key in piece:

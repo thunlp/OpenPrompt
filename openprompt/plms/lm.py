@@ -49,7 +49,6 @@ class LMTokenizerWrapper(TokenizerWrapper):
 
         num_mask_token_used = 0
         
-        add_prefix_space = " "# Whether adding a space before the first word.
         for piece_id, piece in enumerate(wrapped_example):
             if len(piece['text']) == 0:
                 continue
@@ -70,9 +69,9 @@ class LMTokenizerWrapper(TokenizerWrapper):
             if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                 encode_text =  [0] # can be replace by any token, since these token will use their own embeddings
             else: 
-                encode_text = self.tokenizer.encode(add_prefix_space + piece['text'], add_special_tokens=False)
+                add_prefix = piece.get('add_prefix', ' ') # whether to add prefix space 
+                encode_text = self.tokenizer.encode(add_prefix + piece['text'], add_special_tokens=False)
             
-            add_prefix_space = " "
             encoding_length = len(encode_text)
             
             encoder_inputs['input_ids'].append(encode_text)

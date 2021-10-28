@@ -21,7 +21,7 @@ class SoftManualTemplate(ManualTemplate):
     def __init__(self,
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
-                 text: Optional[str] = None,
+                 text: Optional[List[str]] = None,
                  mask_token: str = '<mask>',
                  soft_token: str = '<soft>',
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
