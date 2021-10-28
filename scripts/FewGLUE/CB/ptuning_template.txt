@@ -1,1 +1,1 @@
-<text_a> [SEP] <text_b> ? <new> answer : <mask>
+<text_a> [SEP] <text_b> ? <soft> answer : <mask>

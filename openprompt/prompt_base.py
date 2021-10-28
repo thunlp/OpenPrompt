@@ -37,12 +37,12 @@ class Template(nn.Module):
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
         super().__init__()
-        self.mask_token = mask_token
         self.tokenizer = tokenizer
+        self.mask_token = mask_token
         self.placeholder_mapping = placeholder_mapping
         self._in_on_text_set = False
 
-    def get_default_loss_ids(self):
+    def get_default_loss_ids(self) -> List[int]:
         r'''Get the loss indices for the template using mask.
         E.g. when self.text is ``['<text_a>', 'it', 'is', '<mask>', '.']``, output is ``[0, 0, 0, 1, 0]``.
 
@@ -78,25 +78,38 @@ class Template(nn.Module):
         ]
         return idx
 
-    def get_default_new_token_ids(self) -> List[int]:
-        r'''
-        Sometimes tokens in the template are not from the vocabulary, 
-        but a sequence of newly iniliazed tokens (ones may say, soft-encoding).
-        In this case, you need to implement this function.
-
-        Raises:
-            NotImplementedError: if needed, add ``new_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.
-        '''
-        raise NotImplementedError
-
     def get_default_soft_token_ids(self) -> List[int]:
         r'''
         This function identifies which tokens are soft tokens.
+
+        Sometimes tokens in the template are not from the vocabulary, 
+        but a sequence of soft tokens.
+        In this case, you need to implement this function
 
         Raises:
             NotImplementedError: if needed, add ``soft_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.
         '''
         raise NotImplementedError
+
+    def incorporate_text_example(self,
+                                 example: InputExample
+                                ) -> List[str]:
+        """Given an example, replace placeholder of text_a, text_b and meta information by real data
+
+        Args:
+            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.
+
+        Returns:
+            List[str]: a list of str of the same length as self.text. the placeholder and meta information are replaced by real data information.
+        """
+        text = self.text.copy()
+        for placeholder_token in self.placeholder_mapping:
+            for i in range(len(text)):
+                text[i] = " " + text[i].replace(placeholder_token, getattr(example, self.placeholder_mapping[placeholder_token]))
+        for key, value in example.meta.items():
+            for i in range(len(text)):
+                text[i] = " " + text[i].replace("<meta:"+key+">", value)
+        return text
     
     # @abstractmethod
     def wrap_one_example(self, 
@@ -110,27 +123,21 @@ class Template(nn.Module):
         these attributes are broadcasted along the tokenized sentence.
         
         Args:
-            example (:obj:`Object`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.
+            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.
        
         Returns:
-            :obj:`List[Dict]`
+            :obj:`List[Dict]` a list of dict of the same length as self.text. e.g. [{"loss_ids": 0, "text": "It was"}, {"loss_ids": 1, "text": "<mask>"}, ]
         '''
         
-        not_empty_keys = example.keys()
         if self.text is None:
             raise ValueError("template text has not been initialized")
         if isinstance(example, InputExample):
-            text = self.text.copy()
+            text = self.incorporate_text_example(example)
+
+            not_empty_keys = example.keys()
             for placeholder_token in self.placeholder_mapping:
-                for i in range(len(text)):
-                    text[i] = text[i].replace(placeholder_token, getattr(example, self.placeholder_mapping[placeholder_token]))
-                not_empty_keys.remove(self.placeholder_mapping[placeholder_token]) # this key has been processed, remove
-            for key, value in example.meta.items():
-                for i in range(len(text)):
-                    text[i] = text[i].replace("<meta:"+key+">", value)
+                not_empty_keys.remove(self.placeholder_mapping[placeholder_token]) # placeholder has been processed, remove
             not_empty_keys.remove('meta') # meta has been processed
-            # TODO <a!> rstrip punctuation support
-            # print(text) # for debug
 
             keys, values= ['text'], [text]
             for inputflag_name in self.registered_inputflag_names:
@@ -140,6 +147,7 @@ class Template(nn.Module):
                     v = getattr(self, inputflag_name)
                 elif hasattr(self, "get_default_"+inputflag_name):
                     v = getattr(self, "get_default_"+inputflag_name)()
+                    setattr(self, inputflag_name, v) # cache 
                 else:
                     raise ValueError("""
                     Template's inputflag '{}' is registered but not initialize.
@@ -162,10 +170,9 @@ class Template(nn.Module):
     
     @abstractmethod
     def process_batch(self, batch):
-        r"""All template should rewrite this method to process the batch input
-        such as substituting embeddings.
+        r"""Template should rewrite this method if you need to process the batch input such as substituting embeddings.
         """
-        raise NotImplementedError
+        return batch # not being processed
 
     def save(self,
              path: str,
@@ -187,8 +194,6 @@ class Template(nn.Module):
         self._text = text
         if text is None:
             return
-        if (not isinstance(text, list)) and (not isinstance(text, tuple)):
-            raise ValueError("Template text must be a list or a tuple")
         if not self._in_on_text_set:
             self.safe_on_text_set()
         # else:
@@ -198,7 +203,7 @@ class Template(nn.Module):
         r"""With this wrapper function, setting text inside ``on_text_set()``
             will not trigger ``on_text_set()`` again to prevent endless recursion.
         """
-        self._in_on_text_sett = True
+        self._in_on_text_set = True
         self.on_text_set()
         self._in_on_text_set = False
    
@@ -224,6 +229,7 @@ class Template(nn.Module):
         with open(path, 'r') as fin:
             text = fin.readlines()[choice]
             text = text.strip().split(separator)
+            logger.info(f"using template: {text}")
         self.text = text
         return self
 

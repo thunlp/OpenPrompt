@@ -160,7 +160,7 @@ class TokenizerWrapper:
             else:
                 special_tokens_mask = np.array(self.tokenizer.get_special_tokens_mask(encoder_inputs[key]))
                 with_special_tokens = np.array(self.tokenizer.build_inputs_with_special_tokens(encoder_inputs[key]))  
-                if key in ["new_token_ids", "soft_token_ids"]: # TODO maybe more than these two
+                if key in ["soft_token_ids"]: # TODO maybe more than this
                     encoder_inputs[key] =  ((1-special_tokens_mask) * with_special_tokens).tolist() # use 0 as special
                 else:
                     encoder_inputs[key] =  ((1-special_tokens_mask) * with_special_tokens - special_tokens_mask*100).tolist() # use -100 as special

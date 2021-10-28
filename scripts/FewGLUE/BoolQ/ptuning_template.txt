@@ -1,1 +1,1 @@
-<text_a> Question: <text_b> ? <new> <new> Answer: <mask> .
+<text_a> Question: <text_b> ? <soft> <soft> Answer: <mask> .
