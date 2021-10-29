@@ -17,7 +17,7 @@ class PTRTemplate(PtuningTemplate):
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
         text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.
         mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``<mask>``
-        new_token (:obj:`str`, optional): The special token for new token. Default to ``<new>``
+        soft_token (:obj:`str`, optional): The special token for soft token. Default to ``<soft>``
         placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{'<text_a>': 'text_a', '<text_b>': 'text_b'}``
     """
     def __init__(self, 
@@ -25,7 +25,7 @@ class PTRTemplate(PtuningTemplate):
                  tokenizer: PreTrainedTokenizer,
                  text:  Optional[str] = None,
                  mask_token: str = '<mask>',
-                 new_token: str = '<new>',
+                 soft_token: str = '<soft>',
                  placeholder_mapping: dict = {'<text_a>':'text_a', '<text_b>':'text_b'},
                 ):
         super().__init__(model=model,
@@ -33,7 +33,7 @@ class PTRTemplate(PtuningTemplate):
                          prompt_encoder_type="mlp",
                          text=text,
                          mask_token=mask_token,
-                         new_token=new_token,
+                         soft_token=soft_token,
                          placeholder_mapping=placeholder_mapping)
 
 

@@ -49,15 +49,15 @@ class SoftTemplate(Template):
         self.initialize_from_vocab = initialize_from_vocab
 
         self.text = text 
-        self.default_text1 = "<text_a> <mask>".split()
-        self.default_text2 = "<text_a> <text_b> <mask>".split()
+        # self.default_text1 = {"placeholder<text_a> <mask>"
+        # self.default_text2 = "<text_a> <text_b> <mask>".split()
 
         if self.num_tokens>0:
             self.generate_parameters()
 
 
     def on_text_set(self):
-        pass
+        self.text = self.parse_text(self.text)
 
     def wrap_one_example(self, example) -> List[Dict]:  #TODO this automatic generated template may not be able to process diverse data format.
         if self.text is None:

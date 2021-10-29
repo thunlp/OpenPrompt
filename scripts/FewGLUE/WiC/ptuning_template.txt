@@ -1,1 +1,1 @@
-<text_a> [SEP] <text_b> <new> <meta:word>? <new> <mask>
+<text_a> [SEP] <text_b> <soft> <meta:word>? <soft> <mask>

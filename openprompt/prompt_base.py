@@ -36,14 +36,19 @@ class Template(nn.Module):
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
         super().__init__()
-        self.mask_token = mask_token
         self.tokenizer = tokenizer
+        self.mask_token = mask_token
         self.placeholder_mapping = placeholder_mapping
         self._in_on_text_set = False
 
-    def get_default_loss_ids(self):
-        r'''Get the loss indices for the template using mask.
-        E.g. when self.text is ``['<text_a>', 'it', 'is', '<mask>', '.']``, output is ``[0, 0, 0, 1, 0]``.
+        self.mixed_token_start = "{"
+        self.mixed_token_end = "}"
+
+
+    def get_default_loss_ids(self) -> List[int]:
+        '''Get the loss indices for the template using mask.
+        e.g. when self.text is ``'{"placeholder": "text_a"}. {"meta": "word"} is {"mask"}.'``,
+        output is ``[0, 0, 0, 0, 1, 0]``.
 
         Returns:
             :obj:`List[int]`: A list of integers in the range [0, 1]:
@@ -51,18 +56,15 @@ class Template(nn.Module):
             - 1 for a masked tokens.
             - 0 for a sequence tokens.
         '''
-        idx = [
-            1 if token==self.mask_token
-            else 0
-            for token in self.text
-        ]
-        return idx
+        return [1 if 'mask' in d else 0 for d in self.text]
 
     def get_default_shortenable_ids(self) -> List[int]:
-        r"""Every template needs shortenable_ids, denoting which part of the template can be trucate to fit
+        """Every template needs shortenable_ids, denoting which part of the template can be trucate to fit
         the language model's ``max_seq_length``. Default: the input text is shortenable, while the template text and other
-        special tokens are not shortenable. As far as we are concerned, almost every template will use this default setting. 
-        e.g. when self.text is ``['<text_a>', '<meta:word>', 'is', '<mask>', '.']``, output is ``[1, 0, 0, 0, 0]``
+        special tokens are not shortenable. 
+
+        e.g. when self.text is ``'{"placeholder": "text_a"} {"placeholder": "text_b", "shortenable": False} {"meta": "word"} is {"mask"}.'``,
+        output is ``[1, 0, 0, 0, 0, 0, 0]``.
         
         Returns:
             :obj:`List[int]`: A list of integers in the range ``[0, 1]``:
@@ -70,33 +72,110 @@ class Template(nn.Module):
             - 1 for the input tokens.
             - 0 for the template sequence tokens.
         """
-        idx = [
-            1 if any([placeholder in token for placeholder in self.placeholder_mapping.keys()])
-            else 0
-            for token in self.text
-        ]
+        idx = []
+        for d in self.text:
+            if 'shortenable' in d:
+                idx.append(1 if d['shortenable'] else 0)
+            else:
+                idx.append(1 if 'placeholder' in d else 0)
         return idx
-
-    def get_default_new_token_ids(self) -> List[int]:
-        r'''
-        Sometimes tokens in the template are not from the vocabulary, 
-        but a sequence of newly iniliazed tokens (ones may say, soft-encoding).
-        In this case, you need to implement this function.
-
-        Raises:
-            NotImplementedError: if needed, add ``new_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.
-        '''
-        raise NotImplementedError
 
     def get_default_soft_token_ids(self) -> List[int]:
         r'''
         This function identifies which tokens are soft tokens.
 
+        Sometimes tokens in the template are not from the vocabulary, 
+        but a sequence of soft tokens.
+        In this case, you need to implement this function
+
         Raises:
             NotImplementedError: if needed, add ``soft_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.
         '''
         raise NotImplementedError
+
+    def incorporate_text_example(self,
+                                 example: InputExample
+                                ) -> List[str]:
+        """Given an example, replace placeholder of text_a, text_b and meta information by real data
+
+        Args:
+            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.
+
+        Returns:
+            List[str]: a list of str of the same length as self.text. the placeholder and meta information are replaced by real data information.
+        """
+        text = self.text.copy()
+        for placeholder_token in self.placeholder_mapping:
+            for i in range(len(text)):
+                text[i] = " " + text[i].replace(placeholder_token, getattr(example, self.placeholder_mapping[placeholder_token]))
+        for key, value in example.meta.items():
+            for i in range(len(text)):
+                text[i] = " " + text[i].replace("<meta:"+key+">", value)
+        return text
     
+    def incorporate_text_example(self,
+                                 example: InputExample
+                                ):
+        text = self.text.copy()
+        for i, d in enumerate(text):
+            if 'placeholder' in d:
+                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example, d['placeholder']))
+            elif 'meta' in d:
+                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example.meta, d['meta']))
+            elif 'soft' in d:
+                raise RuntimeError("soft token not supported by SoftTemplate, please use hard template or use MixedTemplate instead.")
+            elif 'mask' in d:
+                text[i] = '<mask>'
+            elif 'text' in d:
+                text[i] = d["add_prefix_space"] + d['text']
+            else:
+                raise ValueError(f'can not parse {d}')
+        return text
+    
+    def parse_text(self, text: str) -> List[Dict]:
+        parsed = []
+        i = 0
+        while i < len(text):
+            d = {"add_prefix_space": ' ' if (i > 0 and text[i-1] == ' ') else ''}
+            while i < len(text) and text[i] == ' ':
+                d["add_prefix_space"] = ' '
+                i = i + 1
+            if i == len(text): break
+
+            if text[i] != self.mixed_token_start:
+                j = i + 1
+                while j < len(text):
+                    if text[j] == self.mixed_token_start:
+                        break
+                    j = j + 1
+                d["text"] = text[i:j].rstrip(' ')
+                i = j
+
+            else:
+                j = i + 1
+                while j < len(text):
+                    if text[j] == self.mixed_token_end:
+                        break
+                    j = j + 1
+                if j == len(text):
+                    raise ValueError(f"mixed_token_start {self.mixed_token_start} at position {i} has no corresponding mixed_token_end {self.mixed_token_end}")
+                dict_str = '{'+text[i+1:j]+'}'
+                try:
+                    val = eval(dict_str)
+                    if isinstance(val, set):
+                        val = {k: None for k in val}
+                    d.update(val)
+                except:
+                    import traceback
+                    print(traceback.format_exc())
+                    print(f"syntax error in {dict_str}")
+                    exit()
+                i = j + 1
+
+            parsed.append(d)
+
+        return parsed
+
     # @abstractmethod
     def wrap_one_example(self, 
                          example: InputExample) -> List[Dict]:
@@ -109,27 +188,21 @@ class Template(nn.Module):
         these attributes are broadcasted along the tokenized sentence.
         
         Args:
-            example (:obj:`Object`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.
+            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.
        
         Returns:
-            :obj:`List[Dict]`
+            :obj:`List[Dict]` a list of dict of the same length as self.text. e.g. [{"loss_ids": 0, "text": "It was"}, {"loss_ids": 1, "text": "<mask>"}, ]
         '''
         
-        not_empty_keys = example.keys()
         if self.text is None:
             raise ValueError("template text has not been initialized")
         if isinstance(example, InputExample):
-            text = self.text.copy()
+            text = self.incorporate_text_example(example)
+
+            not_empty_keys = example.keys()
             for placeholder_token in self.placeholder_mapping:
-                for i in range(len(text)):
-                    text[i] = text[i].replace(placeholder_token, getattr(example, self.placeholder_mapping[placeholder_token]))
-                not_empty_keys.remove(self.placeholder_mapping[placeholder_token]) # this key has been processed, remove
-            for key, value in example.meta.items():
-                for i in range(len(text)):
-                    text[i] = text[i].replace("<meta:"+key+">", value)
+                not_empty_keys.remove(self.placeholder_mapping[placeholder_token]) # placeholder has been processed, remove
             not_empty_keys.remove('meta') # meta has been processed
-            # TODO <a!> rstrip punctuation support
-            # print(text) # for debug
 
             keys, values= ['text'], [text]
             for inputflag_name in self.registered_inputflag_names:
@@ -139,6 +212,7 @@ class Template(nn.Module):
                     v = getattr(self, inputflag_name)
                 elif hasattr(self, "get_default_"+inputflag_name):
                     v = getattr(self, "get_default_"+inputflag_name)()
+                    setattr(self, inputflag_name, v) # cache 
                 else:
                     raise ValueError("""
                     Template's inputflag '{}' is registered but not initialize.
@@ -161,10 +235,9 @@ class Template(nn.Module):
     
     @abstractmethod
     def process_batch(self, batch):
-        r"""All template should rewrite this method to process the batch input
-        such as substituting embeddings.
+        r"""Template should rewrite this method if you need to process the batch input such as substituting embeddings.
         """
-        raise NotImplementedError
+        return batch # not being processed
 
     def save(self,
              path: str,
@@ -186,8 +259,6 @@ class Template(nn.Module):
         self._text = text
         if text is None:
             return
-        if (not isinstance(text, list)) and (not isinstance(text, tuple)):
-            raise ValueError("Template text must be a list or a tuple")
         if not self._in_on_text_set:
             self.safe_on_text_set()
         # else:
@@ -197,7 +268,7 @@ class Template(nn.Module):
         r"""With this wrapper function, setting text inside ``on_text_set()``
             will not trigger ``on_text_set()`` again to prevent endless recursion.
         """
-        self._in_on_text_sett = True
+        self._in_on_text_set = True
         self.on_text_set()
         self._in_on_text_set = False
    
@@ -210,19 +281,17 @@ class Template(nn.Module):
     def from_file(self,
                   path: str,
                   choice: int = 0,
-                  separator: str = " ",
-                  ):
+                 ):
         r'''
         Read the template from a local file.
 
         Args: 
             path (:obj:`str`): The path of the local template file.
             choice (:obj:`int`): The id-th line of the file.
-            separator (:obj:`str`, optional): A sparator to delimit the text in the file. Default to " "
         '''
         with open(path, 'r') as fin:
-            text = fin.readlines()[choice]
-            text = text.strip().split(separator)
+            text = fin.readlines()[choice].rstrip()
+            logger.info(f"using template: {text}")
         self.text = text
         return self
 

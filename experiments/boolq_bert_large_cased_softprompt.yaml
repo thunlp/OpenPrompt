@@ -14,7 +14,7 @@ plm:
       num_warmup_steps: 500
 
 dataloader:
-  max_seq_length: 394 # max_seq_length 
+  max_seq_length: 384 # max_seq_length 
   decoder_max_length: 3 # the decoder max length to truncate decoder input sequence
                     # if it is an encoder-decoder architecture. Note that it's not equavalent
                     # to generation.max_length which is used merely in the generation phase.
@@ -22,10 +22,10 @@ dataloader:
   decode_from_pad: false
 
 train:
-  batch_size: 8
-  gradient_accumulation_steps: 1
+  batch_size: 4
+  gradient_accumulation_steps: 2
   max_grad_norm: 1.0
-  num_epochs:
+  num_epochs: 
   num_training_steps: 30000
 
 

@@ -24,18 +24,13 @@ dev:
 
 
 
-template: manual_template
+template: mixed_template
 verbalizer: manual_verbalizer
 
 
-manual_template:
+mixed_template:
   choice: 0
-  file_path: scripts/TextClassification/agnews/manual_template.txt
-
-
-one2one_verbalizer:
-  choice: 0
-  file_path: scripts/TextClassification/agnews/manual_verbalizer.txt
+  file_path: scripts/TextClassification/agnews/mixed_template.txt
 
 manual_verbalizer:
   choice: 0
@@ -60,5 +55,3 @@ sampling_from_train:
   num_examples_per_label_dev: 10
   seed:
     - 123
-    - 456
-
