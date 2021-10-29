@@ -59,5 +59,7 @@ sampling_from_train:
   num_examples_per_label: 10
   also_sample_dev: True
   num_examples_per_label_dev: 10
-  seed: 123
+  seed:
+    - 123
+    - 456
 

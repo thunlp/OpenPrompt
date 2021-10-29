@@ -43,7 +43,7 @@ class SoftTemplate(Template):
         super().__init__(tokenizer=tokenizer,
                          mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
-        self.wte = model.get_input_embeddings()
+        self.raw_embedding = model.get_input_embeddings()
         self.random_range = random_range
         self.num_tokens = num_tokens
         self.initialize_from_vocab = initialize_from_vocab
@@ -55,31 +55,18 @@ class SoftTemplate(Template):
         if self.num_tokens>0:
             self.generate_parameters()
 
+
     def on_text_set(self):
         pass
 
     def wrap_one_example(self, example) -> List[Dict]:  #TODO this automatic generated template may not be able to process diverse data format.
         if self.text is None:
+            logger.warning("You didn't provide text templat efor softprompt. Using default template, is this intended?")
             if example.text_b is None:
                 self.text = self.default_text1
             else:
                 self.text = self.default_text2
         return super().wrap_one_example(example)
-    
-    
-    def named_parameters(self, prefix: str = '', recurse: bool = True) -> Iterator[Tuple[str, Parameter]]:
-        r""" Filter the pretrained models's nn.Embeddding Layers. Because this layer 
-        should be optimized with the pretrained models's optimizer. And should not be
-        optimized twice unexpectedly. But the str(self) will still return the `wte` field,
-        don't worry, it won't be optimized with the template. 
-        """
-        gen = self._named_members(
-            lambda module: module._parameters.items(),
-            prefix=prefix, recurse=recurse)
-        for elem in gen:
-            if 'wte' not in elem[0]:
-                yield elem
-
 
 
     def generate_parameters(self) -> None:
@@ -88,8 +75,8 @@ class SoftTemplate(Template):
         for soft tokens, use a new embedding layer which is initialized with their corresponding embedding of hard tokens
         """
         if self.initialize_from_vocab:
-            soft_embeds = self.wte.weight[:self.num_tokens].clone().detach()
-        soft_embeds = torch.FloatTensor(self.num_tokens, self.wte.weight.size(1)).uniform_(-self.random_range, self.random_range)
+            soft_embeds = self.raw_embedding.weight[:self.num_tokens].clone().detach()
+        soft_embeds = torch.FloatTensor(self.num_tokens, self.raw_embedding.weight.size(1)).uniform_(-self.random_range, self.random_range)
         self.soft_embeds = nn.Parameter(soft_embeds, requires_grad=True)
 
 
@@ -100,7 +87,7 @@ class SoftTemplate(Template):
         for normal tokens, use the embedding layer of PLM
         for soft tokens, use a new embedding layer which is initialized with their corresponding embedding of hard tokens
         """
-        inputs_embeds = self.wte(batch['input_ids'])
+        inputs_embeds = self.raw_embedding(batch['input_ids'])
         batch_size = inputs_embeds.size(0)
         if self.num_tokens>0:
             soft_embeds = self.soft_embeds.repeat(batch_size, 1, 1)

@@ -32,7 +32,8 @@ sampling_from_train:
   num_examples_per_label: 100
   also_sample_dev: True
   num_examples_per_label_dev: 100
-  seed: 123
+  seed:
+    - 123
 
 template: manual_template
 verbalizer: 

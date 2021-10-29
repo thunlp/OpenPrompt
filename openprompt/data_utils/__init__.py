@@ -8,6 +8,8 @@ from .conditional_generation_dataset import PROCESSORS as CG_PROCESSORS
 from .utils import InputExample, InputFeatures
 from .data_sampler import FewShotSampler
 # support loading transformers datasets from https://huggingface.co/docs/datasets/
+from .lmbff_dataset import PROCESSORS as LMBFF_PROCESSORS
+
 from openprompt.utils.logging import logger
 from openprompt.data_utils.huggingface_dataset import PROCESSORS as HF_PROCESSORS
 
@@ -20,9 +22,11 @@ PROCESSORS = {
     **CG_PROCESSORS,
     **LAMA_PROCESSORS,
     **HF_PROCESSORS,
+    **LMBFF_PROCESSORS,
 }
 
-def load_dataset(config: CfgNode, return_class=True):
+
+def load_dataset(config: CfgNode, return_class=True, test=False):
     r"""A plm loader using a global config.
     It will load the train, valid, and test set (if exists) simulatenously.
     
@@ -40,21 +44,25 @@ def load_dataset(config: CfgNode, return_class=True):
     dataset_config = config.dataset
 
     processor = PROCESSORS[dataset_config.name.lower()]()
-    try:
-        train_dataset = processor.get_train_examples(dataset_config.path)
-    except FileNotFoundError:
-        logger.warning("Has no training dataset.")
-        train_dataset = None
-    try:
-        valid_dataset = processor.get_dev_examples(dataset_config.path)
-    except FileNotFoundError:
-        logger.warning("Has no valid dataset.")
-        valid_dataset = None
+
+    train_dataset = None
+    valid_dataset = None
+    if not test:
+        try:
+            train_dataset = processor.get_train_examples(dataset_config.path)
+        except FileNotFoundError:
+            logger.warning("Has no training dataset.")
+        try:
+            valid_dataset = processor.get_dev_examples(dataset_config.path)
+        except FileNotFoundError:
+            logger.warning("Has no validation dataset.")
+
+    test_dataset = None
     try:
         test_dataset = processor.get_test_examples(dataset_config.path)
     except FileNotFoundError:
         logger.warning("Has no test dataset.")
-        test_dataset = None
+
     # checking whether donwloaded.
     if (train_dataset is None) and \
        (valid_dataset is None) and \

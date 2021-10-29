@@ -17,59 +17,56 @@ from yacs.config import CfgNode
 from openprompt.utils.logging import logger
 
     
-ModelClass = namedtuple("ModelClass", ('config', 'tokenizer', 'model'))
+ModelClass = namedtuple("ModelClass", ('config', 'tokenizer', 'model','wrapper'))
 
 _MODEL_CLASSES = {
     'bert': ModelClass(**{
         'config': BertConfig,
         'tokenizer': BertTokenizer,
         'model':BertForMaskedLM,
+        'wrapper': MLMTokenizerWrapper,
     }),
     'roberta': ModelClass(**{
         'config': RobertaConfig,
         'tokenizer': RobertaTokenizer,
         'model':RobertaForMaskedLM,
+        'wrapper': MLMTokenizerWrapper
     }),
     'albert': ModelClass(**{
         'config': AlbertConfig,
         'tokenizer': AlbertTokenizer,
-        'model':AlbertForMaskedLM,
+        'model': AlbertForMaskedLM,
+        'wrapper': MLMTokenizerWrapper
     }),
     'gpt': ModelClass(**{
         'config': OpenAIGPTConfig,
         'tokenizer': OpenAIGPTTokenizer,
         'model': OpenAIGPTLMHeadModel,
+        'wrapper': LMTokenizerWrapper
     }),
     'gpt2': ModelClass(**{
         'config': GPT2Config,
         'tokenizer': GPT2Tokenizer,
         'model': GPT2LMHeadModel,
+        'wrapper': LMTokenizerWrapper
     }),
     't5':ModelClass(**{
         'config': T5Config,
         'tokenizer': T5Tokenizer,
         'model': T5ForConditionalGeneration,
+        'wrapper': T5TokenizerWrapper
+    }),
+    't5-lm':ModelClass(**{
+        'config': T5Config,
+        'tokenizer': T5Tokenizer,
+        'model': T5ForConditionalGeneration,
+        'wrapper': LMTokenizerWrapper,
     }),
 }
 
-TOKENIZER_WRAPPER_MAPPING = {
-    BertTokenizer: MLMTokenizerWrapper,
-    RobertaTokenizer: MLMTokenizerWrapper,
-    AlbertTokenizer: MLMTokenizerWrapper,
-    OpenAIGPTTokenizer: LMTokenizerWrapper,
-    GPT2Tokenizer: LMTokenizerWrapper,
-    T5Tokenizer: T5TokenizerWrapper,
-}
 
 def get_model_class(plm_type: str):
     return _MODEL_CLASSES[plm_type]
-
-def get_tokenizer_wrapper(tokenizer: PreTrainedTokenizer) -> TokenizerWrapper:
-    try:
-        wrapper_class = TOKENIZER_WRAPPER_MAPPING[type(tokenizer)]
-    except KeyError:
-        logger.info("tokenizer type not in TOKENIZER_WRAPPER_MAPPING")
-    return wrapper_class
 
 
 def load_plm(config: CfgNode):
@@ -88,11 +85,13 @@ def load_plm(config: CfgNode):
     model_class = get_model_class(plm_type = plm_config.model_name)
     model_config = model_class.config.from_pretrained(plm_config.model_path)
     # you can change huggingface model_config here
+    if 't5'  in plm_config.model_name: # remove dropout according to PPT~\ref{}
+        model_config.dropout_rate = 0.0
     model = model_class.model.from_pretrained(plm_config.model_path, config=model_config)
     tokenizer = model_class.tokenizer.from_pretrained(plm_config.model_path)
-
+    wrapper = model_class.wrapper
     model, tokenizer = add_special_tokens(model, tokenizer, specials_to_add=config.plm.specials_to_add)
-    return model, tokenizer, model_config
+    return model, tokenizer, model_config, wrapper
 
 def add_special_tokens(model: PreTrainedModel, 
                        tokenizer: PreTrainedTokenizer,

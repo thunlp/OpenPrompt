@@ -22,9 +22,9 @@ dataloader:
   max_seq_length: 512
 
 train:
-  batch_size: 16
+  batch_size: 1
   num_epochs: 5
-  gradient_accumulation_steps: 4
+  gradient_accumulation_steps: 1
   max_grad_norm: 1.0
 
 test:
@@ -50,16 +50,15 @@ ptr_verbalizer:
   file_path: scripts/RelationClassification/TACRED/ptr_verbalizer.jsonl
   
 environment:
-  num_gpus: 2
+  num_gpus: 1
   cuda_visible_devices:
-    - 2
-    - 7
+    - 1
   local_rank: 0 
 
 classification:
   loss_function: nll_loss
 
-learning_setting: full
+learning_setting: few_shot
 
 few_shot:
   parent_config: learning_setting
@@ -70,4 +69,5 @@ sampling_from_train:
   num_examples_per_label: 32
   also_sample_dev: True
   num_examples_per_label_dev: 32
-  seed: 123
+  seed:
+    - 123

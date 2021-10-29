@@ -1,20 +1,26 @@
-
-from typing import OrderedDict
-from yacs.config import CfgNode, _merge_a_into_b
+try:
+    from typing import OrderedDict
+except ImportError:
+    from collections import OrderedDict
+import argparse
+from yacs.config import CfgNode
+import sys
+from openprompt.utils.utils import check_config_conflicts 
+from .default_config import get_default_config
+from openprompt.utils.logging import logger
 import os
-from collections import defaultdict
+
 
 def get_config_from_file(path):
     cfg = CfgNode(new_allowed=True)
     cfg.merge_from_file(path)
     return cfg
 
-def get_yaml_config(usr_config_path, default_config_path = "config_default.yaml"):
-    # get default config
-    cwd = os.path.dirname(__file__)
-    default_config_path = os.path.join(cwd, default_config_path)
-    config = get_config_from_file(default_config_path)
-
+def get_user_config(usr_config_path, default_config=None):
+    if default_config is None:
+        config = get_default_config()
+    else:
+        config = default_config
     # get user config
     usr_config = get_config_from_file(usr_config_path)
     config.merge_from_other_cfg(usr_config)
@@ -68,4 +74,72 @@ def convert_cfg_to_dict(cfg_node, key_list=[]):
         for k, v in cfg_dict.items():
             cfg_dict[k] = convert_cfg_to_dict(v, key_list + [k])
         return cfg_dict
-    
+
+def add_cfg_to_argparser(cfg, parser, prefix=None):
+    r"""To support argument parser style in addition to yaml style
+    """
+    for key in cfg:
+        value = cfg[key]
+        full_key_name = prefix+"."+key if prefix is not None else key
+        if isinstance(value, CfgNode):
+            add_cfg_to_argparser(value, parser=parser, prefix=full_key_name)
+        else:
+            if type(value) in [str, int, float]:
+                parser.add_argument("--"+full_key_name, type=type(value), default=value)
+            elif type(value) in [tuple, list]:
+                parser.add_argument("--"+full_key_name, type=type(value), default=value, nargs="+")
+            elif type(value) == bool:
+                parser.add_argument("--"+full_key_name, action='store_{}'.format(not value).lower())
+            elif type(value) == type(None):
+                parser.add_argument("--"+full_key_name, default=None)
+            else:
+                raise NotImplementedError("The type of config value is not supported")
+
+
+def update_cfg_with_argparser(cfg, args, prefix=None):
+    r"""To support update cfg with command line
+    """
+    for key in cfg:
+        value = cfg[key]
+        full_key_name = prefix+"."+key if prefix is not None else key
+        if isinstance(value, CfgNode):
+            update_cfg_with_argparser(value, args, prefix=full_key_name)
+        else:
+            v = getattr(args, full_key_name)
+            if type(v) != type(value):
+                raise TypeError
+            if v != value:
+                cfg[key] = v
+                print("Update key {}, value {} -> {}".format(full_key_name, value, v))
+
+
+def save_config_to_yaml(config):
+    from contextlib import redirect_stdout
+    saved_yaml_path = os.path.join(config.logging.path, "config.yaml")
+    with open(saved_yaml_path, 'w') as f:
+        with redirect_stdout(f): print(config.dump())
+    logger.info("Config saved as {}".format(saved_yaml_path))
+                
+def get_config():
+    all_cmd_args = sys.argv[1:]
+    assert "--config_yaml" in all_cmd_args, "You should specify a config_yaml"
+    yaml_idx = all_cmd_args.index("--config_yaml")
+    yaml_path = all_cmd_args[yaml_idx+1]
+    config = get_user_config(yaml_path)
+
+    parser = argparse.ArgumentParser("Global Config Argument Parser")
+    parser.add_argument("--config_yaml", type=str, help='the configuration file for this experiment.')
+    parser.add_argument("--resume", type=str, help='a specified logging path to resume training.\
+           It will fall back to run from initialization if no lastest checkpoint are found.')
+    parser.add_argument("--test", type=str, help='a specified logging path to test')
+    add_cfg_to_argparser(config, parser)
+    args = parser.parse_args()
+    update_cfg_with_argparser(config, args)
+    check_config_conflicts(config)
+    print(config)
+    return config, args
+
+
+
+
+

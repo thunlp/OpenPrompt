@@ -1,0 +1,75 @@
+dataset:
+  name: mnli
+  path: datasets/TextClassification/mnli
+
+plm:
+  model_name: roberta
+  model_path: roberta-large
+  optimize:
+    freeze_para: True
+    lr: 0.0003
+    weight_decay: 0.01
+    scheduler:
+      type: 
+      num_warmup_steps: 500
+
+dataloader:
+  max_seq_length: 128
+
+train:
+  num_epochs: 30
+  batch_size: 30
+  gradient_accumulation_steps: 1
+
+test:
+  batch_size: 10
+
+valid:
+  batch_size: 10
+
+
+template: soft_manual_template
+verbalizer: manual_verbalizer
+
+
+soft_manual_template:
+  choice: 1
+  file_path: scripts/TextClassification/mnli/soft_manual_template.txt
+  optimize:
+    lr: 0.003
+    weight_decay: 0.0
+    scheduler:
+      num_warmup_steps: 0
+
+manual_verbalizer:
+  choice: 0
+  file_path: scripts/TextClassification/mnli/multiwords_verbalizer.jsonl
+  
+environment:
+  num_gpus: 3
+  cuda_visible_devices:
+    - 0
+    - 1
+    - 2
+  local_rank: 0
+
+learning_setting: full
+
+# few_shot:
+#   parent_config: learning_setting
+#   few_shot_sampling: sampling_from_train
+  
+# sampling_from_train:
+#   parent_config: few_shot_sampling
+#   num_examples_per_label: 10000
+#   also_sample_dev: False
+#   num_examples_per_label_dev: 
+#   seed:
+#     - 123
+
+task: classification
+classification:
+  parent_config: task
+  metric:  # the first one will be the main  to determine checkpoint.
+    - accuracy  # whether the higher metric value is better.
+  loss_function: cross_entropy ## the loss function for classification

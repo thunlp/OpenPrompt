@@ -22,6 +22,7 @@ from datasets import load_dataset
 from openprompt.utils.logging import logger
 import os
 
+HUGGING_FACE_SCRIPTS = "/mnt/sfs_turbo/hsd/data/super_glue.py" if 'sfs_turbo' in os.getcwd() else 'super_glue' # one of the test machine can't not connect huggingface
 class SuperglueMultiRCProcessor(DataProcessor):
     def __init__(self):
         super().__init__()
@@ -49,7 +50,7 @@ class SuperglueBoolQProcessor(DataProcessor):
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation" 
-        dataset = load_dataset(path="/mnt/sfs_turbo/hsd/data/scripts/super_glue.py", name='boolq', cache_dir=data_dir, split=split)
+        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='boolq', cache_dir=data_dir, split=split)
         return list(map(self.transform, dataset))
 
     def transform(self, example):
@@ -62,12 +63,12 @@ class SuperglueBoolQProcessor(DataProcessor):
 class SuperglueCBProcessor(DataProcessor):
     def __init__(self):
         super().__init__()
-        self.labels = ["Not Entailment", "Entailment"]
+        self.labels = ["Entailment", "Not Entailment", "Neutral"]
 
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset("super_glue", "cb", split=split)
+        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='cb', cache_dir=data_dir, split=split)
         return list(map(self.transform, dataset))
 
     def transform(self, example):
@@ -86,7 +87,7 @@ class SuperglueCOPAProcessor(DataProcessor):
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset("super_glue", "boolq", split=split)
+        dataset = load_dataset(HUGGING_FACE_SCRIPTS, "boolq", split=split)
         return list(map(self.transform, dataset))
 
     def transform(self, example):
