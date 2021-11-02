@@ -87,27 +87,13 @@ class PromptDataLoader(object):
         self.wrap()
         self.tokenize()
 
-        def prompt_collate_fct(batch: List[Union[Dict, InputFeatures]]):
-            r'''
-            This function is used to collate the current prompt.
 
-            Args:
-                batch (:obj:`List[Union[Dict, InputFeatures]]`): A batch of the current data.
-
-            Returns:
-                :obj:`InputFeatures`: Return the :py:class:`~openprompt.data_utils.data_utils.InputFeatures of the current batch of data.
-            '''
-
-            
-            elem = batch[0]
-            return_dict = {key: default_collate([d[key] for d in batch]) for key in elem}
-            return InputFeatures(**return_dict)
 
         self.dataloader = DataLoader(
             self.tensor_dataset, 
             batch_size = self.batch_size,
             shuffle = self.shuffle,
-            collate_fn = prompt_collate_fct
+            collate_fn = InputFeatures.collate_fct
         )
     
     
@@ -184,6 +170,7 @@ class PromptModel(nn.Module):
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
         return input_batch
+    
 
 
 class PromptForClassification(nn.Module):
@@ -286,6 +273,28 @@ class PromptForClassification(nn.Module):
         self.template.load_state_dict(state_dict['template'])
         self.verbalizer.load_state_dict(state_dict['verbalizer'])
 
+    def parallelize(self, device_map=None):
+        r"""Parallelize the model across device
+        """
+        if hasattr(self.plm, "parallelize"):
+            self.plm.parallelize(device_map)
+            self.device_map = self.plm.device_map
+            self.template.cuda()
+            self.verbalizer.cuda()
+        else:
+            raise NotImplementedError("parallelize method was not implemented for this plm.")
+
+    def deparallelize(self):
+        r"""Deparallelize the model across device
+        """
+        if hasattr(self.plm, "deparallelize"):
+            self.plm.deparallelize()
+            self.device_map = None
+            self.template.cpu()
+            self.verbalizer.cpu()
+        else:
+            raise NotImplementedError("parallelize method was not implemented for this plm.")
+
 
 class PromptForGeneration(nn.Module, GenerationMixin):
     r'''``PromptModel`` with generation loss caculation and generation utils integrated.
@@ -306,7 +315,6 @@ class PromptForGeneration(nn.Module, GenerationMixin):
                  gen_config: Optional[CfgNode] = None,
                  tokenizer: Optional[PreTrainedTokenizer] = None,
                 ):
-                 
         super().__init__()
         if tokenizer is None:
             assert template.tokenizer is not None, "Tokenizer can't be set from input args or template"
@@ -452,7 +460,9 @@ class PromptForGeneration(nn.Module, GenerationMixin):
     
     def prepare_inputs_for_generation(self, input_ids: Optional[torch.Tensor] = None,
                                          **model_kwargs):
-        r"""When the `past` not in model_kwargs, we prepare the input from scratch. 
+        r"""This function wraps the `prepare_inputs_for_generation` function in the huggingface transformers.
+
+        When the `past` not in model_kwargs, we prepare the input from scratch. 
         When `past` is in model_kwargs, we don't need to prepare the template wrapped input,
         instead we use the inner pretrain_models' function to prepare the next step's input.
         `model_kwargs` includes all the argument passed in the `batch`: InputFeatures, except `input_ids`
@@ -462,8 +472,6 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         Args:
             input_ids(:obj:`torch.Tensor`): Indices of input sequence tokens in the vocabulary.
         """
- 
-        
         if self.generate_ith_token == 0 and 'encoder_outputs' not in model_kwargs: # generating the first token in decoder only setting.
 
             batch = InputFeatures(input_ids=input_ids, **model_kwargs)
@@ -503,6 +511,11 @@ class PromptForGeneration(nn.Module, GenerationMixin):
     def _prepare_encoder_decoder_kwargs_for_generation(
         self, input_ids: torch.LongTensor, model_kwargs
     ) -> Dict[str, Any]:
+        r""" This function resemble the function in GeneraionMix
+        
+        Args:
+            input_ids (:obj:`torch.LongTensor`) The input ids for 
+        """
         if "encoder_outputs" not in model_kwargs:
             # retrieve encoder hidden states
             encoder = self.plm.get_encoder()
@@ -511,8 +524,14 @@ class PromptForGeneration(nn.Module, GenerationMixin):
                 for argument, value in model_kwargs.items()
                 if not (argument.startswith("decoder_") or argument.startswith("cross_attn"))
             }
-            batch = InputFeatures(input_ids=input_ids, **encoder_kwargs)
-            model_inputs = self.prompt_model.prepare_model_inputs(batch)
+            batch = {"input_ids":input_ids, **encoder_kwargs}
+            model_inputs = self.prompt_model.prepare_model_inputs(batch) # This line differs from the orinigal code base, we should process the input
+            # with our template, then pass it into the model.
+            # some of the arguments may have been changed by the template,
+            # e.g. the attention mask. Here we update the model_kwargs
+            for key in model_kwargs:
+                if key in model_inputs:
+                    model_kwargs[key] = model_inputs[key]
             model_kwargs["encoder_outputs"] = encoder(return_dict=True, **model_inputs)
         return model_kwargs
     
@@ -534,3 +553,22 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         r"""Use the plm's default _reorder_cache function
         """
         return self.plm._reorder_cache(past, beam_idx)
+
+    def parallelize(self, device_map=None):
+        r"""Parallelize the model across device
+        """
+        if hasattr(self.plm, "parallelize"):
+            self.plm.parallelize(device_map)
+            self.device_map = self.plm.device_map
+        else:
+            raise NotImplementedError("parallelize method was not implemented for this plm.")
+
+    def deparallelize(self):
+        r"""Deparallelize the model across device
+        """
+        if hasattr(self.plm, "deparallelize"):
+            self.plm.deparallelize()
+            self.device_map = None
+        else:
+            raise NotImplementedError("parallelize method was not implemented for this plm.")
+

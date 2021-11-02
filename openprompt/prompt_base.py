@@ -121,7 +121,7 @@ class Template(nn.Module):
             if 'placeholder' in d:
                 text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example, d['placeholder']))
             elif 'meta' in d:
-                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example.meta, d['meta']))
+                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(example.meta[d['meta']])
             elif 'soft' in d:
                 raise RuntimeError("soft token not supported by SoftTemplate, please use hard template or use MixedTemplate instead.")
             elif 'mask' in d:
@@ -131,6 +131,21 @@ class Template(nn.Module):
             else:
                 raise ValueError(f'can not parse {d}')
         return text
+    
+    def _check_template_format(self, ):
+        r"""check whether the template format is correct.
+        TODO: add more
+        """
+        mask_num = 0
+        for i, d in enumerate(self.text):
+            if 'mask' in d:
+                mask_num += 1
+        
+        if mask_num==0:
+            raise RuntimeError(f"'mask' position not found in the template: {self.text}. Please Check!")
+
+
+
     
     def parse_text(self, text: str) -> List[Dict]:
         parsed = []
@@ -261,6 +276,7 @@ class Template(nn.Module):
             return
         if not self._in_on_text_set:
             self.safe_on_text_set()
+        self._check_template_format()
         # else:
         #     logger.warning("Reset text in on_text_set function. Is this intended?")
 
@@ -272,11 +288,13 @@ class Template(nn.Module):
         self.on_text_set()
         self._in_on_text_set = False
    
+    @abstractmethod
     def on_text_set(self):
         r"""
         A hook to do something when template text was set.
+        The designer of the template should explictly know what should be down when the template text is set.
         """
-        pass
+        raise NotImplementedError
     
     def from_file(self,
                   path: str,
@@ -544,7 +562,7 @@ class Verbalizer(nn.Module):
         """
 
         init_args = signature(cls.__init__).args
-        _init_dict = {**convert_cfg_to_dict(config), **kwargs}
+        _init_dict = {**convert_cfg_to_dict(config), **kwargs} if config is not None else kwargs
         init_dict = {key: _init_dict[key] for key in _init_dict if key in init_args}
         verbalizer = cls(**init_dict)
         if hasattr(verbalizer, "from_file"):

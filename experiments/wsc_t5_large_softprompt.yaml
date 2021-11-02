@@ -1,5 +1,5 @@
 dataset:
-  name: super_glue.boolq
+  name: super_glue.wsc
   path: # dataset in huggingface doesn't need path
 
 plm:
@@ -43,7 +43,7 @@ verbalizer: manual_verbalizer
 
 soft_template:
   choice: 0
-  file_path: scripts/SuperGLUE/BoolQ/soft_template.txt
+  file_path: scripts/SuperGLUE/WSC/soft_template.txt
   num_tokens: 20
   initialize_from_vocab: true
   random_range: 0.5
@@ -57,7 +57,7 @@ soft_template:
 
 manual_verbalizer:
   choice: 0
-  file_path: scripts/SuperGLUE/BoolQ/manual_verbalizer.txt
+  file_path: scripts/SuperGLUE/WSC/manual_verbalizer.txt
   
 environment:
   num_gpus: 3

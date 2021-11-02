@@ -30,4 +30,12 @@ class ManualTemplate(Template):
                          mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.text = text
-       
+    
+    def on_text_set(self):
+        """
+        when template text was set
+        
+        1. parse text
+        """
+
+        self.text = self.parse_text(self.text)

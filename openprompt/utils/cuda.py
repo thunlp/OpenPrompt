@@ -17,7 +17,9 @@ def model_to_device(model, config):
             else:
                 model.parallelize(config.device_map)
             logger.info("Using model parallel, spread across device map: {}".format(model.device_map))
-        return model
+            return model
+        else:
+            raise RuntimeError("The model doesn't has parallelize method.")
     if config.num_gpus>1:
         local_rank_device = "cuda:{}".format(config.local_rank)
         model = model.to(local_rank_device)

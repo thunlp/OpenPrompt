@@ -1,10 +1,10 @@
 dataset:
-  name: super_glue.cb
-  path:  # dataset in huggingface doesn't need path
+  name: super_glue.wic
+  path: # dataset in huggingface doesn't need path
 
 plm:
-  model_name: bert
-  model_path: bert-large-cased
+  model_name: t5
+  model_path: t5-large
   optimize:
     freeze_para: True
     lr: 1.0e-5
@@ -14,12 +14,12 @@ plm:
       num_warmup_steps: 500
 
 dataloader:
-  max_seq_length: 256 # max_seq_length 
+  max_seq_length: 256  # max_seq_length 
   decoder_max_length: 3 # the decoder max length to truncate decoder input sequence
                     # if it is an encoder-decoder architecture. Note that it's not equavalent
                     # to generation.max_length which is used merely in the generation phase.
   truncate_method: "head" # choosing from balanced, head, tail
-  decode_from_pad: false
+  decode_from_pad: true
 
 train:
   batch_size: 8
@@ -43,13 +43,13 @@ verbalizer: manual_verbalizer
 
 soft_template:
   choice: 0
-  file_path: scripts/SuperGLUE/CB/soft_template.txt
+  file_path: scripts/SuperGLUE/WiC/soft_template.txt
   num_tokens: 20
   initialize_from_vocab: true
   random_range: 0.5
   optimize: 
     name: AdamW
-    lr: 0.03
+    lr: 0.3
     adam_epsilon: 1.0e-8
     scheduler:
       num_warmup_steps: 500
@@ -57,23 +57,13 @@ soft_template:
 
 manual_verbalizer:
   choice: 0
-  file_path: scripts/SuperGLUE/CB/manual_verbalizer.txt
+  file_path: scripts/SuperGLUE/WiC/manual_verbalizer.txt
   
 environment:
-  num_gpus: 1
+  num_gpus: 3
   cuda_visible_devices:
-  local_rank: 0 
+  local_rank: 0
+  model_parallel: True
+  device_map:
 
-learning_setting: full #few_shot
-
-# few_shot:
-#   parent_config: learning_setting
-#   few_shot_sampling: sampling_from_train
-  
-# sampling_from_train:
-#   parent_config: few_shot_sampling
-#   num_examples_per_label: 100
-#   also_sample_dev: True
-#   num_examples_per_label_dev: 100
-#   seed:
-#     - 123
+learning_setting: full

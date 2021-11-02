@@ -14,7 +14,7 @@ plm:
       num_warmup_steps: 500
 
 dataloader:
-  max_seq_length: 256 # max_seq_length 
+  max_seq_length: 512 # max_seq_length 
   decoder_max_length: 3 # the decoder max length to truncate decoder input sequence
                     # if it is an encoder-decoder architecture. Note that it's not equavalent
                     # to generation.max_length which is used merely in the generation phase.
@@ -22,11 +22,11 @@ dataloader:
   decode_from_pad: false
 
 train:
-  batch_size: 16
-  gradient_accumulation_steps: 2
+  batch_size: 8
+  gradient_accumulation_steps: 1
   max_grad_norm: 1.0
   num_epochs:
-  num_training_steps: 100000
+  num_training_steps: 100
 
 
 test:
@@ -44,12 +44,12 @@ verbalizer: manual_verbalizer
 soft_template:
   choice: 0
   file_path: scripts/TextClassification/agnews/soft_template.txt
-  num_tokens: 20
+  num_tokens: 5
   initialize_from_vocab: true
   random_range: 0.5
   optimize: 
     name: AdamW
-    lr: 3.0e-4
+    lr: 0.5
     adam_epsilon: 1.0e-8
     scheduler:
       num_warmup_steps: 500
@@ -72,8 +72,8 @@ few_shot:
   
 sampling_from_train:
   parent_config: few_shot_sampling
-  num_examples_per_label: 100
+  num_examples_per_label: 10
   also_sample_dev: True
-  num_examples_per_label_dev: 100
+  num_examples_per_label_dev: 10
   seed:
     - 123

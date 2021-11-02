@@ -87,7 +87,7 @@ class SuperglueCOPAProcessor(DataProcessor):
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset(HUGGING_FACE_SCRIPTS, "boolq", split=split)
+        dataset = load_dataset(HUGGING_FACE_SCRIPTS, "copa", cache_dir=data_dir, split=split)
         return list(map(self.transform, dataset))
 
     def transform(self, example):
@@ -101,14 +101,76 @@ class SuperglueCOPAProcessor(DataProcessor):
         meta['choice2'] = choice2
         meta['question'] = question
         label = int(example['label'])
+        tgt_text = [choice1, choice2]  #TODO used in contextualverbalizer. 
         guid = "{}".format(example['idx'])
-        return InputExample(guid = guid, text_a = premise, meta=meta, label=label)
+        return InputExample(guid = guid, text_a = premise, meta=meta, label=label,tgt_text=tgt_text)
 
+class SuperglueRTEProcessor(DataProcessor):
+    def __init__(self):
+        super().__init__()
+        self.labels = ["Entailment", "Not Entailment"]
 
+    def get_examples(self, data_dir, split):
+        if split == "valid" or split == "dev":
+            split = "validation"
+        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='rte', cache_dir=data_dir, split=split)
+        return list(map(self.transform, dataset))
+
+    def transform(self, example):
+        text_a = example['premise']
+        text_b = example['hypothesis']
+        label = int(example['label'])
+        guid = "{}".format(example['idx'])
+        return InputExample(guid = guid, text_a = text_a, text_b = text_b, label=label)
+
+class SuperglueWiCProcessor(DataProcessor):
+    def __init__(self):
+        super().__init__()
+        self.labels = ["Same", "Different"]
+
+    def get_examples(self, data_dir, split):
+        if split == "valid" or split == "dev":
+            split = "validation"
+        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='wic', cache_dir=data_dir, split=split)
+        return list(map(self.transform, dataset))
+
+    def transform(self, example):
+        meta = {}
+        text_a = example["sentence1"]
+        text_b = example["sentence2"]
+        meta['word'] = example['word']
+        label = int(example['label'])
+        guid = "{}".format(example['idx'])
+        return InputExample(guid = guid, text_a=text_a, text_b=text_b, meta=meta, label=label)
+
+class SuperglueWSCProcessor(DataProcessor):
+    def __init__(self):
+        super().__init__()
+        self.labels = ["Different", "Same"]
+    
+    def get_examples(self, data_dir, split):
+        if split == "valid" or split == "dev":
+            split = "validation"
+        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='wsc', cache_dir=data_dir, split=split)
+        return list(map(self.transform, dataset))
+
+    def transform(self, example):
+        meta = {}
+        text_a = example["text"]
+        meta['span1_text'] = example['span1_text']
+        meta['span2_text'] = example['span2_text']
+        label = int(example['label'])
+        guid = "{}".format(example['idx'])
+        return InputExample(guid = guid, text_a=text_a, meta=meta, label=label)
 
 PROCESSORS = {
     "super_glue.multirc": SuperglueMultiRCProcessor,
     "super_glue.boolq": SuperglueBoolQProcessor,
     "super_glue.cb": SuperglueCBProcessor,
     "super_glue.copa": SuperglueCOPAProcessor,
+    "super_glue.rte": SuperglueRTEProcessor,
+    "super_glue.wic": SuperglueWiCProcessor,
+    "super_glue.wsc": SuperglueWSCProcessor,
+
+
 }

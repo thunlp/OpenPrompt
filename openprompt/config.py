@@ -136,7 +136,7 @@ def get_config():
     args = parser.parse_args()
     update_cfg_with_argparser(config, args)
     check_config_conflicts(config)
-    print(config)
+    # print(config)
     return config, args
 
 

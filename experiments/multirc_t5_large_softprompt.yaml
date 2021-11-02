@@ -1,5 +1,5 @@
 dataset:
-  name: super_glue.boolq
+  name: super_glue.multirc
   path: # dataset in huggingface doesn't need path
 
 plm:
@@ -14,7 +14,7 @@ plm:
       num_warmup_steps: 500
 
 dataloader:
-  max_seq_length: 256  # max_seq_length 
+  max_seq_length: 512  # max_seq_length 
   decoder_max_length: 3 # the decoder max length to truncate decoder input sequence
                     # if it is an encoder-decoder architecture. Note that it's not equavalent
                     # to generation.max_length which is used merely in the generation phase.
@@ -22,7 +22,7 @@ dataloader:
   decode_from_pad: true
 
 train:
-  batch_size: 8
+  batch_size: 4
   gradient_accumulation_steps: 1
   max_grad_norm: 1.0
   num_epochs:
@@ -43,7 +43,7 @@ verbalizer: manual_verbalizer
 
 soft_template:
   choice: 0
-  file_path: scripts/SuperGLUE/BoolQ/soft_template.txt
+  file_path: scripts/SuperGLUE/MultiRC/soft_template.txt
   num_tokens: 20
   initialize_from_vocab: true
   random_range: 0.5
@@ -57,7 +57,7 @@ soft_template:
 
 manual_verbalizer:
   choice: 0
-  file_path: scripts/SuperGLUE/BoolQ/manual_verbalizer.txt
+  file_path: scripts/SuperGLUE/MultiRC/manual_verbalizer.txt
   
 environment:
   num_gpus: 3

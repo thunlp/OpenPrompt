@@ -69,7 +69,7 @@ def get_model_class(plm_type: str):
     return _MODEL_CLASSES[plm_type]
 
 
-def load_plm(config: CfgNode):
+def load_plm(model_name, model_path, specials_to_add = None):
     r"""A plm loader using a global config.
     It will load the model, tokenizer, and config simulatenously.
     
@@ -80,6 +80,33 @@ def load_plm(config: CfgNode):
         :obj:`PreTrainedModel`: The pretrained model.
         :obj:`tokenizer`: The pretrained tokenizer.
         :obj:`model_config`: The config of the pretrained model.
+        :obj:`model_config`: The wrapper class of this plm.
+    """
+    model_class = get_model_class(plm_type = model_name)
+    model_config = model_class.config.from_pretrained(model_path)
+    # you can change huggingface model_config here
+    if 't5'  in model_name: # remove dropout according to PPT~\ref{}
+        model_config.dropout_rate = 0.0
+    model = model_class.model.from_pretrained(model_path, config=model_config)
+    tokenizer = model_class.tokenizer.from_pretrained(model_path)
+    wrapper = model_class.wrapper
+    if 'gpt' in model_name: # add pad token for gpt 
+        specials_to_add = ["pad"]
+    model, tokenizer = add_special_tokens(model, tokenizer, specials_to_add=specials_to_add)
+    return model, tokenizer, model_config, wrapper
+
+def load_plm_from_config(config: CfgNode):
+    r"""A plm loader using a global config.
+    It will load the model, tokenizer, and config simulatenously.
+    
+    Args:
+        config (:obj:`CfgNode`): The global config from the CfgNode.
+    
+    Returns:
+        :obj:`PreTrainedModel`: The pretrained model.
+        :obj:`tokenizer`: The pretrained tokenizer.
+        :obj:`model_config`: The config of the pretrained model.
+        :obj:`model_config`: The wrapper class of this plm.
     """
     plm_config = config.plm
     model_class = get_model_class(plm_type = plm_config.model_name)
