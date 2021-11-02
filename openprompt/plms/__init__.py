@@ -91,7 +91,7 @@ def load_plm(model_name, model_path, specials_to_add = None):
     tokenizer = model_class.tokenizer.from_pretrained(model_path)
     wrapper = model_class.wrapper
     if 'gpt' in model_name: # add pad token for gpt 
-        specials_to_add = ["pad"]
+        specials_to_add = ["<pad>"]
     model, tokenizer = add_special_tokens(model, tokenizer, specials_to_add=specials_to_add)
     return model, tokenizer, model_config, wrapper
 

@@ -1,24 +1,24 @@
-# 要添加一个新单元，输入 '# %%'
-# 要添加一个新的标记单元，输入 '# %% [markdown]'
-# %% [markdown]
-# In this notebook, you will learn how to use integrate huggingface datasets utilities into openprompt to enable prompt learning in more datasets.
-# %% [markdown]
-# # Basic Usage: Custom dataset to do classification on various prompt. 
+# In this scripts, you will learn 
+# 1. how to use integrate huggingface datasets utilities into openprompt to
+#  enable prompt learning in diverse datasets.
+# 2. How to instantiate a template using a template language
+# 3. How does the template wrap the input example into a templated one.
+# 4. How do we hide the PLM tokenization details behind and provide a simple tokenization
+# 5. How do construct a verbalizer using one/many label words
+# 5. How to train the prompt like a traditional Pretrained Model.
 
-# %%
+
+# load dataset
 from datasets import load_dataset
 raw_dataset = load_dataset('super_glue', 'cb', cache_dir="../datasets/.cache/huggingface_datasets")
 raw_dataset['train'][0]
 
-# %% [markdown]
 # # Basic Usage: Custom dataset to do classification on various prompt. 
-# %% [markdown]
 # ## Construct InputExample from the dataset format
 # The format of InputeExample must match the datafield of template. 
 # For example, you want the input example to be `passasge` `question` __ .
-# 
 
-# %%
+
 from openprompt.data_utils import InputExample
 
 dataset = {}
@@ -29,60 +29,42 @@ for split in ['train', 'validation', 'test']:
         dataset[split].append(input_example)
 print(dataset['train'][0])
 
-# %% [markdown]
-# ## Construct Template
-# 
-# A template can be constructed from the yaml config, but it can also be constructed by directly passing arguments.
 # You can load the plm related things provided by openprompt simply by calling:
-
-# %%
 from openprompt.plms import load_plm
-
 plm, tokenizer, model_config, WrapperClass = load_plm("t5", "t5-base")
 
-# %% [markdown]
-# ### Manual Template
-
-# %%
+# Constructing Template
+# A template can be constructed from the yaml config, but it can also be constructed by directly passing arguments.
 from openprompt.prompts import ManualTemplate
 template_text = '{"placeholder":"text_a"} Question: {"placeholder":"text_b"}? Is it correct? {"mask"}.'
 mytemplate = ManualTemplate(tokenizer=tokenizer, text=template_text)
 
-
-
-
-# %% [markdown]
 # To better understand how does the template wrap the example, we visualize one instance.
 
-# %%
 wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
 print(wrapped_example)
 
 
-# %% [markdown]
 # Now, the wrapped example is ready to be pass into the tokenizer, hence producing the input for language models.
 # You can use the tokenizer to tokenize the input by yourself, but we recommend using our wrapped tokenizer, which is a wrapped tokenizer tailed for InputExample. 
 # The wrapper has been given if you use our `load_plm` function, otherwise, you should choose the suitable wrapper based on
 # the configuration in `openprompt.plms.__init__.py`.
-
-# %%
+# Note that when t5 is used for classification, we only need to pass <pad> <extra_id_0> <eos> to decoder.
+# The loss is calcaluted at <extra_id_0>. Thus passing decoder_max_length=3 saves the space
 wrapped_t5tokenizer = WrapperClass(max_seq_length=128, decoder_max_length=3, tokenizer=tokenizer,truncate_method="head")
 # or
 from openprompt.plms import T5TokenizerWrapper
 wrapped_t5tokenizer= T5TokenizerWrapper(max_seq_length=128, decoder_max_length=3, tokenizer=tokenizer,truncate_method="head")
 
-
-# %%
+# You can see what a tokenized example looks like by 
 tokenized_example = wrapped_t5tokenizer.tokenize_one_example(wrapped_example, teacher_forcing=False)
 print(tokenized_example)
 print(tokenizer.convert_ids_to_tokens(tokenized_example['input_ids']))
 print(tokenizer.convert_ids_to_tokens(tokenized_example['decoder_input_ids']))
 
-# %% [markdown]
 # Now it's time to convert the whole dataset into the input format!
 # Simply loop over the dataset to achieve it!
 
-# %%
 model_inputs = {}
 for split in ['train', 'validation', 'test']:
     model_inputs[split] = []
@@ -90,10 +72,8 @@ for split in ['train', 'validation', 'test']:
         tokenized_example = wrapped_t5tokenizer.tokenize_one_example(mytemplate.wrap_one_example(sample), teacher_forcing=False)
         model_inputs[split].append(tokenized_example)
 
-# %% [markdown]
-# We provide a `PromptDataLoader` class to help you do all the above matters and wrap them into an `torch.DataLoader` style iterator.
 
-# %%
+# We provide a `PromptDataLoader` class to help you do all the above matters and wrap them into an `torch.DataLoader` style iterator.
 from openprompt import PromptDataLoader
 
 train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer, 
@@ -102,11 +82,10 @@ train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplat
     truncate_method="head")
 # next(iter(train_dataloader))
 
-# %% [markdown]
-# ## Define the verbalizer
+
+# Define the verbalizer
 # In classification, you need to define your verbalizer, which is a mapping from logits on the vocabulary to the final label probability. Let's have a look at the verbalizer details:
 
-# %%
 from openprompt.prompts import ManualVerbalizer
 import torch
 
@@ -115,16 +94,12 @@ myverbalizer = ManualVerbalizer(tokenizer, num_classes=2,
                         label_words=[["yes"], ["no"], ["maybe"]])
 
 print(myverbalizer.label_words_ids)
-logits = torch.randn(2,len(tokenizer)) # creating a pseudo output from the plm
-myverbalizer.process_logits(logits)
+logits = torch.randn(2,len(tokenizer)) # creating a pseudo output from the plm, and 
+print(myverbalizer.process_logits(logits)) # see what the verbalizer do
 
-# %% [markdown]
-# ## Now is time to build your prompt model!
-# In this section we introduce using prompt to do classification, for other kinds of format, please see
-# `generation_tutorial.ipynb`, `probing_tutorial.ipynb`.
-# 
 
-# %%
+# Although you can manually combine the plm, template, verbalizer together, we provide a pipeline 
+# model which take the batched data from the PromptDataLoader and produce a class-wise logits
 
 from openprompt import PromptForClassification
 
@@ -133,15 +108,10 @@ prompt_model = PromptForClassification(plm=plm,template=mytemplate, verbalizer=m
 if use_cuda:
     prompt_model=  prompt_model.cuda()
 
-# %% [markdown]
-# ## below is standard training
-
-# %%
+# Now the training is standard
 from transformers import  AdamW, get_linear_schedule_with_warmup
 loss_func = torch.nn.CrossEntropyLoss()
-
 no_decay = ['bias', 'LayerNorm.weight']
-
 # it's always good practice to set no decay to biase and LayerNorm parameters
 optimizer_grouped_parameters = [
     {'params': [p for n, p in prompt_model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
@@ -162,17 +132,14 @@ for epoch in range(10):
         tot_loss += loss.item()
         optimizer.step()
         optimizer.zero_grad()
-        print(tot_loss/(step+1))
+        if step %100 ==1:
+            print("Epoch {}, average loss: {}".format(epoch, tot_loss/(step+1)), flush=True)
     
-# %% [markdown]
-# ## evaluate
-
-# %%
+# Evaluate
 validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3, 
     batch_size=4,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
-
 
 allpreds = []
 alllabels = []

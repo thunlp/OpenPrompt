@@ -40,7 +40,6 @@ class PrefixTuningTemplate(Template):
 
     def __init__(self, 
                  model: PreTrainedModel,
-                 plm_config: PretrainedConfig,
                  tokenizer: PreTrainedTokenizer,
                  mapping_hook: Optional[nn.Module] = None,
                  text: Optional[str] = None,
@@ -54,10 +53,10 @@ class PrefixTuningTemplate(Template):
                          mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         raw_embedding = model.get_input_embeddings()
+        self.config = model.config
         self.mapping_hook = mapping_hook
         self.embedding_size = raw_embedding.weight.shape[-1]
         self.num_token = num_token
-        self.config = plm_config
 
         if isinstance(self.config, T5Config):
             self.n_layer = self.config.num_layers
@@ -77,8 +76,8 @@ class PrefixTuningTemplate(Template):
         self.prefix_dropout = prefix_dropout
         self.dropout = nn.Dropout(self.prefix_dropout)
 
-        self.default_text1 = "<text_a> <eos> <mask> <eos>".split()  #TODO whether <eos> should be added here?
-        self.default_text2 = "<text_a> <text_b> <eos> <mask> <eos>".split()
+        self.default_text1 = '{"placeholder": "text_a"} {"mask"}'  #TODO whether <eos> should be added here?
+        self.default_text2 = '{"placeholder": "text_a"} {"placeholder": "text_b"} {"mask"}'
 
         self.text = text
         
@@ -86,8 +85,11 @@ class PrefixTuningTemplate(Template):
 
         self.plm_modified = False # flag to indicate whether the function of plm are replaced for prefix tuning.
     
+
     def on_text_set(self):
-        pass
+        self.text = self.parse_text(self.text)
+        self.generate_parameters()
+
 
     def get_past_key_values(self, batch_size):
         input_tokens = self.input_tokens.unsqueeze(0).expand(batch_size, -1)

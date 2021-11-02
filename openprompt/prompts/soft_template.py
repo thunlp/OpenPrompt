@@ -44,6 +44,7 @@ class SoftTemplate(Template):
                          mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.raw_embedding = model.get_input_embeddings()
+        self.model_is_encoder_decoder = model.config.is_encoder_decoder
         self.random_range = random_range
         self.num_tokens = num_tokens
         self.initialize_from_vocab = initialize_from_vocab
@@ -99,3 +100,15 @@ class SoftTemplate(Template):
             am = batch['attention_mask']
             batch['attention_mask'] = torch.cat([torch.ones((batch_size,self.num_tokens), dtype = am.dtype,device=am.device), am], dim=-1)
         return batch
+    
+
+    def post_processing_outputs(self, outputs: torch.Tensor):
+        r"""Post processing the outputs of language models according
+        to the need of template. Most templates don't need post processing,
+        The template like SoftTemplate, which appends soft template as a module
+        (rather than a sequence of input tokens) to the input,
+        should remove the outputs on these positions to keep the seq_len the same
+        """
+        if not self.model_is_encoder_decoder:
+            outputs.logits = outputs.logits[:, self.num_tokens:,: ]
+        return outputs

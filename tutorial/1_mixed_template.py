@@ -1,24 +1,8 @@
-# 要添加一个新单元，输入 '# %%'
-# 要添加一个新的标记单元，输入 '# %% [markdown]'
-# %% [markdown]
-# In this notebook, you will learn how to use integrate huggingface datasets utilities into openprompt to enable prompt learning in more datasets.
-# %% [markdown]
-# # Basic Usage: Custom dataset to do classification on various prompt. 
 
-# %%
 from datasets import load_dataset
 raw_dataset = load_dataset('super_glue', 'cb', cache_dir="../datasets/.cache/huggingface_datasets")
 raw_dataset['train'][0]
 
-# %% [markdown]
-# # Basic Usage: Custom dataset to do classification on various prompt. 
-# %% [markdown]
-# ## Construct InputExample from the dataset format
-# The format of InputeExample must match the datafield of template. 
-# For example, you want the input example to be `passasge` `question` __ .
-# 
-
-# %%
 from openprompt.data_utils import InputExample
 
 dataset = {}
@@ -29,83 +13,27 @@ for split in ['train', 'validation', 'test']:
         dataset[split].append(input_example)
 print(dataset['train'][0])
 
-# %% [markdown]
-# ## Construct Template
-# 
-# A template can be constructed from the yaml config, but it can also be constructed by directly passing arguments.
-# You can load the plm related things provided by openprompt simply by calling:
-
-# %%
 from openprompt.plms import load_plm
 
 plm, tokenizer, model_config, WrapperClass = load_plm("t5", "t5-base")
 
 
-# %% [markdown]
 # # Try more prompt!
-
 # You can use templates other than manual template, for example the mixedtemplate is a good place to start.
-# In MixedTemplate, you can use {"soft"} to denote a tunable template. 
-
-# %%
-
-
-# %% [markdown]
-
-# Or use a mix template
+# In MixedTemplate, you can use {"soft"} to denote a tunable template. More syntax and usage, please refer
+# to `How to write a template`
 from openprompt.prompts import MixedTemplate
 
-mytemplate = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"soft": "Question:"} {"placeholder":"text_b"}? Is it correct? {"mask"}.')
+mytemplate1 = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"soft": "Question:"} {"placeholder":"text_b"}? Is it correct? {"mask"}.')
 
 mytemplate = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"soft"} {"soft"} {"soft"} {"placeholder":"text_b"} {"soft"} {"mask"}.')
 
-# mytemplate = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"soft": "Question:"} {"placeholder":"text_b"}? Is it correct? {"mask"}.')
 
-
-
-# %% [markdown]
-# To better understand how does the template wrap the example, we visualize one instance.
-
-# %%
 wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
 print(wrapped_example)
 
-
-# %% [markdown]
-# Now, the wrapped example is ready to be pass into the tokenizer, hence producing the input for language models.
-# You can use the tokenizer to tokenize the input by yourself, but we recommend using our wrapped tokenizer, which is a wrapped tokenizer tailed for InputExample. 
-# The wrapper has been given if you use our `load_plm` function, otherwise, you should choose the suitable wrapper based on
-# the configuration in `openprompt.plms.__init__.py`.
-
-# %%
 wrapped_t5tokenizer = WrapperClass(max_seq_length=128, decoder_max_length=3, tokenizer=tokenizer,truncate_method="head")
-# or
-from openprompt.plms import T5TokenizerWrapper
-wrapped_t5tokenizer= T5TokenizerWrapper(max_seq_length=128, decoder_max_length=3, tokenizer=tokenizer,truncate_method="head")
 
-
-# %%
-tokenized_example = wrapped_t5tokenizer.tokenize_one_example(wrapped_example, teacher_forcing=False)
-print(tokenized_example)
-print(tokenizer.convert_ids_to_tokens(tokenized_example['input_ids']))
-print(tokenizer.convert_ids_to_tokens(tokenized_example['decoder_input_ids']))
-
-# %% [markdown]
-# Now it's time to convert the whole dataset into the input format!
-# Simply loop over the dataset to achieve it!
-
-# %%
-model_inputs = {}
-for split in ['train', 'validation', 'test']:
-    model_inputs[split] = []
-    for sample in dataset[split]:
-        tokenized_example = wrapped_t5tokenizer.tokenize_one_example(mytemplate.wrap_one_example(sample), teacher_forcing=False)
-        model_inputs[split].append(tokenized_example)
-
-# %% [markdown]
-# We provide a `PromptDataLoader` class to help you do all the above matters and wrap them into an `torch.DataLoader` style iterator.
-
-# %%
 from openprompt import PromptDataLoader
 
 train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer, 
@@ -114,11 +42,9 @@ train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplat
     truncate_method="head")
 # next(iter(train_dataloader))
 
-# %% [markdown]
 # ## Define the verbalizer
 # In classification, you need to define your verbalizer, which is a mapping from logits on the vocabulary to the final label probability. Let's have a look at the verbalizer details:
 
-# %%
 from openprompt.prompts import ManualVerbalizer
 import torch
 
@@ -130,13 +56,6 @@ print(myverbalizer.label_words_ids)
 logits = torch.randn(2,len(tokenizer)) # creating a pseudo output from the plm
 myverbalizer.process_logits(logits)
 
-# %% [markdown]
-# ## Now is time to build your prompt model!
-# In this section we introduce using prompt to do classification, for other kinds of format, please see
-# `generation_tutorial.ipynb`, `probing_tutorial.ipynb`.
-# 
-
-# %%
 
 from openprompt import PromptForClassification
 
@@ -145,10 +64,9 @@ prompt_model = PromptForClassification(plm=plm,template=mytemplate, verbalizer=m
 if use_cuda:
     prompt_model=  prompt_model.cuda()
 
-# %% [markdown]
 # ## below is standard training
 
-# %%
+
 from transformers import  AdamW, get_linear_schedule_with_warmup
 loss_func = torch.nn.CrossEntropyLoss()
 
@@ -184,7 +102,6 @@ for epoch in range(10):
         optimizer2.zero_grad()
         print(tot_loss/(step+1))
     
-# %% [markdown]
 # ## evaluate
 
 # %%

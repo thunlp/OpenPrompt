@@ -1,7 +1,7 @@
-# 要添加一个新单元，输入 '# %%'
-# 要添加一个新的标记单元，输入 '# %% [markdown]'
 # %% [markdown]
-# In this tutorial, we do conditional generation with LM style model like GPT2.
+# Now it's time to step into generation tasks.
+# %% [markdown]
+# We provide 
 
 # %%
 
@@ -26,7 +26,7 @@ dataset['test'] = WebNLGProcessor().get_test_examples("./datasets/CondGen/webnlg
 # %%
 from openprompt.plms import load_plm
 
-plm, tokenizer, model_config, WrapperClass = load_plm("gpt2", "gpt2-medium")
+plm, tokenizer, model_config, WrapperClass = load_plm("t5", "t5-base")
 
 
 # %% [markdown]
@@ -49,43 +49,41 @@ mytemplate = SoftTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"
 
 # mytemplate = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"soft": "Question:"} {"placeholder":"text_b"}? Is it correct? {"mask"}.')
 
-
-
-# %% [markdown]
 # To better understand how does the template wrap the example, we visualize one instance.
 
-# %%
+
 wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
 print(wrapped_example)
 
 
-
-# %% [markdown]
 # Now, the wrapped example is ready to be pass into the tokenizer, hence producing the input for language models.
 # You can use the tokenizer to tokenize the input by yourself, but we recommend using our wrapped tokenizer, which is a wrapped tokenizer tailed for InputExample. 
 # The wrapper has been given if you use our `load_plm` function, otherwise, you should choose the suitable wrapper based on
 # the configuration in `openprompt.plms.__init__.py`.
 
-# %%
-from openprompt.plms import LMTokenizerWrapper
-wrapped_gpt2tokenizer= LMTokenizerWrapper(max_seq_length=128, tokenizer=tokenizer,truncate_method="head")
-# or 
-wrapped_gpt2tokenizer = WrapperClass(max_seq_length=128, tokenizer=tokenizer,truncate_method="head")
+wrapped_t5tokenizer = WrapperClass(max_seq_length=128, decoder_max_length=128, tokenizer=tokenizer,truncate_method="head")
+# or
+from openprompt.plms import T5TokenizerWrapper
+wrapped_t5tokenizer= T5TokenizerWrapper(max_seq_length=128, decoder_max_length=128, tokenizer=tokenizer,truncate_method="head")
 
 
-
-# %%
-tokenized_example = wrapped_gpt2tokenizer.tokenize_one_example(wrapped_example, teacher_forcing=True) # when setting teacher_forcing=True, the mask will be filled with tgt_text
+tokenized_example = wrapped_t5tokenizer.tokenize_one_example(wrapped_example, teacher_forcing=True) # when setting teacher_forcing=True, the mask will be filled with tgt_text
 print(tokenized_example)
 print(tokenizer.convert_ids_to_tokens(tokenized_example['input_ids']))
+print(tokenizer.convert_ids_to_tokens(tokenized_example['decoder_input_ids']))
 
-# %% [markdown]
-# Now it's time to convert the whole dataset into the input format!
+model_inputs = {}
+for split in ['train', 'validation', 'test']:
+    model_inputs[split] = []
+    for sample in dataset[split]:
+        if split == 'train':
+            teacher_forcing=True
+        else:
+            teacher_forcing=False
+        tokenized_example = wrapped_t5tokenizer.tokenize_one_example(mytemplate.wrap_one_example(sample), teacher_forcing=teacher_forcing)
+        model_inputs[split].append(tokenized_example)
 
-# %% [markdown]
-# We provide a `PromptDataLoader` class to help you do all the above matters and wrap them into an `torch.DataLoader` style iterator.
 
-# %%
 from openprompt import PromptDataLoader
 
 train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer, 
@@ -93,14 +91,6 @@ train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplat
     batch_size=4,shuffle=True, teacher_forcing=True, predict_eos_token=True,
     truncate_method="head")
 # next(iter(train_dataloader))
-
-# %% [markdown]
-# ## Now is time to build your prompt model!
-# In this section we introduce using prompt to do classification, for other kinds of format, please see
-# `generation_tutorial.ipynb`, `probing_tutorial.ipynb`.
-# 
-
-# %%
 
 from openprompt import PromptForGeneration
 
@@ -128,7 +118,8 @@ optimizer_grouped_parameters2 = [
 # optimizer1 = AdamW(optimizer_grouped_parameters1, lr=1e-4)
 optimizer2 = AdamW(optimizer_grouped_parameters2, lr=1e-3)
 
-for epoch in range(1):
+for epoch in range(10):
+    print(f"Epoch {epoch}")
     tot_loss = 0 
     for step, inputs in enumerate(train_dataloader):
         if use_cuda:
@@ -138,9 +129,9 @@ for epoch in range(1):
         tot_loss += loss.item()
         optimizer2.step()
         optimizer2.zero_grad()
-        if step %10 ==1 and step>10:
-            print(tot_loss/((step-2)%10+1))
-            tot_loss = 0
+        if step %100 ==1:
+            print(tot_loss/(step+1), flush=True)
+
 
 validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
@@ -167,8 +158,8 @@ for step, inputs in enumerate(validation_dataloader):
     if use_cuda:
         inputs = inputs.cuda()
     _, output_sentence = prompt_model.generate(inputs, **generation_arguments)
-    generated_sentence.append(output_sentence)
-    groundtruth_sentence.append(inputs['tgt_text'])
+    generated_sentence.extend(output_sentence)
+    groundtruth_sentence.extend(inputs['tgt_text'])
 
 from openprompt.utils.metrics import generation_metric
 

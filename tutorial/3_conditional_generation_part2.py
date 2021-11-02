@@ -1,9 +1,5 @@
-# 要添加一个新单元，输入 '# %%'
-# 要添加一个新的标记单元，输入 '# %% [markdown]'
 # %% [markdown]
-# Now it's time to step into generation tasks.
-# %% [markdown]
-# We provide 
+# In this tutorial, we do conditional generation with LM style model like GPT2.
 
 # %%
 
@@ -28,7 +24,7 @@ dataset['test'] = WebNLGProcessor().get_test_examples("./datasets/CondGen/webnlg
 # %%
 from openprompt.plms import load_plm
 
-plm, tokenizer, model_config, WrapperClass = load_plm("t5", "t5-base")
+plm, tokenizer, model_config, WrapperClass = load_plm("gpt2", "gpt2-medium")
 
 
 # %% [markdown]
@@ -69,34 +65,20 @@ print(wrapped_example)
 # the configuration in `openprompt.plms.__init__.py`.
 
 # %%
-wrapped_t5tokenizer = WrapperClass(max_seq_length=128, decoder_max_length=128, tokenizer=tokenizer,truncate_method="head")
-# or
-from openprompt.plms import T5TokenizerWrapper
-wrapped_t5tokenizer= T5TokenizerWrapper(max_seq_length=128, decoder_max_length=128, tokenizer=tokenizer,truncate_method="head")
+from openprompt.plms import LMTokenizerWrapper
+wrapped_gpt2tokenizer= LMTokenizerWrapper(max_seq_length=128, tokenizer=tokenizer,truncate_method="head")
+# or 
+wrapped_gpt2tokenizer = WrapperClass(max_seq_length=128, tokenizer=tokenizer,truncate_method="head")
+
 
 
 # %%
-tokenized_example = wrapped_t5tokenizer.tokenize_one_example(wrapped_example, teacher_forcing=True) # when setting teacher_forcing=True, the mask will be filled with tgt_text
+tokenized_example = wrapped_gpt2tokenizer.tokenize_one_example(wrapped_example, teacher_forcing=True) # when setting teacher_forcing=True, the mask will be filled with tgt_text
 print(tokenized_example)
 print(tokenizer.convert_ids_to_tokens(tokenized_example['input_ids']))
-print(tokenizer.convert_ids_to_tokens(tokenized_example['decoder_input_ids']))
 
 # %% [markdown]
 # Now it's time to convert the whole dataset into the input format!
-# Simply loop over the dataset to achieve it!
-
-# %%
-model_inputs = {}
-for split in ['train', 'validation', 'test']:
-    model_inputs[split] = []
-    for sample in dataset[split]:
-        if split == 'train':
-            teacher_forcing=True
-        else:
-            teacher_forcing=False
-        tokenized_example = wrapped_t5tokenizer.tokenize_one_example(mytemplate.wrap_one_example(sample), teacher_forcing=teacher_forcing)
-        model_inputs[split].append(tokenized_example)
-
 
 # %% [markdown]
 # We provide a `PromptDataLoader` class to help you do all the above matters and wrap them into an `torch.DataLoader` style iterator.
@@ -154,9 +136,8 @@ for epoch in range(10):
         tot_loss += loss.item()
         optimizer2.step()
         optimizer2.zero_grad()
-        if step %10 ==1 and step>10:
-            print(tot_loss/((step-2)%10+1))
-            tot_loss = 0
+        if step %100 ==1:
+            print("Epoch {}, average loss: {}".format(epoch, tot_loss/(step+1)), flush=True)
 
 validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 

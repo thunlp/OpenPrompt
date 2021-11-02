@@ -254,6 +254,15 @@ class Template(nn.Module):
         """
         return batch # not being processed
 
+    def post_processing_outputs(self, outputs: torch.Tensor):
+        r"""Post processing the outputs of language models according
+        to the need of template. Most templates don't need post processing,
+        The template like SoftTemplate, which appends soft template as a module
+        (rather than a sequence of input tokens) to the input,
+        should remove the outputs on these positions to keep the seq_len the same
+        """
+        return outputs
+        
     def save(self,
              path: str,
              **kwargs) -> None:

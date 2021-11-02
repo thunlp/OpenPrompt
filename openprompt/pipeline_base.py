@@ -162,6 +162,7 @@ class PromptModel(nn.Module):
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
         outputs = self.plm(**input_batch)
+        outputs = self.template.post_processing_outputs(outputs)
         return outputs
     
     def prepare_model_inputs(self, batch: Union[Dict, InputFeatures]) -> Dict:
@@ -344,7 +345,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
     def shift_logits_and_labels(self, 
                                 logits, 
-                                batch: InputFeatures):
+                                loss_ids, 
+                                reference_ids):
 
         r"""
         Left shift the label, and make label of the positions that are
@@ -360,12 +362,10 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             shift_input_ids (:obj:`List[int]`):
 
         """
+        
         shift_logits = logits[..., :-1, :].contiguous()
-        shift_loss_ids = batch['loss_ids'][..., 1:].contiguous()
-        if self.config.is_encoder_decoder:
-            shift_input_ids = batch['decoder_input_ids'][..., 1:].contiguous()
-        else:
-            shift_input_ids = batch['input_ids'][..., 1:].contiguous()
+        shift_loss_ids = loss_ids[..., 1:].contiguous()
+        shift_input_ids = reference_ids[..., 1:].contiguous()
         shift_input_ids = torch.where(shift_loss_ids>0, shift_input_ids, -100)
         return shift_logits, shift_input_ids
 
@@ -393,10 +393,13 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         Returns:
             loss(:obj:torch.Tensor): The loss of the current generation procedure.
         """
-        
+        if self.config.is_encoder_decoder:
+            reference_ids = batch['decoder_input_ids']
+        else:
+            reference_ids = batch['input_ids']  # in case in some template, these field is dropped
         outputs = self.prompt_model(batch)
         logits = outputs.logits
-        logits, labels = self.shift_logits_and_labels(logits, batch)
+        logits, labels = self.shift_logits_and_labels(logits, batch['loss_ids'], reference_ids)
         batch_size, seq_len, vocab_size = logits.shape
         loss = self.loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
         loss = loss.view(batch_size, -1).sum(dim=-1) #TODO support more objectives
