@@ -98,14 +98,15 @@
 <span class="kn">from</span> <span class="nn">tqdm.std</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">transformers.tokenization_utils</span> <span class="kn">import</span> <span class="n">PreTrainedTokenizer</span>
 <span class="kn">from</span> <span class="nn">transformers.utils.dummy_pt_objects</span> <span class="kn">import</span> <span class="n">PreTrainedModel</span>
+<span class="kn">from</span> <span class="nn">openprompt.plms.utils</span> <span class="kn">import</span> <span class="n">TokenizerWrapper</span>
 <span class="kn">from</span> <span class="nn">openprompt.prompt_base</span> <span class="kn">import</span> <span class="n">Template</span><span class="p">,</span> <span class="n">Verbalizer</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">openprompt.utils</span> <span class="kn">import</span> <span class="n">round_list</span><span class="p">,</span> <span class="n">signature</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
-<span class="kn">from</span> <span class="nn">openprompt.plms</span> <span class="kn">import</span> <span class="n">get_tokenizer_wrapper</span>
 <span class="kn">from</span> <span class="nn">yacs.config</span> <span class="kn">import</span> <span class="n">CfgNode</span>
 <span class="kn">from</span> <span class="nn">openprompt.utils.logging</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span>  <span class="n">AdamW</span><span class="p">,</span> <span class="n">get_linear_schedule_with_warmup</span>
 
 
 
@@ -118,6 +119,7 @@
 <span class="sd">        dataset (:obj:`Dataset` or :obj:`List`): Either a DatasetObject or a list containing the input examples.</span>
 <span class="sd">        template (:obj:`Template`): A derived class of of :obj:`Template`</span>
 <span class="sd">        tokenizer (:obj:`PretrainedTokenizer`): The pretrained tokenizer.</span>
+<span class="sd">        tokenizer_wrapper_class (:cls:`TokenizerWrapper`): The class of tokenizer wrapper.</span>
 <span class="sd">        max_seq_length (:obj:`str`, optional): The max sequence length of the input ids. It&#39;s used to trucate sentences.</span>
 <span class="sd">        batch_size (:obj:`int`, optional): The batch_size of data loader</span>
 <span class="sd">        teacher_forcing (:obj:`bool`, optional): Whether to fill the mask with target text. Set to true in training generation model.</span>
@@ -130,6 +132,7 @@
                  <span class="n">dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span>
                  <span class="n">template</span><span class="p">:</span> <span class="n">Template</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
+                 <span class="n">tokenizer_wrapper_class</span><span class="p">:</span> <span class="n">TokenizerWrapper</span><span class="p">,</span>
                  <span class="n">max_seq_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span>
                  <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                  <span class="n">shuffle</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -151,20 +154,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span> <span class="o">=</span> <span class="n">shuffle</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">teacher_forcing</span> <span class="o">=</span> <span class="n">teacher_forcing</span>
 
-        <span class="n">tokenizer_wrapper_class</span> <span class="o">=</span> <span class="n">get_tokenizer_wrapper</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">)</span>
         <span class="n">tokenizer_wrapper_init_keys</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">tokenizer_wrapper_class</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
         <span class="n">prepare_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s2">&quot;max_seq_length&quot;</span><span class="p">:</span><span class="n">max_seq_length</span><span class="p">,</span>
-                        <span class="s2">&quot;truncate_method&quot;</span><span class="p">:</span><span class="n">truncate_method</span><span class="p">,</span>
-                        <span class="s2">&quot;decoder_max_length&quot;</span><span class="p">:</span><span class="n">decoder_max_length</span><span class="p">,</span>
-                        <span class="s2">&quot;predict_eos_token&quot;</span><span class="p">:</span><span class="n">predict_eos_token</span><span class="p">,</span>
-                        <span class="s2">&quot;tokenizer&quot;</span><span class="p">:</span> <span class="n">tokenizer</span><span class="p">,</span>
-                        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                        <span class="p">}</span>
+            <span class="s2">&quot;max_seq_length&quot;</span> <span class="p">:</span> <span class="n">max_seq_length</span><span class="p">,</span>
+            <span class="s2">&quot;truncate_method&quot;</span> <span class="p">:</span> <span class="n">truncate_method</span><span class="p">,</span>
+            <span class="s2">&quot;decoder_max_length&quot;</span> <span class="p">:</span> <span class="n">decoder_max_length</span><span class="p">,</span>
+            <span class="s2">&quot;predict_eos_token&quot;</span> <span class="p">:</span> <span class="n">predict_eos_token</span><span class="p">,</span>
+            <span class="s2">&quot;tokenizer&quot;</span> <span class="p">:</span> <span class="n">tokenizer</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">}</span>
         <span class="n">to_pass_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">prepare_kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">prepare_kwargs</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tokenizer_wrapper_init_keys</span><span class="p">}</span>
         
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span> <span class="o">=</span> <span class="n">get_tokenizer_wrapper</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">)(</span><span class="o">**</span><span class="n">to_pass_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span> <span class="o">=</span> <span class="n">tokenizer_wrapper_class</span><span class="p">(</span><span class="o">**</span><span class="n">to_pass_kwargs</span><span class="p">)</span>
         
         <span class="c1"># check the satisfiability of each component</span>
         <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;wrap_one_example&#39;</span><span class="p">),</span> <span class="s2">&quot;Your prompt has no function variable </span><span class="se">\</span>
@@ -174,27 +176,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">wrap</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenize</span><span class="p">()</span>
 
-        <span class="k">def</span> <span class="nf">prompt_collate_fct</span><span class="p">(</span><span class="n">batch</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">]]):</span>
-            <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">            This function is used to collate the current prompt.</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                batch (:obj:`List[Union[Dict, InputFeatures]]`): A batch of the current data.</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">                :obj:`InputFeatures`: Return the :py:class:`~openprompt.data_utils.data_utils.InputFeatures of the current batch of data.</span>
-<span class="sd">            &#39;&#39;&#39;</span>
-
-            
-            <span class="n">elem</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">default_collate</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">}</span>
-            <span class="k">return</span> <span class="n">InputFeatures</span><span class="p">(</span><span class="o">**</span><span class="n">return_dict</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_dataset</span><span class="p">,</span> 
-                                     <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
-                                     <span class="n">shuffle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">,</span>
-                                     <span class="n">collate_fn</span> <span class="o">=</span> <span class="n">prompt_collate_fct</span>
-                                    <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tensor_dataset</span><span class="p">,</span> 
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">shuffle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">,</span>
+            <span class="n">collate_fn</span> <span class="o">=</span> <span class="n">InputFeatures</span><span class="o">.</span><span class="n">collate_fct</span>
+        <span class="p">)</span>
     
     
 <div class="viewcode-block" id="PromptDataLoader.wrap"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptDataLoader.wrap">[docs]</a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -218,13 +207,6 @@
             <span class="n">inputfeatures</span> <span class="o">=</span> <span class="n">InputFeatures</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span><span class="o">.</span><span class="n">tokenize_one_example</span><span class="p">(</span><span class="n">wrapped_example</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">teacher_forcing</span><span class="p">),</span> <span class="o">**</span><span class="n">wrapped_example</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">to_tensor</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tensor_dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inputfeatures</span><span class="p">)</span></div>
         
-
-
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;simulate the ``torch.utils.data.Dataset``&#39;s behavior.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor_dataset</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-    
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span>  <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataloader</span><span class="p">)</span>
 
@@ -238,19 +220,25 @@
 <span class="sd">    with OpenPrompt, these modules could be flexibly combined. And this class is the base class of ``PromptForClassification`` and ``PromptForGeneration``</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        model (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.</span>
+<span class="sd">        plm (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.</span>
 <span class="sd">        template (:obj:`Template`): The ``Template`` object to warp the input data.</span>
+<span class="sd">        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span> 
+                 <span class="n">plm</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span> 
                  <span class="n">template</span><span class="p">:</span> <span class="n">Template</span><span class="p">,</span>
-                 <span class="p">):</span>
+                 <span class="n">freeze_plm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plm</span> <span class="o">=</span> <span class="n">plm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="n">template</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freeze_plm</span> <span class="o">=</span> <span class="n">freeze_plm</span>
+        <span class="k">if</span> <span class="n">freeze_plm</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># get model&#39;s forward function&#39;s keywords</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">forward_keys</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward_keys</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
         
 <div class="viewcode-block" id="PromptModel.forward"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptModel.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; </span>
@@ -262,7 +250,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">process_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">input_batch</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">batch</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">batch</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_keys</span><span class="p">}</span>
-        <span class="n">outputs</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">input_batch</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="p">(</span><span class="o">**</span><span class="n">input_batch</span><span class="p">,</span> <span class="n">output_hidden_states</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">post_processing_outputs</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">outputs</span></div>
     
 <div class="viewcode-block" id="PromptModel.prepare_model_inputs"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptModel.prepare_model_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_model_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
@@ -271,7 +260,6 @@
         <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">process_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">input_batch</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">batch</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">batch</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_keys</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">input_batch</span></div></div>
-
     
 
 
@@ -281,34 +269,39 @@
 <span class="sd">    logits of the labels, using a verbalizer. </span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        model (:obj:`PretrainedModel`): A pre-traiend model you decide to use for classification, e.g. BERT.</span>
+<span class="sd">        plm (:obj:`PretrainedModel`): A pre-traiend model you decide to use for classification, e.g. BERT.</span>
 <span class="sd">        template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``ManualTemplate``.</span>
 <span class="sd">        verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the lables to label words for classification, e.g. ``ManualVerbalizer``.</span>
+<span class="sd">        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span> 
+                 <span class="n">plm</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span> 
                  <span class="n">template</span><span class="p">:</span> <span class="n">Template</span><span class="p">,</span>
                  <span class="n">verbalizer</span><span class="p">:</span> <span class="n">Verbalizer</span><span class="p">,</span>
-                 <span class="p">):</span>
+                 <span class="n">freeze_plm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="n">template</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span> <span class="o">=</span> <span class="n">PromptModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span> <span class="o">=</span> <span class="n">PromptModel</span><span class="p">(</span><span class="n">plm</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">freeze_plm</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span> <span class="o">=</span> <span class="n">verbalizer</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">plm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">plm</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">template</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Register the device parameter.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register the device parameter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">device</span>
 
-<div class="viewcode-block" id="PromptForClassification.extract_logits"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.extract_logits">[docs]</a>    <span class="k">def</span> <span class="nf">extract_logits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+<div class="viewcode-block" id="PromptForClassification.extract_at_mask"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.extract_at_mask">[docs]</a>    <span class="k">def</span> <span class="nf">extract_at_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">outputs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
                        <span class="n">batch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">]):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get logits of all &lt;mask&gt; token</span>
-<span class="sd">        Project the logits of shape</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get outputs at all &lt;mask&gt; token</span>
+<span class="sd">        E.g., project the logits of shape</span>
 <span class="sd">        (``batch_size``, ``max_seq_length``, ``vocab_size``)</span>
 <span class="sd">        into logits of shape (if num_mask_token &gt; 1)</span>
 <span class="sd">        (``batch_size``, ``num_mask_token``, ``vocab_size``)</span>
@@ -316,30 +309,27 @@
 <span class="sd">        (``batch_size``, ``vocab_size``).</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            logits (:obj:`torch.Tensor`): The original logits of the whole sequence.</span>
+<span class="sd">            outputs (:obj:`torch.Tensor`): The original outputs (maybe process by verbalizer&#39;s</span>
+<span class="sd">                 `gather_outputs` before) etc. of the whole sequence.</span>
 <span class="sd">            batch (:obj:`Union[Dict, InputFeatures]`): The original batch</span>
 <span class="sd">        </span>
 <span class="sd">        Returns:</span>
-<span class="sd">            :obj:`torch.Tensor`: The extracted logits of ``&lt;mask&gt;`` tokens.</span>
+<span class="sd">            :obj:`torch.Tensor`: The extracted outputs of ``&lt;mask&gt;`` tokens.</span>
 <span class="sd">            </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s1">&#39;loss_ids&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)]</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s1">&#39;loss_ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">logits</span></div>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s1">&#39;loss_ids&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)]</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s1">&#39;loss_ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">outputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">outputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">outputs</span></div>
         
 <div class="viewcode-block" id="PromptForClassification.forward"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; keys in batch: </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; TODO</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_logits</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
-        <span class="n">label_words_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">process_logits</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="s1">&#39;label&#39;</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
-            <span class="k">pass</span> <span class="c1">#TODO add caculate label loss here</span>
-
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">gather_outputs</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="n">outputs_at_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_at_mask</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+        <span class="n">label_words_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">process_outputs</span><span class="p">(</span><span class="n">outputs_at_mask</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">label_words_logits</span></div>
     
     <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -358,27 +348,42 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">tokenizer</span>
     
 <div class="viewcode-block" id="PromptForClassification.state_dict"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Save the model using template and verbalizer&#39;s save methods.</span>
-<span class="sd">        Args:</span>
-<span class="sd">            path (:obj:`str`): the full path of the checkpoint.</span>
-<span class="sd">            save_plm (:obj:`bool`): whether saving the pretrained language model.</span>
-<span class="sd">            kwargs: other information, such as the achieved metric value. </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Save the model using template, plm and verbalizer&#39;s save methods.&quot;&quot;&quot;</span>
         <span class="n">_state_dict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">freeze_plm</span><span class="p">:</span>
+            <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
         <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
         <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;verbalizer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">_state_dict</span></div>
     
 <div class="viewcode-block" id="PromptForClassification.load_state_dict"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.load_state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;plm&#39;</span> <span class="ow">in</span> <span class="n">state_dict</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">])</span>
+        <span class="sd">&quot;&quot;&quot; Load the model using template, plm and verbalizer&#39;s load methods.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s1">&#39;plm&#39;</span> <span class="ow">in</span> <span class="n">state_dict</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">freeze_plm</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;verbalizer&#39;</span><span class="p">])</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;verbalizer&#39;</span><span class="p">])</span></div>
 
+<div class="viewcode-block" id="PromptForClassification.parallelize"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.parallelize">[docs]</a>    <span class="k">def</span> <span class="nf">parallelize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_map</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Parallelize the model across device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="p">,</span> <span class="s2">&quot;parallelize&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">parallelize</span><span class="p">(</span><span class="n">device_map</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">device_map</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;parallelize method was not implemented for this plm.&quot;</span><span class="p">)</span></div>
 
-
-
+<div class="viewcode-block" id="PromptForClassification.deparallelize"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.deparallelize">[docs]</a>    <span class="k">def</span> <span class="nf">deparallelize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Deparallelize the model across device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="p">,</span> <span class="s2">&quot;deparallelize&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">deparallelize</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device_map</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;parallelize method was not implemented for this plm.&quot;</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="PromptForGeneration"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration">[docs]</a><span class="k">class</span> <span class="nc">PromptForGeneration</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">GenerationMixin</span><span class="p">):</span>
@@ -386,42 +391,51 @@
 
 
 <span class="sd">    Args:</span>
-<span class="sd">        model (:obj:`PretrainedModel`): A pre-traiend model you decide to use for generation, e.g. GPT.</span>
+<span class="sd">        plm (:obj:`PretrainedModel`): A pre-traiend model you decide to use for generation, e.g. GPT.</span>
 <span class="sd">        template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``PrefixTemplate``.</span>
 <span class="sd">        tokenizer (:obj:`Tokenizer`): A ``Tokenizer`` of the current model.</span>
 <span class="sd">        gen_config (:obj:`CfgNode`): The generation configs to pass into `GenerationMixin.generate &lt;https://huggingface.co/transformers/_modules/transformers/generation_utils.html#GenerationMixin.generate&gt;`_</span>
+<span class="sd">        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span> 
+                 <span class="n">plm</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span> 
                  <span class="n">template</span><span class="p">:</span> <span class="n">Template</span><span class="p">,</span>
-                 <span class="n">gen_config</span><span class="p">:</span> <span class="n">CfgNode</span><span class="p">,</span>
+                 <span class="n">freeze_plm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">gen_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CfgNode</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PreTrainedTokenizer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">):</span>
-                 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="n">template</span>
         <span class="k">if</span> <span class="n">tokenizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">tokenizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Tokenizer can&#39;t be set from input args or template&quot;</span>
+            <span class="k">assert</span> <span class="n">template</span><span class="o">.</span><span class="n">tokenizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Tokenizer can&#39;t be set from input args or template&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">tokenizer</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span> <span class="o">=</span> <span class="n">PromptModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span> <span class="o">=</span> <span class="n">PromptModel</span><span class="p">(</span><span class="n">plm</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">freeze_plm</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">config</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">gen_config</span><span class="p">:</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">gen_config</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">plm</span><span class="o">.</span><span class="n">config</span>
+        <span class="k">if</span> <span class="n">gen_config</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">gen_config</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">gen_config</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_generation_function</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">plm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">plm</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">template</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">device</span>
 
 <div class="viewcode-block" id="PromptForGeneration.shift_logits_and_labels"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration.shift_logits_and_labels">[docs]</a>    <span class="k">def</span> <span class="nf">shift_logits_and_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                                 <span class="n">logits</span><span class="p">,</span> 
-                                <span class="n">batch</span><span class="p">:</span> <span class="n">InputFeatures</span><span class="p">):</span>
+                                <span class="n">loss_ids</span><span class="p">,</span> 
+                                <span class="n">reference_ids</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Left shift the label, and make label of the positions that are</span>
@@ -437,12 +451,10 @@
 <span class="sd">            shift_input_ids (:obj:`List[int]`):</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">shift_logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-        <span class="n">shift_loss_ids</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;loss_ids&#39;</span><span class="p">][</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">is_encoder_decoder</span><span class="p">:</span>
-            <span class="n">shift_input_ids</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;decoder_input_ids&#39;</span><span class="p">][</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">shift_input_ids</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">][</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">shift_loss_ids</span> <span class="o">=</span> <span class="n">loss_ids</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">shift_input_ids</span> <span class="o">=</span> <span class="n">reference_ids</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
         <span class="n">shift_input_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">shift_loss_ids</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span> <span class="n">shift_input_ids</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">shift_logits</span><span class="p">,</span> <span class="n">shift_input_ids</span></div>
 
@@ -456,7 +468,7 @@
 <span class="sd">        in which the loss will be calcated for all the postions in the same time. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_generation_function</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -470,10 +482,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            loss(:obj:torch.Tensor): The loss of the current generation procedure.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">is_encoder_decoder</span><span class="p">:</span>
+            <span class="n">reference_ids</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;decoder_input_ids&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reference_ids</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>  <span class="c1"># in case in some template, these field is dropped</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">logits</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span>
-        <span class="n">logits</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift_logits_and_labels</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+        <span class="n">logits</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift_logits_and_labels</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;loss_ids&#39;</span><span class="p">],</span> <span class="n">reference_ids</span><span class="p">)</span>
         <span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">,</span> <span class="n">vocab_size</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">logits</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">labels</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#TODO support more objectives</span>
@@ -506,6 +521,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">in_generation_function</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">output_sequences</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="o">**</span><span class="n">batch</span><span class="p">,</span> <span class="o">**</span><span class="n">input_generation_kwargs</span><span class="p">,</span> <span class="n">pad_token_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">,</span> <span class="n">eos_token_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_generation_function</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">output_sequences</span> <span class="o">=</span> <span class="n">output_sequences</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">generated_sentences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_processing</span><span class="p">(</span><span class="n">output_sequences</span><span class="o">=</span><span class="n">output_sequences</span><span class="p">,</span> <span class="n">input_length</span><span class="o">=</span><span class="n">input_length</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">output_sequences</span><span class="p">,</span> <span class="n">generated_sentences</span></div>
     
@@ -520,7 +536,6 @@
 <span class="sd">            Returns:</span>
 <span class="sd">                :obj:`List`: The generated sentences that have been post-processed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">output_sequences</span> <span class="o">=</span> <span class="n">output_sequences</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">generated_sentences</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">output_sequences</span><span class="p">:</span>
             <span class="c1"># Decode text</span>
@@ -537,7 +552,9 @@
     
 <div class="viewcode-block" id="PromptForGeneration.prepare_inputs_for_generation"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration.prepare_inputs_for_generation">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_inputs_for_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                          <span class="o">**</span><span class="n">model_kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;When the `past` not in model_kwargs, we prepare the input from scratch. </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;This function wraps the `prepare_inputs_for_generation` function in the huggingface transformers.</span>
+
+<span class="sd">        When the `past` not in model_kwargs, we prepare the input from scratch. </span>
 <span class="sd">        When `past` is in model_kwargs, we don&#39;t need to prepare the template wrapped input,</span>
 <span class="sd">        instead we use the inner pretrain_models&#39; function to prepare the next step&#39;s input.</span>
 <span class="sd">        `model_kwargs` includes all the argument passed in the `batch`: InputFeatures, except `input_ids`</span>
@@ -547,14 +564,12 @@
 <span class="sd">        Args:</span>
 <span class="sd">            input_ids(:obj:`torch.Tensor`): Indices of input sequence tokens in the vocabulary.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
- 
-        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_ith_token</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s1">&#39;encoder_outputs&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model_kwargs</span><span class="p">:</span> <span class="c1"># generating the first token in decoder only setting.</span>
 
             <span class="n">batch</span> <span class="o">=</span> <span class="n">InputFeatures</span><span class="p">(</span><span class="n">input_ids</span><span class="o">=</span><span class="n">input_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
             <span class="n">model_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">prepare_model_inputs</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span> <span class="c1"># generating the subsequence generation can use the default setting</span>
-            <span class="n">model_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">prepare_inputs_for_generation</span><span class="p">(</span><span class="n">input_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+            <span class="n">model_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">prepare_inputs_for_generation</span><span class="p">(</span><span class="n">input_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_model_inputs</span> <span class="o">=</span> <span class="n">model_inputs</span>  <span class="c1"># to update the model_kwargs in _update_model_kwargs_for_generation, in-place operation.</span>
         <span class="k">return</span> <span class="n">model_inputs</span></div>
     
@@ -588,40 +603,67 @@
     <span class="k">def</span> <span class="nf">_prepare_encoder_decoder_kwargs_for_generation</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">,</span> <span class="n">model_kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; This function resemble the function in GeneraionMix</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            input_ids (:obj:`torch.LongTensor`) The input ids for </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;encoder_outputs&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model_kwargs</span><span class="p">:</span>
             <span class="c1"># retrieve encoder hidden states</span>
-            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_encoder</span><span class="p">()</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">get_encoder</span><span class="p">()</span>
             <span class="n">encoder_kwargs</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="n">argument</span><span class="p">:</span> <span class="n">value</span>
                 <span class="k">for</span> <span class="n">argument</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">model_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">argument</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;decoder_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">argument</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cross_attn&quot;</span><span class="p">))</span>
             <span class="p">}</span>
-            <span class="n">batch</span> <span class="o">=</span> <span class="n">InputFeatures</span><span class="p">(</span><span class="n">input_ids</span><span class="o">=</span><span class="n">input_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">encoder_kwargs</span><span class="p">)</span>
-            <span class="n">model_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">prepare_model_inputs</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;input_ids&quot;</span><span class="p">:</span><span class="n">input_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">encoder_kwargs</span><span class="p">}</span>
+            <span class="n">model_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">prepare_model_inputs</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="c1"># This line differs from the orinigal code base, we should process the input</span>
+            <span class="c1"># with our template, then pass it into the model.</span>
+            <span class="c1"># some of the arguments may have been changed by the template,</span>
+            <span class="c1"># e.g. the attention mask. Here we update the model_kwargs</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">model_kwargs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">model_inputs</span><span class="p">:</span>
+                    <span class="n">model_kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_inputs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="n">model_kwargs</span><span class="p">[</span><span class="s2">&quot;encoder_outputs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span><span class="n">return_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">model_inputs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model_kwargs</span>
     
 <div class="viewcode-block" id="PromptForGeneration.state_dict"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration.state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Save the model using template and verbalizer&#39;s save methods.</span>
-<span class="sd">        Args:</span>
-<span class="sd">            path (:obj:`str`): the full path of the checkpoint.</span>
-<span class="sd">            save_plm (:obj:`bool`): whether saving the pretrained language model.</span>
-<span class="sd">            kwargs: other information, such as the achieved metric value. </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Save the model using template and plm&#39;s save methods. &quot;&quot;&quot;</span>
         <span class="n">_state_dict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">freeze_plm</span><span class="p">:</span>
+            <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
         <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">_state_dict</span></div>
     
 <div class="viewcode-block" id="PromptForGeneration.load_state_dict"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration.load_state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;plm&#39;</span> <span class="ow">in</span> <span class="n">state_dict</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">])</span>
+        <span class="sd">&quot;&quot;&quot; Load the model using template and plm&#39;s load methods. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s1">&#39;plm&#39;</span> <span class="ow">in</span> <span class="n">state_dict</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">freeze_plm</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">])</span></div>
     
     <span class="k">def</span> <span class="nf">_reorder_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">past</span><span class="p">,</span> <span class="n">beam_idx</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Use the plm&#39;s default _reorder_cache function</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_reorder_cache</span><span class="p">(</span><span class="n">past</span><span class="p">,</span> <span class="n">beam_idx</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">_reorder_cache</span><span class="p">(</span><span class="n">past</span><span class="p">,</span> <span class="n">beam_idx</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PromptForGeneration.parallelize"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration.parallelize">[docs]</a>    <span class="k">def</span> <span class="nf">parallelize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_map</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Parallelize the model across device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="p">,</span> <span class="s2">&quot;parallelize&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">parallelize</span><span class="p">(</span><span class="n">device_map</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">device_map</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;parallelize method was not implemented for this plm.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PromptForGeneration.deparallelize"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration.deparallelize">[docs]</a>    <span class="k">def</span> <span class="nf">deparallelize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Deparallelize the model across device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="p">,</span> <span class="s2">&quot;deparallelize&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">deparallelize</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device_map</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;parallelize method was not implemented for this plm.&quot;</span><span class="p">)</span></div></div>
+
 </pre></div>
 
            </div>

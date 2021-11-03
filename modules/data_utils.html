@@ -98,176 +98,9 @@
 <h1>Data Utils<a class="headerlink" href="#data-utils" title="Permalink to this headline">¶</a></h1>
 <section id="input-example">
 <h2>Input Example<a class="headerlink" href="#input-example" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputExample">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">InputExample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">guid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_text</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputExample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputExample" title="Permalink to this definition">¶</a></dt>
-<dd><p>A raw input example consisting of segments of text,
-a label for classification task or a target sequence of generation task.
-Other desired information can be passed via meta.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>guid</strong> – A unique identifier of the example.</p></li>
-<li><p><strong>text_a</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The placeholder for sequence of text.</p></li>
-<li><p><strong>text_b</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – A secend sequence of text, which is not always neccessary.</p></li>
-<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional) – The label id of the example in classification task.</p></li>
-<li><p><strong>tgt_text</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[str,List[str]]</span></code>, optional) – The target sequence of the example in a generation task..</p></li>
-<li><p><strong>meta</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>, optional) – An optional dictionary to store arbitrary extra information for the example.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputExample.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputExample.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputExample.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serialize this instance to a Python dictionary.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputExample.to_json_string">
-<span class="sig-name descname"><span class="pre">to_json_string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputExample.to_json_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputExample.to_json_string" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serialize this instance to a JSON string.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputExample.load_examples">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputExample.load_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputExample.load_examples" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load a set of input examples from a file</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputExample.save_examples">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">save_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">examples</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputExample.save_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputExample.save_examples" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save a set of input examples to a file</p>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="input-features">
 <h2>Input Features<a class="headerlink" href="#input-features" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputFeatures">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">InputFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs_embeds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_mask</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_type_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_input_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_inputs_embeds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">soft_token_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_token_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">past_key_values</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_text</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_cache</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputFeatures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputFeatures" title="Permalink to this definition">¶</a></dt>
-<dd><p>The class for input to the PLM and Prompts. To make users explicitly know the available keys,
-we define a dict with a set of predefined possible keys. The default value to any key is None.
-When use it as a dict, all the keys whose values are None are invisible.</p>
-<p>This class support most of the dict’s operation (See Examples). It can also be consumed by
-pytorch’s default_collate in DataLoader.
-Also a <a class="reference internal" href="#openprompt.data_utils.data_utils.InputFeatures.to_tensor" title="openprompt.data_utils.data_utils.InputFeatures.to_tensor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_tensor()</span></code></a> method is build to convert the values into torch.Tensor for torch’s input.</p>
-<p>Examples:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">in_feat</span> <span class="o">=</span> <span class="n">InputFeatures</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s1">&#39;input_ids&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="s1">&#39;new_token_ids&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]})</span>  <span class="c1"># init from dict</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">in_feat</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>       <span class="c1"># [&#39;input_ids, &#39;new_token_ids&#39;]</span>
-<span class="n">in_feat</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>        <span class="c1"># can assign value like normal dict</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">in_feat</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>       <span class="c1"># [&#39;input_ids&#39;,&#39;label&#39;, &#39;new_token_ids&#39;] (Note that it&#39;s also ordered)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">in_feat</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>     <span class="c1"># 3</span>
-<span class="n">in_feat</span><span class="p">[</span><span class="s1">&#39;alice&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>        <span class="c1"># KeyError: Key alice not in predefined set of keys</span>
-<span class="n">in_feat</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>            <span class="c1"># [[1,4,5], 3, [3,4,5]]  (Note that it&#39;s also ordered)</span>
-<span class="p">[</span><span class="n">in_feat</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">in_feat</span><span class="p">]</span>   <span class="c1"># [[1,4,5], 3, [3,4,5]]</span>
-<span class="n">new_dict</span><span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">in_feat</span><span class="p">,</span> <span class="s1">&#39;new_key&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">}</span>  <span class="c1"># new_dict is {&#39;input_ids&#39;: [1, 4, 5], &#39;label&#39;: 3, &#39;new_token_ids&#39;: [3, 4, 5], &#39;new_key&#39;: 2}</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_ids</strong> – Indices of input sequence tokens in the vocabulary.</p></li>
-<li><p><strong>attention_mask</strong> – Mask to avoid performing attention on padding token indices.
-Mask values selected in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>: Usually <code class="docutils literal notranslate"><span class="pre">1</span></code> for tokens that are NOT MASKED, <code class="docutils literal notranslate"><span class="pre">0</span></code> for MASKED (padded)
-tokens.</p></li>
-<li><p><strong>token_type_ids</strong> – (Optional) Segment token indices to indicate first and second
-portions of the inputs. Only some models use them.</p></li>
-<li><p><strong>label</strong> – (Optional) Label corresponding to the input. Int for classification problems,
-float for regression problems.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputFeatures.to_tensor">
-<span class="sig-name descname"><span class="pre">to_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'cuda'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputFeatures.to_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputFeatures.to_tensor" title="Permalink to this definition">¶</a></dt>
-<dd><p>inplace operation, convert all tensorable features into <code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.tensor</span></code></p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputFeatures.to">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'cuda:0'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputFeatures.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputFeatures.to" title="Permalink to this definition">¶</a></dt>
-<dd><p>move the tensor keys to runtime device, such as gpu:0</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputFeatures.to_json_string">
-<span class="sig-name descname"><span class="pre">to_json_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_none</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputFeatures.to_json_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputFeatures.to_json_string" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serializes this instance to a JSON string.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputFeatures.keys">
-<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_none</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputFeatures.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputFeatures.keys" title="Permalink to this definition">¶</a></dt>
-<dd><p>get all keys of the InputFeatures</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>keep_none</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – whether to keep the predefined keys whose value is none. Defaults to False.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>keys of the InputFeatures</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[str]</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputFeatures.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_none</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputFeatures.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputFeatures.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>get the dict of mapping from keys to values of the InputFeatures</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>keep_none</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – whether to keep the predefined keys whose value is none. Defaults to False.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>dict of mapping from keys to values of the InputFeatures</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">Any]</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputFeatures.values">
-<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_none</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputFeatures.values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputFeatures.values" title="Permalink to this definition">¶</a></dt>
-<dd><p>get the values with respect to the keys  of the InputFeatures</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>keep_none</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – whether to keep the predefined keys whose value is none. Defaults to False.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>the values with respect to the keys of the InputFeatures</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Any]</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.data_utils.data_utils.InputFeatures.items">
-<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_utils.html#InputFeatures.items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_utils.InputFeatures.items" title="Permalink to this definition">¶</a></dt>
-<dd><p>get the (key, value) pairs  of the InputFeatures</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>keep_none</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – whether to keep the predefined keys whose value is none. Defaults to False.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>the (key, value) pairs of the InputFeatures</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Any]</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="fewshot-sampler">
 <h2>Fewshot Sampler<a class="headerlink" href="#fewshot-sampler" title="Permalink to this headline">¶</a></h2>
@@ -288,7 +121,7 @@ float for regression problems.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.data_utils.data_sampler.FewShotSampler.sample_total">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">sample_total</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_examples_total</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_sampler.html#FewShotSampler.sample_total"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_sampler.FewShotSampler.sample_total" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sample_total</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_examples_total</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_sampler.html#FewShotSampler.sample_total"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_sampler.FewShotSampler.sample_total" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use the total number of examples for few-shot sampling (Strategy <code class="docutils literal notranslate"><span class="pre">I</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -308,7 +141,7 @@ float for regression problems.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.data_utils.data_sampler.FewShotSampler.sample_per_label">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">sample_per_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_examples_per_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_sampler.html#FewShotSampler.sample_per_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_sampler.FewShotSampler.sample_per_label" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sample_per_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_examples_per_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/data_sampler.html#FewShotSampler.sample_per_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.data_sampler.FewShotSampler.sample_per_label" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use the number of examples per class for few-shot sampling (Strategy <code class="docutils literal notranslate"><span class="pre">II</span></code>).
 If the number of examples is not enough, a warning will pop up.</p>
 <dl class="field-list simple">

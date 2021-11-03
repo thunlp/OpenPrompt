@@ -172,7 +172,9 @@
                 <span class="n">sample_twice</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -204,8 +206,7 @@
                 <span class="k">return</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selected_ids</span><span class="p">]</span>
         
     
-<div class="viewcode-block" id="FewShotSampler.sample_total"><a class="viewcode-back" href="../../../modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_total">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">sample_total</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">num_examples_total</span><span class="p">):</span>
+<div class="viewcode-block" id="FewShotSampler.sample_total"><a class="viewcode-back" href="../../../modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_total">[docs]</a>    <span class="k">def</span> <span class="nf">sample_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">num_examples_total</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Use the total number of examples for few-shot sampling (Strategy ``I``).</span>
 <span class="sd">        </span>
@@ -217,13 +218,12 @@
 <span class="sd">            :obj:`List`: The selected indices with the size of ``num_examples_total``.</span>
 <span class="sd">            </span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
         <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[:</span><span class="n">num_examples_total</span><span class="p">]</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Selected examples (mixed) </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">selected_ids</span></div>
 
-<div class="viewcode-block" id="FewShotSampler.sample_per_label"><a class="viewcode-back" href="../../../modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_per_label">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">sample_per_label</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">num_examples_per_label</span><span class="p">):</span>
+<div class="viewcode-block" id="FewShotSampler.sample_per_label"><a class="viewcode-back" href="../../../modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_per_label">[docs]</a>    <span class="k">def</span> <span class="nf">sample_per_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">num_examples_per_label</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Use the number of examples per class for few-shot sampling (Strategy ``II``). </span>
 <span class="sd">        If the number of examples is not enough, a warning will pop up.</span>
@@ -243,12 +243,12 @@
             <span class="n">ids_per_label</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">ids_per_label</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">num_examples_per_label</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Not enough examples of label </span><span class="si">{}</span><span class="s2"> can be sampled&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
             <span class="n">selected_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tmp</span><span class="p">[:</span><span class="n">num_examples_per_label</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
         <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span>
         <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">selected_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>    
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Selected examples </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">selected_ids</span></div></div>

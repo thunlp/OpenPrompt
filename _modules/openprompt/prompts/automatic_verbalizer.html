@@ -88,7 +88,7 @@
              
   <h1>Source code for openprompt.prompts.automatic_verbalizer</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">transformers.tokenization_utils</span> <span class="kn">import</span> <span class="n">PreTrainedTokenizer</span>
-<span class="kn">from</span> <span class="nn">openprompt.data_utils.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span>
 <span class="kn">from</span> <span class="nn">openprompt</span> <span class="kn">import</span> <span class="n">Verbalizer</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span>
 <span class="kn">import</span> <span class="nn">torch</span>
@@ -168,7 +168,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span><span class="p">,</span> <span class="n">logits</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="p">,</span> <span class="n">labels</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="AutomaticVerbalizer.process_logits"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer.process_logits">[docs]</a>    <span class="k">def</span> <span class="nf">process_logits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">process_logits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">accumulate</span><span class="p">:</span> <span class="c1"># inherit from nn.Module, only store buffer in training mode.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">accumulate_step</span><span class="o">+=</span><span class="mi">1</span>
@@ -196,7 +196,7 @@
             <span class="k">return</span> <span class="n">label_logits</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">((</span><span class="n">logits</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">device</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">((</span><span class="n">logits</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         
 <div class="viewcode-block" id="AutomaticVerbalizer.project"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>

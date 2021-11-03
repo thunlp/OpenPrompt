@@ -90,7 +90,7 @@
 <span></span><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">transformers.tokenization_utils</span> <span class="kn">import</span> <span class="n">PreTrainedTokenizer</span>
 <span class="kn">from</span> <span class="nn">yacs.config</span> <span class="kn">import</span> <span class="n">CfgNode</span>
-<span class="kn">from</span> <span class="nn">openprompt.data_utils.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">openprompt</span> <span class="kn">import</span> <span class="n">Verbalizer</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="o">*</span>
@@ -268,6 +268,8 @@
         <span class="n">norm</span> <span class="o">=</span> <span class="n">label_words_probs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># TODO Test the performance of detaching()</span>
         <span class="n">label_words_probs</span> <span class="o">/=</span> <span class="n">norm</span>
         <span class="k">return</span> <span class="n">label_words_probs</span></div></div>
+    
+    
     
 
         

@@ -92,7 +92,7 @@
 
 
 
-<span class="kn">from</span> <span class="nn">openprompt.data_utils.data_utils</span> <span class="kn">import</span> <span class="n">InputExample</span><span class="p">,</span> <span class="n">InputFeatures</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputExample</span><span class="p">,</span> <span class="n">InputFeatures</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="kn">from</span> <span class="nn">transformers.tokenization_utils</span> <span class="kn">import</span> <span class="n">PreTrainedTokenizer</span>
@@ -119,91 +119,15 @@
                          <span class="n">mask_token</span><span class="o">=</span><span class="n">mask_token</span><span class="p">,</span>
                          <span class="n">placeholder_mapping</span><span class="o">=</span><span class="n">placeholder_mapping</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
-        
-
-<div class="viewcode-block" id="ManualTemplate.wrap_one_example"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.manual_template.ManualTemplate.wrap_one_example">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_one_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
-                         <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-        <span class="sd">&#39;&#39;&#39;Given an input example which contains input text, which can be referenced</span>
-<span class="sd">        by self.template.placeholder_mapping &#39;s value. </span>
-<span class="sd">        This function process the example into a list of dict,</span>
-<span class="sd">        Each dict functions as a group, which has the sample properties, such as whether </span>
-<span class="sd">        it&#39;s shortenable, whether it&#39;s the masked position, whether it&#39;s soft token.</span>
-<span class="sd">        Since a text will be tokenized in the subsequent processing procedure,</span>
-<span class="sd">        these attributes are broadcasted along the tokenized sentence.</span>
+    
+<div class="viewcode-block" id="ManualTemplate.on_text_set"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.manual_template.ManualTemplate.on_text_set">[docs]</a>    <span class="k">def</span> <span class="nf">on_text_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        when template text was set</span>
 <span class="sd">        </span>
-<span class="sd">        Args:       example(:obj:`InputExample`):Should have attributes that </span>
-<span class="sd">                    are able to be filled in the template.</span>
-<span class="sd">        Returns:    :obj:`List[Dict]`</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        
-        <span class="n">not_empty_keys</span> <span class="o">=</span> <span class="n">example</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;template text has not been initialized&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">InputExample</span><span class="p">):</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">placeholder_token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
-                    <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">placeholder_token</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">[</span><span class="n">placeholder_token</span><span class="p">]))</span>
-                <span class="n">not_empty_keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">[</span><span class="n">placeholder_token</span><span class="p">])</span> <span class="c1"># this key has been processed, remove</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">example</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
-                    <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;meta:&quot;</span><span class="o">+</span><span class="n">key</span><span class="o">+</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-            <span class="n">not_empty_keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;meta&#39;</span><span class="p">)</span> <span class="c1"># meta has been processed</span>
-            <span class="c1"># TODO &lt;a!&gt; rstrip punctuation support</span>
-            <span class="c1"># print(text) # for debug</span>
-
-            <span class="n">keys</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">text</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">inputflag_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">registered_inputflag_names</span><span class="p">:</span>
-                <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inputflag_name</span><span class="p">)</span>
-                <span class="n">v</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;get_default_&quot;</span><span class="o">+</span><span class="n">inputflag_name</span><span class="p">):</span>
-                    <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;get_default_&quot;</span><span class="o">+</span><span class="n">inputflag_name</span><span class="p">)()</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">                    Template&#39;s inputflag &#39;</span><span class="si">{}</span><span class="s2">&#39; is registered but not initialize.</span>
-<span class="s2">                    Try using template.</span><span class="si">{}</span><span class="s2"> = [...] to initialize</span>
-<span class="s2">                    or create an method get_default_</span><span class="si">{}</span><span class="s2">(self) in your template.</span>
-<span class="s2">                    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inputflag_name</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">))</span>
-                
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Template: len(</span><span class="si">{}</span><span class="s2">)=</span><span class="si">{}</span><span class="s2"> doesn&#39;t match len(text)=</span><span class="si">{}</span><span class="s2">.&quot;</span>\
-                        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inputflag_name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)))</span>
-                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="n">wrapped_parts_to_tokenize</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">piece</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">)):</span>
-                <span class="n">wrapped_parts_to_tokenize</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">piece</span><span class="p">)))</span>
-
-            <span class="n">wrapped_parts_not_tokenize</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">not_empty_keys</span><span class="p">}</span>
-            <span class="k">return</span> <span class="p">[</span><span class="n">wrapped_parts_to_tokenize</span><span class="p">,</span> <span class="n">wrapped_parts_not_tokenize</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;InputExample&quot;</span><span class="p">)</span>        </div>
-
-
-<div class="viewcode-block" id="ManualTemplate.process_batch"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.manual_template.ManualTemplate.process_batch">[docs]</a>    <span class="k">def</span> <span class="nf">process_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">InputFeatures</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;In manual_template, the batch need not to be processed.</span>
+<span class="sd">        1. parse text</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">batch</span></div>
-    
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mask_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_mask_prefix&#39;</span><span class="p">):</span>
-            <span class="n">mask_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="k">if</span> <span class="n">word</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_mask_prefix</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39; &#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">mask_ids</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_prefix</span>
-    
-<div class="viewcode-block" id="ManualTemplate.from_file"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.manual_template.ManualTemplate.from_file">[docs]</a>    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                  <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                  <span class="n">choice</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                  <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
-                  <span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="n">choice</span><span class="p">]</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">separator</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
-        <span class="k">return</span> <span class="bp">self</span></div></div>
-        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

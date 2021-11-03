@@ -106,7 +106,7 @@ is one of the most important module in a prompt-leanring framework.  In this tut
 </pre></div>
 </div>
 <p>This is also a template:</p>
-<div class="highlight-python notranslate" id="template-2"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; &lt;new&gt; &lt;new&gt; &lt;new&gt; &lt;new&gt; &lt;mask&gt; &lt;new&gt; &lt;new&gt; .&quot;</span>
+<div class="highlight-python notranslate" id="template-2"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; &lt;soft&gt; &lt;soft&gt; &lt;soft&gt; &lt;soft&gt; &lt;mask&gt; &lt;soft&gt; &lt;soft&gt; .&quot;</span>
 </pre></div>
 </div>
 <p>This is also a template:</p>
@@ -134,22 +134,21 @@ The <code class="docutils literal notranslate"><span class="pre">loss_ids</span>
 <span class="n">loss_ids</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span>         <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">1</span>       <span class="p">,</span> <span class="mi">0</span>  <span class="p">]</span>
 </pre></div>
 </div>
-<p>New tokens and soft tokens are tokens that will be optimized separately from the PLM, where new tokens are randomly initialized, and soft tokens are initialized by specific tokens in the vocabulary.
-New tokens are denoted by <code class="docutils literal notranslate"><span class="pre">new_ids</span></code> and soft tokens are denoted by <code class="docutils literal notranslate"><span class="pre">soft_ids</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;new&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;new&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;soft&gt;a&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">]</span>
-<span class="n">new_ids</span> <span class="p">:</span> <span class="p">[</span><span class="mi">0</span>         <span class="p">,</span> <span class="mi">1</span>      <span class="p">,</span> <span class="mi">1</span>      <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">0</span>       <span class="p">,</span> <span class="mi">0</span>        <span class="p">,</span> <span class="mi">0</span>  <span class="p">]</span>
-<span class="n">soft_ids</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span>         <span class="p">,</span> <span class="mi">0</span>      <span class="p">,</span> <span class="mi">0</span>      <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">0</span>       <span class="p">,</span> <span class="mi">1</span>        <span class="p">,</span> <span class="mi">0</span>  <span class="p">]</span>
+<p>Soft tokens are tokens that are optimized separately from the PLM.
+Soft tokens are denoted by <code class="docutils literal notranslate"><span class="pre">soft_token_ids</span></code>, where <code class="docutils literal notranslate"><span class="pre">&lt;soft&gt;</span></code> is randomly initialized and <code class="docutils literal notranslate"><span class="pre">&lt;soft&gt;a</span></code> is initialized to <code class="docutils literal notranslate"><span class="pre">a</span></code>’s embedding.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="p">:</span>       <span class="p">[</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;soft&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;soft&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;soft&gt;a&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">]</span>
+<span class="n">soft_token_ids</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span>         <span class="p">,</span> <span class="mi">1</span>       <span class="p">,</span> <span class="mi">1</span>       <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">0</span>       <span class="p">,</span> <span class="mi">1</span>        <span class="p">,</span> <span class="mi">0</span>  <span class="p">]</span>
 </pre></div>
 </div>
 </section>
 <section id="meta-information">
 <h2>Meta Information<a class="headerlink" href="#meta-information" title="Permalink to this headline">¶</a></h2>
-<p>In the <a class="reference internal" href="../modules/data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a> class, we leave a <code class="docutils literal notranslate"><span class="pre">meta</span></code> API to store arbitrary extra information for the input example.</p>
+<p>In the <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code> class, we leave a <code class="docutils literal notranslate"><span class="pre">meta</span></code> API to store arbitrary extra information for the input example.</p>
 <p>For example, for a relation extraction task, you want to add different head and tail entities in different input examples.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;text_a&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;In this sentence, the relation of&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;meta:head&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;meta:tail&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;mask&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>In this case, with an <a class="reference internal" href="../modules/data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a></p>
+<p>In this case, with an <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="n">guid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">text_a</span> <span class="o">=</span> <span class="s2">&quot;Albert Einstein was born in Germany.&quot;</span>

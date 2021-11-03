@@ -94,7 +94,7 @@
 <span class="kn">from</span> <span class="nn">transformers.models.t5.configuration_t5</span> <span class="kn">import</span> <span class="n">T5Config</span>
 <span class="kn">from</span> <span class="nn">transformers.models.t5.modeling_t5</span> <span class="kn">import</span> <span class="n">T5ForConditionalGeneration</span>
 <span class="kn">from</span> <span class="nn">transformers.models.gpt2.modeling_gpt2</span> <span class="kn">import</span> <span class="n">GPT2LMHeadModel</span>
-<span class="kn">from</span> <span class="nn">openprompt.data_utils.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
@@ -129,7 +129,6 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                  <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span>
-                 <span class="n">plm_config</span><span class="p">:</span> <span class="n">PretrainedConfig</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
                  <span class="n">mapping_hook</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -143,10 +142,10 @@
                          <span class="n">mask_token</span><span class="o">=</span><span class="n">mask_token</span><span class="p">,</span>
                          <span class="n">placeholder_mapping</span><span class="o">=</span><span class="n">placeholder_mapping</span><span class="p">)</span>
         <span class="n">raw_embedding</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_input_embeddings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mapping_hook</span> <span class="o">=</span> <span class="n">mapping_hook</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">embedding_size</span> <span class="o">=</span> <span class="n">raw_embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_token</span> <span class="o">=</span> <span class="n">num_token</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">plm_config</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">T5Config</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_layer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">num_layers</span>
@@ -166,8 +165,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prefix_dropout</span> <span class="o">=</span> <span class="n">prefix_dropout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix_dropout</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_text1</span> <span class="o">=</span> <span class="s2">&quot;&lt;text_a&gt; &lt;eos&gt; &lt;mask&gt; &lt;eos&gt;&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_text2</span> <span class="o">=</span> <span class="s2">&quot;&lt;text_a&gt; &lt;text_b&gt; &lt;eos&gt; &lt;mask&gt; &lt;eos&gt;&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_text1</span> <span class="o">=</span> <span class="s1">&#39;{&quot;placeholder&quot;: &quot;text_a&quot;} {&quot;mask&quot;}&#39;</span>  <span class="c1">#TODO whether &lt;eos&gt; should be added here?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_text2</span> <span class="o">=</span> <span class="s1">&#39;{&quot;placeholder&quot;: &quot;text_a&quot;} {&quot;placeholder&quot;: &quot;text_b&quot;} {&quot;mask&quot;}&#39;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
         
@@ -175,8 +174,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">plm_modified</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># flag to indicate whether the function of plm are replaced for prefix tuning.</span>
     
+
 <div class="viewcode-block" id="PrefixTuningTemplate.on_text_set"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.prefix_tuning_template.PrefixTuningTemplate.on_text_set">[docs]</a>    <span class="k">def</span> <span class="nf">on_text_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generate_parameters</span><span class="p">()</span></div>
+
 
     <span class="k">def</span> <span class="nf">get_past_key_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
         <span class="n">input_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_tokens</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>

@@ -131,17 +131,9 @@ Specifically, seeds for all potential randomness.</p>
 <p>Example:</p>
 <ul class="simple">
 <li><p><strong>seed</strong>: If seed this seed, and other seeds are unset, then all the seeds will use this value.</p></li>
-<li><p><strong>random_seed</strong>: The seed for the <code class="docutils literal notranslate"><span class="pre">ramdom</span></code> package.</p></li>
-<li><p><strong>torch_seed</strong>: The seed for the <code class="docutils literal notranslate"><span class="pre">pytorch</span></code> package.</p></li>
-<li><p><strong>numpy_seed</strong>:  The seed for the <code class="docutils literal notranslate"><span class="pre">numpy</span></code> package.</p></li>
-<li><p><strong>cuda_seed</strong>:  The seed for <code class="docutils literal notranslate"><span class="pre">CUDA</span></code>.</p></li>
 </ul>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reproduce</span><span class="p">:</span>
     <span class="nt">seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
-    <span class="nt">random_seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-1</span>
-    <span class="nt">torch_seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-1</span>
-    <span class="nt">numpy_seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-1</span>
-    <span class="nt">cuda_seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-1</span>
 </pre></div>
 </div>
 </section>
@@ -198,6 +190,7 @@ Specifically, seeds for all potential randomness.</p>
 <li><p><strong>batch_size</strong>: The batch size during training.</p></li>
 <li><p><strong>shuffle_data</strong>: If True, the data will be shuffled during training.</p></li>
 <li><p><strong>teacher_forcing</strong>: If True, the teach forcing method will be used during training.</p></li>
+<li><p><strong>clean</strong>: If True, not saving checkpoints and not logging tensorboard. However, test will use the last model but not the best model in validation.</p></li>
 </ul>
 </dd>
 </dl>
@@ -225,6 +218,7 @@ Specifically, seeds for all potential randomness.</p>
     <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
     <span class="nt">shuffle_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
     <span class="nt">teacher_forcing</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+    <span class="nt">clean</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
 
 <span class="nt">dev</span><span class="p">:</span>
     <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
@@ -290,7 +284,9 @@ which sets some attributes like <code class="docutils literal notranslate"><span
     <span class="nt">num_examples_per_label</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
     <span class="nt">also_sample_dev</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">num_examples_per_label_dev</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-    <span class="nt">seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">123</span>
+    <span class="nt">seed</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">123</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">456</span>
 </pre></div>
 </div>
 </section>

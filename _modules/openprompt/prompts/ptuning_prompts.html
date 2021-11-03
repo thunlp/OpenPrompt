@@ -88,7 +88,7 @@
              
   <h1>Source code for openprompt.prompts.ptuning_prompts</h1><div class="highlight"><pre>
 <span></span>
-<span class="kn">from</span> <span class="nn">openprompt.data_utils.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
@@ -105,11 +105,11 @@
 <span class="sd">        prompt_encoder_type (:obj:`str`): head above the embedding layer of new tokens. Can be ``lstm`` or ``mlp``.</span>
 <span class="sd">        text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.</span>
 <span class="sd">        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``&lt;mask&gt;``</span>
-<span class="sd">        new_token (:obj:`str`, optional): The special token for new token. Default to ``&lt;new&gt;``</span>
+<span class="sd">        soft_token (:obj:`str`, optional): The special token for new token. Default to ``&lt;soft&gt;``</span>
 <span class="sd">        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{&#39;&lt;text_a&gt;&#39;: &#39;text_a&#39;, &#39;&lt;text_b&gt;&#39;: &#39;text_b&#39;}``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">registered_inputflag_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;new_token_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;loss_ids&quot;</span><span class="p">,</span> <span class="s1">&#39;shortenable_ids&#39;</span><span class="p">]</span>
+    <span class="n">registered_inputflag_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;soft_token_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;loss_ids&quot;</span><span class="p">,</span> <span class="s1">&#39;shortenable_ids&#39;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                  <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span>
@@ -117,7 +117,7 @@
                  <span class="n">prompt_encoder_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lstm&quot;</span><span class="p">,</span>
                  <span class="n">text</span><span class="p">:</span>  <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">mask_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">,</span>
-                 <span class="n">new_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&lt;new&gt;&#39;</span><span class="p">,</span>
+                 <span class="n">soft_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&lt;soft&gt;&#39;</span><span class="p">,</span>
                  <span class="n">placeholder_mapping</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_a&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;text_b&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_b&#39;</span><span class="p">},</span>
                 <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">,</span> 
@@ -126,21 +126,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">raw_embedding</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_input_embeddings</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prompt_encoder_type</span> <span class="o">=</span> <span class="n">prompt_encoder_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">embedding_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_embedding</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">new_token</span> <span class="o">=</span> <span class="n">new_token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">soft_token</span> <span class="o">=</span> <span class="n">soft_token</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
 
-<div class="viewcode-block" id="PtuningTemplate.get_default_new_token_ids"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.ptuning_prompts.PtuningTemplate.get_default_new_token_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_new_token_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="PtuningTemplate.get_default_soft_token_ids"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.ptuning_prompts.PtuningTemplate.get_default_soft_token_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_soft_token_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;get the new token indices for the template</span>
-<span class="sd">        e.g. when self.text is [&#39;&lt;text_a&gt;&#39;, &#39;&lt;new&gt;&#39;, &#39;&lt;new&gt;&#39;, &#39;&lt;mask&gt;&#39;, &#39;.&#39;],</span>
+<span class="sd">        e.g. when self.text is [&#39;&lt;text_a&gt;&#39;, &#39;&lt;soft&gt;&#39;, &#39;&lt;soft&gt;&#39;, &#39;&lt;mask&gt;&#39;, &#39;.&#39;],</span>
 <span class="sd">        output is [0, 1, 2, 0, 0]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># TODO ptuing supervised use same new token for each &lt;new&gt; ?</span>
+        <span class="c1"># TODO ptuing supervised use same new token for each &lt;soft&gt; ?</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">num_new_token</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">num_soft_token</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_token</span><span class="p">:</span>
-                <span class="n">num_new_token</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">num_new_token</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">soft_token</span><span class="p">:</span>
+                <span class="n">num_soft_token</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">num_soft_token</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">idx</span></div>
@@ -149,17 +149,17 @@
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        when template text was set, generate parameters needed in p-tuning input embedding phrase</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_new_token</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">token</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_token</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_soft_token</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">token</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">soft_token</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">generate_parameters</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PtuningTemplate.generate_parameters"><a class="viewcode-back" href="../../../modules/template.html#openprompt.prompts.ptuning_prompts.PtuningTemplate.generate_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">generate_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        generate parameters needed for new tokens&#39; embedding in P-tuning</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_new_token</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_soft_token</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">new_embedding</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_new_token</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_size</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">new_ids</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_new_token</span><span class="p">))),</span> <span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_embedding</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_soft_token</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_ids</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_soft_token</span><span class="p">))),</span> <span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_encoder_type</span> <span class="o">==</span> <span class="s2">&quot;lstm&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">new_lstm_head</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LSTM</span><span class="p">(</span>
                 <span class="n">input_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_size</span><span class="p">,</span>
@@ -189,18 +189,17 @@
 <span class="sd">        for normal tokens, use the embedding layer of PLM</span>
 <span class="sd">        for new tokens, use a brand new embedding layer, with MLP or LSTM head</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># print(batch) # for debug</span>
         <span class="n">inputs_embeds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_embedding</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_new_token</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_soft_token</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">new_embeds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_embedding</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_ids</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_encoder_type</span> <span class="o">==</span> <span class="s2">&quot;lstm&quot;</span><span class="p">:</span>
                 <span class="n">new_embeds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_lstm_head</span><span class="p">(</span><span class="n">new_embeds</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">new_embeds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_mlp_head</span><span class="p">(</span><span class="n">new_embeds</span><span class="p">)</span>
 
-            <span class="n">replace_idxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s1">&#39;new_token_ids&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_new_token</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">replace_idxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s1">&#39;soft_token_ids&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_soft_token</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">replace_idxs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_new_token</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_soft_token</span><span class="p">):</span>
                     <span class="n">inputs_embeds</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="n">replace_idxs</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">new_embeds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
 
         <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>

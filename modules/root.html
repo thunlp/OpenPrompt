@@ -93,11 +93,11 @@
 <div class="contents local topic" id="contents">
 <p class="topic-title">Contents</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#prompt-base" id="id15">prompt_base</a></p></li>
+<li><p><a class="reference internal" href="#prompt-base" id="id17">prompt_base</a></p></li>
 </ul>
 </div>
 <section id="prompt-base">
-<h2><a class="toc-backref" href="#id15">prompt_base</a><a class="headerlink" href="#prompt-base" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id17">prompt_base</a><a class="headerlink" href="#prompt-base" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -127,9 +127,10 @@ Most of methods are abstract, with some expections to hold the common methods fo
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template.get_default_loss_ids">
-<span class="sig-name descname"><span class="pre">get_default_loss_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_loss_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_loss_ids" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_default_loss_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_loss_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_loss_ids" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the loss indices for the template using mask.
-E.g. when self.text is <code class="docutils literal notranslate"><span class="pre">['&lt;text_a&gt;',</span> <span class="pre">'it',</span> <span class="pre">'is',</span> <span class="pre">'&lt;mask&gt;',</span> <span class="pre">'.']</span></code>, output is <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0]</span></code>.</p>
+e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">'{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_a&quot;}.</span> <span class="pre">{&quot;meta&quot;:</span> <span class="pre">&quot;word&quot;}</span> <span class="pre">is</span> <span class="pre">{&quot;mask&quot;}.'</span></code>,
+output is <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0]</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><p>A list of integers in the range [0, 1]:</p>
@@ -150,8 +151,9 @@ E.g. when self.text is <code class="docutils literal notranslate"><span class="p
 <span class="sig-name descname"><span class="pre">get_default_shortenable_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_shortenable_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_shortenable_ids" title="Permalink to this definition">¶</a></dt>
 <dd><p>Every template needs shortenable_ids, denoting which part of the template can be trucate to fit
 the language model’s <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>. Default: the input text is shortenable, while the template text and other
-special tokens are not shortenable. As far as we are concerned, almost every template will use this default setting.
-e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">['&lt;text_a&gt;',</span> <span class="pre">'&lt;meta:word&gt;',</span> <span class="pre">'is',</span> <span class="pre">'&lt;mask&gt;',</span> <span class="pre">'.']</span></code>, output is <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0]</span></code></p>
+special tokens are not shortenable.</p>
+<p>e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">'{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_a&quot;}</span> <span class="pre">{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_b&quot;,</span> <span class="pre">&quot;shortenable&quot;:</span> <span class="pre">False}</span> <span class="pre">{&quot;meta&quot;:</span> <span class="pre">&quot;word&quot;}</span> <span class="pre">is</span> <span class="pre">{&quot;mask&quot;}.'</span></code>,
+output is <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0]</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><p>A list of integers in the range <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>:</p>
@@ -168,22 +170,12 @@ e.g. when self.text is <code class="docutils literal notranslate"><span class="p
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openprompt.prompt_base.Template.get_default_new_token_ids">
-<span class="sig-name descname"><span class="pre">get_default_new_token_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_new_token_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_new_token_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sometimes tokens in the template are not from the vocabulary,
-but a sequence of newly iniliazed tokens (ones may say, soft-encoding).
-In this case, you need to implement this function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – if needed, add <code class="docutils literal notranslate"><span class="pre">new_token_ids</span></code> into <code class="docutils literal notranslate"><span class="pre">registered_inputflag_names</span></code> attribute of Template class and implement this method.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template.get_default_soft_token_ids">
 <span class="sig-name descname"><span class="pre">get_default_soft_token_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_soft_token_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_soft_token_ids" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function identifies which tokens are soft tokens.</p>
+<p>Sometimes tokens in the template are not from the vocabulary,
+but a sequence of soft tokens.
+In this case, you need to implement this function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – if needed, add <code class="docutils literal notranslate"><span class="pre">soft_token_ids</span></code> into <code class="docutils literal notranslate"><span class="pre">registered_inputflag_names</span></code> attribute of Template class and implement this method.</p>
@@ -192,8 +184,18 @@ In this case, you need to implement this function.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.incorporate_text_example">
+<span class="sig-name descname"><span class="pre">incorporate_text_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">example</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">openprompt.data_utils.utils.InputExample</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.incorporate_text_example"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.incorporate_text_example" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.parse_text">
+<span class="sig-name descname"><span class="pre">parse_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.parse_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.parse_text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template.wrap_one_example">
-<span class="sig-name descname"><span class="pre">wrap_one_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">example</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.wrap_one_example"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.wrap_one_example" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wrap_one_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">example</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">openprompt.data_utils.utils.InputExample</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.wrap_one_example"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.wrap_one_example" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an input example which contains input text, which can be referenced
 by self.template.placeholder_mapping ‘s value.
 This function process the example into a list of dict,
@@ -203,10 +205,13 @@ Since a text will be tokenized in the subsequent processing procedure,
 these attributes are broadcasted along the tokenized sentence.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>example</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Object</span></code>) – An <a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a> object, which should have attributes that are able to be filled in the template.</p>
+<dd class="field-odd"><p><strong>example</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">InputExample</span></code>) – An <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code> object, which should have attributes that are able to be filled in the template.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code></p>
+<dd class="field-even"><p>0, “text”: “It was”}, {“loss_ids”: 1, “text”: “&lt;mask&gt;”}, ]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code> a list of dict of the same length as self.text. e.g. [{“loss_ids”</p>
 </dd>
 </dl>
 </dd></dl>
@@ -214,8 +219,17 @@ these attributes are broadcasted along the tokenized sentence.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template.process_batch">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">process_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.process_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.process_batch" title="Permalink to this definition">¶</a></dt>
-<dd><p>All template should rewrite this method to process the batch input
-such as substituting embeddings.</p>
+<dd><p>Template should rewrite this method if you need to process the batch input such as substituting embeddings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Template.post_processing_outputs">
+<span class="sig-name descname"><span class="pre">post_processing_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.post_processing_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.post_processing_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post processing the outputs of language models according
+to the need of template. Most templates don’t need post processing,
+The template like SoftTemplate, which appends soft template as a module
+(rather than a sequence of input tokens) to the input,
+should remove the outputs on these positions to keep the seq_len the same</p>
 </dd></dl>
 
 <dl class="py method">
@@ -243,20 +257,20 @@ will not trigger <code class="docutils literal notranslate"><span class="pre">on
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template.on_text_set">
-<span class="sig-name descname"><span class="pre">on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.on_text_set" title="Permalink to this definition">¶</a></dt>
-<dd><p>A hook to do something when template text was set.</p>
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.on_text_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>A hook to do something when template text was set.
+The designer of the template should explictly know what should be down when the template text is set.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template.from_file">
-<span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separator</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.from_file" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the template from a local file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The path of the local template file.</p></li>
 <li><p><strong>choice</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – The id-th line of the file.</p></li>
-<li><p><strong>separator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – A sparator to delimit the text in the file. Default to ” “</p></li>
 </ul>
 </dd>
 </dl>
@@ -348,15 +362,32 @@ It can be acheived by wrapping a tensor using nn.Parameter().</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.process_logits">
-<span class="sig-name descname"><span class="pre">process_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputFeatures" title="openprompt.data_utils.data_utils.InputFeatures"><span class="pre">openprompt.data_utils.data_utils.InputFeatures</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.process_logits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.process_logits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Abstract method for process logits.</p>
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.process_outputs">
+<span class="sig-name descname"><span class="pre">process_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><span class="pre">openprompt.data_utils.utils.InputFeatures</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.process_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.process_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>By default, the verbalizer will process the logits of the PLM’s
+output.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The current logits generated by pre-trained language models.</p></li>
 <li><p><strong>batch</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[Dict,</span> <span class="pre">InputFeatures]</span></code>) – The input features of the data.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.gather_outputs">
+<span class="sig-name descname"><span class="pre">gather_outputs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.gather_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.gather_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>retrieve useful output for the verbalizer from the whole model ouput
+By default, it will only retrieve the logits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>outputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelOutput</span></code>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code> The gathered output, should be of shape (<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>,
+<code class="docutils literal notranslate"><span class="pre">seq_len</span></code>, <code class="docutils literal notranslate"><span class="pre">any</span></code>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -380,6 +411,11 @@ Can be re-implemented in advanced verbaliezer.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.normalize">
 <span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.normalize" title="Permalink to this definition">¶</a></dt>
@@ -396,11 +432,6 @@ Can be re-implemented in advanced verbaliezer.</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.project">
@@ -505,9 +536,10 @@ Most of methods are abstract, with some expections to hold the common methods fo
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">get_default_loss_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_loss_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_default_loss_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_loss_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the loss indices for the template using mask.
-E.g. when self.text is <code class="docutils literal notranslate"><span class="pre">['&lt;text_a&gt;',</span> <span class="pre">'it',</span> <span class="pre">'is',</span> <span class="pre">'&lt;mask&gt;',</span> <span class="pre">'.']</span></code>, output is <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0]</span></code>.</p>
+e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">'{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_a&quot;}.</span> <span class="pre">{&quot;meta&quot;:</span> <span class="pre">&quot;word&quot;}</span> <span class="pre">is</span> <span class="pre">{&quot;mask&quot;}.'</span></code>,
+output is <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0]</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><p>A list of integers in the range [0, 1]:</p>
@@ -528,8 +560,9 @@ E.g. when self.text is <code class="docutils literal notranslate"><span class="p
 <span class="sig-name descname"><span class="pre">get_default_shortenable_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_shortenable_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Permalink to this definition">¶</a></dt>
 <dd><p>Every template needs shortenable_ids, denoting which part of the template can be trucate to fit
 the language model’s <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>. Default: the input text is shortenable, while the template text and other
-special tokens are not shortenable. As far as we are concerned, almost every template will use this default setting.
-e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">['&lt;text_a&gt;',</span> <span class="pre">'&lt;meta:word&gt;',</span> <span class="pre">'is',</span> <span class="pre">'&lt;mask&gt;',</span> <span class="pre">'.']</span></code>, output is <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0]</span></code></p>
+special tokens are not shortenable.</p>
+<p>e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">'{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_a&quot;}</span> <span class="pre">{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_b&quot;,</span> <span class="pre">&quot;shortenable&quot;:</span> <span class="pre">False}</span> <span class="pre">{&quot;meta&quot;:</span> <span class="pre">&quot;word&quot;}</span> <span class="pre">is</span> <span class="pre">{&quot;mask&quot;}.'</span></code>,
+output is <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0]</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><p>A list of integers in the range <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>:</p>
@@ -547,21 +580,11 @@ e.g. when self.text is <code class="docutils literal notranslate"><span class="p
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id4">
-<span class="sig-name descname"><span class="pre">get_default_new_token_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_new_token_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sometimes tokens in the template are not from the vocabulary,
-but a sequence of newly iniliazed tokens (ones may say, soft-encoding).
-In this case, you need to implement this function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – if needed, add <code class="docutils literal notranslate"><span class="pre">new_token_ids</span></code> into <code class="docutils literal notranslate"><span class="pre">registered_inputflag_names</span></code> attribute of Template class and implement this method.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id5">
-<span class="sig-name descname"><span class="pre">get_default_soft_token_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_soft_token_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_default_soft_token_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_soft_token_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function identifies which tokens are soft tokens.</p>
+<p>Sometimes tokens in the template are not from the vocabulary,
+but a sequence of soft tokens.
+In this case, you need to implement this function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – if needed, add <code class="docutils literal notranslate"><span class="pre">soft_token_ids</span></code> into <code class="docutils literal notranslate"><span class="pre">registered_inputflag_names</span></code> attribute of Template class and implement this method.</p>
@@ -570,8 +593,18 @@ In this case, you need to implement this function.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">incorporate_text_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">example</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">openprompt.data_utils.utils.InputExample</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.incorporate_text_example"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="id6">
-<span class="sig-name descname"><span class="pre">wrap_one_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">example</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><span class="pre">openprompt.data_utils.data_utils.InputExample</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.wrap_one_example"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">parse_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.parse_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">wrap_one_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">example</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">openprompt.data_utils.utils.InputExample</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.wrap_one_example"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an input example which contains input text, which can be referenced
 by self.template.placeholder_mapping ‘s value.
 This function process the example into a list of dict,
@@ -581,24 +614,36 @@ Since a text will be tokenized in the subsequent processing procedure,
 these attributes are broadcasted along the tokenized sentence.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>example</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Object</span></code>) – An <a class="reference internal" href="data_utils.html#openprompt.data_utils.data_utils.InputExample" title="openprompt.data_utils.data_utils.InputExample"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></a> object, which should have attributes that are able to be filled in the template.</p>
+<dd class="field-odd"><p><strong>example</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">InputExample</span></code>) – An <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code> object, which should have attributes that are able to be filled in the template.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code></p>
+<dd class="field-even"><p>0, “text”: “It was”}, {“loss_ids”: 1, “text”: “&lt;mask&gt;”}, ]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code> a list of dict of the same length as self.text. e.g. [{“loss_ids”</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id7">
-<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">process_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.process_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Permalink to this definition">¶</a></dt>
-<dd><p>All template should rewrite this method to process the batch input
-such as substituting embeddings.</p>
+<dt class="sig sig-object py" id="id8">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">process_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.process_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Template should rewrite this method if you need to process the batch input such as substituting embeddings.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id8">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">post_processing_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.post_processing_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post processing the outputs of language models according
+to the need of template. Most templates don’t need post processing,
+The template like SoftTemplate, which appends soft template as a module
+(rather than a sequence of input tokens) to the input,
+should remove the outputs on these positions to keep the seq_len the same</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Permalink to this definition">¶</a></dt>
 <dd><p>A save method API.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -608,41 +653,41 @@ such as substituting embeddings.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id9">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">text</span></span><a class="headerlink" href="#id9" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id11">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">text</span></span><a class="headerlink" href="#id11" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id10">
-<span class="sig-name descname"><span class="pre">safe_on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.safe_on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">safe_on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.safe_on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id12" title="Permalink to this definition">¶</a></dt>
 <dd><p>With this wrapper function, setting text inside <code class="docutils literal notranslate"><span class="pre">on_text_set()</span></code>
 will not trigger <code class="docutils literal notranslate"><span class="pre">on_text_set()</span></code> again to prevent endless recursion.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id11">
-<span class="sig-name descname"><span class="pre">on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id11" title="Permalink to this definition">¶</a></dt>
-<dd><p>A hook to do something when template text was set.</p>
+<dt class="sig sig-object py" id="id13">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Permalink to this definition">¶</a></dt>
+<dd><p>A hook to do something when template text was set.
+The designer of the template should explictly know what should be down when the template text is set.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id12">
-<span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separator</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id12" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the template from a local file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The path of the local template file.</p></li>
 <li><p><strong>choice</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – The id-th line of the file.</p></li>
-<li><p><strong>separator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – A sparator to delimit the text in the file. Default to ” “</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id13">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yacs.config.CfgNode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id15">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yacs.config.CfgNode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Permalink to this definition">¶</a></dt>
 <dd><p>load a template from template’s configuration node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -657,8 +702,8 @@ The actual value should match the arguments of __init__ functions.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id14">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#id14" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#id16" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

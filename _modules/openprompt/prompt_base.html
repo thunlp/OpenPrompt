@@ -89,16 +89,17 @@
   <h1>Source code for openprompt.prompt_base</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">transformers.file_utils</span> <span class="kn">import</span> <span class="n">ModelOutput</span>
 <span class="kn">from</span> <span class="nn">openprompt.config</span> <span class="kn">import</span> <span class="n">convert_cfg_to_dict</span>
 
 <span class="kn">from</span> <span class="nn">transformers.utils.dummy_pt_objects</span> <span class="kn">import</span> <span class="n">PreTrainedModel</span>
 <span class="kn">from</span> <span class="nn">openprompt.utils.utils</span> <span class="kn">import</span> <span class="n">signature</span>
 
 <span class="kn">from</span> <span class="nn">yacs.config</span> <span class="kn">import</span> <span class="n">CfgNode</span>
-<span class="kn">from</span> <span class="nn">openprompt.data_utils.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputFeatures</span><span class="p">,</span> <span class="n">InputExample</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">from</span> <span class="nn">openprompt.data_utils</span> <span class="kn">import</span> <span class="n">InputExample</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">transformers.tokenization_utils</span> <span class="kn">import</span> <span class="n">PreTrainedTokenizer</span>
 
@@ -126,14 +127,19 @@
                  <span class="n">placeholder_mapping</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_a&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;text_b&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_b&#39;</span><span class="p">},</span>
                 <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span> <span class="o">=</span> <span class="n">mask_token</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span> <span class="o">=</span> <span class="n">mask_token</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span> <span class="o">=</span> <span class="n">placeholder_mapping</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_on_text_set</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="Template.get_default_loss_ids"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.get_default_loss_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_loss_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Get the loss indices for the template using mask.</span>
-<span class="sd">        E.g. when self.text is ``[&#39;&lt;text_a&gt;&#39;, &#39;it&#39;, &#39;is&#39;, &#39;&lt;mask&gt;&#39;, &#39;.&#39;]``, output is ``[0, 0, 0, 1, 0]``.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mixed_token_start</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mixed_token_end</span> <span class="o">=</span> <span class="s2">&quot;}&quot;</span>
+
+
+<div class="viewcode-block" id="Template.get_default_loss_ids"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.get_default_loss_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_loss_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&#39;&#39;&#39;Get the loss indices for the template using mask.</span>
+<span class="sd">        e.g. when self.text is ``&#39;{&quot;placeholder&quot;: &quot;text_a&quot;}. {&quot;meta&quot;: &quot;word&quot;} is {&quot;mask&quot;}.&#39;``,</span>
+<span class="sd">        output is ``[0, 0, 0, 0, 1, 0]``.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`List[int]`: A list of integers in the range [0, 1]:</span>
@@ -141,18 +147,15 @@
 <span class="sd">            - 1 for a masked tokens.</span>
 <span class="sd">            - 0 for a sequence tokens.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="mi">1</span> <span class="k">if</span> <span class="n">token</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_token</span>
-            <span class="k">else</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span>
-        <span class="p">]</span>
-        <span class="k">return</span> <span class="n">idx</span></div>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="s1">&#39;mask&#39;</span> <span class="ow">in</span> <span class="n">d</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Template.get_default_shortenable_ids"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.get_default_shortenable_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_shortenable_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Every template needs shortenable_ids, denoting which part of the template can be trucate to fit</span>
+        <span class="sd">&quot;&quot;&quot;Every template needs shortenable_ids, denoting which part of the template can be trucate to fit</span>
 <span class="sd">        the language model&#39;s ``max_seq_length``. Default: the input text is shortenable, while the template text and other</span>
-<span class="sd">        special tokens are not shortenable. As far as we are concerned, almost every template will use this default setting. </span>
-<span class="sd">        e.g. when self.text is ``[&#39;&lt;text_a&gt;&#39;, &#39;&lt;meta:word&gt;&#39;, &#39;is&#39;, &#39;&lt;mask&gt;&#39;, &#39;.&#39;]``, output is ``[1, 0, 0, 0, 0]``</span>
+<span class="sd">        special tokens are not shortenable. </span>
+
+<span class="sd">        e.g. when self.text is ``&#39;{&quot;placeholder&quot;: &quot;text_a&quot;} {&quot;placeholder&quot;: &quot;text_b&quot;, &quot;shortenable&quot;: False} {&quot;meta&quot;: &quot;word&quot;} is {&quot;mask&quot;}.&#39;``,</span>
+<span class="sd">        output is ``[1, 0, 0, 0, 0, 0, 0]``.</span>
 <span class="sd">        </span>
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`List[int]`: A list of integers in the range ``[0, 1]``:</span>
@@ -160,33 +163,125 @@
 <span class="sd">            - 1 for the input tokens.</span>
 <span class="sd">            - 0 for the template sequence tokens.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="mi">1</span> <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">placeholder</span> <span class="ow">in</span> <span class="n">token</span> <span class="k">for</span> <span class="n">placeholder</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
-            <span class="k">else</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span>
-        <span class="p">]</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;shortenable&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;shortenable&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="s1">&#39;placeholder&#39;</span> <span class="ow">in</span> <span class="n">d</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">idx</span></div>
-
-<div class="viewcode-block" id="Template.get_default_new_token_ids"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.get_default_new_token_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_new_token_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Sometimes tokens in the template are not from the vocabulary, </span>
-<span class="sd">        but a sequence of newly iniliazed tokens (ones may say, soft-encoding).</span>
-<span class="sd">        In this case, you need to implement this function.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            NotImplementedError: if needed, add ``new_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="Template.get_default_soft_token_ids"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.get_default_soft_token_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_soft_token_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This function identifies which tokens are soft tokens.</span>
 
+<span class="sd">        Sometimes tokens in the template are not from the vocabulary, </span>
+<span class="sd">        but a sequence of soft tokens.</span>
+<span class="sd">        In this case, you need to implement this function</span>
+
 <span class="sd">        Raises:</span>
 <span class="sd">            NotImplementedError: if needed, add ``soft_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">incorporate_text_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                 <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span>
+                                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Given an example, replace placeholder of text_a, text_b and meta information by real data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[str]: a list of str of the same length as self.text. the placeholder and meta information are replaced by real data information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">placeholder_token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
+                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">placeholder_token</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">[</span><span class="n">placeholder_token</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">example</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
+                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;meta:&quot;</span><span class="o">+</span><span class="n">key</span><span class="o">+</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span>
     
+<div class="viewcode-block" id="Template.incorporate_text_example"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.incorporate_text_example">[docs]</a>    <span class="k">def</span> <span class="nf">incorporate_text_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                 <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span>
+                                <span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;placeholder&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;add_prefix_space&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;post_processing&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">)(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;placeholder&#39;</span><span class="p">]))</span>
+            <span class="k">elif</span> <span class="s1">&#39;meta&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;add_prefix_space&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;post_processing&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">)(</span><span class="n">example</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;meta&#39;</span><span class="p">]])</span>
+            <span class="k">elif</span> <span class="s1">&#39;soft&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;soft token not supported by SoftTemplate, please use hard template or use MixedTemplate instead.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">&#39;mask&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span>
+            <span class="k">elif</span> <span class="s1">&#39;text&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;add_prefix_space&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;can not parse </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span></div>
+    
+    <span class="k">def</span> <span class="nf">_check_template_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;check whether the template format is correct.</span>
+<span class="sd">        TODO: add more</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mask_num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;mask&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">mask_num</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">if</span> <span class="n">mask_num</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;mask&#39; position not found in the template: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">. Please Check!&quot;</span><span class="p">)</span>
+
+
+
+    
+<div class="viewcode-block" id="Template.parse_text"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.parse_text">[docs]</a>    <span class="k">def</span> <span class="nf">parse_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;add_prefix_space&quot;</span><span class="p">:</span> <span class="s1">&#39; &#39;</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s2">&quot;add_prefix_space&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span> <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixed_token_start</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">text</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixed_token_start</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">d</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">j</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">text</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixed_token_end</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mixed_token_start </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mixed_token_start</span><span class="si">}</span><span class="s2"> at position </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> has no corresponding mixed_token_end </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mixed_token_end</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">dict_str</span> <span class="o">=</span> <span class="s1">&#39;{&#39;</span><span class="o">+</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;}&#39;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">dict_str</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+                        <span class="n">val</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">val</span><span class="p">}</span>
+                    <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="kn">import</span> <span class="nn">traceback</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;syntax error in </span><span class="si">{</span><span class="n">dict_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">exit</span><span class="p">()</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="n">parsed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">parsed</span></div>
+
     <span class="c1"># @abstractmethod</span>
 <div class="viewcode-block" id="Template.wrap_one_example"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.wrap_one_example">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_one_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                          <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -199,27 +294,21 @@
 <span class="sd">        these attributes are broadcasted along the tokenized sentence.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
-<span class="sd">            example (:obj:`Object`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.</span>
+<span class="sd">            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.</span>
 <span class="sd">       </span>
 <span class="sd">        Returns:</span>
-<span class="sd">            :obj:`List[Dict]`</span>
+<span class="sd">            :obj:`List[Dict]` a list of dict of the same length as self.text. e.g. [{&quot;loss_ids&quot;: 0, &quot;text&quot;: &quot;It was&quot;}, {&quot;loss_ids&quot;: 1, &quot;text&quot;: &quot;&lt;mask&gt;&quot;}, ]</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         
-        <span class="n">not_empty_keys</span> <span class="o">=</span> <span class="n">example</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;template text has not been initialized&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">InputExample</span><span class="p">):</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">incorporate_text_example</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+
+            <span class="n">not_empty_keys</span> <span class="o">=</span> <span class="n">example</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">placeholder_token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
-                    <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">placeholder_token</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">[</span><span class="n">placeholder_token</span><span class="p">]))</span>
-                <span class="n">not_empty_keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">[</span><span class="n">placeholder_token</span><span class="p">])</span> <span class="c1"># this key has been processed, remove</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">example</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
-                    <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;meta:&quot;</span><span class="o">+</span><span class="n">key</span><span class="o">+</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="n">not_empty_keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">[</span><span class="n">placeholder_token</span><span class="p">])</span> <span class="c1"># placeholder has been processed, remove</span>
             <span class="n">not_empty_keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;meta&#39;</span><span class="p">)</span> <span class="c1"># meta has been processed</span>
-            <span class="c1"># TODO &lt;a!&gt; rstrip punctuation support</span>
-            <span class="c1"># print(text) # for debug</span>
 
             <span class="n">keys</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">text</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">inputflag_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">registered_inputflag_names</span><span class="p">:</span>
@@ -229,6 +318,7 @@
                     <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;get_default_&quot;</span><span class="o">+</span><span class="n">inputflag_name</span><span class="p">):</span>
                     <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;get_default_&quot;</span><span class="o">+</span><span class="n">inputflag_name</span><span class="p">)()</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="c1"># cache </span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">                    Template&#39;s inputflag &#39;</span><span class="si">{}</span><span class="s2">&#39; is registered but not initialize.</span>
@@ -251,11 +341,19 @@
     
 <div class="viewcode-block" id="Template.process_batch"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.process_batch">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">process_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;All template should rewrite this method to process the batch input</span>
-<span class="sd">        such as substituting embeddings.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Template should rewrite this method if you need to process the batch input such as substituting embeddings.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+        <span class="k">return</span> <span class="n">batch</span> <span class="c1"># not being processed</span></div>
 
+<div class="viewcode-block" id="Template.post_processing_outputs"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.post_processing_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">post_processing_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Post processing the outputs of language models according</span>
+<span class="sd">        to the need of template. Most templates don&#39;t need post processing,</span>
+<span class="sd">        The template like SoftTemplate, which appends soft template as a module</span>
+<span class="sd">        (rather than a sequence of input tokens) to the input,</span>
+<span class="sd">        should remove the outputs on these positions to keep the seq_len the same</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">outputs</span></div>
+        
 <div class="viewcode-block" id="Template.save"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -276,10 +374,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_text</span> <span class="o">=</span> <span class="n">text</span>
         <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Template text must be a list or a tuple&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_on_text_set</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">safe_on_text_set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_template_format</span><span class="p">()</span>
         <span class="c1"># else:</span>
         <span class="c1">#     logger.warning(&quot;Reset text in on_text_set function. Is this intended?&quot;)</span>
 
@@ -287,32 +384,32 @@
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;With this wrapper function, setting text inside ``on_text_set()``</span>
 <span class="sd">            will not trigger ``on_text_set()`` again to prevent endless recursion.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_in_on_text_sett</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_on_text_set</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">on_text_set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_on_text_set</span> <span class="o">=</span> <span class="kc">False</span></div>
    
-<div class="viewcode-block" id="Template.on_text_set"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.on_text_set">[docs]</a>    <span class="k">def</span> <span class="nf">on_text_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Template.on_text_set"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.on_text_set">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">on_text_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A hook to do something when template text was set.</span>
+<span class="sd">        The designer of the template should explictly know what should be down when the template text is set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
     
 <div class="viewcode-block" id="Template.from_file"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.from_file">[docs]</a>    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                   <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                   <span class="n">choice</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                  <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
-                  <span class="p">):</span>
+                 <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Read the template from a local file.</span>
 
 <span class="sd">        Args: </span>
 <span class="sd">            path (:obj:`str`): The path of the local template file.</span>
 <span class="sd">            choice (:obj:`int`): The id-th line of the file.</span>
-<span class="sd">            separator (:obj:`str`, optional): A sparator to delimit the text in the file. Default to &quot; &quot;</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="n">choice</span><span class="p">]</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">separator</span><span class="p">)</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="n">choice</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;using template: </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -469,18 +566,33 @@
             <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_calibrate_logits</span> <span class="o">=</span> <span class="n">logits</span></div>
         
-<div class="viewcode-block" id="Verbalizer.process_logits"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.process_logits">[docs]</a>    <span class="k">def</span> <span class="nf">process_logits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+<div class="viewcode-block" id="Verbalizer.process_outputs"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.process_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">process_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">outputs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
                        <span class="n">batch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">],</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Abstract method for process logits.</span>
-<span class="sd">        </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;By default, the verbalizer will process the logits of the PLM&#39;s </span>
+<span class="sd">        output. </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            logits (:obj:`torch.Tensor`): The current logits generated by pre-trained language models.</span>
 <span class="sd">            batch (:obj:`Union[Dict, InputFeatures]`): The input features of the data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_logits</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Verbalizer.gather_outputs"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.gather_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">gather_outputs</span><span class="p">(</span><span class="n">outputs</span><span class="p">:</span> <span class="n">ModelOutput</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; retrieve useful output for the verbalizer from the whole model ouput</span>
+<span class="sd">        By default, it will only retrieve the logits</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            outputs (:obj:`ModelOutput`) The output from the pretrained language model.</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            :obj:`torch.Tensor` The gathered output, should be of shape (``batch_size``, </span>
+<span class="sd">            ``seq_len``, ``any``)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span></div>
+    
 <div class="viewcode-block" id="Verbalizer.aggregate"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.aggregate">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="n">label_words_logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; To aggregate logits on multiple label words into the label&#39;s logits</span>
@@ -565,7 +677,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">init_args</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
-        <span class="n">_init_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">convert_cfg_to_dict</span><span class="p">(</span><span class="n">config</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+        <span class="n">_init_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">convert_cfg_to_dict</span><span class="p">(</span><span class="n">config</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span> <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">kwargs</span>
         <span class="n">init_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_init_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_init_dict</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">init_args</span><span class="p">}</span>
         <span class="n">verbalizer</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">init_dict</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">verbalizer</span><span class="p">,</span> <span class="s2">&quot;from_file&quot;</span><span class="p">):</span>
