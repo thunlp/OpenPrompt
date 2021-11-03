@@ -1,7 +1,7 @@
 from yacs.config import CfgNode
 from .typing_dataset import PROCESSORS as TYPING_PROCESSORS
 from .text_classification_dataset import PROCESSORS as TC_PROCESSORS
-from .superglue_dataset import PROCESSORS as SUPERGLUE_PROCESSORS
+from .fewglue_dataset import PROCESSORS as SUPERGLUE_PROCESSORS
 from .relation_classification_dataset import PROCESSORS as RC_PROCESSORS
 from .lama_dataset import PROCESSORS as LAMA_PROCESSORS
 from .conditional_generation_dataset import PROCESSORS as CG_PROCESSORS
