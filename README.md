@@ -29,7 +29,7 @@
 <div align="center">
 
 
-<img src="https://z3.ax1x.com/2021/11/03/IAdT3D.png" width="63%" align="center"/>
+<img src="https://z3.ax1x.com/2021/11/03/IAdT3D.png" width="75%" align="center"/>
 
 </div>
 
