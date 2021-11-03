@@ -1,7 +1,7 @@
 
 from typing import *
 from abc import abstractmethod
-from openprompt.data_utils import InputExample
+from openprompt.data_utils.utils import InputExample
 
 class DataProcessor:
     """
@@ -84,7 +84,7 @@ class DataProcessor:
         """
         return len(self.labels)
 
-    def get_train_examples(self, data_dir) -> InputExample:
+    def get_train_examples(self, data_dir: Optional[str] = None) -> InputExample:
         """
         get train examples from the training file under :obj:`data_dir`
 
@@ -92,7 +92,7 @@ class DataProcessor:
         """
         return self.get_examples(data_dir, "train")
 
-    def get_dev_examples(self, data_dir) -> List[InputExample]:
+    def get_dev_examples(self, data_dir: Optional[str] = None) -> List[InputExample]:
         """
         get dev examples from the development file under :obj:`data_dir`
 
@@ -100,7 +100,7 @@ class DataProcessor:
         """
         return self.get_examples(data_dir, "dev")
 
-    def get_test_examples(self, data_dir) -> List[InputExample]:
+    def get_test_examples(self, data_dir: Optional[str] = None) -> List[InputExample]:
         """
         get test examples from the test file under :obj:`data_dir`
 
@@ -108,7 +108,7 @@ class DataProcessor:
         """
         return self.get_examples(data_dir, "test")
 
-    def get_unlabeled_examples(self, data_dir) -> List[InputExample]:
+    def get_unlabeled_examples(self, data_dir: Optional[str] = None) -> List[InputExample]:
         """
         get unlabeled examples from the unlabeled file under :obj:`data_dir`
 
@@ -117,7 +117,7 @@ class DataProcessor:
         return self.get_examples(data_dir, "unlabeled")
 
     @abstractmethod
-    def get_examples(self, data_dir, split) -> List[InputExample]:
+    def get_examples(self, data_dir: Optional[str] = None, split: Optional[str] = None) -> List[InputExample]:
         """get the :obj:`split` of dataset under :obj:`data_dir`
 
         :obj:`data_dir` is the base path of the dataset, for example:

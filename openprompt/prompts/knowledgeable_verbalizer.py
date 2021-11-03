@@ -2,7 +2,7 @@ import os
 from openprompt.prompts.manual_template import ManualTemplate
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.utils.dummy_pt_objects import PreTrainedModel
-from openprompt.data_utils.data_utils import InputFeatures
+from openprompt.data_utils import InputFeatures
 import re
 from openprompt.prompts.manual_verbalizer import ManualVerbalizer
 from typing import *

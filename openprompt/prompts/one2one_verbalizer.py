@@ -1,7 +1,7 @@
 import json
 from transformers.tokenization_utils import PreTrainedTokenizer
 from yacs.config import CfgNode
-from openprompt.data_utils.data_utils import InputFeatures
+from openprompt.data_utils import InputFeatures
 import re
 from openprompt import Verbalizer
 from typing import *
@@ -179,6 +179,8 @@ class One2oneVerbalizer(Verbalizer):
         norm = label_words_probs.reshape(shape[0], -1).sum(dim=-1,keepdim=True) # TODO Test the performance of detaching()
         label_words_probs /= norm
         return label_words_probs
+    
+    
     
 
         

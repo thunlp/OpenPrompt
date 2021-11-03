@@ -1,0 +1,1 @@
+<text_a> Is " <meta:choice1> " or " <meta:choice2> " the <meta:question> ? The answer is the <mask> .

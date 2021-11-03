@@ -4,7 +4,7 @@ from typing import List, Optional, Dict
 import torch
 import torch.nn.functional as F
 from ..utils import logger
-from transformers import T5Tokenizer, T5ForConditionalGeneration
+from transformers import T5Tokenizer, T5ForConditionalGeneration, BertForMaskedLM, RobertaForMaskedLM
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.utils.dummy_pt_objects import PreTrainedModel
 from tqdm import tqdm
@@ -31,7 +31,8 @@ class TemplateGenerator:
                  max_length: Optional[int] = 20,
                  target_number: Optional[int] = 2,
                  beam_width: Optional[int] = 100,
-                 length_limit: Optional[List[int]] = None):
+                 length_limit: Optional[List[int]] = None, 
+                 forbidden_word_ids: Optional[List[int]] = []):
         self.template_generate_model = template_generate_model
         self.tokenizer = tokenizer
         self.target_number = target_number # number of parts to generate in one sample
@@ -41,7 +42,7 @@ class TemplateGenerator:
         self.probs_buffer, self.labels_buffer = None, None
 
         # Forbid single space token, "....", and ".........."
-        self.forbidden_word_ids = [self.tokenizer.convert_tokens_to_ids(t) for t in [' ', '....', '..........']]
+        self.forbidden_word_ids = forbidden_word_ids
         self.sent_end_id = self.tokenizer.convert_tokens_to_ids('.')
 
         self.input_ids_buffer, self.attention_mask_buffer, self.labels_buffer = None, None, None
@@ -177,11 +178,12 @@ class TemplateGenerator:
         init_dict = {key: _init_dict[key] for key in _init_dict if key in init_args}
         template_generator = cls(**init_dict)
         return template_generator
-
-
+    
+    def release_memory(self):
+        self.template_generate_model = self.template_generate_model.cpu()
         
 
-class T5TemplateGenerator(TemplateGenerator):
+class T5TemplateGenerator(TemplateGenerator): # TODO merge it into Base class
     r""" Automatic Template Search from LM-BFF using T5
     """
     def __init__(self, 
@@ -190,68 +192,56 @@ class T5TemplateGenerator(TemplateGenerator):
                  max_length: Optional[int] = 20,
                  target_number: Optional[int] = 2,
                  beam_width: Optional[int] = 100,
-                 length_limit: Optional[List[int]] = None):
+                 length_limit: Optional[List[int]] = None,
+                 forbidden_word_ids: Optional[List[int]] = [3, 19794, 22354]):
         super().__init__(template_generate_model = template_generate_model,
                         tokenizer = tokenizer,
                         max_length = max_length,
                         target_number= target_number,
                         beam_width = beam_width,
-                        length_limit = length_limit)
+                        length_limit = length_limit,
+                        forbidden_word_ids = forbidden_word_ids)
 
     def get_part_token_id(self, part_id):
         return self.tokenizer._convert_token_to_id('<extra_id_0>') - part_id
 
     def convert_template(self, generate_text_list):
-        text_list = ' '.join(generate_text_list).replace('<extra_id_0>', '<text_a>').replace('<extra_id_1>', '<mask>').replace('<extra_id_2>', '<text_b>').replace('</s>', '').replace('▁', '_').strip().split(' ')
+        text_list = self.tokenizer.convert_tokens_to_string(generate_text_list).replace('<extra_id_0>', '<text_a>').replace('<extra_id_1>', ' <mask>').replace('<extra_id_2>', ' <text_b>').replace('</s>', '').replace('  ', ' ').split(' ')
         # incase no <extra_id_1> (generation stop by maximum length)
         if '<mask>' not in text_list:
             text_list.append('<mask>')
+        if '<text_b>' not in text_list:
+            text_list.append('<text_b>')
         return text_list
 
 
 class VerbalizerGenerator:
-    r""" Automatic Verbalizer Search from https://arxiv.org/abs/2010.13641
-    This implementation is slightly different from the original code in that
+    r""" Automatic Label Words Search from https://arxiv.org/pdf/2012.15723.pdf
 
     Args:
-        candidate_num: the number of candidates for further selection 
-                        based on Section 4.1
-        label_word_num_per_class: set to be greater than 1 to support Multi-
-                        Verbalizers in Section 4.2
+        candidate_num: the number of candidates for further selection
+        label_word_num_per_class: candidate label words per class
         probs_buffer: stores the probability $q_{P,t}(1|\mathbf{x})$ to be 
-                      used in later verbalizer selection.
-        label_buffer: stores the label $y$ to be used in later verbalizer
+                      used in later label words selection.
+        label_buffer: stores the label $y$ to be used in later label words
                       selection.
-        score_fct: the scoring function of label words selection. ``llr'' 
-                    means log likelihood ratio, corresponding to Equation 
-                    (7); ``ce'' means cross entropy, corresponding 
-                   to Equation (6). As the paper points out, ``llr'' is 
-                   significantly better than 'ce', we only keep it to match
-                    the original code.
-        normalize: whether to perform normalization of unbalanced training 
-                    dataset, as Equation (5).
     """
     def __init__(self, 
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  candidate_num: int,
-                 label_word_num_per_class: Optional[int] = 1,
-                 score_fct: Optional[str] = 'llr',
-                 normalize: Optional[bool] = True,
-                 **kwargs):
-        super().__init__(**kwargs)
+                 label_word_num_per_class: Optional[int] = 1):
         self.model = model
         self.tokenizer = tokenizer
         self.candidate_num = candidate_num
         self.label_word_num_per_class = label_word_num_per_class
         self.probs_buffer, self.labels_buffer = None, None
-        self.score_fct = score_fct
-        self.normalize = normalize
 
     def register_buffer(self, data):
         self.model.eval()
         with torch.no_grad():
-            forward_keys = signature(self.model.forward).args
+            inner_model = self.model.module if isinstance(self.model, DataParallel) else self.model
+            forward_keys = signature(inner_model.forward).args
             input_batch = {key: data[key] for key in data if key in forward_keys}
             logits = self.model.forward(**input_batch).logits[data['loss_ids']==1]
         logits = F.softmax(logits.detach(),dim=-1)
@@ -261,27 +251,41 @@ class VerbalizerGenerator:
         else:
             self.probs_buffer = torch.vstack([self.probs_buffer, logits])
             self.labels_buffer = torch.hstack([self.labels_buffer, data.label.detach()])
+    
+    def post_process(self, word):
+        inner_model = self.model.module if isinstance(self.model, DataParallel) else self.model
+        if isinstance(inner_model, RobertaForMaskedLM):
+            return word.lstrip('Ġ')
+        elif isinstance(inner_model, BertForMaskedLM):
+            return word
+        else:
+            raise NotImplementedError("not implemented for {}".format(type(inner_model))) # TODO add more model
+        
+    def invalid_label_word(self, word):
+        '''
+        make sure label word is the proper start of a word
+        '''
+        inner_model = self.model.module if isinstance(self.model, DataParallel) else self.model
+        if isinstance(inner_model, RobertaForMaskedLM):
+            return (not word.startswith('Ġ'))
+        elif isinstance(inner_model, BertForMaskedLM):
+            return False
+        else:
+            raise NotImplementedError("not implemented for {}".format(type(inner_model))) # TODO
 
     def generate(self):
-        self.label_words_ids = self._find_verbalizer(
-                                            words_per_label=self.label_word_num_per_class, 
-                                                        score_fct=self.score_fct,
-                                                        normalize=self.normalize)
-        self.label_words = [[(self.tokenizer.convert_ids_to_tokens(i)).replace('▁', '') for i in ids] for ids in self.label_words_ids]
+        self.label_words_ids = self._find_verbalizer()
+        self.label_words = [[self.post_process(word) for word in self.tokenizer.convert_ids_to_tokens(i)] for i in self.label_words_ids]
         self._show_verbalizer()
         return self.label_words
-        
             
     def _show_verbalizer(self):
-        tokens = [self.tokenizer.convert_ids_to_tokens(i) for i in self.label_words_ids]
-        logger.info("Verbalizer is {}".format(tokens))
+        logger.info("Verbalizer is {}".format(self.label_words))
 
 
-    def _find_verbalizer(self, words_per_label: int = 1, normalize: bool = True,
-                         score_fct: str = 'llr'):
+    def _find_verbalizer(self):
         logger.info("Finding verbalizer ...")
-        probs = self.probs_buffer
-        label_words =  self._get_top_words(probs=probs, normalize=normalize, words_per_label=words_per_label, score_fct=score_fct)
+        label_words =  self._get_top_words()
         label_words = self._get_top_group(candidates=label_words)
         return label_words
 
@@ -299,49 +303,20 @@ class VerbalizerGenerator:
         best_idx = np.argsort(-np.array(group_scores))[:self.candidate_num]
         best_groups = [groups[i] for i in best_idx]
         return best_groups
+
     
-    def _get_top_words(self, 
-                       probs: torch.Tensor,
-                       normalize: bool = True,
-                       words_per_label: int = 1,
-                       score_fct: Optional[str] = 'llr'):
+    def _get_top_words(self):
         label_words_ids = []
         for label_id in torch.unique(self.labels_buffer):
-            label_mask = (self.labels_buffer==label_id).to(torch.float)
-            probs_per_label = probs
-            if score_fct == 'llr':
-                s = self._log_likelihood_ratio(probs_per_label, label_mask, normalize)
-            elif score_fct == 'ce':
-                s = self._cross_entropy(probs_per_label, label_mask, normalize)
-            else:
-                raise ValueError(f"Score function '{score_fct}' not implemented")
-            sorted_ids  = torch.argsort(s, descending=True)[:words_per_label]
-            label_words_ids.append(sorted_ids.cpu().numpy().tolist())
+            scores = self.probs_buffer[self.labels_buffer==label_id].mean(axis=0).cpu().numpy()
+            kept = []
+            for i in np.argsort(-scores):
+                word = self.tokenizer.convert_ids_to_tokens([i])[0]
+                if self.invalid_label_word(word):
+                    continue
+                kept.append(i)
+            label_words_ids.append(kept[:self.label_word_num_per_class])
         return label_words_ids
-
-    def _log_likelihood_ratio(self, probs, label_mask, normalize):
-        if normalize:
-            scale_factor =  torch.sum(label_mask) / torch.sum(1 - label_mask) \
-                            * (1-label_mask).unsqueeze(-1)
-        else:
-            scale_factor = (1-label_mask).unsqueeze(-1)
-        label_mask = label_mask.unsqueeze(-1)
-
-        pos_score = torch.sum(torch.log(probs+1e-15) * label_mask, dim=0) - torch.sum(torch.log(1 - probs + 1e-15) * label_mask, dim=0)
-        neg_score = torch.sum(torch.log(1 - probs +1e-15) * scale_factor, dim=0) - torch.sum(torch.log(probs+1e-15) * scale_factor, dim=0)
-        return pos_score + neg_score
-    
-    def _cross_entropy(self, probs, label_mask, normalize):
-        if normalize:
-            scale_factor =  torch.sum(label_mask) / torch.sum(1 - label_mask) \
-                            * (1-label_mask).unsqueeze(-1)
-        else:
-            scale_factor = (1-label_mask).unsqueeze(-1)
-        label_mask = label_mask.unsqueeze(-1)
-
-        pos_score = torch.sum(torch.log(probs+1e-15) * label_mask, dim=0)
-        neg_score = torch.sum(torch.log(1 - probs +1e-15) * scale_factor, dim=0)
-        return pos_score + neg_score
     
     @classmethod
     def from_config(cls, config, **kwargs,):
@@ -350,3 +325,6 @@ class VerbalizerGenerator:
         init_dict = {key: _init_dict[key] for key in _init_dict if key in init_args}
         verbalizer_generator = cls(**init_dict)
         return verbalizer_generator
+    
+    def release_memory(self):
+        self.model = self.model.cpu()

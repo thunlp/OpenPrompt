@@ -1,8 +1,4 @@
-from typing import OrderedDict
-from yacs.config import CfgNode, _merge_a_into_b
-import os
-from collections import defaultdict 
-
+from yacs.config import CfgNode
 
 def get_default_config():
     # OpenPrompt's default configuration options
@@ -15,13 +11,11 @@ def get_default_config():
     cfg.environment.cuda_visible_devices = [0] # which index of cuda devices is visible to the program
     cfg.environment.local_rank = 0 # the main device in the cuda visible devices that your DataParallel model will put the model on.
                     # The following should holds: local_rank < len(cuda_visible_devices)
+    cfg.environment.model_parallel = False  # whether to perform model parallel
+    cfg.environment.device_map = None  # the device_map, such as "{0: [0, 1, 2], 1: [3, 4, 5, 6, 7, 8, 9], 2: [10, 11, 12, 13, 14, 15, 16],3: [17, 18, 19, 20, 21, 22, 23]}
 
     cfg.reproduce = CfgNode(new_allowed=True) # seed for reproduction 
-    cfg.reproduce.seed = 100  # a seed for all random part
-    cfg.reproduce.random_seed = -1 # seed for random package
-    cfg.reproduce.torch_seed = -1 # seed for pytorch
-    cfg.reproduce.numpy_seed = -1 # seed for numpy 
-    cfg.reproduce.cuda_seed = -1 # seed for cuda
+    cfg.reproduce.seed = 100  # a seed for all everything
 
     # PLM PARAMETERS
     ##################################
@@ -56,7 +50,7 @@ def get_default_config():
     ##    - ...
     ##
     cfg.logging = CfgNode(new_allowed=True)
-    cfg.logging.path_base = './logs' # the path base of all the logs.
+    cfg.logging.path_base = 'logs' # the path base of all the logs.
     cfg.logging.file_level = 'NOTSET' # make sure it's an option of logging package
     cfg.logging.console_level = 'INFO' # make sure it's an option of logging package
     cfg.logging.unique_string = None  # the generated (or usr defined) unique string for one experiment. 
@@ -67,7 +61,7 @@ def get_default_config():
         #- template
         #- verbalizer
         #- datetime  # a 12-digit string recording the date time of running the experiment, i.e., YYMMDDHHMMSS.
-    cfg.logging.datetime_format = "%y%m%d%H%M%S" # only useful when unique_string_keys includes `datetime`.
+    cfg.logging.datetime_format = "%m%d%H%M%S%f" # only useful when unique_string_keys includes `datetime`.
         #  make sure it's a valid format for datetime package.
     cfg.logging.path = None # always keep none to let the config generate a full path according to 
             # path_base and unique_string.
@@ -94,6 +88,7 @@ def get_default_config():
     cfg.train.gradient_accumulation_steps = 1 # update weight  every N step of training.
                         # set 1 to disable gradient accumulation.
     cfg.train.max_grad_norm = -1.0 # <0 for unlimited gradients norm
+    cfg.train.clean = False # set to True for not saving checkpoint and no tensorboard logging
 
     cfg.dev = CfgNode(new_allowed=True)
     cfg.dev.batch_size = 2 # evaluationn batch_size, can be a bit larger than training batch_size
@@ -114,7 +109,6 @@ def get_default_config():
     # LMBFF-classification config ###########################################################W
     cfg.classification.auto_t = False
     cfg.classification.auto_v = False 
-    cfg.classification.generation_epoch = 10
 
     cfg.template_generator = CfgNode(new_allowed=True)
     cfg.template_generator.plm = CfgNode(new_allowed=True)
@@ -149,7 +143,7 @@ def get_default_config():
     cfg.generation.top_p = 0.9
     cfg.generation.repetition_penalty = 1.0 ##args.repetition_penalty,
     cfg.generation.num_beams = 5
-    cfg.generation.bad_words_ids = [628, 198] 
+    cfg.generation.bad_words_ids = [[628, 198]]
 
 
     cfg.relation_classification = CfgNode(new_allowed=True)
@@ -184,7 +178,7 @@ def get_default_config():
     cfg.sampling_from_train.num_examples_per_label = 10
     cfg.sampling_from_train.also_sample_dev = True
     cfg.sampling_from_train.num_examples_per_label_dev = 10
-    cfg.sampling_from_train.seed = 123
+    cfg.sampling_from_train.seed = [123]
 
     ## CALIBRATION ###########################################################
     cfg.calibrate = None # leave blank to use no calibrate
@@ -276,3 +270,4 @@ def get_default_config():
     cfg.lmbff_template.choice = 0
     cfg.lmbff_template.optimize = None  # the parameters related to optimize the tempalte
     return cfg
+

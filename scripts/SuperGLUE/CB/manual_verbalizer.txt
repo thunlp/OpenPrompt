@@ -1,0 +1,3 @@
+yes
+no
+maybe

@@ -1,0 +1,1 @@
+{"placeholder":"text_a"} Question: {"placeholder":"text_b"} Is this the answer? {"meta":"answer"} . {"mask"} .

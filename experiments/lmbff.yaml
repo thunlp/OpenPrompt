@@ -1,32 +1,35 @@
 dataset:
   name: sst-2
-  path: ../datasets/original/SST-2
+  path: ../datasets/k-shot/SST-2/16-13
 
 task: classification
+
+dataloader:
+  max_seq_length: 256
 
 plm:
   model_name: roberta
   model_path: roberta-large
   optimize:
     freeze_para: False
-    lr: 0.00003
+    lr: 0.00001
     weight_decay: 0.01
     scheduler:
       type: 
-      num_warmup_steps: 500
+      num_warmup_steps: 50
 
 template_generator:
   plm:
     model_name: t5
-    model_path: t5-3b
+    model_path: t5-large
   max_length: 20
   target_number: 2
-  beam_width: 100
+  beam_width: 3
   length_limit: 
 
 verbalizer_generator:
-  candidate_num: 1
-  label_word_num_per_class: 1
+  candidate_num: 100
+  label_word_num_per_class: 100
   score_fct: llr
   normalize: True
 
@@ -35,14 +38,14 @@ classification:
     - micro-f1
     - accuracy
   loss_function: cross_entropy
-  auto_t: True 
-  auto_v: False
-  generation_epoch: 10
+  auto_t: False
+  auto_v: True
 
 
 train:
   num_epochs: 10 # the number of training epochs.
   batch_size: 2
+  clean: True
 
 test:
   batch_size: 8
@@ -52,7 +55,7 @@ dev:
 
 
 
-template: lmbff_template
+template: manual_template
 verbalizer: manual_verbalizer
 
 
@@ -60,17 +63,22 @@ lmbff_template:
   choice: 0
   file_path: ../datasets/original/glue-sst-2-small/initial_template.txt
 
+manual_template:
+  choice: 0
+  file_path: ../datasets/original/glue-sst-2-small/manual_template.txt
+
 manual_verbalizer:
   choice: 0
   file_path: ../datasets/original/glue-sst-2-small/initial_verbalizer.txt
   
 environment:
-  num_gpus: 1
+  num_gpus: 2
   cuda_visible_devices:
     - 0
+    - 1
   local_rank: 0 
 
-learning_setting: few_shot
+learning_setting: full
 
 few_shot:
   parent_config: learning_setting
@@ -81,5 +89,6 @@ sampling_from_train:
   num_examples_per_label: 16
   also_sample_dev: True
   num_examples_per_label_dev: 16
-  seed: 123
+  seed:
+    - 123
 

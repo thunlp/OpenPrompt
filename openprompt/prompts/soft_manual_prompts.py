@@ -4,7 +4,7 @@ from openprompt.utils.logging import logger
 
 
 
-from openprompt.data_utils.data_utils import InputExample, InputFeatures
+from openprompt.data_utils import InputExample, InputFeatures
 from typing import *
 
 from transformers import PreTrainedModel
@@ -21,7 +21,7 @@ class SoftManualTemplate(ManualTemplate):
     def __init__(self,
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
-                 text: Optional[str] = None,
+                 text: Optional[List[str]] = None,
                  mask_token: str = '<mask>',
                  soft_token: str = '<soft>',
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
@@ -36,7 +36,7 @@ class SoftManualTemplate(ManualTemplate):
     
     def get_default_soft_token_ids(self) -> List[int]:
         r"""get the soft token indices for the template
-        e.g. when self.text is ['<text_a>', '<train>It', '<train>is', '<mask>', '.'],
+        e.g. when self.text is ['<text_a>', '<soft>It', '<soft>is', '<mask>', '.'],
         output is [0, 1, 2, 0, 0]
         """
         idx = []

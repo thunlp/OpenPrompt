@@ -63,8 +63,9 @@ learning_setting: full
 #   parent_config: few_shot_sampling
 #   num_examples_per_label: 10000
 #   also_sample_dev: False
-  # num_examples_per_label_dev: 
-  # seed: 123
+#   num_examples_per_label_dev: 
+#   seed:
+#     - 123
 
 task: classification
 classification:

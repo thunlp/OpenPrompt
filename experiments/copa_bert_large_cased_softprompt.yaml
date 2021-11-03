@@ -1,0 +1,78 @@
+dataset:
+  name: super_glue.copa
+  path:  # dataset in huggingface doesn't need path
+
+plm:
+  model_name: bert
+  model_path: bert-large-cased
+  optimize:
+    freeze_para: True
+    lr: 1.0e-5
+    weight_decay: 0.0
+    scheduler:
+      type: 
+      num_warmup_steps: 500
+
+dataloader:
+  max_seq_length: 384 # max_seq_length 
+  decoder_max_length: 3 # the decoder max length to truncate decoder input sequence
+                    # if it is an encoder-decoder architecture. Note that it's not equavalent
+                    # to generation.max_length which is used merely in the generation phase.
+  truncate_method: "head" # choosing from balanced, head, tail
+  decode_from_pad: false
+
+train:
+  batch_size: 4
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
+  num_epochs:
+  num_training_steps: 30000
+  teacher_forcing: false
+
+
+test:
+  batch_size: 16
+
+dev:
+  batch_size: 16
+
+
+template: soft_template
+verbalizer: contextual_verbalizer
+
+
+
+soft_template:
+  choice: 0
+  file_path: scripts/SuperGLUE/COPA/soft_template.txt
+  num_tokens: 20
+  initialize_from_vocab: true
+  random_range: 0.5
+  optimize: 
+    name: AdamW
+    lr: 0.03
+    adam_epsilon: 1.0e-8
+    scheduler:
+      num_warmup_steps: 500
+
+
+contextual_verbalizer:
+  
+environment:
+  num_gpus: 1
+  cuda_visible_devices:
+  local_rank: 0 
+
+learning_setting: full #few_shot
+
+# few_shot:
+#   parent_config: learning_setting
+#   few_shot_sampling: sampling_from_train
+  
+# sampling_from_train:
+#   parent_config: few_shot_sampling
+#   num_examples_per_label: 100
+#   also_sample_dev: True
+#   num_examples_per_label_dev: 100
+#   seed:
+#     - 123

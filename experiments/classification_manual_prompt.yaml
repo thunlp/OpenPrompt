@@ -42,10 +42,9 @@ manual_verbalizer:
   file_path: scripts/TextClassification/agnews/manual_verbalizer.txt
   
 environment:
-  num_gpus: 2
+  num_gpus: 1
   cuda_visible_devices:
-    - 0
-    - 1
+    - 2
   local_rank: 0 
 
 learning_setting: few_shot
@@ -59,5 +58,7 @@ sampling_from_train:
   num_examples_per_label: 10
   also_sample_dev: True
   num_examples_per_label_dev: 10
-  seed: 123
+  seed:
+    - 123
+    - 456
 

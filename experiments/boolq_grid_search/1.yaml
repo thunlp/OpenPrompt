@@ -1,0 +1,81 @@
+dataset:
+  name: super_glue.copa
+  path: # dataset in huggingface doesn't need path
+
+plm:
+  model_name: roberta
+  model_path: roberta-large
+  optimize:
+    freeze_para: False
+    lr: 5.0e-4
+    weight_decay: 0.0
+    scheduler:
+      type: 
+      num_warmup_steps: 500
+
+dataloader:
+  max_seq_length: 256 # max_seq_length 
+  decoder_max_length: 256 # the decoder max length to truncate decoder input sequence
+                    # if it is an encoder-decoder architecture. Note that it's not equavalent
+                    # to generation.max_length which is used merely in the generation phase.
+  truncate_method: "head" # choosing from balanced, head, tail
+
+train:
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  max_grad_norm: 1.0
+
+
+test:
+  batch_size: 8
+
+dev:
+  batch_size: 8
+
+
+template: manual_template
+verbalizer: manual_verbalizer
+
+
+
+manual_template:
+  parent_config: template
+  text: 
+  mask_token: <mask>
+  file_path: scripts/SuperGLUE/COPA/manual_template.txt
+  choice: 0
+  optimize:  # the parameters related to optimize the tempalte
+
+
+
+soft_template:
+  text: 
+  num_tokens: 20
+  initialize_from_vocab: true
+  random_range: 0.5
+  optimize: 
+    name: AdamW
+    lr: 5.0e-5
+    betas: 
+      - 0.9
+      - 0.999
+    eps: 1.0E-8
+    scheduler: 
+      num_warmup_steps: 0
+  
+  
+
+
+manual_verbalizer:
+  choice: 0
+  path:
+  
+environment:
+  num_gpus: 1
+  cuda_visible_devices:
+  local_rank: 0 
+
+learning_setting: full
+
+
+

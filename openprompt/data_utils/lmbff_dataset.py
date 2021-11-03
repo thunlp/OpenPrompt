@@ -12,48 +12,51 @@
 
 import os
 from typing import List
-from transformers.data.processors.utils import DataProcessor, InputExample
 from openprompt.data_utils import InputExample
+from openprompt.data_utils.data_processor import DataProcessor
 
 # logger = log.get_logger(__name__)
 
 class SSTDataProcessor(DataProcessor):
     def __init__(self):
         super().__init__()
-        self.labels = [1, 0]
-
-    def get_train_examples(self, data_dir):
-        return self._create_examples(os.path.join(data_dir, "train.tsv"), "train")
-
-    def get_dev_examples(self, data_dir):
-        return self._create_examples(os.path.join(data_dir, "dev.tsv"), "dev")
-
-    def get_test_examples(self, data_dir):
-        return self._create_examples(os.path.join(data_dir, "test.tsv"), "test", train=False)
+        self.labels = [0, 1]
     
-    def _create_examples(self, path: str, set_type: str, train=True) -> List[InputExample]:
+    def get_examples(self, data_dir, split):
+        path = os.path.join(data_dir, f"{split}.tsv")
         examples = []
         with open(path, encoding='utf-8')as f:
             lines = f.readlines()
-            if train:
-                lines = lines[1:]
-            for idx, line in enumerate(lines):
-                if train:
-                    linelist = line.strip().split('\t')
-                    text_a = linelist[0]
-                    label = int(linelist[1])
-                    guid = "%s-%s" % (set_type, idx)
-                    example = InputExample(guid=guid, text_a=text_a, label=label)
-                else:
-                    linelist = line.strip().split(' ')
-                    guid = "%s-%s" % (set_type, idx)
-                    label = int(linelist[0])
-                    text_a = ' '.join(linelist[1:])
-                    example = InputExample(guid=guid, text_a=text_a, label=label)
+            for idx, line in enumerate(lines[1:]):
+                linelist = line.strip().split('\t')
+                text_a = linelist[0]
+                label = int(linelist[1])
+                guid = "%s-%s" % (split, idx)
+                example = InputExample(guid=guid, text_a=text_a, label=label)
                 examples.append(example)
+        return examples
 
+class SNLIDataProcessor(DataProcessor):
+    def __init__(self):
+        super().__init__()
+        self.labels = ['entailment', 'neutral', 'contradiction']
+    
+    def get_examples(self, data_dir, split):
+        path = os.path.join(data_dir, f"{split}.tsv")
+        examples = []
+        with open(path, encoding='utf-8')as f:
+            lines = f.readlines()
+            for idx, line in enumerate(lines[1:]):
+                linelist = line.strip().split('\t')
+                guid = "%s-%s" % (split, idx)
+                label = linelist[-1]
+                text_a = linelist[7]
+                text_b = linelist[8]
+                example = InputExample(guid=guid, text_a=text_a, text_b=text_b, label=self.get_label_id(label))
+                examples.append(example)
         return examples
 
 PROCESSORS = {
     "sst-2": SSTDataProcessor,
+    "snli": SNLIDataProcessor
 }

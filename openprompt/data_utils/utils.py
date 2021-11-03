@@ -5,14 +5,10 @@ import pickle
 from typing import *
 
 import torch
+from torch.utils.data._utils.collate import default_collate
 from openprompt.utils.logging import logger
 
 from typing import Union
-
-
-
-
-
 
 
 class InputExample(object):
@@ -21,8 +17,8 @@ class InputExample(object):
     Other desired information can be passed via meta.
     
     Args:
-        guid : A unique identifier of the example.
-        text_a (:obj:`str`): The placeholder for sequence of text.
+        guid (:obj:`str`, optional): A unique identifier of the example.
+        text_a (:obj:`str`, optional): The placeholder for sequence of text.
         text_b (:obj:`str`, optional): A secend sequence of text, which is not always neccessary.
         label (:obj:`int`, optional): The label id of the example in classification task.
         tgt_text (:obj:`Union[str,List[str]]`, optional):  The target sequence of the example in a generation task..
@@ -30,8 +26,8 @@ class InputExample(object):
     """
 
     def __init__(self,
-                 guid,
-                 text_a,
+                 guid = None,
+                 text_a = "",
                  text_b = "",
                  label = None,
                  meta: Optional[Dict] = None,
@@ -87,15 +83,15 @@ class InputFeatures(dict):
 
     ..  code-block:: python 
 
-        in_feat = InputFeatures(**{'input_ids':[1,4,5], 'new_token_ids': [3,4,5]})  # init from dict
-        print(in_feat.keys())       # ['input_ids, 'new_token_ids']
+        in_feat = InputFeatures(**{'input_ids':[1,4,5], 'soft_token_ids': [3,4,5]})  # init from dict
+        print(in_feat.keys())       # ['input_ids, 'soft_token_ids']
         in_feat['label'] = 3        # can assign value like normal dict
-        print(in_feat.keys())       # ['input_ids','label', 'new_token_ids'] (Note that it's also ordered)
+        print(in_feat.keys())       # ['input_ids','label', 'soft_token_ids'] (Note that it's also ordered)
         print(in_feat['label'])     # 3
         in_feat['alice'] = 0        # KeyError: Key alice not in predefined set of keys
         in_feat.values()            # [[1,4,5], 3, [3,4,5]]  (Note that it's also ordered)
         [in_feat[key] for key in in_feat]   # [[1,4,5], 3, [3,4,5]]
-        new_dict= {**in_feat, 'new_key':2}  # new_dict is {'input_ids': [1, 4, 5], 'label': 3, 'new_token_ids': [3, 4, 5], 'new_key': 2}
+        new_dict= {**in_feat, 'new_key':2}  # new_dict is {'input_ids': [1, 4, 5], 'label': 3, 'soft_token_ids': [3, 4, 5], 'new_key': 2}
 
     Args:
         input_ids: Indices of input sequence tokens in the vocabulary.
@@ -108,11 +104,11 @@ class InputFeatures(dict):
             float for regression problems.
     """
     tensorable_keys = ['input_ids', 'inputs_embeds', 'attention_mask', 'token_type_ids', 'label',
-        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 'new_token_ids',
+        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 
         'past_key_values', 'loss_ids']
     all_keys = ['input_ids', 'inputs_embeds', 'attention_mask', 'token_type_ids', 'label',
-        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 'new_token_ids',
-        'past_key_values', 'loss_ids', 'guid', 'tgt_text']
+        'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 
+        'past_key_values', 'loss_ids', 'guid', 'tgt_text', 'encoded_tgt_text']
     non_tensorable_keys = []
 
     def __init__(self, 
@@ -124,12 +120,12 @@ class InputFeatures(dict):
                 decoder_input_ids: Optional[Union[List, torch.Tensor]] = None,
                 decoder_inputs_embeds: Optional[torch.Tensor] = None,
                 soft_token_ids: Optional[Union[List, torch.Tensor]] = None,
-                new_token_ids: Optional[Union[List, torch.Tensor]] = None,
                 past_key_values: Optional[torch.Tensor] = None,  # for prefix_tuning
                 loss_ids: Optional[Union[List, torch.Tensor]] = None,
                 guid: Optional[str] = None,
                 tgt_text: Optional[str] = None,
                 use_cache: Optional[bool] = None,
+                encoded_tgt_text: Optional[str] = None,
                 **kwargs):
 
         self.input_ids = input_ids
@@ -140,14 +136,15 @@ class InputFeatures(dict):
         self.decoder_input_ids = decoder_input_ids
         self.decoder_inputs_embeds = decoder_inputs_embeds
         self.soft_token_ids = soft_token_ids
-        self.new_token_ids = new_token_ids
         self.past_key_values = past_key_values
         self.loss_ids = loss_ids
         self.guid = guid
         self.tgt_text = tgt_text
+        self.encoded_tgt_text = encoded_tgt_text
         self.use_cache = use_cache
 
         for k in kwargs.keys():
+            logger.warning("Your are passing an unexpected key words: {} to InputFeatures, might yield unexpected behaviours!".format(k))
             setattr(self, k, kwargs[k])
 
     @classmethod
@@ -184,6 +181,11 @@ class InputFeatures(dict):
             if value is not None:
                 setattr(self, key, value.to(device))
         return self
+    
+    def cuda(self):
+        r"""mimic the tensor behavior
+        """
+        return self.to()
 
     def to_json_string(self, keep_none=False):
         """Serializes this instance to a JSON string."""
@@ -265,3 +267,25 @@ class InputFeatures(dict):
             :obj:`List[Any]`: the (key, value) pairs of the InputFeatures
         """
         return [(key, self.__getitem__(key)) for key in self.keys()]
+
+    @staticmethod
+    def collate_fct(batch: List):
+        r'''
+        This function is used to collate the input_features.
+
+        Args:
+            batch (:obj:`List[Union[Dict, InputFeatures]]`): A batch of the current data.
+
+        Returns:
+            :obj:`InputFeatures`: Return the :py:class:`~openprompt.data_utils.data_utils.InputFeatures of the current batch of data.
+        '''
+
+        
+        elem = batch[0]
+        return_dict = {}
+        for key in elem:
+            if key == "encoded_tgt_text":
+                return_dict[key] = [d[key] for d in batch]
+            else:
+                return_dict[key] = default_collate([d[key] for d in batch])
+        return InputFeatures(**return_dict)

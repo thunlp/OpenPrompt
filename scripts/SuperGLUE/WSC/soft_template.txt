@@ -1,0 +1,1 @@
+{"placeholder":"text_a"} Does the pronoun "{"meta":"span2_text"}" refer to "{"meta":"span1_text"}" ? {"mask"} .

@@ -13,7 +13,7 @@ from transformers.tokenization_utils import SPECIAL_TOKENS_MAP_FILE
 
 from openprompt.utils.logging import logger
 
-from openprompt.data_utils import InputExample
+from openprompt.data_utils.utils import InputExample
 from openprompt.data_utils.data_processor import DataProcessor
 
 
