@@ -161,7 +161,7 @@ class PromptModel(nn.Module):
         """
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
-        outputs = self.plm(**input_batch)
+        outputs = self.plm(**input_batch, output_hidden_states=True)
         outputs = self.template.post_processing_outputs(outputs)
         return outputs
     
@@ -208,11 +208,11 @@ class PromptForClassification(nn.Module):
         r"""Register the device parameter."""
         return self.plm.device
 
-    def extract_logits(self,
-                       logits: torch.Tensor,
+    def extract_at_mask(self,
+                       outputs: torch.Tensor,
                        batch: Union[Dict, InputFeatures]):
-        r"""Get logits of all <mask> token
-        Project the logits of shape
+        r"""Get outputs at all <mask> token
+        E.g., project the logits of shape
         (``batch_size``, ``max_seq_length``, ``vocab_size``)
         into logits of shape (if num_mask_token > 1)
         (``batch_size``, ``num_mask_token``, ``vocab_size``)
@@ -220,27 +220,27 @@ class PromptForClassification(nn.Module):
         (``batch_size``, ``vocab_size``).
 
         Args:
-            logits (:obj:`torch.Tensor`): The original logits of the whole sequence.
+            outputs (:obj:`torch.Tensor`): The original outputs (maybe process by verbalizer's
+                 `gather_outputs` before) etc. of the whole sequence.
             batch (:obj:`Union[Dict, InputFeatures]`): The original batch
         
         Returns:
-            :obj:`torch.Tensor`: The extracted logits of ``<mask>`` tokens.
+            :obj:`torch.Tensor`: The extracted outputs of ``<mask>`` tokens.
             
         """
-        logits = logits[torch.where(batch['loss_ids']>0)]
-        logits = logits.view(batch['loss_ids'].shape[0], -1, logits.shape[1])
-        if logits.shape[1] == 1:
-            logits = logits.view(logits.shape[0], logits.shape[2])
-        return logits
+        outputs = outputs[torch.where(batch['loss_ids']>0)]
+        outputs = outputs.view(batch['loss_ids'].shape[0], -1, outputs.shape[1])
+        if outputs.shape[1] == 1:
+            outputs = outputs.view(outputs.shape[0], outputs.shape[2])
+        return outputs
         
     def forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
-        r""" keys in batch: 
+        r""" TODO
         """
         outputs = self.prompt_model(batch)
-        logits = outputs.logits
-        logits = self.extract_logits(logits, batch)
-        label_words_logits = self.verbalizer.process_logits(logits=logits, batch=batch)
-
+        outputs = self.verbalizer.gather_outputs(outputs)
+        outputs_at_mask = self.extract_at_mask(outputs, batch)
+        label_words_logits = self.verbalizer.process_outputs(outputs_at_mask, batch=batch)
         return label_words_logits
     
     def predict(self):

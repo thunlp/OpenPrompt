@@ -20,6 +20,8 @@ from .soft_template import SoftTemplate
 from .lmbff_prompts import LMBFFTemplate
 from .prompt_generator import T5TemplateGenerator, TemplateGenerator, VerbalizerGenerator
 from .contextual_verbalizer import ContextualVerbalizer
+from .soft_verbalizer import SoftVerbalizer
+
 TEMPLATE_CLASS = {
     'manual_template': ManualTemplate,
     'mixed_template': MixedTemplate,
@@ -38,6 +40,7 @@ VERBALIZER_CLASS = {
     'ptr_verbalizer': PTRVerbalizer,
     'one2one_verbalizer': One2oneVerbalizer,
     'contextual_verbalizer': ContextualVerbalizer,
+    'soft_verbalizer': SoftVerbalizer,
 }
 
 TEMPLATE_GENERATOR_CLASS = {

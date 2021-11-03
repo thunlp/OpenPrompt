@@ -44,6 +44,9 @@ class LMTokenizerWrapper(TokenizerWrapper):
             if isinstance(tgt_text, str):
                 tgt_text = [tgt_text]
             
+        if self.predict_eos:
+            if not wrapped_example[-1]['text'].endswith(self.tokenizer.eos_token):
+                wrapped_example.append({"text":self.tokenizer.eos_token, "shortenable_ids":0, "loss_ids":1})
 
         encoder_inputs = defaultdict(list)
 
@@ -53,7 +56,7 @@ class LMTokenizerWrapper(TokenizerWrapper):
             if len(piece['text']) == 0:
                 continue
         
-            if piece['text'] == self.template_eos_token and wrapped_example[piece_id-1]['loss_ids'] == 1: # eos after the mask also need to be pred
+            if piece['text'] == self.tokenizer.eos_token and self.predict_eos and wrapped_example[piece_id-1]['loss_ids'] == 1: # eos after the mask also need to be pred
                 piece['loss_ids'] = 1
 
             if piece['text'] == self.template_mask_token:
@@ -83,7 +86,7 @@ class LMTokenizerWrapper(TokenizerWrapper):
         # delete shortenable ids
         encoder_inputs.pop("shortenable_ids")
         encoder_inputs = self.concate_parts(input_dict=encoder_inputs)
-        encoder_inputs = self.add_special_tokens(encoder_inputs=encoder_inputs)
+        encoder_inputs = self.add_special_tokens(encoder_inputs=encoder_inputs) # this will do nothing in GPT2 tokenizer
         # create special input ids
         encoder_inputs['attention_mask'] = [1] * len(encoder_inputs['input_ids'])
         if self.create_token_type_ids:

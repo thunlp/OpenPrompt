@@ -5,6 +5,11 @@
 
 # %%
 
+import argparse
+parser = argparse.ArgumentParser("")
+parser.add_argument("--lr", type=float, default=1e-3)
+args = parser.parse_args()
+
 from openprompt.data_utils.conditional_generation_dataset import WebNLGProcessor
 
 
@@ -90,6 +95,16 @@ train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplat
     tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
     batch_size=4,shuffle=True, teacher_forcing=True, predict_eos_token=True,
     truncate_method="head")
+
+validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
+    batch_size=4,shuffle=False, teacher_forcing=False, predict_eos_token=True,
+    truncate_method="head")
+
+test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer, 
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
+    batch_size=4,shuffle=False, teacher_forcing=False, predict_eos_token=True,
+    truncate_method="head")
 # next(iter(train_dataloader))
 
 from openprompt import PromptForGeneration
@@ -111,32 +126,31 @@ from transformers import AdamW
 # ]
 
 # Using different optimizer for prompt parameters and model parameters
-optimizer_grouped_parameters2 = [
+optimizer_grouped_parameters = [
     {'params': [p for n,p in prompt_model.template.named_parameters() if "raw_embedding" not in n]}
 ]
 
 # optimizer1 = AdamW(optimizer_grouped_parameters1, lr=1e-4)
-optimizer2 = AdamW(optimizer_grouped_parameters2, lr=1e-3)
+optimizer = AdamW(optimizer_grouped_parameters, lr=args.lr)
 
-for epoch in range(10):
-    print(f"Epoch {epoch}")
-    tot_loss = 0 
-    for step, inputs in enumerate(train_dataloader):
+
+# We provide generation a generation metric, you can also define your own. Note that it's not directly comparable to WebNLG's scripts evaluation.
+from openprompt.utils.metrics import generation_metric
+# Define evaluate function 
+def evaluate(prompt_model, dataloader):
+    generated_sentence = []
+    groundtruth_sentence = []
+
+    for step, inputs in enumerate(dataloader):
         if use_cuda:
             inputs = inputs.cuda()
-        loss = prompt_model(inputs)
-        loss.backward()
-        tot_loss += loss.item()
-        optimizer2.step()
-        optimizer2.zero_grad()
-        if step %100 ==1:
-            print(tot_loss/(step+1), flush=True)
+        _, output_sentence = prompt_model.generate(inputs, **generation_arguments)
+        generated_sentence.extend(output_sentence)
+        groundtruth_sentence.extend(inputs['tgt_text'])
+    score = generation_metric(generated_sentence, groundtruth_sentence, "sentence_bleu")
+    print("validation score", score, flush=True)
+    return generated_sentence
 
-
-validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
-    batch_size=4,shuffle=False, teacher_forcing=False, predict_eos_token=True,
-    truncate_method="head")
 
 generation_arguments = {
     "max_length": 512,
@@ -151,18 +165,27 @@ generation_arguments = {
     "bad_words_ids": None
 }
 
-generated_sentence = []
-groundtruth_sentence = []
 
-for step, inputs in enumerate(validation_dataloader):
-    if use_cuda:
-        inputs = inputs.cuda()
-    _, output_sentence = prompt_model.generate(inputs, **generation_arguments)
-    generated_sentence.extend(output_sentence)
-    groundtruth_sentence.extend(inputs['tgt_text'])
+# training and generation.
+for epoch in range(10):
+    tot_loss = 0 
+    for step, inputs in enumerate(train_dataloader):
+        if use_cuda:
+            inputs = inputs.cuda()
+        loss = prompt_model(inputs)
+        loss.backward()
+        tot_loss += loss.item()
+        optimizer.step()
+        optimizer.zero_grad()
+        if step %100 ==1:
+            print("Epoch {}, average loss: {}".format(epoch, tot_loss/(step+1)), flush=True)
+        
+    evaluate(prompt_model, validation_dataloader)
 
-from openprompt.utils.metrics import generation_metric
+generated_sentence = evaluate(prompt_model, test_dataloader)  # sentence_score ~ 52
 
-score = generation_metric(generated_sentence, groundtruth_sentence, "sentence_bleu")
-print(score)
+with open("../../Generated_sentence_webnlg.txt",'w') as f:
+    for i in generated_sentence:
+        f.write(i+"\n")
+
 
