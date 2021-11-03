@@ -22,7 +22,7 @@ from datasets import load_dataset
 from openprompt.utils.logging import logger
 import os
 
-HUGGING_FACE_SCRIPTS = "/mnt/sfs_turbo/hsd/data/super_glue.py" if 'sfs_turbo' in os.getcwd() else 'super_glue' # one of the test machine can't not connect huggingface
+HUGGING_FACE_SCRIPTS = 'super_glue' # if you can not connect huggingface in our machine, you can download the scripts manually and change this line.
 class SuperglueMultiRCProcessor(DataProcessor):
     def __init__(self):
         super().__init__()
