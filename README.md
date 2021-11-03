@@ -180,6 +180,8 @@ We also encourage the users to find the best hyper-parameters for their own task
 ## Known Issues
 Major improvement/enhancement in future.
 
+- We made some major changes from the last version, so part of the docs is outdated. We will fix it soon.
+
 ## Citation
 We are working on the technical report...
 
