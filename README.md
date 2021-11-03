@@ -166,14 +166,21 @@ promptModel = PromptForClassification(
 )
 ```
 
-Please refer to our documentation for more details.
+Please refer to our [tutorial scripts](https://github.com/thunlp/OpenPrompt/tree/main/tutorial), and [documentation](https://thunlp.github.io/OpenPrompt/) for more details.
 
 ## Datasets
 
 We provide a series of download scripts in the `dataset/` folder, feel free to use them to download benchmarks.
 
-## Citation
+## Performance Report
+There are too many possible combinations powered by OpenPrompt. We are trying our best
+to test the performance of different methods as soon as possible. The performance will be constantly updated into the [Tables](https://github.com/thunlp/OpenPrompt/tree/main/results/).
+We also encourage the users to find the best hyper-parameters for their own tasks and report the results by making pull request.
 
+## Known Issues
+Major improvement/enhancement in future.
+
+## Citation
 We are working on the technical report...
 
 ## Contributors

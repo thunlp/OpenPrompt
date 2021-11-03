@@ -12,14 +12,13 @@ args = parser.parse_args()
 
 from openprompt.data_utils.conditional_generation_dataset import WebNLGProcessor
 
-
+# Don't forget to download the dataset first
 dataset = {}
 dataset['train'] = WebNLGProcessor().get_train_examples("./datasets/CondGen/webnlg_2017/")
 dataset['validation'] = WebNLGProcessor().get_dev_examples("./datasets/CondGen/webnlg_2017/")
 dataset['test'] = WebNLGProcessor().get_test_examples("./datasets/CondGen/webnlg_2017/")
 
 # print(train_dataset[0])
-# exit()
 
 
 # %% [markdown]
@@ -37,15 +36,9 @@ plm, tokenizer, model_config, WrapperClass = load_plm("t5", "t5-base")
 # %% [markdown]
 # # Try more prompt!
 
-# You can use templates other than manual template, for example the mixedtemplate is a good place to start.
-# In MixedTemplate, you can use {"soft"} to denote a tunable template. 
+# You can use templates other than manual template, for example the soft template.
+# In SoftTemplate, the text is prepended by `num_tokens` soft template tokens before the input samples. 
 
-# %%
-
-
-# %% [markdown]
-
-# Or use a mix template
 from openprompt.prompts import SoftTemplate
 
 mytemplate = SoftTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} Make a sentence {"mask"}',num_tokens=100)
@@ -115,17 +108,9 @@ if use_cuda:
     prompt_model=  prompt_model.cuda()
 
 from transformers import AdamW
-# # %% [markdown]
-# # ## below is standard training
-# no_decay = ['bias', 'LayerNorm.weight']
 
-# # it's always good practice to set no decay to biase and LayerNorm parameters
-# optimizer_grouped_parameters1 = [
-#     {'params': [p for n, p in prompt_model.plm.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
-#     {'params': [p for n, p in prompt_model.plm.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
-# ]
 
-# Using different optimizer for prompt parameters and model parameters
+# Only tune the soft template.
 optimizer_grouped_parameters = [
     {'params': [p for n,p in prompt_model.template.named_parameters() if "raw_embedding" not in n]}
 ]
