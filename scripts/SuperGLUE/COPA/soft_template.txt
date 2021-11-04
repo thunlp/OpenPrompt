@@ -1,1 +1,1 @@
-{"placeholder":choice1} or <meta:choice2> ? <text_a> The <meta:question> is that <mask> .
+A: {"meta":"choice1"} or B:{"meta":"choice2"} ? {"placeholder":"text_a"} The {"meta":"question"} is that {"mask"} .

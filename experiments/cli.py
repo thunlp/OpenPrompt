@@ -14,7 +14,7 @@ from openprompt.prompts import load_template, load_verbalizer, load_template_gen
 from openprompt.data_utils import FewShotSampler
 from openprompt.utils.logging import config_experiment_dir, init_logger, logger
 from openprompt.config import get_config, save_config_to_yaml
-from openprompt.plms import load_plm
+from openprompt.plms import load_plm_from_config
 from openprompt.data_utils import load_dataset
 from openprompt.utils.cuda import model_to_device
 
@@ -40,6 +40,7 @@ def build_dataloader(dataset, template, tokenizer,tokenizer_wrapper_class, confi
 
 def main():
     config, args = get_config()
+    # exit()
     # init logger, create log dir and set log level, etc.
     if args.resume and args.test:
         raise Exception("cannot use flag --resume and --test together")
@@ -50,6 +51,7 @@ def main():
         init_logger(os.path.join(EXP_PATH, "log.txt"), config.logging.file_level, config.logging.console_level)
         # save config to the logger directory
         save_config_to_yaml(config)
+    
 
     # load dataset. The valid_dataset can be None
     train_dataset, valid_dataset, test_dataset, Processor = load_dataset(config, test = args.test is not None or config.learning_setting == 'zero_shot')
@@ -123,7 +125,7 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
     set_seed(config.reproduce.seed)
 
     # load the pretrained models, its model, tokenizer, and config.
-    plm_model, plm_tokenizer, plm_config, plm_wrapper_class = load_plm(config)
+    plm_model, plm_tokenizer, plm_config, plm_wrapper_class = load_plm_from_config(config)
 
     
 
@@ -132,7 +134,7 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
         verbalizer = load_verbalizer(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config, classes=Processor.labels)
         template_generate_model, template_generate_tokenizer = None, None
         if config.classification.auto_t:
-            template_generate_model, template_generate_tokenizer, template_generate_config = load_plm(config.template_generator)
+            template_generate_model, template_generate_tokenizer, template_generate_config = load_plm_from_config(config.template_generator)
             template = load_template(config=config, model=template_generate_model, tokenizer=template_generate_tokenizer, plm_config=template_generate_config, verbalizer=verbalizer)
 
         else:

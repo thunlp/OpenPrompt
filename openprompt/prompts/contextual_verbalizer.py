@@ -14,107 +14,51 @@ from openprompt.utils.logging import logger
 
 class ContextualVerbalizer(Verbalizer):
     r"""
-    The basic manually defined verbalizer class, this class is inherited from the :obj:`Verbalizer` class.
+    This verbalizer is usefull when the label prediction is better defined by a piece of input.
+    For example, in correference resolution, the tgt_text is a proper noun metioned in the text.
+    This is there is no fixed mapping between a class label and its label words. This verbalizer
+    is the default verbalizer of COPA and WiC dataset in superglue datasets. 
 
     Args:   
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.
         classes (:obj:`List[Any]`): The classes (or labels) of the current task.
-        label_words (:obj:`Union[Sequence[str], Mapping[str, str]]`, optional): The label words that are projected by the labels.
         prefix (:obj:`str`, optional): The prefix string of the verbalizer (used in PLMs like RoBERTa, which is sensitive to prefix space)
-        multi_token_handler (:obj:`str`, optional): The handling strategy for multiple tokens produced by the tokenizer.
-        post_log_softmax (:obj:`bool`, optional): Whether to apply log softmax post processing on label_logits. Default to True.
+        multi_token_handler (:obj:`str`, optional): The handling strategy for multiple tokens produced by the tokenizer. Default to
+            hingeloss `ADAPET <https://arxiv.org/pdf/2103.11955.pdf>_`.
     """
     def __init__(self, 
                  tokenizer: PreTrainedTokenizer,
                  classes: Optional[List] = None,
                  num_classes: Optional[Sequence[str]] = None,
-                 label_words: Optional[Union[Sequence[str], Mapping[str, str]]] = None,
                  prefix: Optional[str] = " ",
-                 multi_token_handler: Optional[str] = "first",
-                 post_log_softmax: Optional[bool] = True,
+                 multi_token_handler: Optional[str] = "hingeloss",
                 ):
         super().__init__(tokenizer=tokenizer, num_classes=num_classes, classes=classes)
         self.prefix = prefix
         self.multi_token_handler = multi_token_handler
-        self.label_words = label_words
-        self.post_log_softmax = post_log_softmax
 
-    def on_label_words_set(self):
-        super().on_label_words_set()
-        self.label_words = self.add_prefix(self.label_words, self.prefix)
-         
          # TODO should Verbalizer base class has label_words property and setter?
          # it don't have label_words init argument or label words from_file option at all
 
-        self.generate_parameters()
-        
-    @staticmethod
-    def add_prefix(label_words, prefix):
-        r"""Add prefix to label words. For example, if a label words is in the middle of a template,
-        the prefix should be ``' '``.
+    
 
-        Args:
-            label_words (:obj:`Union[Sequence[str], Mapping[str, str]]`, optional): The label words that are projected by the labels.
-            prefix (:obj:`str`, optional): The prefix string of the verbalizer.
-        
-        Returns:
-            :obj:`Sequence[str]`: New label words with prefix.
-        """
-        new_label_words = []
-        if isinstance(label_words[0], str):
-            label_words = [[w] for w in label_words]  #wrapped it to a list of list of label words.
-
-        for label_words_per_label in label_words:
-            new_label_words_per_label = []
-            for word in label_words_per_label:
-                if word.startswith("<!>"):
-                    new_label_words_per_label.append(word.split("<!>")[1])
-                else:
-                    new_label_words_per_label.append(prefix + word)
-            new_label_words.append(new_label_words_per_label)
-        return new_label_words
-        
-    def generate_parameters(self) -> List:
-        r"""In basic manual template, the parameters are generated from label words directly.
-        In this implementation, the label_words should not be tokenized into more than one token. 
-        """
-        all_ids = []
-        for words_per_label in self.label_words:
-            ids_per_label = []
-            for word in words_per_label:
-                ids = self.tokenizer.encode(word, add_special_tokens=False)
-                ids_per_label.append(ids)
-            all_ids.append(ids_per_label)
-
-        max_len  = max([max([len(ids) for ids in ids_per_label]) for ids_per_label in all_ids])
-        max_num_label_words = max([len(ids_per_label) for ids_per_label in all_ids])
-        words_ids_mask = torch.zeros(max_num_label_words, max_len)
-        words_ids_mask = [[[1]*len(ids) + [0]*(max_len-len(ids)) for ids in ids_per_label]
-                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label)) 
-                             for ids_per_label in all_ids]
-        words_ids = [[ids + [0]*(max_len-len(ids)) for ids in ids_per_label]
-                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label)) 
-                             for ids_per_label in all_ids]
-        
-        words_ids_tensor = torch.tensor(words_ids)
-        words_ids_mask = torch.tensor(words_ids_mask)
-        self.label_words_ids = nn.Parameter(words_ids_tensor, requires_grad=False)
-        self.words_ids_mask = nn.Parameter(words_ids_mask, requires_grad=False) # A 3-d mask
-        self.label_words_mask = nn.Parameter(torch.clamp(words_ids_mask.sum(dim=-1), max=1), requires_grad=False)
 
     def project(self,
                 logits: torch.Tensor,
-                **kwargs,
+                batch: Dict,
                 ) -> torch.Tensor:
         r"""
         Project the labels, the return value is the normalized (sum to 1) probs of label words. 
         
         Args:
             logits (:obj:`torch.Tensor`): The orginal logits of label words.
-        
+            batch (:obj:`dict`): The batch containing the 
         Returns:
             :obj:`torch.Tensor`: The normalized logits of label words
         """
+        from IPython import embed
+        embed()
+
 
         label_words_logits = logits[:, self.label_words_ids]
         label_words_logits = self.handle_multi_token(label_words_logits, self.words_ids_mask)
@@ -141,6 +85,7 @@ class ContextualVerbalizer(Verbalizer):
             (:obj:`torch.Tensor`): The final processed logits over the labels (classes).
         """
         # project
+        
         label_words_logits = self.project(logits, **kwargs)  #Output: (batch_size, num_classes) or  (batch_size, num_classes, num_label_words_per_label)
 
         if self.post_log_softmax:

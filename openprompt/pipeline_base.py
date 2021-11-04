@@ -87,27 +87,13 @@ class PromptDataLoader(object):
         self.wrap()
         self.tokenize()
 
-        def prompt_collate_fct(batch: List[Union[Dict, InputFeatures]]):
-            r'''
-            This function is used to collate the current prompt.
 
-            Args:
-                batch (:obj:`List[Union[Dict, InputFeatures]]`): A batch of the current data.
-
-            Returns:
-                :obj:`InputFeatures`: Return the :py:class:`~openprompt.data_utils.data_utils.InputFeatures of the current batch of data.
-            '''
-
-            
-            elem = batch[0]
-            return_dict = {key: default_collate([d[key] for d in batch]) for key in elem}
-            return InputFeatures(**return_dict)
 
         self.dataloader = DataLoader(
             self.tensor_dataset, 
             batch_size = self.batch_size,
             shuffle = self.shuffle,
-            collate_fn = prompt_collate_fct
+            collate_fn = InputFeatures.collate_fct
         )
     
     
@@ -175,7 +161,8 @@ class PromptModel(nn.Module):
         """
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
-        outputs = self.plm(**input_batch)
+        outputs = self.plm(**input_batch, output_hidden_states=True)
+        outputs = self.template.post_processing_outputs(outputs)
         return outputs
     
     def prepare_model_inputs(self, batch: Union[Dict, InputFeatures]) -> Dict:
@@ -184,6 +171,7 @@ class PromptModel(nn.Module):
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
         return input_batch
+    
 
 
 class PromptForClassification(nn.Module):
@@ -220,11 +208,11 @@ class PromptForClassification(nn.Module):
         r"""Register the device parameter."""
         return self.plm.device
 
-    def extract_logits(self,
-                       logits: torch.Tensor,
+    def extract_at_mask(self,
+                       outputs: torch.Tensor,
                        batch: Union[Dict, InputFeatures]):
-        r"""Get logits of all <mask> token
-        Project the logits of shape
+        r"""Get outputs at all <mask> token
+        E.g., project the logits of shape
         (``batch_size``, ``max_seq_length``, ``vocab_size``)
         into logits of shape (if num_mask_token > 1)
         (``batch_size``, ``num_mask_token``, ``vocab_size``)
@@ -232,27 +220,27 @@ class PromptForClassification(nn.Module):
         (``batch_size``, ``vocab_size``).
 
         Args:
-            logits (:obj:`torch.Tensor`): The original logits of the whole sequence.
+            outputs (:obj:`torch.Tensor`): The original outputs (maybe process by verbalizer's
+                 `gather_outputs` before) etc. of the whole sequence.
             batch (:obj:`Union[Dict, InputFeatures]`): The original batch
         
         Returns:
-            :obj:`torch.Tensor`: The extracted logits of ``<mask>`` tokens.
+            :obj:`torch.Tensor`: The extracted outputs of ``<mask>`` tokens.
             
         """
-        logits = logits[torch.where(batch['loss_ids']>0)]
-        logits = logits.view(batch['loss_ids'].shape[0], -1, logits.shape[1])
-        if logits.shape[1] == 1:
-            logits = logits.view(logits.shape[0], logits.shape[2])
-        return logits
+        outputs = outputs[torch.where(batch['loss_ids']>0)]
+        outputs = outputs.view(batch['loss_ids'].shape[0], -1, outputs.shape[1])
+        if outputs.shape[1] == 1:
+            outputs = outputs.view(outputs.shape[0], outputs.shape[2])
+        return outputs
         
     def forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
-        r""" keys in batch: 
+        r""" TODO
         """
         outputs = self.prompt_model(batch)
-        logits = outputs.logits
-        logits = self.extract_logits(logits, batch)
-        label_words_logits = self.verbalizer.process_logits(logits=logits, batch=batch)
-
+        outputs = self.verbalizer.gather_outputs(outputs)
+        outputs_at_mask = self.extract_at_mask(outputs, batch)
+        label_words_logits = self.verbalizer.process_outputs(outputs_at_mask, batch=batch)
         return label_words_logits
     
     def predict(self):
@@ -286,6 +274,28 @@ class PromptForClassification(nn.Module):
         self.template.load_state_dict(state_dict['template'])
         self.verbalizer.load_state_dict(state_dict['verbalizer'])
 
+    def parallelize(self, device_map=None):
+        r"""Parallelize the model across device
+        """
+        if hasattr(self.plm, "parallelize"):
+            self.plm.parallelize(device_map)
+            self.device_map = self.plm.device_map
+            self.template.cuda()
+            self.verbalizer.cuda()
+        else:
+            raise NotImplementedError("parallelize method was not implemented for this plm.")
+
+    def deparallelize(self):
+        r"""Deparallelize the model across device
+        """
+        if hasattr(self.plm, "deparallelize"):
+            self.plm.deparallelize()
+            self.device_map = None
+            self.template.cpu()
+            self.verbalizer.cpu()
+        else:
+            raise NotImplementedError("parallelize method was not implemented for this plm.")
+
 
 class PromptForGeneration(nn.Module, GenerationMixin):
     r'''``PromptModel`` with generation loss caculation and generation utils integrated.
@@ -306,7 +316,6 @@ class PromptForGeneration(nn.Module, GenerationMixin):
                  gen_config: Optional[CfgNode] = None,
                  tokenizer: Optional[PreTrainedTokenizer] = None,
                 ):
-                 
         super().__init__()
         if tokenizer is None:
             assert template.tokenizer is not None, "Tokenizer can't be set from input args or template"
@@ -336,7 +345,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
     def shift_logits_and_labels(self, 
                                 logits, 
-                                batch: InputFeatures):
+                                loss_ids, 
+                                reference_ids):
 
         r"""
         Left shift the label, and make label of the positions that are
@@ -352,12 +362,10 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             shift_input_ids (:obj:`List[int]`):
 
         """
+        
         shift_logits = logits[..., :-1, :].contiguous()
-        shift_loss_ids = batch['loss_ids'][..., 1:].contiguous()
-        if self.config.is_encoder_decoder:
-            shift_input_ids = batch['decoder_input_ids'][..., 1:].contiguous()
-        else:
-            shift_input_ids = batch['input_ids'][..., 1:].contiguous()
+        shift_loss_ids = loss_ids[..., 1:].contiguous()
+        shift_input_ids = reference_ids[..., 1:].contiguous()
         shift_input_ids = torch.where(shift_loss_ids>0, shift_input_ids, -100)
         return shift_logits, shift_input_ids
 
@@ -385,10 +393,13 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         Returns:
             loss(:obj:torch.Tensor): The loss of the current generation procedure.
         """
-        
+        if self.config.is_encoder_decoder:
+            reference_ids = batch['decoder_input_ids']
+        else:
+            reference_ids = batch['input_ids']  # in case in some template, these field is dropped
         outputs = self.prompt_model(batch)
         logits = outputs.logits
-        logits, labels = self.shift_logits_and_labels(logits, batch)
+        logits, labels = self.shift_logits_and_labels(logits, batch['loss_ids'], reference_ids)
         batch_size, seq_len, vocab_size = logits.shape
         loss = self.loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
         loss = loss.view(batch_size, -1).sum(dim=-1) #TODO support more objectives
@@ -452,7 +463,9 @@ class PromptForGeneration(nn.Module, GenerationMixin):
     
     def prepare_inputs_for_generation(self, input_ids: Optional[torch.Tensor] = None,
                                          **model_kwargs):
-        r"""When the `past` not in model_kwargs, we prepare the input from scratch. 
+        r"""This function wraps the `prepare_inputs_for_generation` function in the huggingface transformers.
+
+        When the `past` not in model_kwargs, we prepare the input from scratch. 
         When `past` is in model_kwargs, we don't need to prepare the template wrapped input,
         instead we use the inner pretrain_models' function to prepare the next step's input.
         `model_kwargs` includes all the argument passed in the `batch`: InputFeatures, except `input_ids`
@@ -462,8 +475,6 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         Args:
             input_ids(:obj:`torch.Tensor`): Indices of input sequence tokens in the vocabulary.
         """
- 
-        
         if self.generate_ith_token == 0 and 'encoder_outputs' not in model_kwargs: # generating the first token in decoder only setting.
 
             batch = InputFeatures(input_ids=input_ids, **model_kwargs)
@@ -503,6 +514,11 @@ class PromptForGeneration(nn.Module, GenerationMixin):
     def _prepare_encoder_decoder_kwargs_for_generation(
         self, input_ids: torch.LongTensor, model_kwargs
     ) -> Dict[str, Any]:
+        r""" This function resemble the function in GeneraionMix
+        
+        Args:
+            input_ids (:obj:`torch.LongTensor`) The input ids for 
+        """
         if "encoder_outputs" not in model_kwargs:
             # retrieve encoder hidden states
             encoder = self.plm.get_encoder()
@@ -511,8 +527,14 @@ class PromptForGeneration(nn.Module, GenerationMixin):
                 for argument, value in model_kwargs.items()
                 if not (argument.startswith("decoder_") or argument.startswith("cross_attn"))
             }
-            batch = InputFeatures(input_ids=input_ids, **encoder_kwargs)
-            model_inputs = self.prompt_model.prepare_model_inputs(batch)
+            batch = {"input_ids":input_ids, **encoder_kwargs}
+            model_inputs = self.prompt_model.prepare_model_inputs(batch) # This line differs from the orinigal code base, we should process the input
+            # with our template, then pass it into the model.
+            # some of the arguments may have been changed by the template,
+            # e.g. the attention mask. Here we update the model_kwargs
+            for key in model_kwargs:
+                if key in model_inputs:
+                    model_kwargs[key] = model_inputs[key]
             model_kwargs["encoder_outputs"] = encoder(return_dict=True, **model_inputs)
         return model_kwargs
     
@@ -534,3 +556,22 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         r"""Use the plm's default _reorder_cache function
         """
         return self.plm._reorder_cache(past, beam_idx)
+
+    def parallelize(self, device_map=None):
+        r"""Parallelize the model across device
+        """
+        if hasattr(self.plm, "parallelize"):
+            self.plm.parallelize(device_map)
+            self.device_map = self.plm.device_map
+        else:
+            raise NotImplementedError("parallelize method was not implemented for this plm.")
+
+    def deparallelize(self):
+        r"""Deparallelize the model across device
+        """
+        if hasattr(self.plm, "deparallelize"):
+            self.plm.deparallelize()
+            self.device_map = None
+        else:
+            raise NotImplementedError("parallelize method was not implemented for this plm.")
+

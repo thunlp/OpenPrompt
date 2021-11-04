@@ -27,7 +27,7 @@ train:
   max_grad_norm: 1.0
   num_epochs:
   num_training_steps: 30000
-  teacher_forcing: True
+  teacher_forcing: false
 
 
 test:
@@ -38,7 +38,7 @@ dev:
 
 
 template: soft_template
-verbalizer: manual_verbalizer
+verbalizer: contextual_verbalizer
 
 
 
@@ -56,10 +56,8 @@ soft_template:
       num_warmup_steps: 500
 
 
-manual_verbalizer:
-  choice: 0
-  file_path: scripts/SuperGLUE/COPA/manual_verbalizer.txt
-
+contextual_verbalizer:
+  
 environment:
   num_gpus: 1
   cuda_visible_devices:

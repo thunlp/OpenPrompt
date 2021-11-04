@@ -5,6 +5,7 @@ import pickle
 from typing import *
 
 import torch
+from torch.utils.data._utils.collate import default_collate
 from openprompt.utils.logging import logger
 
 from typing import Union
@@ -16,8 +17,8 @@ class InputExample(object):
     Other desired information can be passed via meta.
     
     Args:
-        guid : A unique identifier of the example.
-        text_a (:obj:`str`): The placeholder for sequence of text.
+        guid (:obj:`str`, optional): A unique identifier of the example.
+        text_a (:obj:`str`, optional): The placeholder for sequence of text.
         text_b (:obj:`str`, optional): A secend sequence of text, which is not always neccessary.
         label (:obj:`int`, optional): The label id of the example in classification task.
         tgt_text (:obj:`Union[str,List[str]]`, optional):  The target sequence of the example in a generation task..
@@ -25,8 +26,8 @@ class InputExample(object):
     """
 
     def __init__(self,
-                 guid,
-                 text_a,
+                 guid = None,
+                 text_a = "",
                  text_b = "",
                  label = None,
                  meta: Optional[Dict] = None,
@@ -107,7 +108,7 @@ class InputFeatures(dict):
         'past_key_values', 'loss_ids']
     all_keys = ['input_ids', 'inputs_embeds', 'attention_mask', 'token_type_ids', 'label',
         'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 
-        'past_key_values', 'loss_ids', 'guid', 'tgt_text']
+        'past_key_values', 'loss_ids', 'guid', 'tgt_text', 'encoded_tgt_text']
     non_tensorable_keys = []
 
     def __init__(self, 
@@ -124,6 +125,7 @@ class InputFeatures(dict):
                 guid: Optional[str] = None,
                 tgt_text: Optional[str] = None,
                 use_cache: Optional[bool] = None,
+                encoded_tgt_text: Optional[str] = None,
                 **kwargs):
 
         self.input_ids = input_ids
@@ -138,9 +140,11 @@ class InputFeatures(dict):
         self.loss_ids = loss_ids
         self.guid = guid
         self.tgt_text = tgt_text
+        self.encoded_tgt_text = encoded_tgt_text
         self.use_cache = use_cache
 
         for k in kwargs.keys():
+            logger.warning("Your are passing an unexpected key words: {} to InputFeatures, might yield unexpected behaviours!".format(k))
             setattr(self, k, kwargs[k])
 
     @classmethod
@@ -177,6 +181,11 @@ class InputFeatures(dict):
             if value is not None:
                 setattr(self, key, value.to(device))
         return self
+    
+    def cuda(self):
+        r"""mimic the tensor behavior
+        """
+        return self.to()
 
     def to_json_string(self, keep_none=False):
         """Serializes this instance to a JSON string."""
@@ -258,3 +267,25 @@ class InputFeatures(dict):
             :obj:`List[Any]`: the (key, value) pairs of the InputFeatures
         """
         return [(key, self.__getitem__(key)) for key in self.keys()]
+
+    @staticmethod
+    def collate_fct(batch: List):
+        r'''
+        This function is used to collate the input_features.
+
+        Args:
+            batch (:obj:`List[Union[Dict, InputFeatures]]`): A batch of the current data.
+
+        Returns:
+            :obj:`InputFeatures`: Return the :py:class:`~openprompt.data_utils.data_utils.InputFeatures of the current batch of data.
+        '''
+
+        
+        elem = batch[0]
+        return_dict = {}
+        for key in elem:
+            if key == "encoded_tgt_text":
+                return_dict[key] = [d[key] for d in batch]
+            else:
+                return_dict[key] = default_collate([d[key] for d in batch])
+        return InputFeatures(**return_dict)

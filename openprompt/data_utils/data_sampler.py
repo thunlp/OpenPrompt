@@ -84,6 +84,8 @@ class FewShotSampler(object):
                ) -> Union[Dataset, List]:
         if seed is not None:
             self.rng = np.random.RandomState(seed)
+        else:
+            self.rng = np.random.RandomState()
         indices = [i for i in range(len(data))]
 
         if self.num_examples_per_label is not None:

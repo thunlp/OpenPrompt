@@ -25,11 +25,31 @@ class MLMTokenizerWrapper(TokenizerWrapper):
     def tokenize_one_example(self, wrapped_example, teacher_forcing):
         ''' # TODO doens't consider the situation that input has two parts
         '''
+
         wrapped_example, others = wrapped_example
+        
+        # for some dataset like SuperGLUE.COPA, the answer requires prediction an span of 
+        # the input. Or in generation tasks, we need to generate a piece of target_text.
+        # In these case, it tokenized to the encoded_tgt_text for furture use.
+        encoded_tgt_text = []
+        if 'tgt_text' in others:
+            tgt_text = others['tgt_text']
+            if isinstance(tgt_text, str):
+                tgt_text = [tgt_text]
+            for t in tgt_text:
+                encoded_tgt_text.append(self.tokenizer.encode(t, add_special_tokens=False))
+            
+        
+        mask_id = 0 # the i-th the mask token in the template. 
+
         encoder_inputs = defaultdict(list)
         for piece in wrapped_example:
             if piece['loss_ids']==1:
-                encode_text = [self.mask_token_ids]
+                if teacher_forcing: # fill the mask with the tgt task
+                    raise RuntimeError("Masked Language Model can't perform teacher forcing training!")
+                else:
+                    encode_text = [self.mask_token_ids]
+                mask_id += 1
 
             if piece['text'] in self.special_tokens_maps.keys():
                 to_replace = self.special_tokens_maps[piece['text']]
@@ -43,6 +63,8 @@ class MLMTokenizerWrapper(TokenizerWrapper):
             else:
                 encode_text = self.tokenizer.encode(piece['text'], add_special_tokens=False)
 
+            from IPython import embed; embed()
+
             encoding_length = len(encode_text)
             encoder_inputs['input_ids'].append(encode_text)
             for key in piece:
@@ -50,7 +72,6 @@ class MLMTokenizerWrapper(TokenizerWrapper):
                     encoder_inputs[key].append([piece[key]]*encoding_length)
         
         encoder_inputs = self.truncate(encoder_inputs=encoder_inputs)
-
         # delete shortenable ids
         encoder_inputs.pop("shortenable_ids")
         encoder_inputs = self.concate_parts(input_dict=encoder_inputs)
@@ -62,7 +83,11 @@ class MLMTokenizerWrapper(TokenizerWrapper):
         # padding
         encoder_inputs = self.padding(input_dict=encoder_inputs, max_len=self.max_seq_length, pad_id_for_inputs=self.tokenizer.pad_token_id)
 
-        encoder_inputs = dict(encoder_inputs) # convert defaultdict to dict
+
+        if len(encoded_tgt_text) > 0:
+            encoder_inputs = {**encoder_inputs, "encoded_tgt_text": encoded_tgt_text}# convert defaultdict to dict
+        else:
+            encoder_inputs = {**encoder_inputs}
         return encoder_inputs
     
 
