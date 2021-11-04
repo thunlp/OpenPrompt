@@ -192,6 +192,8 @@ class MixedTemplate(Template):
                 text[i] = ''; # unused
             elif 'mask' in d:
                 text[i] = '<mask>'
+            elif 'special' in d:
+                text[i] = d['special']
             elif 'text' in d:
                 text[i] = d["add_prefix_space"] + d['text']
             else:

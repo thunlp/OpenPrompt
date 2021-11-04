@@ -64,7 +64,11 @@ class LMTokenizerWrapper(TokenizerWrapper):
                     break
 
             if piece['text'] in self.special_tokens_maps.keys():
-                piece['text'] = self.special_tokens_maps[piece['text']]
+                to_replace = self.special_tokens_maps[piece['text']]
+                if to_replace is not None:
+                    piece['text'] = to_replace
+                else:
+                    raise KeyError("This tokenizer doesn't specify {} token.".format(piece['text']))
 
             if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                 encode_text =  [0] # can be replace by any token, since these token will use their own embeddings
@@ -173,7 +177,7 @@ class EncDecLMWrapper(TokenizerWrapper):
                     if to_replace is not None:
                         piece['text'] = to_replace
                     else:
-                        raise KeyError("This tokenize doesn't specify{} token.".format(piece['text']))
+                        raise KeyError("This tokenizer doesn't specify{} token.".format(piece['text']))
 
                 if 'new_token_ids' in piece and piece['new_token_ids']!=0:
                     encode_text =  [0] # can be replace by any token, since these token will use their own embeddings

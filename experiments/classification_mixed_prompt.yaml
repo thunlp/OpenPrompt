@@ -29,8 +29,8 @@ verbalizer: manual_verbalizer
 
 
 mixed_template:
-  choice: 0
-  file_path: scripts/TextClassification/agnews/mixed_template.txt
+  choice: 4
+  file_path: scripts/TextClassification/agnews/manual_template.txt
 
 one2one_verbalizer:
   choice: 0
