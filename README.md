@@ -15,6 +15,9 @@
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
   <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> • 
+  <a href="https://arxiv.org/abs/2111.01998">Paper</a> • 
+
+
 
 </p>
 
@@ -22,14 +25,21 @@
 
 ![version](https://img.shields.io/badge/version-v0.0.1--beta-blue)
 
+
+
+## What's New?
+
+- Nov 2011: Now we have released a paper [OpenPrompt: An Open-source Framework for Prompt-learning](https://arxiv.org/abs/2111.01998).
+- Nov 2011: We made some major changes from the last version, so part of the docs is outdated. We will fix it soon.
+
 ## Overview
 
-**Prompt-learning** is the latest paradigm to adapt pre-trained language models (PLMs) to downstream NLP tasks, which modifies the input text with a textual template and directly uses PLMs to conduct pre-trained tasks. This library provides a standard, flexible and extensible framework to deploy the prompt-learning pipeline. OpenPrompt supports loading PLMs directly from huggingface transformers. In the future, we will also support PLMs implemented by other libraries. For more resources about prompt-learning, please check our [paper list](https://github.com/thunlp/PromptPapers).
+**Prompt-learning** is the latest paradigm to adapt pre-trained language models (PLMs) to downstream NLP tasks, which modifies the input text with a textual template and directly uses PLMs to conduct pre-trained tasks. This library provides a standard, flexible and extensible framework to deploy the prompt-learning pipeline. OpenPrompt supports loading PLMs directly from [huggingface transformers](https://github.com/huggingface/transformers). In the future, we will also support PLMs implemented by other libraries. For more resources about prompt-learning, please check our [paper list](https://github.com/thunlp/PromptPapers).
 
 <div align="center">
 
 
-<img src="https://z3.ax1x.com/2021/11/03/IAdT3D.png" width="75%" align="center"/>
+<img src="https://z3.ax1x.com/2021/11/03/IAdT3D.png" width="85%" align="center"/>
 
 </div>
 
@@ -183,10 +193,19 @@ Major improvement/enhancement in future.
 - We made some major changes from the last version, so part of the docs is outdated. We will fix it soon.
 
 ## Citation
-We are working on the technical report...
+Please cite our paper if you use OpenPrompt in your work
+
+```
+@article{ding2021openprompt,
+  title={OpenPrompt: An Open-source Framework for Prompt-learning},
+  author={Ding, Ning and Hu, Shengding and Zhao, Weilin and Chen, Yulin and Liu, Zhiyuan and Zheng, Hai-Tao and Sun, Maosong},
+  journal={arXiv preprint arXiv:2111.01998},
+  year={2021}
+}
+```
+
+ 
 
 ## Contributors
 
 We thank all the  contributors to this project, more contributors are welcome!
-
-[Ning Ding](https://github.com/ningding97), [Shengding Hu](https://github.com/ShengdingHu), [Weilin Zhao](https://github.com/Achazwl).
