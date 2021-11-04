@@ -8,24 +8,19 @@
 
 ------
 
-
-
 <p align="center">
   <a href="#Overview">Overview</a> •
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
   <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> • 
-  <a href="https://arxiv.org/abs/2111.01998">Paper</a> • 
-
-
+  <a href="https://arxiv.org/abs/2111.01998">Paper</a> •  
+  <a href="#citation">Citation</a> •
 
 </p>
 
 </div>
 
 ![version](https://img.shields.io/badge/version-v0.0.1--beta-blue)
-
-
 
 ## What's New?
 
@@ -196,7 +191,7 @@ Major improvement/enhancement in future.
 ## Citation
 Please cite our paper if you use OpenPrompt in your work
 
-```
+```bibtex
 @article{ding2021openprompt,
   title={OpenPrompt: An Open-source Framework for Prompt-learning},
   author={Ding, Ning and Hu, Shengding and Zhao, Weilin and Chen, Yulin and Liu, Zhiyuan and Zheng, Hai-Tao and Sun, Maosong},
