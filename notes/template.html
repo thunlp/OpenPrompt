@@ -50,9 +50,9 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Introduction with an Example</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How to Write a Template?</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#examples-of-templates">Examples of Templates</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#basic-attributes">Basic Attributes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#meta-information">Meta Information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#textual-template">Textual Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#soft-mix-template">Soft &amp; Mix Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#post-processing">Post processing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="verbalizer.html">How to Write a Verbalizer?</a></li>
@@ -96,74 +96,72 @@
              
   <section id="how-to-write-a-template">
 <span id="tutorial-template"></span><h1>How to Write a Template?<a class="headerlink" href="#how-to-write-a-template" title="Permalink to this headline">¶</a></h1>
-<p>As we stated, template (which could be specific textual tokens or abstract new tokens, the only difference is the initialization)
-is one of the most important module in a prompt-leanring framework.  In this tutorial, we introduce how to write a template and set the corresponding attributes for a <code class="docutils literal notranslate"><span class="pre">Template</span></code> class.</p>
-<p>First, let’s take a look what template could look like.</p>
-<section id="examples-of-templates">
-<h2>Examples of Templates<a class="headerlink" href="#examples-of-templates" title="Permalink to this headline">¶</a></h2>
-<p>This is a template:</p>
-<div class="highlight-python notranslate" id="template-1"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; It was a &lt;mask&gt; .&quot;</span>
+<p>As we stated,
+template (which could be specific textual tokens or abstract new tokens,
+the only difference is the initialization)
+is one of the most important module in a prompt-leanring framework.
+In this tutorial, we introduce how to write a template and set the corresponding attributes for a <code class="docutils literal notranslate"><span class="pre">Template</span></code> class.</p>
+<p>Our template language takes the insight fromthe Dict grammer from Python in order to make it easy-to-learn.
+We use a <code class="docutils literal notranslate"><span class="pre">meta</span></code> key to denote the orginal text input, or the part of the input, or other key information.
+A <code class="docutils literal notranslate"><span class="pre">mask</span></code> key is used to denote the indice of the token that need to be predicted. A <code class="docutils literal notranslate"><span class="pre">soft</span></code> key denotes soft tokens and textual tokens could be directly written down.</p>
+<section id="textual-template">
+<h2>Textual Template<a class="headerlink" href="#textual-template" title="Permalink to this headline">¶</a></h2>
+<p>A simple template for binary sentiment classification, the <code class="docutils literal notranslate"><span class="pre">sentence</span></code> denotes the original input and the <code class="docutils literal notranslate"><span class="pre">mask</span></code> is the target position,</p>
+<div class="highlight-python notranslate" id="template-0"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;sentence&quot;</span><span class="p">}</span><span class="o">.</span> <span class="n">It</span> <span class="ow">is</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">}</span><span class="o">.</span>
 </pre></div>
 </div>
-<p>This is also a template:</p>
-<div class="highlight-python notranslate" id="template-2"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; &lt;soft&gt; &lt;soft&gt; &lt;soft&gt; &lt;soft&gt; &lt;mask&gt; &lt;soft&gt; &lt;soft&gt; .&quot;</span>
+<p>Here is a basic template for news topic classification, where one example contains two parts – a <code class="docutils literal notranslate"><span class="pre">title</span></code> and a <code class="docutils literal notranslate"><span class="pre">description</span></code>,</p>
+<div class="highlight-python notranslate" id="template-1"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">}</span> <span class="n">news</span> <span class="p">:</span> <span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;title&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;description&quot;</span><span class="p">}</span>
 </pre></div>
 </div>
-<p>This is also a template:</p>
-<div class="highlight-python notranslate" id="template-3"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; In this sentence, &lt;meta:entity&gt; is a &lt;mask&gt; .&quot;</span>
-</pre></div>
-</div>
-<p>This is also a template:</p>
-<div class="highlight-python notranslate" id="template-4"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; the &lt;mask&gt; &lt;meta:head&gt; &lt;mask&gt; &lt;mask&gt; &lt;mask&gt; the &lt;mask&gt; &lt;meta:tail&gt; .&quot;</span>
-</pre></div>
-</div>
-<p>This is also a template:</p>
-<div class="highlight-python notranslate" id="template-5"><div class="highlight"><pre><span></span><span class="s2">&quot;&lt;text_a&gt; Question: &lt;text_b&gt; ? &lt;soft&gt;the Answer &lt;soft&gt;is &lt;mask&gt; .&quot;</span>
-</pre></div>
-</div>
-<p>Kind of confusing? Don’t worry, we will handle it step by step.</p>
-</section>
-<section id="basic-attributes">
-<h2>Basic Attributes<a class="headerlink" href="#basic-attributes" title="Permalink to this headline">¶</a></h2>
-<p>A template should firstly consider the original input, which is defaultly denoted as <code class="docutils literal notranslate"><span class="pre">text_a</span></code>.
-For tasks with multiple input text (or you can segment the text into multiple pieces), use other placeholders such as <code class="docutils literal notranslate"><span class="pre">text_b</span></code>.</p>
-<p>When defining a template, a series basic attributes may need to be considered.
-A template should contain at least one masked token that need to be predicted by PLMs, typically denoted as <code class="docutils literal notranslate"><span class="pre">&lt;mask&gt;</span></code>.
-The <code class="docutils literal notranslate"><span class="pre">loss_ids</span></code> denotes which tokens’ loss are computed.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;it&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">]</span>
-<span class="n">loss_ids</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span>         <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">1</span>       <span class="p">,</span> <span class="mi">0</span>  <span class="p">]</span>
-</pre></div>
-</div>
-<p>Soft tokens are tokens that are optimized separately from the PLM.
-Soft tokens are denoted by <code class="docutils literal notranslate"><span class="pre">soft_token_ids</span></code>, where <code class="docutils literal notranslate"><span class="pre">&lt;soft&gt;</span></code> is randomly initialized and <code class="docutils literal notranslate"><span class="pre">&lt;soft&gt;a</span></code> is initialized to <code class="docutils literal notranslate"><span class="pre">a</span></code>’s embedding.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">template</span><span class="p">:</span>       <span class="p">[</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;soft&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;soft&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;soft&gt;a&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">]</span>
-<span class="n">soft_token_ids</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span>         <span class="p">,</span> <span class="mi">1</span>       <span class="p">,</span> <span class="mi">1</span>       <span class="p">,</span> <span class="mi">0</span>   <span class="p">,</span> <span class="mi">0</span>       <span class="p">,</span> <span class="mi">1</span>        <span class="p">,</span> <span class="mi">0</span>  <span class="p">]</span>
-</pre></div>
-</div>
-</section>
-<section id="meta-information">
-<h2>Meta Information<a class="headerlink" href="#meta-information" title="Permalink to this headline">¶</a></h2>
-<p>In the <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code> class, we leave a <code class="docutils literal notranslate"><span class="pre">meta</span></code> API to store arbitrary extra information for the input example.</p>
-<p>For example, for a relation extraction task, you want to add different head and tail entities in different input examples.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;text_a&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;In this sentence, the relation of&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;meta:head&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;meta:tail&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;mask&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>In this case, with an <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="n">guid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">text_a</span> <span class="o">=</span> <span class="s2">&quot;Albert Einstein was born in Germany.&quot;</span>
-    <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;head&quot;</span><span class="p">:</span> <span class="s2">&quot;Albert Einstein&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;tail&quot;</span><span class="p">:</span> <span class="s2">&quot;Germany&quot;</span>
-    <span class="p">}</span>
+<p>In entity typing, an <code class="docutils literal notranslate"><span class="pre">entity</span></code> is a key information, and we want to copy it in the template,s</p>
+<div class="highlight-python notranslate" id="template-2"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;sentence&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;In this sentence,&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;entity&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;is a&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">},</span>
 
-<span class="p">}</span>
+<span class="c1"># you can also omit the `text` key</span>
+<span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;sentence&quot;</span><span class="p">}</span><span class="o">.</span> <span class="n">In</span> <span class="n">this</span> <span class="n">sentence</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;entity&quot;</span><span class="p">}</span> <span class="ow">is</span> <span class="n">a</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">},</span>
 </pre></div>
 </div>
-<p>The complete prompted example becomes</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="s2">&quot;Albert Einstein was born in Germany. In this sentence, the relation of Albert Einstein and Germany is &lt;mask&gt; .&quot;</span>
+<p>Easy, huh? We can also specify that in topic classification, the title should not be truncated,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">}</span> <span class="n">news</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;shortenable&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;description&quot;</span><span class="p">}</span>
 </pre></div>
 </div>
+</section>
+<section id="soft-mix-template">
+<h2>Soft &amp; Mix Template<a class="headerlink" href="#soft-mix-template" title="Permalink to this headline">¶</a></h2>
+<p>Enough for the textual template, let’s try some soft tokens, if you use <code class="docutils literal notranslate"><span class="pre">{'soft'}</span></code>,
+the token will be randomly initialized. If you add some textual tokens at the value position,
+the soft token(s) will be initialized by these tokens.
+Note that, a textual template will optimized with the model.
+And soft tokens will be separately optimzed.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;premise&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;hypothesis&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;soft&quot;</span><span class="p">:</span> <span class="s2">&quot;Does the first sentence entails the second?&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;soft&quot;</span><span class="p">}</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>We can also mix them up, too, note that if two soft tokens have same <code class="docutils literal notranslate"><span class="pre">soft_ids</span></code>, they will share embeddings,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>{&quot;meta&quot;: &quot;premise&quot;} {&quot;meta&quot;: &quot;hypothesis&quot;} {&quot;soft&quot;: &quot;Does&quot;} {&quot;soft&quot;: &quot;the&quot;, &quot;soft_id&quot;: 1} first sentence entails {&quot;soft_id&quot;: 1} second?
+</pre></div>
+</div>
+<p>If you try to define 10000 soft tokens, please use the key <code class="docutils literal notranslate"><span class="pre">duplicate</span></code>,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;soft&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;duplicate&quot;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>If you try to define 10000 identical soft tokens, use the key <cite>same</cite>,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;soft&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;duplicate&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;same&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="post-processing">
+<h2>Post processing<a class="headerlink" href="#post-processing" title="Permalink to this headline">¶</a></h2>
+<p>We also support post-processing (e.g. write an lambda expression to strip the final punctuation in data),</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="s1">&#39;context&#39;</span><span class="p">,</span> <span class="s2">&quot;post_processing&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="p">)}</span><span class="o">.</span> <span class="p">{</span><span class="s2">&quot;soft&quot;</span><span class="p">:</span> <span class="s2">&quot;It was&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>You can also apply an MLP to post process your tokens,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;This sentence is&quot;</span><span class="p">,</span> <span class="s2">&quot;post_processing&quot;</span><span class="p">:</span> <span class="s2">&quot;mlp&quot;</span><span class="p">}</span> <span class="p">{</span><span class="s2">&quot;soft&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;post_processing&quot;</span><span class="p">:</span> <span class="s2">&quot;mlp&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Our flexible template language support token-level specifying in prompt-learning,
+you can easily develop complex desired template by OpenPrompt,
+try it out!</p>
 </section>
 </section>
 
