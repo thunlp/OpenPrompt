@@ -4,112 +4,108 @@ How to Write a Template?
 =============================
 
 
-As we stated, template (which could be specific textual tokens or abstract new tokens, the only difference is the initialization) 
-is one of the most important module in a prompt-leanring framework.  In this tutorial, we introduce how to write a template and set the corresponding attributes for a ``Template`` class.
+As we stated, 
+template (which could be specific textual tokens or abstract new tokens, 
+the only difference is the initialization) 
+is one of the most important module in a prompt-leanring framework.  
+In this tutorial, we introduce how to write a template and set the corresponding attributes for a ``Template`` class.
 
-First, let's take a look what template could look like.
 
+Our template language takes the insight fromthe Dict grammer from Python in order to make it easy-to-learn. 
+We use a ``meta`` key to denote the orginal text input, or the part of the input, or other key information.
+A ``mask`` key is used to denote the indice of the token that need to be predicted. A ``soft`` key denotes soft tokens and textual tokens could be directly written down.
 
-
-Examples of Templates
+Textual Template
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is a template: 
+
+A simple template for binary sentiment classification, the ``sentence`` denotes the original input and the ``mask`` is the target position,
+
+.. _template_0:
+.. code-block:: python
+
+    {"meta": "sentence"}. It is {"mask"}.
+
+
+Here is a basic template for news topic classification, where one example contains two parts -- a ``title`` and a ``description``,
 
 .. _template_1:
 .. code-block:: python
 
-    "<text_a> It was a <mask> ."
+    A {"mask"} news : {"meta": "title"} {"meta": "description"}
 
-
-This is also a template:
+In entity typing, an ``entity`` is a key information, and we want to copy it in the template,s
 
 .. _template_2:
 .. code-block:: python
 
-    "<text_a> <soft> <soft> <soft> <soft> <mask> <soft> <soft> ."
+    {"meta": "sentence"} {"text": "In this sentence,"} {"meta": "entity"} {"text": "is a"} {"mask"},
+
+    # you can also omit the `text` key
+    {"meta": "sentence"}. In this sentence, {"meta": "entity"} is a {"mask"},
+    
 
 
-This is also a template:
+Easy, huh? We can also specify that in topic classification, the title should not be truncated,
 
-.. _template_3:
+.. _template_3
 .. code-block:: python
 
-    "<text_a> In this sentence, <meta:entity> is a <mask> ."
+    a {"mask"} news: {"meta": "title", "shortenable": False} {"meta": "description"}
 
-This is also a template:
-
-.. _template_4:
-.. code-block:: python
-
-    "<text_a> the <mask> <meta:head> <mask> <mask> <mask> the <mask> <meta:tail> ."
-
-This is also a template:
-
-
-.. _template_5:
-.. code-block:: python
-
-   "<text_a> Question: <text_b> ? <soft>the Answer <soft>is <mask> ."
-
-
-Kind of confusing? Don't worry, we will handle it step by step. 
-
-
-Basic Attributes
+Soft & Mix Template
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A template should firstly consider the original input, which is defaultly denoted as ``text_a``.
-For tasks with multiple input text (or you can segment the text into multiple pieces), use other placeholders such as ``text_b``.
+Enough for the textual template, let's try some soft tokens, if you use ``{'soft'}``, 
+the token will be randomly initialized. If you add some textual tokens at the value position,
+the soft token(s) will be initialized by these tokens. 
+Note that, a textual template will optimized with the model. 
+And soft tokens will be separately optimzed. 
 
-When defining a template, a series basic attributes may need to be considered. 
-A template should contain at least one masked token that need to be predicted by PLMs, typically denoted as ``<mask>``. 
-The ``loss_ids`` denotes which tokens' loss are computed.
-
+.. _template_4
 .. code-block:: python
-    
-    template: ['<text_a>', 'it', 'is', '<mask>', '.']
-    loss_ids: [0         , 0   , 0   , 1       , 0  ]
 
+    {"meta": "premise"} {"meta": "hypothesis"} {"soft": "Does the first sentence entails the second?"} {"mask"} {"soft"}.
 
-Soft tokens are tokens that are optimized separately from the PLM.
-Soft tokens are denoted by ``soft_token_ids``, where ``<soft>`` is randomly initialized and ``<soft>a`` is initialized to ``a``'s embedding.
+We can also mix them up, too, note that if two soft tokens have same ``soft_ids``, they will share embeddings,
 
+.. _template_5
 .. code-block:: python
-    
-    template:       ['<text_a>', '<soft>', '<soft>', 'is', '<mask>', '<soft>a', '.']
-    soft_token_ids: [0         , 1       , 1       , 0   , 0       , 1        , 0  ]
 
+    {"meta": "premise"} {"meta": "hypothesis"} {"soft": "Does"} {"soft": "the", "soft_id": 1} first sentence entails {"soft_id": 1} second?
 
-Meta Information
+If you try to define 10000 soft tokens, please use the key ``duplicate``,
+
+.. _template_6
+.. code-block:: python
+
+    {"soft": None, "duplicate": 10000} {"meta": "text"} {"mask"}
+
+If you try to define 10000 identical soft tokens, use the key `same`,
+
+.. _template_7
+.. code-block:: python
+
+    {"soft": None, "duplicate": 20, "same": True}
+
+Post processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In the :py:class:`~openprompt.data_utils.data_utils.InputExample` class, we leave a ``meta`` API to store arbitrary extra information for the input example.
+We also support post-processing (e.g. write an lambda expression to strip the final punctuation in data),
 
-For example, for a relation extraction task, you want to add different head and tail entities in different input examples.
-
+.. _template_8
 .. code-block:: python
-    
-    template = ["<text_a>", "In this sentence, the relation of", "<meta:head>", "and", "<meta:tail>", "is", "<mask>", "."]
 
-In this case, with an :py:class:`~openprompt.data_utils.data_utils.InputExample`
+    {"meta": 'context', "post_processing": lambda s: s.rstrip(string.punctuation)}. {"soft": "It was"} {"mask"}
 
+You can also apply an MLP to post process your tokens,
+
+.. _template_9
 .. code-block:: python
-    
-    {
-        guid = 0,
-        text_a = "Albert Einstein was born in Germany."
-        meta = {
-            "head": "Albert Einstein",
-            "tail": "Germany"
-        }
 
-    }
-
-The complete prompted example becomes
-
-.. code-block:: python
-    
-    x = "Albert Einstein was born in Germany. In this sentence, the relation of Albert Einstein and Germany is <mask> ."
+    {"text": "This sentence is", "post_processing": "mlp"} {"soft": None, "post_processing": "mlp"} 
 
 
+Our flexible template language support token-level specifying in prompt-learning, 
+you can easily develop complex desired template by OpenPrompt, 
+try it out!
