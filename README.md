@@ -195,12 +195,12 @@ Major improvement/enhancement in future.
 Please cite our paper if you use OpenPrompt in your work
 
 ```bibtex
-  @article{ding2021openprompt,
-    title={OpenPrompt: An Open-source Framework for Prompt-learning},
-    author={Ding, Ning and Hu, Shengding and Zhao, Weilin and Chen, Yulin and Liu, Zhiyuan and Zheng, Hai-Tao and Sun, Maosong},
-    journal={arXiv preprint arXiv:2111.01998},
-    year={2021}
-  }
+@article{ding2021openprompt,
+  title={OpenPrompt: An Open-source Framework for Prompt-learning},
+  author={Ding, Ning and Hu, Shengding and Zhao, Weilin and Chen, Yulin and Liu, Zhiyuan and Zheng, Hai-Tao and Sun, Maosong},
+  journal={arXiv preprint arXiv:2111.01998},
+  year={2021}
+}
 ```
 
  
