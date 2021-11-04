@@ -489,9 +489,9 @@ class Verbalizer(nn.Module):
             batch (:obj:`Union[Dict, InputFeatures]`): The input features of the data.
         """
 
-        return self.process_logits(outputs, batch, **kwargs)
+        return self.process_logits(outputs, batch=batch, **kwargs)
 
-    def gather_outputs(outputs: ModelOutput):
+    def gather_outputs(self, outputs: ModelOutput):
         r""" retrieve useful output for the verbalizer from the whole model ouput
         By default, it will only retrieve the logits
 
