@@ -29,7 +29,7 @@ verbalizer: manual_verbalizer
 
 
 mixed_template:
-  choice: 4
+  choice: 0
   file_path: scripts/TextClassification/agnews/manual_template.txt
 
 one2one_verbalizer:

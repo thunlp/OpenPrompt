@@ -63,8 +63,6 @@ class MLMTokenizerWrapper(TokenizerWrapper):
             else:
                 encode_text = self.tokenizer.encode(piece['text'], add_special_tokens=False)
 
-            from IPython import embed; embed()
-
             encoding_length = len(encode_text)
             encoder_inputs['input_ids'].append(encode_text)
             for key in piece:
