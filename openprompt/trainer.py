@@ -66,7 +66,6 @@ class BaseRunner(object):
             os.mkdir(os.path.join(config.logging.path, 'checkpoints'))
 
         self.clean = self.config.train.clean
-        self.set_stop_criterion()
         
     def __del__(self):
         if hasattr(self, 'writer'):
@@ -78,7 +77,7 @@ class BaseRunner(object):
 
     def set_stop_criterion(self):
         """Total training steps, either controlled by num_training_steps or num_epochs"""
-        if self.config.train.num_training_steps is not None:
+        if hasattr(self.config.train, "num_training_steps") and self.config.train.num_training_steps is not None:
             if self.config.train.num_epochs is not None:
                 logger.warning("num_training_steps set explicitly, num_epochs is not in use.")
             self.num_training_steps = self.config.train.num_training_steps
@@ -88,7 +87,6 @@ class BaseRunner(object):
                 raise RuntimeError("At least num_training_steps & num_epochs should be specified.")
             self.num_training_steps = self.steps_per_epoch * self.config.train.num_epochs
             self.num_epochs = self.config.train.num_epochs
-
         
     @property
     def steps_per_epoch(self) -> int:
@@ -286,7 +284,7 @@ class BaseRunner(object):
         self.model.zero_grad()
         total_loss = 0.0
         sum_loss = 0.0
-        with tqdm(total=self.steps_per_epoch) as pbar:
+        with tqdm(total=self.steps_per_epoch, desc=f"train epoch: {epoch}") as pbar:
             for batch_idx, batch in enumerate(self.train_dataloader):
                 batch = batch.to("cuda:{}".format(self.config.environment.local_rank)).to_dict()
 
@@ -326,6 +324,7 @@ class BaseRunner(object):
         pass
 
     def fit(self, ckpt: Optional[str] = None):
+        self.set_stop_criterion()
         self.configure_optimizers()
 
         if ckpt:

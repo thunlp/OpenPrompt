@@ -9,7 +9,6 @@ from typing import *
 from transformers import PreTrainedModel
 from transformers.tokenization_utils import PreTrainedTokenizer
 from openprompt import Template
-from openprompt.prompts import ManualTemplate, ManualVerbalizer
 
 import torch
 from torch import nn
@@ -188,7 +187,7 @@ class MixedTemplate(Template):
             if 'placeholder' in d:
                 text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example, d['placeholder']))
             elif 'meta' in d:
-                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example.meta, d['meta']))
+                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(example.meta[d['meta']])
             elif 'soft' in d:
                 text[i] = ''; # unused
             elif 'mask' in d:

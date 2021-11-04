@@ -121,19 +121,17 @@ def save_config_to_yaml(config):
     logger.info("Config saved as {}".format(saved_yaml_path))
                 
 def get_config():
-    all_cmd_args = sys.argv[1:]
-    assert "--config_yaml" in all_cmd_args, "You should specify a config_yaml"
-    yaml_idx = all_cmd_args.index("--config_yaml")
-    yaml_path = all_cmd_args[yaml_idx+1]
-    config = get_user_config(yaml_path)
-
-    parser = argparse.ArgumentParser("Global Config Argument Parser")
-    parser.add_argument("--config_yaml", type=str, help='the configuration file for this experiment.')
+    parser = argparse.ArgumentParser("Global Config Argument Parser", allow_abbrev=False)
+    parser.add_argument("--config_yaml", required=True, type=str, help='the configuration file for this experiment.')
     parser.add_argument("--resume", type=str, help='a specified logging path to resume training.\
            It will fall back to run from initialization if no lastest checkpoint are found.')
     parser.add_argument("--test", type=str, help='a specified logging path to test')
+    args, _ = parser.parse_known_args()
+    config = get_user_config(args.config_yaml)
+
     add_cfg_to_argparser(config, parser)
     args = parser.parse_args()
+
     update_cfg_with_argparser(config, args)
     check_config_conflicts(config)
     print(config)

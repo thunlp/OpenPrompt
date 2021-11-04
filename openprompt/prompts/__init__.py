@@ -21,7 +21,6 @@ from .lmbff_prompts import LMBFFTemplate
 from .prompt_generator import T5TemplateGenerator, TemplateGenerator, VerbalizerGenerator
 
 TEMPLATE_CLASS = {
-    'manual_template': ManualTemplate,
     'mixed_template': MixedTemplate,
     'ptuning_template': PtuningTemplate,
     'soft_manual_template': SoftManualTemplate,
