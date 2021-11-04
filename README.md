@@ -30,7 +30,10 @@
 ## What's New?
 
 - Nov 2011: Now we have released a paper [OpenPrompt: An Open-source Framework for Prompt-learning](https://arxiv.org/abs/2111.01998).
-- Nov 2011: We made some major changes from the last version, so part of the docs is outdated. We will fix it soon.
+
+- Nov 2011: We made some major changes from the last version, where a flexible template language is newly introduced! Part of the docs is outdated and we will fix it soon. 
+
+  ​
 
 ## Overview
 
@@ -83,9 +86,7 @@ python setup.py develop
 
 ### Base Concepts
 
-A  `Prompt`  class contains a (or multiple) `Template`  and a (or multiple) `Verbalizer`, where the `Template` class is defined to wrap the original input with templates, and the `Verbalizer` class is to construct a projection between labels and target words in the current vocabulary. 
-
-A `PromptModel` class combines the `Template`, `Verbalizer` and `PLM`, practically participating in training and inference. 
+A  `PromptModel`  object contains a `PLM`, a (or multiple) `Template`  and a (or multiple) `Verbalizer`, where the `Template` class is defined to wrap the original input with templates, and the `Verbalizer` class is to construct a projection between labels and target words in the current vocabulary. And a `PromptModel`  object practically participates in training and inference. 
 
 ### Introduction by a Simple Example
 
