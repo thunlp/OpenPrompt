@@ -27,7 +27,6 @@ TEMPLATE_CLASS = {
     'soft_template': SoftTemplate,
     'ptr_template': PTRTemplate,
     'prefix_tuning_template': PrefixTuningTemplate,
-    'lmbff_template': LMBFFTemplate
 }
 
 VERBALIZER_CLASS = {

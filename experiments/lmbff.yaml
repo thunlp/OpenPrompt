@@ -1,6 +1,6 @@
 dataset:
   name: sst-2
-  path: ../datasets/k-shot/SST-2/16-13
+  path: datasets/k-shot/SST-2/16-13
 
 task: classification
 
@@ -25,7 +25,8 @@ template_generator:
   max_length: 20
   target_number: 2
   beam_width: 3
-  length_limit: 
+  template: 
+    file_path: scripts/LMBFF/SST-2/template_for_auto_t.txt
 
 verbalizer_generator:
   candidate_num: 100
@@ -38,8 +39,8 @@ classification:
     - micro-f1
     - accuracy
   loss_function: cross_entropy
-  auto_t: False
-  auto_v: True
+  auto_t: True
+  auto_v: False
 
 
 train:
@@ -55,21 +56,17 @@ dev:
 
 
 
-template: manual_template
+template: mixed_template
 verbalizer: manual_verbalizer
 
 
-lmbff_template:
+mixed_template:
   choice: 0
-  file_path: ../datasets/original/glue-sst-2-small/initial_template.txt
-
-manual_template:
-  choice: 0
-  file_path: ../datasets/original/glue-sst-2-small/manual_template.txt
+  file_path: scripts/LMBFF/SST-2/manual_template.txt
 
 manual_verbalizer:
   choice: 0
-  file_path: ../datasets/original/glue-sst-2-small/initial_verbalizer.txt
+  file_path: scripts/LMBFF/SST-2/manual_verbalizer.txt
   
 environment:
   num_gpus: 2

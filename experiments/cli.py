@@ -131,17 +131,10 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
 
     # define template and verbalizer
     if config.task == "classification":
+        # define prompt
+        template = load_template(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config)
         verbalizer = load_verbalizer(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config, classes=Processor.labels)
-        template_generate_model, template_generate_tokenizer = None, None
-        if config.classification.auto_t:
-            template_generate_model, template_generate_tokenizer, template_generate_config = load_plm_from_config(config.template_generator)
-            template = load_template(config=config, model=template_generate_model, tokenizer=template_generate_tokenizer, plm_config=template_generate_config, verbalizer=verbalizer)
-
-        else:
-            # define prompt
-            template = load_template(config=config, model=plm_model, tokenizer=plm_tokenizer, plm_config=plm_config)
-            
-            # load prompt’s pipeline model
+        # load prompt’s pipeline model
         prompt_model = PromptForClassification(plm_model, template, verbalizer, freeze_plm = config.plm.optimize.freeze_para)
             
     elif config.task == "generation":
@@ -158,22 +151,18 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
     if config.task == "classification":
         if config.classification.auto_t or config.classification.auto_v:
             runner = LMBFFClassificationRunner(train_dataset = train_dataset, 
-                                        valid_dataset = valid_dataset, 
-                                        test_dataset = test_dataset, 
-                                        model= plm_model, 
-                                        tokenizer = plm_tokenizer, 
-                                        template_generate_tokenizer = template_generate_tokenizer,
-                                        template_generate_model = template_generate_model,
-                                        initial_template = template,
-                                        initial_verbalizer = verbalizer,
-                                        config = config)
+                                                valid_dataset = valid_dataset, 
+                                                test_dataset = test_dataset, 
+                                                template=template,
+                                                verbalizer=verbalizer,
+                                                config = config
+                                                )
         else:
-            runner = ClassificationRunner(
-                model = prompt_model,
-                train_dataloader = train_dataloader,
-                valid_dataloader = valid_dataloader,
-                test_dataloader = test_dataloader,
-                config = config
+            runner = ClassificationRunner(model = prompt_model,
+                                    train_dataloader = train_dataloader,
+                                    valid_dataloader = valid_dataloader,
+                                    test_dataloader = test_dataloader,
+                                    config = config
             )
     elif config.task == "generation":
         runner = GenerationRunner(
