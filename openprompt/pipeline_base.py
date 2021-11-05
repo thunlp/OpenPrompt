@@ -376,7 +376,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         have been processed into the past_key_value,
         then we can use the normal generation function. 
         In learning process, the forward is linked to ``_forward`` functions.
-        in which the loss will be calcated for all the postions in the same time. 
+        in which the loss will be calculated for all the positions in the same time. 
         """
         if self.in_generation_function:
             return self.plm.forward(*args, **kwargs)

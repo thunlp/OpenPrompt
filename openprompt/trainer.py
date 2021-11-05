@@ -12,7 +12,7 @@ from tqdm import tqdm
 import dill
 import warnings
 
-from typing import Callable, Union
+from typing import Callable, Union, Dict
 try:
     from typing import OrderedDict
 except ImportError:
@@ -381,6 +381,7 @@ class ClassificationRunner(BaseRunner):
                  valid_dataloader: Optional[PromptDataLoader] = None,
                  test_dataloader: Optional[PromptDataLoader] = None,
                  loss_function: Optional[Callable] = None,
+                 id2label: Optional[Dict] = None,
                  ):
         super().__init__(model = model,
                          config = config,
@@ -389,6 +390,8 @@ class ClassificationRunner(BaseRunner):
                          test_dataloader = test_dataloader,
                         )
         self.loss_function = loss_function if loss_function else self.configure_loss_function()
+        self.id2label = id2label
+        self.label_path_sep = config.dataset.label_path_sep   
     
     def configure_loss_function(self,):
         r"""config the loss function if it's not passed."""
@@ -419,7 +422,7 @@ class ClassificationRunner(BaseRunner):
 
         metrics = OrderedDict()
         for metric_name in self.config.classification.metric:
-            metric = classification_metrics(preds, labels, metric_name)
+            metric = classification_metrics(preds, labels, metric_name, id2label=self.id2label, label_path_sep=self.label_path_sep)
             metrics[metric_name] = metric
         return metrics
 

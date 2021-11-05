@@ -56,6 +56,13 @@ class DataProcessor:
     def label_mapping(self, label_mapping: Mapping[Any, int]):
         self._labels = [item[0] for item in sorted(label_mapping.items(), key=lambda item: item[1])]
         self._label_mapping = label_mapping
+    
+    @property
+    def id2label(self) -> Dict[int, Any]:
+        if not hasattr(self, "_labels"):
+            raise ValueError("DataProcessor doesn't set labels or label_mapping yet")
+        return {i: k for (i, k) in enumerate(self._labels)}
+
 
     def get_label_id(self, label: Any) -> int:
         """get label id of the corresponding label
