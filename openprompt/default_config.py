@@ -163,6 +163,7 @@ def get_default_config():
     cfg.dataset.name = None   # the name of the dataset, for the supported choices,
             # please see the processors in ./data_utils/ 
     cfg.dataset.path = None  # whether is the dataset saved in your local machine.
+    cfg.dataset.label_path_sep = None # label path separation token, only for hierarchical label
 
     ## DATALOADER ######################################################
     cfg.dataloader = CfgNode(new_allowed=True)

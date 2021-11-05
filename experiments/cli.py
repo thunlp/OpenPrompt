@@ -162,6 +162,7 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
                                     train_dataloader = train_dataloader,
                                     valid_dataloader = valid_dataloader,
                                     test_dataloader = test_dataloader,
+                                    id2label = Processor.id2label,
                                     config = config
             )
     elif config.task == "generation":
