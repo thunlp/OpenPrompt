@@ -224,7 +224,7 @@ these attributes are broadcasted along the tokenized sentence.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template.post_processing_outputs">
-<span class="sig-name descname"><span class="pre">post_processing_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.post_processing_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.post_processing_outputs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">post_processing_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.post_processing_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.post_processing_outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post processing the outputs of language models according
 to the need of template. Most templates don’t need post processing,
 The template like SoftTemplate, which appends soft template as a module
@@ -378,7 +378,7 @@ output.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.gather_outputs">
-<span class="sig-name descname"><span class="pre">gather_outputs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.gather_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.gather_outputs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">gather_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.file_utils.ModelOutput</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.gather_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.gather_outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>retrieve useful output for the verbalizer from the whole model ouput
 By default, it will only retrieve the logits</p>
 <dl class="field-list simple">
@@ -633,7 +633,7 @@ these attributes are broadcasted along the tokenized sentence.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id9">
-<span class="sig-name descname"><span class="pre">post_processing_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.post_processing_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">post_processing_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.post_processing_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post processing the outputs of language models according
 to the need of template. Most templates don’t need post processing,
 The template like SoftTemplate, which appends soft template as a module

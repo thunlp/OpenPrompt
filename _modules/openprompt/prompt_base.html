@@ -214,9 +214,11 @@
             <span class="k">elif</span> <span class="s1">&#39;meta&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
                 <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;add_prefix_space&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;post_processing&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">)(</span><span class="n">example</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;meta&#39;</span><span class="p">]])</span>
             <span class="k">elif</span> <span class="s1">&#39;soft&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;soft token not supported by SoftTemplate, please use hard template or use MixedTemplate instead.&quot;</span><span class="p">)</span>
+                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span> <span class="c1"># unused</span>
             <span class="k">elif</span> <span class="s1">&#39;mask&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
                 <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span>
+            <span class="k">elif</span> <span class="s1">&#39;special&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;special&#39;</span><span class="p">]</span>
             <span class="k">elif</span> <span class="s1">&#39;text&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
                 <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;add_prefix_space&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
@@ -345,7 +347,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">batch</span> <span class="c1"># not being processed</span></div>
 
-<div class="viewcode-block" id="Template.post_processing_outputs"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.post_processing_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">post_processing_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<div class="viewcode-block" id="Template.post_processing_outputs"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.post_processing_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">post_processing_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Post processing the outputs of language models according</span>
 <span class="sd">        to the need of template. Most templates don&#39;t need post processing,</span>
 <span class="sd">        The template like SoftTemplate, which appends soft template as a module</span>
@@ -578,9 +580,9 @@
 <span class="sd">            batch (:obj:`Union[Dict, InputFeatures]`): The input features of the data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_logits</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_logits</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Verbalizer.gather_outputs"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.gather_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">gather_outputs</span><span class="p">(</span><span class="n">outputs</span><span class="p">:</span> <span class="n">ModelOutput</span><span class="p">):</span>
+<div class="viewcode-block" id="Verbalizer.gather_outputs"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.gather_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">gather_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">ModelOutput</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; retrieve useful output for the verbalizer from the whole model ouput</span>
 <span class="sd">        By default, it will only retrieve the logits</span>
 
