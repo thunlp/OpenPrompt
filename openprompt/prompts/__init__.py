@@ -16,12 +16,13 @@ from .ptr_prompts import PTRTemplate, PTRVerbalizer
 from .knowledgeable_verbalizer import KnowledgeableVerbalizer
 from .prefix_tuning_template import PrefixTuningTemplate
 from .soft_template import SoftTemplate
-from .lmbff_prompts import LMBFFTemplate
+# from .lmbff_prompts import LMBFFTemplate
 from .prompt_generator import T5TemplateGenerator, TemplateGenerator, VerbalizerGenerator
 from .contextual_verbalizer import ContextualVerbalizer
 from .soft_verbalizer import SoftVerbalizer
 
 TEMPLATE_CLASS = {
+    'manual_template': ManualTemplate,
     'mixed_template': MixedTemplate,
     'ptuning_template': PtuningTemplate,
     'soft_template': SoftTemplate,

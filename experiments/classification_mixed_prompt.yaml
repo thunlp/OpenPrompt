@@ -30,7 +30,7 @@ verbalizer: manual_verbalizer
 
 mixed_template:
   choice: 0
-  file_path: scripts/TextClassification/agnews/manual_template.txt
+  file_path: scripts/TextClassification/agnews/mixed_template.txt
 
 one2one_verbalizer:
   choice: 0
@@ -60,3 +60,6 @@ sampling_from_train:
   seed:
     - 123
     - 456
+    - 789
+    - 321
+    - 654

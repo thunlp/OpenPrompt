@@ -85,8 +85,8 @@ def load_plm(model_name, model_path, specials_to_add = None):
     model_class = get_model_class(plm_type = model_name)
     model_config = model_class.config.from_pretrained(model_path)
     # you can change huggingface model_config here
-    if 't5'  in model_name: # remove dropout according to PPT~\ref{}
-        model_config.dropout_rate = 0.0
+    # if 't5'  in model_name: # remove dropout according to PPT~\ref{}
+    #     model_config.dropout_rate = 0.0
     if 'gpt' in model_name: # add pad token for gpt 
         specials_to_add = ["<pad>"]
         # model_config.attn_pdrop = 0.0
@@ -117,8 +117,11 @@ def load_plm_from_config(config: CfgNode):
     model_class = get_model_class(plm_type = plm_config.model_name)
     model_config = model_class.config.from_pretrained(plm_config.model_path)
     # you can change huggingface model_config here
-    if 't5'  in plm_config.model_name: # remove dropout according to PPT~\ref{}
-        model_config.dropout_rate = 0.0
+    # if 't5'  in plm_config.model_name: # remove dropout according to PPT~\ref{}
+    #     model_config.dropout_rate = 0.0
+    if 'gpt' in plm_config.model_name: # add pad token for gpt
+        if "<pad>" not in config.plm.specials_to_add:
+            config.plm.specials_to_add.append("<pad>")
     model = model_class.model.from_pretrained(plm_config.model_path, config=model_config)
     tokenizer = model_class.tokenizer.from_pretrained(plm_config.model_path)
     wrapper = model_class.wrapper
@@ -146,9 +149,6 @@ def add_special_tokens(model: PreTrainedModel,
     for token in specials_to_add:
         if "pad" in token.lower():
             if tokenizer.pad_token is None:
-                import torch
-                torch.manual_seed(100)
-                torch.cuda.manual_seed_all(100)
                 tokenizer.add_special_tokens({'pad_token': token})
                 model.resize_token_embeddings(len(tokenizer))
                 logger.info("pad token is None, set to id {}".format(tokenizer.pad_token_id))

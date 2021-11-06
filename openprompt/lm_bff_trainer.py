@@ -6,7 +6,7 @@ from openprompt.plms.utils import TokenizerWrapper
 
 from .prompts import TemplateGenerator, VerbalizerGenerator
 from openprompt import PromptDataLoader, PromptForClassification
-from openprompt.prompts import ManualVerbalizer, LMBFFTemplate, ManualTemplate
+from openprompt.prompts import ManualVerbalizer, ManualTemplate
 from typing import List, Optional, Dict, Union
 from . import Template, Verbalizer, PromptDataLoader
 import copy

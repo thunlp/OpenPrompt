@@ -138,17 +138,23 @@ class PromptModel(nn.Module):
         plm (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.
         template (:obj:`Template`): The ``Template`` object to warp the input data.
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
+        plm_eval_mode (:obj:`bool`): this is a strong freezing than freeze_plm, i.e. the drop of the model is turned off.
     '''
     def __init__(self,
                  plm: PreTrainedModel, 
                  template: Template,
-                 freeze_plm: bool = False
+                 freeze_plm: bool = False,
+                 plm_eval_mode: bool=False,
                 ):
         super().__init__()
         self.plm = plm
         self.template = template
         self.freeze_plm = freeze_plm
+        self.plm_eval_mode = plm_eval_mode
         if freeze_plm:
+            for param in self.plm.parameters():
+                param.requires_grad = False
+        if plm_eval_mode:
             self.plm.eval()
             for param in self.plm.parameters():
                 param.requires_grad = False
@@ -161,7 +167,7 @@ class PromptModel(nn.Module):
             raise ValueError("training mode is expected to be boolean")
         self.training = mode
         for name, module in self.named_children():
-            if not (self.freeze_plm and 'plm' in name):
+            if not (self.plm_eval_mode and 'plm' in name and mode):
                 module.train(mode)
         return self
         
@@ -199,15 +205,17 @@ class PromptForClassification(nn.Module):
         template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``ManualTemplate``.
         verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the lables to label words for classification, e.g. ``ManualVerbalizer``.
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
+        plm_eval_mode (:obj:`bool`): this is a strong freezing than freeze_plm, i.e. the drop of the model is turned off.
     '''
     def __init__(self,
                  plm: PreTrainedModel, 
                  template: Template,
                  verbalizer: Verbalizer,
                  freeze_plm: bool = False,
+                 plm_eval_mode: bool=False
                 ):
         super().__init__()
-        self.prompt_model = PromptModel(plm, template, freeze_plm)
+        self.prompt_model = PromptModel(plm, template, freeze_plm, plm_eval_mode)
         self.verbalizer = verbalizer
 
     @property
@@ -322,12 +330,14 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         tokenizer (:obj:`Tokenizer`): A ``Tokenizer`` of the current model.
         gen_config (:obj:`CfgNode`): The generation configs to pass into `GenerationMixin.generate <https://huggingface.co/transformers/_modules/transformers/generation_utils.html#GenerationMixin.generate>`_
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
+        plm_eval_mode (:obj:`bool`): this is a strong freezing than freeze_plm, i.e. the drop of the model is turned off.
     '''
 
     def __init__(self,
                  plm: PreTrainedModel, 
                  template: Template,
                  freeze_plm: bool = False,
+                 plm_eval_mode: bool = False,
                  gen_config: Optional[CfgNode] = None,
                  tokenizer: Optional[PreTrainedTokenizer] = None,
                 ):
@@ -338,7 +348,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             self.tokenizer = template.tokenizer
         else:
             self.tokenizer = tokenizer
-        self.prompt_model = PromptModel(plm, template, freeze_plm)
+        self.prompt_model = PromptModel(plm, template, freeze_plm, plm_eval_mode)
 
         self.loss_fct = nn.CrossEntropyLoss(reduction='none')
         self.config = plm.config
