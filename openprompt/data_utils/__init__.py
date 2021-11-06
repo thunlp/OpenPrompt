@@ -51,17 +51,17 @@ def load_dataset(config: CfgNode, return_class=True, test=False):
         try:
             train_dataset = processor.get_train_examples(dataset_config.path)
         except FileNotFoundError:
-            logger.warning("Has no training dataset.")
+            logger.warning(f"Has no training dataset in {dataset_config.path}.")
         try:
             valid_dataset = processor.get_dev_examples(dataset_config.path)
         except FileNotFoundError:
-            logger.warning("Has no validation dataset.")
+            logger.warning(f"Has no validation dataset in {dataset_config.path}.")
 
     test_dataset = None
     try:
         test_dataset = processor.get_test_examples(dataset_config.path)
     except FileNotFoundError:
-        logger.warning("Has no test dataset.")
+        logger.warning(f"Has no test dataset in {dataset_config.path}.")
 
     # checking whether donwloaded.
     if (train_dataset is None) and \

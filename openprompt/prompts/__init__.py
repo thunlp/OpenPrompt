@@ -22,13 +22,11 @@ from .contextual_verbalizer import ContextualVerbalizer
 from .soft_verbalizer import SoftVerbalizer
 
 TEMPLATE_CLASS = {
-    'manual_template': ManualTemplate,
     'mixed_template': MixedTemplate,
     'ptuning_template': PtuningTemplate,
     'soft_template': SoftTemplate,
     'ptr_template': PTRTemplate,
     'prefix_tuning_template': PrefixTuningTemplate,
-    'lmbff_template': LMBFFTemplate
 }
 
 VERBALIZER_CLASS = {
