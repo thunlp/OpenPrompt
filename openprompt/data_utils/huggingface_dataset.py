@@ -163,6 +163,29 @@ class SuperglueWSCProcessor(DataProcessor):
         guid = "{}".format(example['idx'])
         return InputExample(guid = guid, text_a=text_a, meta=meta, label=label)
 
+
+class YahooAnswersTopicProcessor(DataProcessor):
+    def __init__(self):
+        super().__init__()
+        self.labels = []
+    
+    def get_examples(self, data_dir, split):
+        if split == "valid" or split == "dev":
+            split = "validation"
+        dataset = load_dataset(path="yahoo_answer_topic", cache_dir=data_dir, split=split)
+        return list(map(self.transform, dataset))
+    
+    def transform(self, example):
+        meta = {}
+        
+
+        
+
+
+
+
+
+
 PROCESSORS = {
     "super_glue.multirc": SuperglueMultiRCProcessor,
     "super_glue.boolq": SuperglueBoolQProcessor,
@@ -171,6 +194,5 @@ PROCESSORS = {
     "super_glue.rte": SuperglueRTEProcessor,
     "super_glue.wic": SuperglueWiCProcessor,
     "super_glue.wsc": SuperglueWSCProcessor,
-
-
+    "yahoo_answers_topic": YahooAnswersTopicProcessor
 }

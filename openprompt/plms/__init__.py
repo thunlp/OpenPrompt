@@ -87,11 +87,16 @@ def load_plm(model_name, model_path, specials_to_add = None):
     # you can change huggingface model_config here
     if 't5'  in model_name: # remove dropout according to PPT~\ref{}
         model_config.dropout_rate = 0.0
+    if 'gpt' in model_name: # add pad token for gpt 
+        specials_to_add = ["<pad>"]
+        # model_config.attn_pdrop = 0.0
+        # model_config.resid_pdrop = 0.0
+        # model_config.embd_pdrop = 0.0
     model = model_class.model.from_pretrained(model_path, config=model_config)
     tokenizer = model_class.tokenizer.from_pretrained(model_path)
     wrapper = model_class.wrapper
-    if 'gpt' in model_name: # add pad token for gpt 
-        specials_to_add = ["<pad>"]
+
+
     model, tokenizer = add_special_tokens(model, tokenizer, specials_to_add=specials_to_add)
     return model, tokenizer, model_config, wrapper
 
@@ -141,6 +146,9 @@ def add_special_tokens(model: PreTrainedModel,
     for token in specials_to_add:
         if "pad" in token.lower():
             if tokenizer.pad_token is None:
+                import torch
+                torch.manual_seed(100)
+                torch.cuda.manual_seed_all(100)
                 tokenizer.add_special_tokens({'pad_token': token})
                 model.resize_token_embeddings(len(tokenizer))
                 logger.info("pad token is None, set to id {}".format(tokenizer.pad_token_id))

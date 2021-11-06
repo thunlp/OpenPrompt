@@ -58,16 +58,12 @@ class PrefixTuningTemplate(Template):
         self.embedding_size = raw_embedding.weight.shape[-1]
         self.num_token = num_token
 
-        if isinstance(self.config, T5Config):
-            self.n_layer = self.config.num_layers
-            self.n_embd = self.config.d_model
-            self.n_head = self.config.num_heads
-            self.n_decoder_layer = self.config.num_decoder_layers
-            self.match_n_decoder_layer = self.n_decoder_layer
-        elif isinstance(self.config, GPT2Config):
+        if isinstance(self.config, GPT2Config):
             self.n_layer = self.config.n_layer
             self.n_embd = self.config.n_embd
             self.n_head = self.config.n_head
+        else:
+            raise NotImplementedError("This template currently only support GPT2, please consider using PrefixTuningTemplatePro.")
         self.mid_dim = mid_dim
 
         self.match_n_layer = self.n_layer
@@ -138,3 +134,4 @@ class PrefixTuningTemplate(Template):
             batch['attention_mask'] = torch.cat([torch.ones((batch_size,self.num_token), dtype = am.dtype,device=am.device), am], dim=-1)
         batch['past_key_values'] = past_key_values
         return batch
+    

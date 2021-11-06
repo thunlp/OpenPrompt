@@ -19,6 +19,8 @@ class ContextualVerbalizer(Verbalizer):
     This is there is no fixed mapping between a class label and its label words. This verbalizer
     is the default verbalizer of COPA and WiC dataset in superglue datasets. 
 
+    TODO: This verbalizer haven't been finished yet!
+
     Args:   
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.
         classes (:obj:`List[Any]`): The classes (or labels) of the current task.
@@ -56,9 +58,6 @@ class ContextualVerbalizer(Verbalizer):
         Returns:
             :obj:`torch.Tensor`: The normalized logits of label words
         """
-        from IPython import embed
-        embed()
-
 
         label_words_logits = logits[:, self.label_words_ids]
         label_words_logits = self.handle_multi_token(label_words_logits, self.words_ids_mask)
