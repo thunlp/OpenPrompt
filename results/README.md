@@ -23,7 +23,7 @@ The evaluation scripts: https://github.com/Yale-LILY/dart
 
 | Prompt |      LM      |      Ref     | Comment | BLEU-SEEN | BLEU-UNSEEN | BLEU-ALL |
 |:------:|:------------:|:------------:|:-------:|:---------:|:-----------:|:--------:|
-|   Prf  | t5-base, fix, | [tutorial2.4](../tutorial/2.2_conditional_generation.py) |    plm-dropout-off      |   62.88   |    47.05    |   55.79  |
-|   Prf  | t5-base, fix | [tutorial2.4](../tutorial/2.2_conditional_generation.py) |   plm-dropout-on      |   61.94   |    52.02    |   57.41  |
-|    Prf |  gpt2-medium, fix,  |  [tutorial2.4](../tutorial/2.2_conditional_generation.py)    |  plm-dropout-off |    62.97       |    43.43     |      54.21     |
-|    Prf |  gpt2-medium, fix |   [tutorial2.4](../tutorial/2.2_conditional_generation.py)   |  plm-dropout-on  |    60.21       |    45.67     |     53.66     |
+|   Prf  | t5-base, fix, | [tutorial2.2](../tutorial/2.2_conditional_generation.py) |    plm-dropout-off      |   62.88   |    47.05    |   55.79  |
+|   Prf  | t5-base, fix | [tutorial2.2](../tutorial/2.2_conditional_generation.py) |   plm-dropout-on      |   61.94   |    52.02    |   57.41  |
+|    Prf |  gpt2-medium, fix,  |  [tutorial2.2](../tutorial/2.2_conditional_generation.py)    |  plm-dropout-off |    62.97       |    43.43     |      54.21     |
+|    Prf |  gpt2-medium, fix |   [tutorial2.2](../tutorial/2.2_conditional_generation.py)   |  plm-dropout-on  |    60.21       |    45.67     |     53.66     |
