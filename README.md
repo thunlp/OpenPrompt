@@ -28,8 +28,10 @@
 
 ## What's New?
 
+
 - Nov 2021: Now we have released a paper [OpenPrompt: An Open-source Framework for Prompt-learning](https://arxiv.org/abs/2111.01998).
 
+- Nov 2021 PrefixTuning supports t5 now 1.
 - Nov 2021: We made some major changes from the last version, where a flexible template language is newly introduced! Part of the docs is outdated and we will fix it soon. 
 
 
@@ -137,7 +139,7 @@ A `Template` is a modifier of the original input text, which is also one of th
 ```python
 from openprompt.prompts import ManualTemplate
 promptTemplate = ManualTemplate(
-    text = ["<text_a>", "It", "was", "<mask>"],
+    text = '{"placeholder": "text_a"} It was {"mask"}',
     tokenizer = bertTokenizer,
 )
 ```
