@@ -135,11 +135,12 @@ bertModel = model_class.model.from_pretrained(model_path)
 #### Step 3: Define a Template.
 
 A `Template` is a modifier of the original input text, which is also one of the most important modules in prompt-learning. 
+We have defined `text_a` in Step 1.
 
 ```python
 from openprompt.prompts import ManualTemplate
 promptTemplate = ManualTemplate(
-    text = '{"placeholder": "text_a"} It was {"mask"}',
+    text = '{"meta": "text_a"} It was {"mask"}',
     tokenizer = bertTokenizer,
 )
 ```
