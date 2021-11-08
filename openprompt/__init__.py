@@ -2,3 +2,4 @@ from .pipeline_base import PromptDataLoader, PromptModel, PromptForClassificatio
 from .utils import *
 from .prompt_base import Template, Verbalizer
 from .trainer import ClassificationRunner, GenerationRunner
+from .lm_bff_trainer import LMBFFClassificationRunner
