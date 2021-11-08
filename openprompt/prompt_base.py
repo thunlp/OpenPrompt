@@ -94,26 +94,6 @@ class Template(nn.Module):
             NotImplementedError: if needed, add ``soft_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.
         '''
         raise NotImplementedError
-
-    def incorporate_text_example(self,
-                                 example: InputExample
-                                ) -> List[str]:
-        """Given an example, replace placeholder of text_a, text_b and meta information by real data
-
-        Args:
-            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.
-
-        Returns:
-            List[str]: a list of str of the same length as self.text. the placeholder and meta information are replaced by real data information.
-        """
-        text = self.text.copy()
-        for placeholder_token in self.placeholder_mapping:
-            for i in range(len(text)):
-                text[i] = " " + text[i].replace(placeholder_token, getattr(example, self.placeholder_mapping[placeholder_token]))
-        for key, value in example.meta.items():
-            for i in range(len(text)):
-                text[i] = " " + text[i].replace("<meta:"+key+">", value)
-        return text
     
     def incorporate_text_example(self,
                                  example: InputExample
