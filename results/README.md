@@ -25,7 +25,7 @@ Dataset details see https://arxiv.org/abs/2105.07464
 N-S means N-shot
 
 |Prompt| LM| Ref |Coment | Acc(8-S) | MiF(8-S)|
-|:------:|:------------:|:------------:|:-------:|:---------:|:-----------:|:--------:|
+|:------:|:------------:|:------------:|:-------:|:---------:|:-----------:|
 |ManualT+ManualV| bert-base-cased|[yaml](../referenced_yamls/1107032409468965.yaml)| | 55.30| 67.88|
 
 
