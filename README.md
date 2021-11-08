@@ -13,9 +13,15 @@
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
   <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> • 
+<<<<<<< HEAD
   <a href="https://arxiv.org/abs/2111.01998">Paper</a> •  
   <a href="#citation">Citation</a> •
 
+=======
+  <a href="https://arxiv.org/abs/2111.01998">Paper</a> • 
+  <a href="#citation">Citation</a> •
+  <a href="https://github.com/thunlp/OpenPrompt/tree/main/results/">Performance</a> •
+>>>>>>> 8f9888f84fcb56997e95dc7878be339d674f4067
 </p>
 
 </div>
@@ -24,11 +30,12 @@
 
 ## What's New?
 
-- Nov 2011: Now we have released a paper [OpenPrompt: An Open-source Framework for Prompt-learning](https://arxiv.org/abs/2111.01998).
 
-- Nov 2011: We made some major changes from the last version, where a flexible template language is newly introduced! Part of the docs is outdated and we will fix it soon. 
+- Nov 2021: Now we have released a paper [OpenPrompt: An Open-source Framework for Prompt-learning](https://arxiv.org/abs/2111.01998).
 
-  ​
+- Nov 2021 PrefixTuning supports t5 now.
+- Nov 2021: We made some major changes from the last version, where a flexible template language is newly introduced! Part of the docs is outdated and we will fix it soon. 
+
 
 ## Overview
 
@@ -130,11 +137,12 @@ bertModel = model_class.model.from_pretrained(model_path)
 #### Step 3: Define a Template.
 
 A `Template` is a modifier of the original input text, which is also one of the most important modules in prompt-learning. 
+We have defined `text_a` in Step 1.
 
 ```python
 from openprompt.prompts import ManualTemplate
 promptTemplate = ManualTemplate(
-    text = ["<text_a>", "It", "was", "<mask>"],
+    text = '{"meta": "text_a"} It was {"mask"}',
     tokenizer = bertTokenizer,
 )
 ```

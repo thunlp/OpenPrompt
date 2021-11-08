@@ -1,4 +1,5 @@
-A <mask> news : <text_a> <text_b>
-<text_a> <text_b> This topic is about <mask> .
-[ Category : <mask> ] <text_a> <text_b>
-[ Topic : <mask> ] <text_a> <text_b>
+ A {"mask"} news : {"placeholder": "text_a"} {"placeholder": "text_b"}
+ {"placeholder": "text_a"} {"placeholder": "text_b"} This topic is about {"mask"} .
+ [ Category : {"mask"} ] {"placeholder": "text_a"} {"placeholder": "text_b"}
+ [ Topic : {"mask"} ] {"placeholder": "text_a"} {"placeholder": "text_b"}
+ {"placeholder": "text_a"} {"placeholder": "text_b"} {"special": "<sep>"} This topic is about {"mask"} .

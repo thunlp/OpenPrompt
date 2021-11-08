@@ -39,6 +39,7 @@ class TokenizerWrapper:
         self.template_bos_token = '<bos>'
         self.template_sep_token = '<sep>'
         self.template_cls_token = '<cls>'
+        self.template_pad_token = '<pad>'
         
         from transformers import logging
         verbosity_before = logging.get_verbosity()
@@ -48,6 +49,7 @@ class TokenizerWrapper:
         self.bos_token_map = {self.template_bos_token: self.tokenizer.bos_token if hasattr(self.tokenizer, 'bos_token') else ''}
         self.sep_token_map = {self.template_sep_token: self.tokenizer.sep_token if hasattr(self.tokenizer, 'sep_token') else ''}
         self.cls_token_map = {self.template_cls_token: self.tokenizer.cls_token if hasattr(self.tokenizer, 'cls_token') else ''}
+        self.pad_token_map = {self.template_pad_token: self.tokenizer.pad_token if hasattr(self.tokenizer, 'pad_token') else ''}
         logging.set_verbosity(verbosity_before)
         
     @property

@@ -1,0 +1,2 @@
+{"placeholder": "text_a"} {"placeholder": "text_b"} {"soft"} {"soft"} {"soft"} {"soft"} {"soft"} {"soft"} {"soft"} {"soft"} {"mask"}
+{"placeholder": "text_a"} {"placeholder": "text_b"} {"soft": "Does the first sentence entails the second ?"} {"mask"} {"soft"}.

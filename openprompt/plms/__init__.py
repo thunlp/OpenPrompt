@@ -85,13 +85,18 @@ def load_plm(model_name, model_path, specials_to_add = None):
     model_class = get_model_class(plm_type = model_name)
     model_config = model_class.config.from_pretrained(model_path)
     # you can change huggingface model_config here
-    if 't5'  in model_name: # remove dropout according to PPT~\ref{}
-        model_config.dropout_rate = 0.0
+    # if 't5'  in model_name: # remove dropout according to PPT~\ref{}
+    #     model_config.dropout_rate = 0.0
+    if 'gpt' in model_name: # add pad token for gpt 
+        specials_to_add = ["<pad>"]
+        # model_config.attn_pdrop = 0.0
+        # model_config.resid_pdrop = 0.0
+        # model_config.embd_pdrop = 0.0
     model = model_class.model.from_pretrained(model_path, config=model_config)
     tokenizer = model_class.tokenizer.from_pretrained(model_path)
     wrapper = model_class.wrapper
-    if 'gpt' in model_name: # add pad token for gpt 
-        specials_to_add = ["<pad>"]
+
+
     model, tokenizer = add_special_tokens(model, tokenizer, specials_to_add=specials_to_add)
     return model, tokenizer, model_config, wrapper
 
@@ -112,8 +117,11 @@ def load_plm_from_config(config: CfgNode):
     model_class = get_model_class(plm_type = plm_config.model_name)
     model_config = model_class.config.from_pretrained(plm_config.model_path)
     # you can change huggingface model_config here
-    if 't5'  in plm_config.model_name: # remove dropout according to PPT~\ref{}
-        model_config.dropout_rate = 0.0
+    # if 't5'  in plm_config.model_name: # remove dropout according to PPT~\ref{}
+    #     model_config.dropout_rate = 0.0
+    if 'gpt' in plm_config.model_name: # add pad token for gpt
+        if "<pad>" not in config.plm.specials_to_add:
+            config.plm.specials_to_add.append("<pad>")
     model = model_class.model.from_pretrained(plm_config.model_path, config=model_config)
     tokenizer = model_class.tokenizer.from_pretrained(plm_config.model_path)
     wrapper = model_class.wrapper

@@ -26,8 +26,8 @@ class TemplateGenerator:
         target_number: number of parts to generate, e.g. in T5, every <extra_id_{}> token is one part
     """
     def __init__(self, 
-                template_generate_model: T5ForConditionalGeneration,
-                 tokenizer: T5Tokenizer,
+                template_generate_model: PreTrainedModel,
+                 tokenizer: PreTrainedTokenizer,
                  max_length: Optional[int] = 20,
                  target_number: Optional[int] = 2,
                  beam_width: Optional[int] = 100,
@@ -41,7 +41,7 @@ class TemplateGenerator:
         self.length_limit = length_limit
         self.probs_buffer, self.labels_buffer = None, None
 
-        # Forbid single space token, "....", and ".........."
+        # Forbid single space token, "....", and "..........", and some other tokens based on vocab
         self.forbidden_word_ids = forbidden_word_ids
         self.sent_end_id = self.tokenizer.convert_tokens_to_ids('.')
 
@@ -159,10 +159,10 @@ class TemplateGenerator:
             generate_text = []
             for i in item['output']:
                 generate_text.append(self.tokenizer._convert_id_to_token(i))
-            self.templates_text.append(self.convert_template(generate_text))
+            self.templates_text.append(' '.join(self.convert_template(generate_text)))
     
     def _show_template(self):
-        logger.info("Templates are \n{}".format('\n'.join([' '.join(template) for template in self.templates_text])))
+        logger.info("Templates are \n{}".format('\n'.join(self.templates_text)))
 
     def generate(self):
         self.template_generate_model.eval()
@@ -203,15 +203,15 @@ class T5TemplateGenerator(TemplateGenerator): # TODO merge it into Base class
                         forbidden_word_ids = forbidden_word_ids)
 
     def get_part_token_id(self, part_id):
-        return self.tokenizer._convert_token_to_id('<extra_id_0>') - part_id
+        return self.tokenizer.convert_tokens_to_ids('<extra_id_0>') - part_id
 
     def convert_template(self, generate_text_list):
-        text_list = self.tokenizer.convert_tokens_to_string(generate_text_list).replace('<extra_id_0>', '<text_a>').replace('<extra_id_1>', ' <mask>').replace('<extra_id_2>', ' <text_b>').replace('</s>', '').replace('  ', ' ').split(' ')
+        text_list = self.tokenizer.convert_tokens_to_string(generate_text_list).replace('<extra_id_0>', '{"placeholder":"text_a"}').replace('<extra_id_1>', ' {"mask"}').replace('<extra_id_2>', ' {"placeholder": "text_b"}').replace('</s>', '').replace('  ', ' ').split(' ')
         # incase no <extra_id_1> (generation stop by maximum length)
-        if '<mask>' not in text_list:
-            text_list.append('<mask>')
-        if '<text_b>' not in text_list:
-            text_list.append('<text_b>')
+        if '{"mask"}' not in text_list:
+            text_list.append('{"mask"}')
+        if '{"placeholder": "text_b"}' not in text_list:
+            text_list.append('{"placeholder": "text_b"}')
         return text_list
 
 

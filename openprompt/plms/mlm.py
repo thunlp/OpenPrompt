@@ -45,14 +45,20 @@ class MLMTokenizerWrapper(TokenizerWrapper):
         encoder_inputs = defaultdict(list)
         for piece in wrapped_example:
             if piece['loss_ids']==1:
-                encode_text = [self.mask_token_ids]
                 if teacher_forcing: # fill the mask with the tgt task
                     raise RuntimeError("Masked Language Model can't perform teacher forcing training!")
                 else:
                     encode_text = [self.mask_token_ids]
                 mask_id += 1
 
-            elif 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
+            if piece['text'] in self.special_tokens_maps.keys():
+                to_replace = self.special_tokens_maps[piece['text']]
+                if to_replace is not None:
+                    piece['text'] = to_replace
+                else:
+                    raise KeyError("This tokenizer doesn't specify {} token.".format(piece['text']))
+
+            if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                 encode_text = [0] # can be replace by any token, since these token will use their own embeddings
             else:
                 encode_text = self.tokenizer.encode(piece['text'], add_special_tokens=False)

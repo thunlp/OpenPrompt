@@ -59,7 +59,7 @@ class T5TokenizerWrapper(TokenizerWrapper):
 
         num_mask_token_used = 0
         
-        decoder_input_ids = [self.mask_token_ids(num_mask_token_used)]
+        decoder_input_ids = []
         loss_ids =[0]
         
         for piece_id, piece in enumerate(wrapped_example):
@@ -67,15 +67,17 @@ class T5TokenizerWrapper(TokenizerWrapper):
                 continue
             if piece['text'] == self.template_mask_token:
                 if teacher_forcing:
+                    decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
                     encode_text = [self.mask_token_ids(num_mask_token_used)] 
                     tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
-                    decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
+                    # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
                     loss_ids.append(1)
                 else:
+                    decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
                     encode_text = [self.mask_token_ids(num_mask_token_used)] 
-                    decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
+                    # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
                     loss_ids[-1] = 1 # shift loss_ids
                     loss_ids.append(0)
                 num_mask_token_used += 1
@@ -85,7 +87,7 @@ class T5TokenizerWrapper(TokenizerWrapper):
                     if to_replace is not None:
                         piece['text'] = to_replace
                     else:
-                        raise KeyError("This tokenize doesn't specify{} token.".format(piece['text']))
+                        raise KeyError("This tokenizer doesn't specify {} token.".format(piece['text']))
 
                 if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                     encode_text =  [0] # can be replace by any token, since these token will use their own embeddings

@@ -1,4 +1,4 @@
-It was <mask> . <text_a>
-Just <mask> ! <text_a>
-<text_a> All in all, it was <mask> .
-<text_a>  In summary, the film was <mask> .
+It was {"mask"}. {"placeholder": "text_a"}
+Just {"mask"}! {"placeholder": "text_a"}
+{"placeholder": "text_a"} All in all, it was {"mask"}.
+{"placeholder": "text_a"} In summary, the film was {"mask"}.

@@ -1,1 +1,0 @@
-<text_a> <text_b> <soft>This topic <soft>is <soft>about <mask> .

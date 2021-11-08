@@ -12,7 +12,7 @@ dataset['test'] = AgnewsProcessor().get_test_examples("./datasets/TextClassifica
 
 from openprompt.plms import load_plm
 
-plm, tokenizer, model_config, WrapperClass = load_plm("roberta", "../../plm_cache/roberta-large")
+plm, tokenizer, model_config, WrapperClass = load_plm("gpt2", "../../plm_cache/gpt2-medium")
 
 
 from openprompt.prompts import ManualTemplate
@@ -39,9 +39,10 @@ from openprompt.prompts import SoftVerbalizer
 import torch
 
 # for example the verbalizer contains multiple label words in each class
-myverbalizer = SoftVerbalizer(tokenizer, plm, num_classes=4,
-         label_words=["politics", "sports", "business", "technology"])
-
+# myverbalizer = SoftVerbalizer(tokenizer, plm, num_classes=4,
+#          label_words=["politics", "sports", "business", "technology"])
+# or without label words
+myverbalizer = SoftVerbalizer(tokenizer, plm, num_classes=4)
 
 
 from openprompt import PromptForClassification
@@ -69,15 +70,13 @@ optimizer_grouped_parameters1 = [
 
 optimizer_grouped_parameters2 = [
     {'params': prompt_model.verbalizer.group_parameters_1, "lr":3e-5},
-    {'params': prompt_model.verbalizer.group_parameters_2, "lr":3e-5},
+    {'params': prompt_model.verbalizer.group_parameters_2, "lr":3e-4},
 ]
 
 
 optimizer1 = AdamW(optimizer_grouped_parameters1, lr=3e-5)
 optimizer2 = AdamW(optimizer_grouped_parameters2)
 
-# from IPython import embed
-# embed()
 
 for epoch in range(5):
     tot_loss = 0 
@@ -103,6 +102,7 @@ validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template
     batch_size=4,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
 
+prompt_model.eval()
 
 allpreds = []
 alllabels = []

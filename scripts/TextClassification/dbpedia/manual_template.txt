@@ -1,4 +1,4 @@
-<text_a> <text_b> <text_a> is a <mask> .
-<text_a> <text_b> In this sentence, <text_a> is a <mask> .
-<text_a> <text_b> The type of <text_a> is <mask> .
-<text_a> <text_b> The category of <text_a> is <mask> .
+{"placeholder": "text_a"} {"placeholder": "text_b"} {"placeholder": "text_a"} is a {"mask"}.
+{"placeholder": "text_a"} {"placeholder": "text_b"} In this sentence, {"placeholder": "text_a"} is a {"mask"}.
+{"placeholder": "text_a"} {"placeholder": "text_b"} The type of {"placeholder": "text_a"} is {"mask"}.
+{"placeholder": "text_a"} {"placeholder": "text_b"} The category of {"placeholder": "text_a"} is {"mask"}.

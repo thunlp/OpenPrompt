@@ -1,1 +1,1 @@
- A {"mask"} news : {"placeholder": "text_a"} {"placeholder": "text_b"}
+{"placeholder": "text_a"} {"placeholder": "text_b"} {"soft":"This"} topic {"soft":"is about"} {"mask"}.

@@ -108,7 +108,7 @@ class InputFeatures(dict):
         'past_key_values', 'loss_ids']
     all_keys = ['input_ids', 'inputs_embeds', 'attention_mask', 'token_type_ids', 'label',
         'decoder_input_ids', 'decoder_inputs_embeds', 'soft_token_ids', 
-        'past_key_values', 'loss_ids', 'guid', 'tgt_text', 'encoded_tgt_text']
+        'past_key_values', 'loss_ids', 'guid', 'tgt_text', 'encoded_tgt_text', 'input_ids_len']
     non_tensorable_keys = []
 
     def __init__(self, 
@@ -126,6 +126,7 @@ class InputFeatures(dict):
                 tgt_text: Optional[str] = None,
                 use_cache: Optional[bool] = None,
                 encoded_tgt_text: Optional[str] = None,
+                input_ids_len: Optional[int] = None,
                 **kwargs):
 
         self.input_ids = input_ids
@@ -142,6 +143,7 @@ class InputFeatures(dict):
         self.tgt_text = tgt_text
         self.encoded_tgt_text = encoded_tgt_text
         self.use_cache = use_cache
+        self.input_ids_len = input_ids_len
 
         for k in kwargs.keys():
             logger.warning("Your are passing an unexpected key words: {} to InputFeatures, might yield unexpected behaviours!".format(k))

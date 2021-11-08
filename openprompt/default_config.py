@@ -80,6 +80,7 @@ def get_default_config():
 
     cfg.train = CfgNode(new_allowed=True)
     cfg.train.num_epochs = 5 # the number of training epochs.
+    cfg.train.num_training_steps = None
     cfg.train.batch_size = 2 # the batch_size.
     cfg.train.shuffle_data = True # whether shuffle the training data.
     cfg.train.teacher_forcing = False # whether perform teacher forcing in training.
@@ -121,6 +122,14 @@ def get_default_config():
     cfg.template_generator.target_number = 2 # number of parts to generate, e.g. in T5, every <extra_id_{}> token is one part
     cfg.template_generator.beam_width = 5
     cfg.template_generator.length_limit = None # List[str] length limit for each part of content
+    cfg.template_generator.template = CfgNode(new_allowed=True)
+    cfg.template_generator.template.text = None
+    cfg.template_generator.template.mask_token = '<mask>'
+    cfg.template_generator.template.placeholder_mapping = CfgNode(new_allowed=True)
+    cfg.template_generator.template.placeholder_mapping['<text_a>'] = 'text_a'
+    cfg.template_generator.template.placeholder_mapping['<text_b>'] = 'text_b'
+    cfg.template_generator.template.file_path = None
+    cfg.template_generator.template.choice = 0
 
     # verbalizer_generator, refer to https://arxiv.org/abs/2010.13641
     cfg.verbalizer_generator = CfgNode(new_allowed=True)
@@ -154,6 +163,7 @@ def get_default_config():
     cfg.dataset.name = None   # the name of the dataset, for the supported choices,
             # please see the processors in ./data_utils/ 
     cfg.dataset.path = None  # whether is the dataset saved in your local machine.
+    cfg.dataset.label_path_sep = None # label path separation token, only for hierarchical label
 
     ## DATALOADER ######################################################
     cfg.dataloader = CfgNode(new_allowed=True)
@@ -250,24 +260,32 @@ def get_default_config():
     cfg.prefix_tuning_template.prefix_dropout = 0.0
     cfg.prefix_tuning_template.mid_dim = 512
     cfg.prefix_tuning_template.optimize = CfgNode(new_allowed=True) 
-    cfg.prefix_tuning_template.optimize.name = 'AdamW'  # TODO: curently not in use. 
+    cfg.prefix_tuning_template.optimize.name = 'AdamW' 
     cfg.prefix_tuning_template.optimize.lr = 0.00005
     cfg.prefix_tuning_template.optimize.betas = [0.9, 0.999]
-    cfg.prefix_tuning_template.optimize.eps = 1.0e-8
+    cfg.prefix_tuning_template.optimize.adam_epsilon = 1.0e-8
     cfg.prefix_tuning_template.optimize.weight_decay = 0.0
     cfg.prefix_tuning_template.optimize.no_decay = ['bias', 'LayerNorm.weight']
     cfg.prefix_tuning_template.optimize.scheduler = CfgNode(new_allowed=True)
     cfg.prefix_tuning_template.optimize.scheduler.num_warmup_steps = 0
 
-    cfg.lmbff_template = CfgNode(new_allowed=True)
-    cfg.lmbff_template.parent_config = 'template'
-    cfg.lmbff_template.text = None 
-    cfg.lmbff_template.mask_token = '<mask>'
-    cfg.lmbff_template.placeholder_mapping = CfgNode(new_allowed=True)
-    cfg.lmbff_template.placeholder_mapping['<text_a>'] = 'text_a'
-    cfg.lmbff_template.placeholder_mapping['<text_b>'] = 'text_b'
-    cfg.lmbff_template.file_path = None
-    cfg.lmbff_template.choice = 0
-    cfg.lmbff_template.optimize = None  # the parameters related to optimize the tempalte
+    cfg.mixed_template = CfgNode(new_allowed=True)
+    cfg.mixed_template.parent_config = 'template'
+    cfg.mixed_template.text = None
+    cfg.mixed_template.mask_token = '<mask>'
+    cfg.mixed_template.placeholder_mapping = CfgNode(new_allowed=True)
+    cfg.mixed_template.placeholder_mapping['<text_a>'] = 'text_a'
+    cfg.mixed_template.placeholder_mapping['<text_b>'] = 'text_b'
+    cfg.mixed_template.optimize = CfgNode(new_allowed=True) 
+    cfg.mixed_template.optimize.name = 'AdamW' 
+    cfg.mixed_template.optimize.lr = 0.00005
+    cfg.mixed_template.optimize.betas = [0.9, 0.999]
+    cfg.mixed_template.optimize.adam_epsilon = 1.0e-8
+    cfg.mixed_template.optimize.weight_decay = 0.0
+    cfg.mixed_template.optimize.no_decay = ['bias', 'LayerNorm.weight']
+    cfg.mixed_template.optimize.scheduler = CfgNode(new_allowed=True)
+    cfg.mixed_template.optimize.scheduler.num_warmup_steps = 0
+
+    
     return cfg
 

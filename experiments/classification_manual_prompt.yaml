@@ -33,10 +33,6 @@ manual_template:
   file_path: scripts/TextClassification/agnews/manual_template.txt
 
 
-one2one_verbalizer:
-  choice: 0
-  file_path: scripts/TextClassification/agnews/manual_verbalizer.txt
-
 manual_verbalizer:
   choice: 0
   file_path: scripts/TextClassification/agnews/manual_verbalizer.txt
@@ -44,7 +40,6 @@ manual_verbalizer:
 environment:
   num_gpus: 1
   cuda_visible_devices:
-    - 2
   local_rank: 0 
 
 learning_setting: few_shot
@@ -61,4 +56,7 @@ sampling_from_train:
   seed:
     - 123
     - 456
-
+    - 789
+    - 321
+    - 654
+    
