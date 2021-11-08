@@ -182,9 +182,6 @@ class PromptModel(nn.Module):
         """
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
-
-        input_batch['inputs_embeds'] = self.plm.roberta.embeddings.word_embeddings(input_batch['input_ids'])
-        input_batch['input_ids'] = None
         outputs = self.plm(**input_batch, output_hidden_states=True)
         outputs = self.template.post_processing_outputs(outputs)
         return outputs
