@@ -1,12 +1,17 @@
 from abc import abstractmethod
 from builtins import ValueError
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
+from tokenizers import Tokenizer
 import torch
 import torch.nn.functional as F
+from yacs.config import CfgNode
+from openprompt.data_utils.utils import InputExample, InputFeatures
+from openprompt.pipeline_base import PromptDataLoader, PromptModel
+
+from openprompt.prompt_base import Template, Verbalizer
+from openprompt.prompts import ManualTemplate, ManualVerbalizer
 from ..utils import logger
-from transformers import T5Tokenizer, T5ForConditionalGeneration, BertForMaskedLM, RobertaForMaskedLM
-from transformers.tokenization_utils import PreTrainedTokenizer
-from transformers.utils.dummy_pt_objects import PreTrainedModel
+from transformers import T5Tokenizer, T5ForConditionalGeneration, BertForMaskedLM, RobertaForMaskedLM, RobertaTokenizer, PreTrainedModel, PreTrainedTokenizer
 from tqdm import tqdm
 from typing import List, Optional, Dict
 import itertools
@@ -15,26 +20,73 @@ from ..utils import signature
 from ..config import convert_cfg_to_dict
 from torch.nn.parallel import DataParallel
 
-
-class TemplateGenerator:
-    r""" Automatic Template Search from LM-BFF
+class LMBFFTemplateGenerationWrapper(ManualTemplate):
+    """
+    This is a special template used only for earch of template in LM-BFF. For example, a template could be ``{"placeholder": "text_a"}{"mask"}{"meta":"labelword"}{"mask"}``, where ``{"meta":"labelword"}`` is replaced by label_words in verbalizer in `wrap_one_example` method, and ``{"mask"}`` is replaced by special tokens used for generation, for T5, it is ``<extra_id_0>, <extra_id_1>, ...``.
 
     Args:
-        beam_width: beam search width
-        max_length: maximum length of generated template
-        length_limit: length limit for each part of content
-        target_number: number of parts to generate, e.g. in T5, every <extra_id_{}> token is one part
+        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
+        verbalizer (:obj:`ManualVerbalizer`): A verbalizer to provide label_words.
+        text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.
+        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``<mask>``
+        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{'<text_a>': 'text_a', '<text_b>': 'text_b'}``
     """
     def __init__(self, 
-                template_generate_model: PreTrainedModel,
+                 tokenizer: T5Tokenizer,
+                 verbalizer: ManualVerbalizer,
+                 text: Optional[List[str]] = None,
+                 mask_token: str = '<mask>',
+                 placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
+                ):
+        super().__init__(tokenizer=tokenizer, 
+                         mask_token=mask_token,
+                         placeholder_mapping=placeholder_mapping)
+        self.text = text
+        self.verbalizer = verbalizer
+    
+    def wrap_one_example(self, 
+                         example: InputExample) -> List[Dict]:
+        example.meta['labelword'] = self.verbalizer.label_words[example.label][0].strip()
+        wrapped_example = super().wrap_one_example(example)
+
+        # TODO: replace <mask> with special tokens in each generation model
+        # e.g. in T5 multi-parts generation use <extra_id_0>, <extra_id_1>, ...
+        # handle different types of plm
+        current_idx = self.tokenizer.convert_tokens_to_ids('<extra_id_0>')
+        for d in wrapped_example[0]:
+            if d['text'] == '<mask>':
+                d['text'] = self.tokenizer.convert_ids_to_tokens(current_idx)
+                current_idx -= 1
+        return wrapped_example
+
+class TemplateGenerator:
+    r""" This is the automatic template search implementation for `LM-BFF <https://arxiv.org/pdf/2012.15723.pdf>`_. It uses a generation model to generate multi-part text to fill in the template. By jointly considering all samples in the dataset, it uses beam search decoding method to generate a designated number of templates with the highest probability. The generated template may be uniformly used for all samples in the dataset.
+
+    Args:
+        model (:obj:`PretrainedModel`): A pretrained model for generation.
+        tokenizer (:obj:`PretrainedTokenizer`): A corresponding type tokenizer.
+        tokenizer_wrapper (:obj:`TokenizerWrapper`): A corresponding type tokenizer wrapper class.
+        max_length (:obj:`Optional[int]`): The maximum length of total generated template. Defaults to 20.
+        target_number (:obj:`Optional[int]`): The number of separate parts to generate, e.g. in T5, every <extra_id_{}> token stands for one part. Defaults to 2.
+        beam_width (:obj:`Optional[int]`): The beam search width.  Defaults to 100.
+        length_limit (:obj:`Optional[List[int]]`): The length limit for each part of content, if None, there is no limit. If not None, the list should have a length equal to `target_number`. Defaults to None.
+        forbidden_word_ids (:obj:`Optional[List[int]]`): Any tokenizer-specific token_id you want to prevent from generating. Defaults to `[]`, i.e. all tokens in the vocabulary are allowed in the generated template.
+    """
+    def __init__(self, 
+                model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
+                 tokenizer_wrapper: Tokenizer,
+                 verbalizer: Verbalizer,
                  max_length: Optional[int] = 20,
                  target_number: Optional[int] = 2,
                  beam_width: Optional[int] = 100,
                  length_limit: Optional[List[int]] = None, 
-                 forbidden_word_ids: Optional[List[int]] = []):
-        self.template_generate_model = template_generate_model
+                 forbidden_word_ids: Optional[List[int]] = [],
+                 config: CfgNode = None):
+        self.model = model
         self.tokenizer = tokenizer
+        self.tokenizer_wrapper = tokenizer_wrapper
+        self.verbalizer= verbalizer
         self.target_number = target_number # number of parts to generate in one sample
         self.beam_width = beam_width
         self.max_length = max_length
@@ -47,30 +99,48 @@ class TemplateGenerator:
 
         self.input_ids_buffer, self.attention_mask_buffer, self.labels_buffer = None, None, None
 
-    def register_buffer(self, input_ids, attention_mask, labels):
-        if self.input_ids_buffer is None :
-            self.input_ids_buffer = input_ids.detach()
-            self.attention_mask_buffer = attention_mask.detach()
-            self.labels_buffer = labels.detach()
+        self.config = config
+    
+    @property
+    def device(self):
+        r"""
+        return the device of the model
+        """
+        if isinstance(self.model, DataParallel):
+            return self.model.module.device
         else:
-            self.input_ids_buffer = torch.vstack([self.input_ids_buffer, input_ids.detach()])
-            self.attention_mask_buffer = torch.vstack([self.attention_mask_buffer, attention_mask.detach()])
-            self.labels_buffer = torch.hstack([self.labels_buffer, labels.detach()])
+            return self.model.device
+
+    def _register_buffer(self, data):
+        if self.input_ids_buffer is None :
+            self.input_ids_buffer = data.input_ids.detach()
+            self.attention_mask_buffer = data.attention_mask.detach()
+            self.labels_buffer = data.label.detach()
+        else:
+            self.input_ids_buffer = torch.vstack([self.input_ids_buffer, data.input_ids.detach()])
+            self.attention_mask_buffer = torch.vstack([self.attention_mask_buffer, data.attention_mask.detach()])
+            self.labels_buffer = torch.hstack([self.labels_buffer, data.label.detach()])
 
     @abstractmethod
-    def get_next_part_token_id(self, part_id: int) -> int:
-        r"""get the start token id for next part
+    def get_part_token_id(self, part_id: int) -> int:
+        r"""
+        Get the start token id for the current part. It should be specified according to the specific model type. For T5 model, for example, the start token for `part_id=0` is `<extra_id_0>`, this method should return the corresponding token_id.
+        Args:
+            part_id (:obj:`int`): The current part id (starts with 0).
+        Returns:
+            token_id (:obj:`int`): The corresponding start token_id.
         """
         raise NotImplementedError
     
+    @abstractmethod
     def convert_template(self, text_list: List[str]) -> List[str]:
-        r"""convert the generated template into a standard template for downstream prompt model, return a list of str
+        r"""
+        Convert the generated template into a standard template for downstream prompt model, return a list of str
         """
         raise NotImplementedError
         
-    @abstractmethod
-    def get_templates(self):
-        inner_model = self.template_generate_model.module if isinstance(self.template_generate_model, DataParallel) else self.template_generate_model
+    def _get_templates(self):
+        inner_model = self.model.module if isinstance(self.model, DataParallel) else self.model
         input_ids = self.input_ids_buffer
         attention_mask = self.attention_mask_buffer
 
@@ -104,7 +174,7 @@ class TemplateGenerator:
                     end = min((t + 1) * batch_size, input_ids.size(0))
 
                     with torch.no_grad():
-                        aggr_output.append(self.template_generate_model(input_ids[start:end], attention_mask=attention_mask[start:end], decoder_input_ids=decoder_input_ids.to(input_ids.device)[start:end])[0])
+                        aggr_output.append(self.model(input_ids[start:end], attention_mask=attention_mask[start:end], decoder_input_ids=decoder_input_ids.to(input_ids.device)[start:end])[0])
                 aggr_output = torch.cat(aggr_output, 0)
 
                 # Gather results across all input sentences, and sort generated tokens by log likelihood
@@ -164,43 +234,68 @@ class TemplateGenerator:
     def _show_template(self):
         logger.info("Templates are \n{}".format('\n'.join(self.templates_text)))
 
-    def generate(self):
-        self.template_generate_model.eval()
-        with torch.no_grad():
-            self.get_templates()
-            self._show_template()
-        return self.templates_text
 
     @classmethod
-    def from_config(cls, config, **kwargs,):
+    def from_config(cls, config: CfgNode, **kwargs,):
+        r"""
+        Returns:
+            template_generator (:obj:`TemplateGenerator`)
+        """
         init_args = signature(cls.__init__).args
         _init_dict = {**convert_cfg_to_dict(config), **kwargs}
         init_dict = {key: _init_dict[key] for key in _init_dict if key in init_args}
+        init_dict['config'] = config
         template_generator = cls(**init_dict)
         return template_generator
     
     def release_memory(self):
-        self.template_generate_model = self.template_generate_model.cpu()
+        self.model = self.model.cpu()
         
+    def generate(self, dataset: List[InputExample]):
+        r"""
+        Args:
+            dataset (:obj:`List[InputExample]`): The dataset based on which template it to be generated.
+        Returns:
+            template_text (:obj:`List[str]`): The generated template text
+        """
 
-class T5TemplateGenerator(TemplateGenerator): # TODO merge it into Base class
-    r""" Automatic Template Search from LM-BFF using T5
+        template_for_auto_t = LMBFFTemplateGenerationWrapper.from_config(config=self.config.template, tokenizer=self.tokenizer, verbalizer = self.verbalizer)
+        dataloader = PromptDataLoader(dataset, template_for_auto_t, self.tokenizer, self.tokenizer_wrapper, batch_size=len(dataset)) # register all data at once
+        for data in dataloader:
+            data = data.to(self.device)
+            self._register_buffer(data)
+        
+        self.model.eval()
+        with torch.no_grad():
+            self._get_templates()
+            self._show_template()
+        return self.templates_text
+
+class T5TemplateGenerator(TemplateGenerator):
+    r""" 
+    Automatic template search using T5 model. This class inherits from `TemplateGenerator`.
     """
     def __init__(self, 
-                 template_generate_model: T5ForConditionalGeneration,
+                 model: T5ForConditionalGeneration,
                  tokenizer: T5Tokenizer,
+                 tokenizer_wrapper: Tokenizer,
+                 verbalizer: Verbalizer,
                  max_length: Optional[int] = 20,
                  target_number: Optional[int] = 2,
                  beam_width: Optional[int] = 100,
                  length_limit: Optional[List[int]] = None,
-                 forbidden_word_ids: Optional[List[int]] = [3, 19794, 22354]):
-        super().__init__(template_generate_model = template_generate_model,
+                 forbidden_word_ids: Optional[List[int]] = [3, 19794, 22354],
+                 config: CfgNode = None):
+        super().__init__(model = model,
                         tokenizer = tokenizer,
+                        tokenizer_wrapper=tokenizer_wrapper,
+                        verbalizer = verbalizer,
                         max_length = max_length,
                         target_number= target_number,
                         beam_width = beam_width,
                         length_limit = length_limit,
-                        forbidden_word_ids = forbidden_word_ids)
+                        forbidden_word_ids = forbidden_word_ids,
+                        config=config)
 
     def get_part_token_id(self, part_id):
         return self.tokenizer.convert_tokens_to_ids('<extra_id_0>') - part_id
@@ -216,21 +311,20 @@ class T5TemplateGenerator(TemplateGenerator): # TODO merge it into Base class
 
 
 class VerbalizerGenerator:
-    r""" Automatic Label Words Search from https://arxiv.org/pdf/2012.15723.pdf
+    r""" 
+    This is the automatic label word search implementation in `LM-BFF <https://arxiv.org/pdf/2012.15723.pdf`_. 
 
     Args:
-        candidate_num: the number of candidates for further selection
-        label_word_num_per_class: candidate label words per class
-        probs_buffer: stores the probability $q_{P,t}(1|\mathbf{x})$ to be 
-                      used in later label words selection.
-        label_buffer: stores the label $y$ to be used in later label words
-                      selection.
+        model (:obj:`PretrainedModel`): A pre-trained model for label word generation.
+        tokenizer (:obj:`PretrainedTokenizer`): The corresponding tokenize.
+        candidate_num (:obj:`Optional[int]`): The number of label word candidates to generate. Defaults to 100.
+        label_word_num_per_class (:obj:`Optional[int]`): The number of candidate label words per class. Defaults to 100.
     """
     def __init__(self, 
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
-                 candidate_num: int,
-                 label_word_num_per_class: Optional[int] = 1):
+                 candidate_num: Optional[int] = 100,
+                 label_word_num_per_class: Optional[int] = 100):
         self.model = model
         self.tokenizer = tokenizer
         self.candidate_num = candidate_num
@@ -252,32 +346,42 @@ class VerbalizerGenerator:
             self.probs_buffer = torch.vstack([self.probs_buffer, logits])
             self.labels_buffer = torch.hstack([self.labels_buffer, data.label.detach()])
     
-    def post_process(self, word):
+    @abstractmethod
+    def post_process(self, word: str):
+        r"""
+        Post-processing for generated labrl word.
+
+        Args:
+            word (:obj:`str`): The original word token.
+        
+        Returns:
+            processed_word (:obj:`str`): The post-processed token.
+        """
         inner_model = self.model.module if isinstance(self.model, DataParallel) else self.model
         if isinstance(inner_model, RobertaForMaskedLM):
             return word.lstrip('Ġ')
         elif isinstance(inner_model, BertForMaskedLM):
             return word
         else:
-            raise NotImplementedError("not implemented for {}".format(type(inner_model))) # TODO add more model
-        
-    def invalid_label_word(self, word):
-        '''
-        make sure label word is the proper start of a word
-        '''
+            raise RuntimeError("{} is not supported yet".format(type(inner_model))) # TODO add more model
+
+    @abstractmethod
+    def invalid_label_word(self, word: str):
+        r"""
+        Decide whether the generated token is a valid label word. Heuristic strategy can be implemented here, e.g. requiring that a label word must be the start token of a word.
+
+        Args:
+            word (:obj:`str`): The token.
+        Returns:
+            is_invalid (:obj:`bool`): `True` if it cannot be a label word.
+        """
         inner_model = self.model.module if isinstance(self.model, DataParallel) else self.model
         if isinstance(inner_model, RobertaForMaskedLM):
             return (not word.startswith('Ġ'))
         elif isinstance(inner_model, BertForMaskedLM):
             return False
         else:
-            raise NotImplementedError("not implemented for {}".format(type(inner_model))) # TODO
-
-    def generate(self):
-        self.label_words_ids = self._find_verbalizer()
-        self.label_words = [[self.post_process(word) for word in self.tokenizer.convert_ids_to_tokens(i)] for i in self.label_words_ids]
-        self._show_verbalizer()
-        return self.label_words
+            raise RuntimeError("{} is not supported yet".format(type(inner_model))) # TODO
             
     def _show_verbalizer(self):
         logger.info("Verbalizer is {}".format(self.label_words))
@@ -303,7 +407,6 @@ class VerbalizerGenerator:
         best_idx = np.argsort(-np.array(group_scores))[:self.candidate_num]
         best_groups = [groups[i] for i in best_idx]
         return best_groups
-
     
     def _get_top_words(self):
         label_words_ids = []
@@ -319,7 +422,11 @@ class VerbalizerGenerator:
         return label_words_ids
     
     @classmethod
-    def from_config(cls, config, **kwargs,):
+    def from_config(cls, config: CfgNode, **kwargs,):
+        r"""
+        Returns:
+            verbalizer_generator (:obj:`VerbalizerGenerator`)
+        """
         init_args = signature(cls.__init__).args
         _init_dict = {**convert_cfg_to_dict(config), **kwargs}
         init_dict = {key: _init_dict[key] for key in _init_dict if key in init_args}
@@ -328,3 +435,34 @@ class VerbalizerGenerator:
     
     def release_memory(self):
         self.model = self.model.cpu()
+
+    def generate(self):
+        r"""
+        Generate label words.
+
+        Returns:
+            label_words (:obj:`List[List[str]]`): A list of generated label word.
+        """
+
+        self.label_words_ids = self._find_verbalizer()
+        self.label_words = [[self.post_process(word) for word in self.tokenizer.convert_ids_to_tokens(i)] for i in self.label_words_ids]
+        self._show_verbalizer()
+        return self.label_words
+
+class RobertaVerbalizerGenerator(VerbalizerGenerator):
+    def __init__(self, 
+                 model: RobertaForMaskedLM,
+                 tokenizer: RobertaTokenizer,
+                 candidate_num: Optional[int] = 100,
+                 label_word_num_per_class: Optional[int] = 100):
+        super().__init__(
+                        model = model,
+                        tokenizer = tokenizer,
+                        candidate_num = candidate_num,
+                        label_word_num_per_class = label_word_num_per_class)
+
+    def invalid_label_word(self, word: str):
+        return (not word.startswith('Ġ'))
+    
+    def post_process(self, word: str):
+        return word.lstrip('Ġ')

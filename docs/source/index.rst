@@ -30,6 +30,7 @@ In the future, we will also support PLMs implemented by other libraries.
    modules/base
    modules/template
    modules/verbalizer
+   modules/prompt_generator
    modules/data_utils
    modules/data_processors
    modules/trainer

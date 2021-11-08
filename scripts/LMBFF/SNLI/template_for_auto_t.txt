@@ -1,0 +1,1 @@
+{"placeholder": "text_a", "post_processing": lambda s: s[:-1]} {"mask"} {"meta": "labelword"} {"mask"} {"placeholder": "text_b", "post_processing": lambda s: s[:1].lower() + s[1:]}
