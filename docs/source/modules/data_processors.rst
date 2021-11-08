@@ -30,11 +30,16 @@ DBpediaProcessor
 .. autoclass:: openprompt.data_utils.text_classification_dataset.DBpediaProcessor
    :members:
 
-
 ImdbProcessor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: openprompt.data_utils.text_classification_dataset.ImdbProcessor
+   :members:
+
+SST2Processor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: openprompt.data_utils.text_classification_dataset.SST2Processor
    :members:
 
 ..
@@ -121,7 +126,8 @@ ImdbProcessor
 
    .. autoclass:: openprompt.data_utils.superglue_dataset.RecordProcessor
       :members:
-   
+
+
 
 Entity Typing Processor
 ---------------------------------
@@ -158,6 +164,13 @@ SemEvalProcessor
 
 
 
+Language Inference Processor
+---------------------------------
+
+SNLIProcessor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: openprompt.data_utils.nli_dataset.SNLIProcessor
 
 
 Conditional Generation Processor

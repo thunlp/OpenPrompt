@@ -17,3 +17,8 @@ Generation Runner
 
 .. autoclass:: openprompt.trainer.GenerationRunner
    :members:
+
+LM-BFF Classification Runner
+---------------------------------
+.. autoclass:: openprompt.lm_bff_trainer.LMBFFClassificationRunner
+   :members:
