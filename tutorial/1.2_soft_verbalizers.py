@@ -12,7 +12,7 @@ dataset['test'] = AgnewsProcessor().get_test_examples("./datasets/TextClassifica
 
 from openprompt.plms import load_plm
 
-plm, tokenizer, model_config, WrapperClass = load_plm("gpt2", "../../plm_cache/gpt2-medium")
+plm, tokenizer, model_config, WrapperClass = load_plm("gpt2", "gpt2-medium")
 
 
 from openprompt.prompts import ManualTemplate
