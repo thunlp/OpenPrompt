@@ -227,7 +227,7 @@
 <span class="sd">        plm (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.</span>
 <span class="sd">        template (:obj:`Template`): The ``Template`` object to warp the input data.</span>
 <span class="sd">        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model</span>
-<span class="sd">        plm_eval_mode (:obj:`bool`): this is a strong freezing than freeze_plm, i.e. the drop of the model is turned off.</span>
+<span class="sd">        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train. </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">plm</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span> 
@@ -294,7 +294,7 @@
 <span class="sd">        template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``ManualTemplate``.</span>
 <span class="sd">        verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the lables to label words for classification, e.g. ``ManualVerbalizer``.</span>
 <span class="sd">        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model</span>
-<span class="sd">        plm_eval_mode (:obj:`bool`): this is a strong freezing than freeze_plm, i.e. the drop of the model is turned off.</span>
+<span class="sd">        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train. </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">plm</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span> 
@@ -419,7 +419,7 @@
 <span class="sd">        tokenizer (:obj:`Tokenizer`): A ``Tokenizer`` of the current model.</span>
 <span class="sd">        gen_config (:obj:`CfgNode`): The generation configs to pass into `GenerationMixin.generate &lt;https://huggingface.co/transformers/_modules/transformers/generation_utils.html#GenerationMixin.generate&gt;`_</span>
 <span class="sd">        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model</span>
-<span class="sd">        plm_eval_mode (:obj:`bool`): this is a strong freezing than freeze_plm, i.e. the drop of the model is turned off.</span>
+<span class="sd">        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train. </span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
