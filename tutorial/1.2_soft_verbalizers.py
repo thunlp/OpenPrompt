@@ -12,7 +12,7 @@ dataset['test'] = AgnewsProcessor().get_test_examples("./datasets/TextClassifica
 
 from openprompt.plms import load_plm
 
-plm, tokenizer, model_config, WrapperClass = load_plm("gpt2", "gpt2-medium")
+plm, tokenizer, model_config, WrapperClass = load_plm("t5", "t5-base")
 
 
 from openprompt.prompts import ManualTemplate
@@ -21,8 +21,6 @@ mytemplate = ManualTemplate(tokenizer=tokenizer, text='{"placeholder":"text_a"} 
 
 wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
 print(wrapped_example)
-
-wrapped_t5tokenizer = WrapperClass(max_seq_length=128, decoder_max_length=3, tokenizer=tokenizer,truncate_method="head")
 
 from openprompt import PromptDataLoader
 

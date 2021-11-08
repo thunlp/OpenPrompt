@@ -138,7 +138,7 @@ class PromptModel(nn.Module):
         plm (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.
         template (:obj:`Template`): The ``Template`` object to warp the input data.
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
-        plm_eval_mode (:obj:`bool`): this is a strong freezing than freeze_plm, i.e. the drop of the model is turned off.
+        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train. 
     '''
     def __init__(self,
                  plm: PreTrainedModel, 
@@ -205,7 +205,7 @@ class PromptForClassification(nn.Module):
         template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``ManualTemplate``.
         verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the lables to label words for classification, e.g. ``ManualVerbalizer``.
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
-        plm_eval_mode (:obj:`bool`): this is a strong freezing than freeze_plm, i.e. the drop of the model is turned off.
+        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train. 
     '''
     def __init__(self,
                  plm: PreTrainedModel, 
@@ -330,7 +330,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         tokenizer (:obj:`Tokenizer`): A ``Tokenizer`` of the current model.
         gen_config (:obj:`CfgNode`): The generation configs to pass into `GenerationMixin.generate <https://huggingface.co/transformers/_modules/transformers/generation_utils.html#GenerationMixin.generate>`_
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
-        plm_eval_mode (:obj:`bool`): this is a strong freezing than freeze_plm, i.e. the drop of the model is turned off.
+        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train. 
     '''
 
     def __init__(self,
