@@ -246,8 +246,6 @@
 
         <span class="c1"># aggreate</span>
         <span class="n">label_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">label_words_logits</span><span class="p">)</span>
-        <span class="c1"># from IPython import embed</span>
-        <span class="c1"># embed()</span>
         <span class="k">return</span> <span class="n">label_logits</span></div>
     
 <div class="viewcode-block" id="ManualVerbalizer.normalize"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.manual_verbalizer.ManualVerbalizer.normalize">[docs]</a>    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
@@ -287,9 +285,6 @@
 <span class="sd">            :obj:`torch.Tensor`: The calibrated probability of label words.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">label_words_probs</span><span class="o">.</span><span class="n">shape</span>
-        <span class="c1"># from IPython import embed</span>
-        <span class="c1"># print(&quot;in ManualVerbalizer line 202&quot;)</span>
-        <span class="c1"># embed()</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calibrate_logits</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span>  <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;self._calibrate_logits are not 1-d tensor&quot;</span>
         <span class="n">calibrate_label_words_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibrate_logits</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
         <span class="k">assert</span> <span class="n">calibrate_label_words_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="n">label_words_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> \
