@@ -97,67 +97,65 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
-<div class="viewcode-block" id="pmi_calibrate"><a class="viewcode-back" href="../../../modules/utils.html#openprompt.utils.calibrate.pmi_calibrate">[docs]</a><span class="k">def</span> <span class="nf">pmi_calibrate</span><span class="p">(</span><span class="n">prompt_model</span><span class="p">:</span> <span class="n">PromptModel</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Pmi calibrate. See `Paper &lt;https://arxiv.org/pdf/2104.08315.pdf&gt;`_</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        prompt_model (:obj:`PromptForClassification`): the PromptForClassification model.</span>
-<span class="sd">        max_seq_length: (:obj:`int`): the truncation parameters for dataloader.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">prompt</span>
-    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">tokenizer</span>
-    <span class="n">virtual_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="s1">&#39;000&#39;</span><span class="p">,</span> <span class="n">text_a</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text_b</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)]</span>
-    <span class="n">virtual_loader</span> <span class="o">=</span> <span class="n">PromptDataLoader</span><span class="p">(</span><span class="n">virtual_dataset</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="n">max_seq_length</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">virtual_dataset</span><span class="p">),</span><span class="n">device</span><span class="o">=</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">virtual_loader</span><span class="p">:</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">forward_without_verbalize</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">loss_ids</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)]</span>
-    <span class="k">return</span> <span class="n">logits</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+<span class="c1"># def pmi_calibrate(prompt_model: PromptModel,context_dataloader, max_seq_length: int) -&gt; torch.Tensor:</span>
+<span class="c1">#     r&quot;&quot;&quot;Pmi calibrate. See `Paper &lt;https://arxiv.org/pdf/2104.08315.pdf&gt;`_</span>
+    
+<span class="c1">#     Args:</span>
+<span class="c1">#         prompt_model (:obj:`PromptForClassification`): the PromptForClassification model.</span>
+<span class="c1">#         max_seq_length: (:obj:`int`): the truncation parameters for dataloader.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     prompt = prompt_model.prompt</span>
+<span class="c1">#     tokenizer = prompt_model.tokenizer</span>
+<span class="c1">#     virtual_dataset = [InputExample(guid=&#39;000&#39;, text_a=&#39;&#39;, text_b=&#39;&#39;)]</span>
+<span class="c1">#     context_dataloader = PromptDataLoader(virtual_dataset, prompt, tokenizer, max_seq_length=max_seq_length, batch_size=len(virtual_dataset),device=prompt_model.device)</span>
+<span class="c1">#     for batch in context_dataloader:</span>
+<span class="c1">#         logits = prompt_model.forward_without_verbalize(batch)</span>
+<span class="c1">#         logits = logits[torch.where(batch.loss_ids&gt;0)]</span>
+<span class="c1">#     return logits.mean(dim=0)</span>
 
-<div class="viewcode-block" id="contextualized_calibrate"><a class="viewcode-back" href="../../../modules/utils.html#openprompt.utils.calibrate.contextualized_calibrate">[docs]</a><span class="k">def</span> <span class="nf">contextualized_calibrate</span><span class="p">(</span><span class="n">prompt_model</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">],</span> <span class="n">max_seq_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Contextualized calibrate. See `Paper &lt;https://arxiv.org/abs/2108.02035&gt;`_</span>
+<div class="viewcode-block" id="calibrate"><a class="viewcode-back" href="../../../modules/utils.html#openprompt.utils.calibrate.calibrate">[docs]</a><span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="n">prompt_model</span><span class="p">:</span> <span class="n">PromptForClassification</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">:</span> <span class="n">PromptDataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calibrate. See `Paper &lt;https://arxiv.org/abs/2108.02035&gt;`_</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        prompt_model (:obj:`PromptForClassification`): the PromptForClassification model.</span>
-<span class="sd">        context (:obj:`List`): the context dataset, if use the training dataset to do contextualized calibrate.</span>
-<span class="sd">        max_seq_length: (:obj:`int`): the truncation parameters for dataloader.</span>
+<span class="sd">        dataloader (:obj:`List`): the dataloader to conduct the calibrate, could be a virtual one, i.e. contain an only-template example.</span>
+<span class="sd">    </span>
+<span class="sd">    Return:</span>
+<span class="sd">        (:obj:`torch.Tensor`) A tensor of shape  (vocabsize) or (mask_num, vocabsize), the logits calculated for each word in the vocabulary</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">prompt</span>
-    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">tokenizer</span>
-    <span class="n">virtual_dataset</span> <span class="o">=</span> <span class="n">context</span>
-    <span class="n">virtual_loader</span> <span class="o">=</span> <span class="n">PromptDataLoader</span><span class="p">(</span><span class="n">virtual_dataset</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="n">max_seq_length</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
     <span class="n">all_logits</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">prompt_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">virtual_loader</span><span class="p">,</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;ContextCali&#39;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">dataloader</span><span class="p">,</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;ContextCali&#39;</span><span class="p">):</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="n">logits</span> <span class="o">=</span> <span class="n">prompt_model</span><span class="o">.</span><span class="n">forward_without_verbalize</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">batch</span><span class="o">.</span><span class="n">loss_ids</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)]</span>
         <span class="n">all_logits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
     <span class="n">all_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">all_logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">all_logits</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="calibrate"><a class="viewcode-back" href="../../../modules/utils.html#openprompt.utils.calibrate.calibrate">[docs]</a><span class="k">def</span> <span class="nf">calibrate</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">PromptForClassification</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">valid_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calibrate the PromptForClassification model. Select and run the calibrate using the global config node.</span>
+<span class="c1"># def calibrate(model: PromptForClassification, calibrate_method: str=None, config: CfgNode =None , train_dataset: Optional[List]=None, valid_dataset: Optional[List]=None):</span>
+<span class="c1">#     r&quot;&quot;&quot;Calibrate the PromptForClassification model. Select and run the calibrate using the global config node.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        model (:obj:`PromptForClassification`): the PromptForClassification model.</span>
-<span class="sd">        config (:obj:`CfgNode`): The global config node.</span>
-<span class="sd">        train_dataset: (:obj:`List`): the training dataset, if use the training dataset to do contextualized calibrate.</span>
-<span class="sd">        valid_dataset: (:obj:`List`): the valid dataset, if use the valid dataset to do contextualized calibrate.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">calibrate</span> <span class="o">==</span> <span class="s2">&quot;pmi_calibrate&quot;</span><span class="p">:</span>
-        <span class="n">calibrate_logits</span> <span class="o">=</span> <span class="n">pmi_calibrate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dataloader</span><span class="o">.</span><span class="n">max_seq_length</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">register_calibrate_logits</span><span class="p">(</span><span class="n">calibrate_logits</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">calibrate_type</span> <span class="o">==</span> <span class="s2">&quot;contextualized_calibrate&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">use_split</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
-            <span class="n">context_dataset</span> <span class="o">=</span> <span class="n">train_dataset</span>
-        <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">use_split</span> <span class="o">==</span> <span class="s2">&quot;valid&quot;</span><span class="p">:</span>
-            <span class="n">context_dataset</span> <span class="o">=</span> <span class="n">valid_dataset</span>
-        <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">use_split</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">num_example</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sampler</span> <span class="o">=</span> <span class="n">FewShotSampler</span><span class="p">(</span><span class="n">num_examples_total</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">contextualized_calibrate</span><span class="o">.</span><span class="n">num_example</span><span class="p">,</span>
-                                <span class="n">also_sample_dev</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">context_dataset</span> <span class="o">=</span> <span class="n">sampler</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span>
-        <span class="n">calibrate_logits</span> <span class="o">=</span> <span class="n">contextualized_calibrate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context_dataset</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dataloader</span><span class="o">.</span><span class="n">max_seq_length</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">register_calibrate_logits</span><span class="p">(</span><span class="n">calibrate_logits</span><span class="p">)</span></div>
+<span class="c1">#     Args:</span>
+<span class="c1">#         model (:obj:`PromptForClassification`): the PromptForClassification model.</span>
+<span class="c1">#         config (:obj:`CfgNode`): The global config node.</span>
+<span class="c1">#         train_dataset: (:obj:`List`): the training dataset, if use the training dataset to do contextualized calibrate.</span>
+<span class="c1">#         valid_dataset: (:obj:`List`): the valid dataset, if use the valid dataset to do contextualized calibrate.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if config.calibrate == &quot;pmi_calibrate&quot;:</span>
+<span class="c1">#         calibrate_logits = pmi_calibrate(model, max_seq_length=config.dataloader.max_seq_length)</span>
+<span class="c1">#         model.register_calibrate_logits(calibrate_logits)</span>
+<span class="c1">#     elif config.calibrate_type == &quot;contextualized_calibrate&quot;:</span>
+<span class="c1">#         if config.contextualized_calibrate.use_split == &quot;train&quot;:</span>
+<span class="c1">#             context_dataset = train_dataset</span>
+<span class="c1">#         elif config.contextualized_calibrate.use_split == &quot;valid&quot;:</span>
+<span class="c1">#             context_dataset = valid_dataset</span>
+<span class="c1">#         elif config.contextualized_calibrate.use_split is None and config.contextualized_calibrate.num_example is not None:</span>
+<span class="c1">#             sampler = FewShotSampler(num_examples_total=config.contextualized_calibrate.num_example,</span>
+<span class="c1">#                                 also_sample_dev=False)</span>
+<span class="c1">#             context_dataset = sampler(train_dataset)</span>
+<span class="c1">#         calibrate_logits = contextualized_calibrate(model, context=context_dataset, max_seq_length=config.dataloader.max_seq_length)</span>
+<span class="c1">#         model.register_calibrate_logits(calibrate_logits)</span>
 
 </pre></div>
 

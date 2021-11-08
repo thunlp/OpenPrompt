@@ -159,7 +159,10 @@
 
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">valid_dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">sample_twice</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">also_sample_dev</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">sample_twice</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">sample_twice</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">train_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">also_sample_dev</span><span class="p">:</span>
