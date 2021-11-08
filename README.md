@@ -8,13 +8,13 @@
 
 ------
 
-
-
 <p align="center">
   <a href="#Overview">Overview</a> •
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
   <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> • 
+  <a href="https://arxiv.org/abs/2111.01998">Paper</a> •  
+  <a href="#citation">Citation</a> •
   <a href="https://arxiv.org/abs/2111.01998">Paper</a> • 
   <a href="#citation">Citation</a> •
   <a href="https://github.com/thunlp/OpenPrompt/tree/main/results/">Performance</a> •
@@ -23,8 +23,6 @@
 </div>
 
 ![version](https://img.shields.io/badge/version-v0.0.1--beta-blue)
-
-
 
 ## What's New?
 
@@ -135,11 +133,12 @@ bertModel = model_class.model.from_pretrained(model_path)
 #### Step 3: Define a Template.
 
 A `Template` is a modifier of the original input text, which is also one of the most important modules in prompt-learning. 
+We have defined `text_a` in Step 1.
 
 ```python
 from openprompt.prompts import ManualTemplate
 promptTemplate = ManualTemplate(
-    text = '{"placeholder": "text_a"} It was {"mask"}',
+    text = '{"meta": "text_a"} It was {"mask"}',
     tokenizer = bertTokenizer,
 )
 ```

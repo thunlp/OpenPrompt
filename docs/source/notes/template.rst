@@ -81,12 +81,13 @@ If you try to define 10000 soft tokens, please use the key ``duplicate``,
 
     {"soft": None, "duplicate": 10000} {"meta": "text"} {"mask"}
 
+
 If you try to define 10000 identical soft tokens, use the key `same`,
 
 .. _template_7
 .. code-block:: python
 
-    {"soft": None, "duplicate": 20, "same": True}
+    {"soft": None, "duplicate": 10000, "same": True}
 
 Post processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
