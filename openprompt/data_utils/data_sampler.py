@@ -70,7 +70,10 @@ class FewShotSampler(object):
 
         '''
         if valid_dataset is None:
-            return self._sample(train_dataset, seed, sample_twice = True)
+            if self.also_sample_dev:
+                return self._sample(train_dataset, seed, sample_twice=True)
+            else:
+                return self._sample(train_dataset, seed, sample_twice=False)
         else:
             train_dataset = self._sample(train_dataset, seed)
             if self.also_sample_dev:

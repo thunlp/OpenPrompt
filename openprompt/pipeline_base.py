@@ -182,8 +182,14 @@ class PromptModel(nn.Module):
         """
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
+
+        input_batch['inputs_embeds'] = self.plm.roberta.embeddings.word_embeddings(input_batch['input_ids'])
+        input_batch['input_ids'] = None
         outputs = self.plm(**input_batch, output_hidden_states=True)
         outputs = self.template.post_processing_outputs(outputs)
+        # from IPython import embed
+        # print("in line 188")
+        # embed()
         return outputs
     
     def prepare_model_inputs(self, batch: Union[Dict, InputFeatures]) -> Dict:
@@ -264,6 +270,10 @@ class PromptForClassification(nn.Module):
         outputs = self.verbalizer.gather_outputs(outputs)
         outputs_at_mask = self.extract_at_mask(outputs, batch)
         label_words_logits = self.verbalizer.process_outputs(outputs_at_mask, batch=batch)
+        # from IPython import embed
+        # print("in line 268")
+        # embed()
+
         return label_words_logits
     
     def predict(self):
@@ -271,9 +281,12 @@ class PromptForClassification(nn.Module):
     
     def forward_without_verbalize(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
         outputs = self.prompt_model(batch)
-        logits = outputs.logits
-        logits = self.extract_logits(logits, batch)
-        return logits
+        # from IPython import embed
+        # print("in line 282")
+        # embed()
+        outputs = self.verbalizer.gather_outputs(outputs)
+        outputs_at_mask = self.extract_at_mask(outputs, batch)
+        return outputs_at_mask
 
     @property
     def tokenizer(self):

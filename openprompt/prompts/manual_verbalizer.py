@@ -143,6 +143,7 @@ class ManualVerbalizer(Verbalizer):
         # project
         label_words_logits = self.project(logits, **kwargs)  #Output: (batch_size, num_classes) or  (batch_size, num_classes, num_label_words_per_label)
 
+        
         if self.post_log_softmax:
             # normalize
             label_words_probs = self.normalize(label_words_logits)
@@ -156,6 +157,8 @@ class ManualVerbalizer(Verbalizer):
 
         # aggreate
         label_logits = self.aggregate(label_words_logits)
+        # from IPython import embed
+        # embed()
         return label_logits
     
     def normalize(self, logits: torch.Tensor) -> torch.Tensor:
@@ -195,6 +198,9 @@ class ManualVerbalizer(Verbalizer):
             :obj:`torch.Tensor`: The calibrated probability of label words.
         """
         shape = label_words_probs.shape
+        # from IPython import embed
+        # print("in ManualVerbalizer line 202")
+        # embed()
         assert self._calibrate_logits.dim() ==  1, "self._calibrate_logits are not 1-d tensor"
         calibrate_label_words_probs = self.normalize(self.project(self._calibrate_logits.unsqueeze(0), **kwargs))
         assert calibrate_label_words_probs.shape[1:] == label_words_probs.shape[1:] \
@@ -202,7 +208,8 @@ class ManualVerbalizer(Verbalizer):
         label_words_probs /= (calibrate_label_words_probs+1e-15)
         # normalize # TODO Test the performance
         norm = label_words_probs.reshape(shape[0], -1).sum(dim=-1,keepdim=True) # TODO Test the performance of detaching()
-        label_words_probs /= norm
+        label_words_probs = label_words_probs.reshape(shape[0], -1) / norm
+        label_words_probs = label_words_probs.reshape(*shape)
         return label_words_probs
 
 

@@ -5,7 +5,7 @@ Note that we do not attempt to match the exact performance score of
 the referenced papers, if they use additional tricks such as data-augmentation
 or prompt-ensemble. 
 
-## Filed:
+## Table Heads Explanation
 ### Prompt
 The config of the template.
 ### LM
@@ -14,7 +14,20 @@ The pre-trained language model we used.
 The specific yaml file or tutorial scripts to
 achieve the results.
 ### Comment
-Other noticable aspect of the experiment.
+Other noticable aspects of the experiments.
+
+
+-------
+
+## Few-NERD
+
+Dataset details see https://arxiv.org/abs/2105.07464
+N-S means N-shot
+
+|Prompt| LM| Ref |Coment | Acc(8-S) | MiF(8-S)|
+|:------:|:------------:|:------------:|:-------:|:---------:|:-----------:|:--------:|
+|ManualT+ManualV| bert-base-cased|[yaml](../referenced_yamls/1107032409468965.yaml)| | 55.30| 67.88|
+
 
 
 
