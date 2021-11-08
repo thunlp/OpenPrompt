@@ -15,8 +15,6 @@
   <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> • 
   <a href="https://arxiv.org/abs/2111.01998">Paper</a> •  
   <a href="#citation">Citation</a> •
-  <a href="https://arxiv.org/abs/2111.01998">Paper</a> • 
-  <a href="#citation">Citation</a> •
   <a href="https://github.com/thunlp/OpenPrompt/tree/main/results/">Performance</a> •
 </p>
 
