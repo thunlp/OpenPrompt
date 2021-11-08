@@ -225,24 +225,71 @@ class AmazonProcessor(DataProcessor):
         return examples
 
 
+# class SST2Processor(DataProcessor):
+#     """
+#     #TODO test needed
+#     """
+
+#     def __init__(self):
+#         raise NotImplementedError
+#         super().__init__()
+#         self.labels = ["negative", "positive"]
+
+#     def get_examples(self, data_dir, split):
+#         examples = []
+#         path = os.path.join(data_dir,"{}.tsv".format(split))
+#         with open(path, 'r') as f:
+#             reader = csv.DictReader(f, delimiter='\t')
+#             for idx, example_json in enumerate(reader):
+#                 text_a = example_json['sentence'].strip()
+#                 example = InputExample(guid=str(idx), text_a=text_a, label=int(example_json['label']))
+#                 examples.append(example)
+#         return examples
 class SST2Processor(DataProcessor):
     """
-    #TODO test needed
+    `SST-2 <https://nlp.stanford.edu/sentiment/index.html>`_ dataset is a dataset for sentiment analysis. It is a modified version containing only binary labels (negative or somewhat negative vs somewhat positive or positive with neutral sentences discarded) on top of the original 5-labeled dataset released first in `Recursive Deep Models for Semantic Compositionality Over a Sentiment Treebank <https://aclanthology.org/D13-1170.pdf>`_
+
+    We use the data released in `Making Pre-trained Language Models Better Few-shot Learners (Gao et al. 2020) <https://arxiv.org/pdf/2012.15723.pdf>`_
+
+    Examples:
+
+    ..  code-block:: python 
+
+        from openprompt.data_utils.lmbff_dataset import PROCESSORS
+
+        base_path = "datasets/TextClassification"
+
+        dataset_name = "SST-2"
+        dataset_path = os.path.join(base_path, dataset_name)
+        processor = PROCESSORS[dataset_name.lower()]()
+        train_dataset = processor.get_train_examples(dataset_path)
+        dev_dataset = processor.get_dev_examples(dataset_path)
+        test_dataset = processor.get_test_examples(dataset_path)
+
+        assert processor.get_num_labels() == 2
+        assert processor.get_labels() == [0,1]
+        assert len(train_dataset) == 6920
+        assert len(dev_dataset) == 872
+        assert len(test_dataset) == 1821
+        assert train_dataset[0].text_a == 'a stirring , funny and finally transporting re-imagining of beauty and the beast and 1930s horror films'
+        assert train_dataset[0].label == 1
+
     """
-
     def __init__(self):
-        raise NotImplementedError
         super().__init__()
-        self.labels = ["negative", "positive"]
-
+        self.labels = [0, 1]
+    
     def get_examples(self, data_dir, split):
+        path = os.path.join(data_dir, f"{split}.tsv")
         examples = []
-        path = os.path.join(data_dir,"{}.tsv".format(split))
-        with open(path, 'r') as f:
-            reader = csv.DictReader(f, delimiter='\t')
-            for idx, example_json in enumerate(reader):
-                text_a = example_json['sentence'].strip()
-                example = InputExample(guid=str(idx), text_a=text_a, label=int(example_json['label']))
+        with open(path, encoding='utf-8')as f:
+            lines = f.readlines()
+            for idx, line in enumerate(lines[1:]):
+                linelist = line.strip().split('\t')
+                text_a = linelist[0]
+                label = int(linelist[1])
+                guid = "%s-%s" % (split, idx)
+                example = InputExample(guid=guid, text_a=text_a, label=self.get_label_id(label))
                 examples.append(example)
         return examples
 

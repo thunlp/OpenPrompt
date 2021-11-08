@@ -8,7 +8,7 @@ from .conditional_generation_dataset import PROCESSORS as CG_PROCESSORS
 from .utils import InputExample, InputFeatures
 from .data_sampler import FewShotSampler
 # support loading transformers datasets from https://huggingface.co/docs/datasets/
-from .lmbff_dataset import PROCESSORS as LMBFF_PROCESSORS
+from .nli_dataset import PROCESSORS as NLI_PROCESSORS
 
 from openprompt.utils.logging import logger
 from openprompt.data_utils.huggingface_dataset import PROCESSORS as HF_PROCESSORS
@@ -22,7 +22,7 @@ PROCESSORS = {
     **CG_PROCESSORS,
     **LAMA_PROCESSORS,
     **HF_PROCESSORS,
-    **LMBFF_PROCESSORS,
+    **NLI_PROCESSORS,
 }
 
 
