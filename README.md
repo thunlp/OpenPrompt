@@ -13,15 +13,11 @@
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
   <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> • 
-<<<<<<< HEAD
   <a href="https://arxiv.org/abs/2111.01998">Paper</a> •  
   <a href="#citation">Citation</a> •
-
-=======
   <a href="https://arxiv.org/abs/2111.01998">Paper</a> • 
   <a href="#citation">Citation</a> •
   <a href="https://github.com/thunlp/OpenPrompt/tree/main/results/">Performance</a> •
->>>>>>> 8f9888f84fcb56997e95dc7878be339d674f4067
 </p>
 
 </div>
