@@ -182,6 +182,9 @@ class PromptModel(nn.Module):
         """
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
+
+        input_batch['inputs_embeds'] = self.plm.roberta.embeddings.word_embeddings(input_batch['input_ids'])
+        input_batch['input_ids'] = None
         outputs = self.plm(**input_batch, output_hidden_states=True)
         outputs = self.template.post_processing_outputs(outputs)
         return outputs
@@ -271,9 +274,9 @@ class PromptForClassification(nn.Module):
     
     def forward_without_verbalize(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
         outputs = self.prompt_model(batch)
-        logits = outputs.logits
-        logits = self.extract_logits(logits, batch)
-        return logits
+        outputs = self.verbalizer.gather_outputs(outputs)
+        outputs_at_mask = self.extract_at_mask(outputs, batch)
+        return outputs_at_mask
 
     @property
     def tokenizer(self):
