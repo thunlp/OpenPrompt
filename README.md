@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="https://z3.ax1x.com/2021/11/11/IwE8TU.png" width="350px">
+<img src="https://z3.ax1x.com/2021/11/11/IwED0K.png" width="350px">
   
 **An Open-Source Framework for Prompt-learning.**
 
