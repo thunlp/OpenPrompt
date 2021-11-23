@@ -53,12 +53,8 @@ Simply use a ``get_model_class`` to obtain your PLM.
 
 ..  code-block:: python
 
-    from openprompt.plms import get_model_class
-    model_class = get_model_class(plm_type = "bert")
-    model_path = "bert-base-cased"
-    bertConfig = model_class.config.from_pretrained(model_path)
-    bertTokenizer = model_class.tokenizer.from_pretrained(model_path)
-    bertModel = model_class.model.from_pretrained(model_path)
+    from openprompt.plms import load_plm
+    plm, tokenizer, model_config, WrapperClass = load_plm("bert", "bert-base-cased")
 
 Step 3. Define a Template
 --------------------------------------------------------------------------------------------------------
@@ -72,8 +68,8 @@ Here is an example, where the ``<text_a>`` will be replaced by the :obj:`text_a`
 
     from openprompt.prompts import ManualTemplate
     promptTemplate = ManualTemplate(
-        text = ["<text_a>", "It", "was", "<mask>"],
-        tokenizer = bertTokenizer,
+        text = '{"placeholder":"text_a"} It was {"mask"}',
+        tokenizer = tokenizer,
     )
 
 Step 4. Define a Verbalizer
@@ -97,7 +93,7 @@ Here is an example that we
             "negative": ["bad"],
             "positive": ["good", "wonderful", "great"],
         },
-        tokenizer = bertTokenizer,
+        tokenizer = tokenizer,
     )
 
 
@@ -114,7 +110,7 @@ Note that although this example naively combine the three modules, you can actua
     from openprompt import PromptForClassification
     promptModel = PromptForClassification(
         template = promptTemplate,
-        model = bertModel,
+        plm = plm,
         verbalizer = promptVerbalizer,
     )
 
@@ -132,8 +128,9 @@ A ``PromptDataLoader`` is basically a prompt version of pytorch Dataloader, whic
     from openprompt import PromptDataLoader
     data_loader = PromptDataLoader(
         dataset = dataset,
-        tokenizer = bertTokenizer, 
+        tokenizer = tokenizer, 
         template = promptTemplate, 
+        tokenizer_wrapper_class=WrapperClass,
     )
 
 
@@ -144,7 +141,7 @@ Done! We can conduct training and inference the same as other processes in Pytor
 
 
 ..  code-block:: python
-
+    # making zero-shot inference using pretrained MLM with prompt
     promptModel.eval()
     with torch.no_grad():
         for batch in data_loader:

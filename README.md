@@ -118,12 +118,8 @@ dataset = [ # For simplicity, there's only two examples
 Choose a PLM to support your task. Different models have different attributes, we encourge you to use OpenPrompt to explore the potential of various PLMs. OpenPrompt is compatible with models on [huggingface](https://huggingface.co/transformers/).
 
 ```python
-from openprompt.plms import get_model_class
-model_class = get_model_class(plm_type = "bert")
-model_path = "bert-base-cased"
-bertConfig = model_class.config.from_pretrained(model_path)
-bertTokenizer = model_class.tokenizer.from_pretrained(model_path)
-bertModel = model_class.model.from_pretrained(model_path)
+from openprompt.plms import load_plm
+plm, tokenizer, model_config, WrapperClass = load_plm("bert", "bert-base-cased")
 ```
 
 
@@ -136,8 +132,8 @@ We have defined `text_a` in Step 1.
 ```python
 from openprompt.prompts import ManualTemplate
 promptTemplate = ManualTemplate(
-    text = '{"meta": "text_a"} It was {"mask"}',
-    tokenizer = bertTokenizer,
+    text = '{"placeholder":"text_a"} It was {"mask"}',
+    tokenizer = tokenizer,
 )
 ```
 
@@ -155,7 +151,7 @@ promptVerbalizer = ManualVerbalizer(
         "negative": ["bad"],
         "positive": ["good", "wonderful", "great"],
     },
-    tokenizer = bertTokenizer,
+    tokenizer = tokenizer,
 )
 ```
 
@@ -169,9 +165,40 @@ Given the task, now we have a `PLM`, a `Template` and a `Verbalizer`, we com
 from openprompt import PromptForClassification
 promptModel = PromptForClassification(
     template = promptTemplate,
-    model = bertModel,
+    plm = plm,
     verbalizer = promptVerbalizer,
 )
+```
+
+#### Step 6: Define a DataLoader
+
+A ``PromptDataLoader`` is basically a prompt version of pytorch Dataloader, which also includes a ``Tokenizer``, a ``Template`` and a ``TokenizerWrapper``.
+
+```python
+
+    from openprompt import PromptDataLoader
+    data_loader = PromptDataLoader(
+        dataset = dataset,
+        tokenizer = tokenizer, 
+        template = promptTemplate, 
+        tokenizer_wrapper_class=WrapperClass,
+    )
+```
+
+#### Step 7: Train and inference
+
+Done! We can conduct training and inference the same as other processes in Pytorch.
+
+
+```python
+    # making zero-shot inference using pretrained MLM with prompt
+    promptModel.eval()
+    with torch.no_grad():
+        for batch in data_loader:
+            logits = promptModel(batch)
+            preds = torch.argmax(logits, dim = -1)
+            print(classes[preds])
+    # predictions would be 1, 0 for classes 'positive', 'negative'
 ```
 
 Please refer to our [tutorial scripts](https://github.com/thunlp/OpenPrompt/tree/main/tutorial), and [documentation](https://thunlp.github.io/OpenPrompt/) for more details.
