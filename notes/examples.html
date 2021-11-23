@@ -139,12 +139,8 @@ the following models have been tested:</p>
 <li><p>Sequence-to-Sequence Models (Seq2Seq): <code class="docutils literal notranslate"><span class="pre">T5</span></code></p></li>
 </ul>
 <p>Simply use a <code class="docutils literal notranslate"><span class="pre">get_model_class</span></code> to obtain your PLM.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.plms</span> <span class="kn">import</span> <span class="n">get_model_class</span>
-<span class="n">model_class</span> <span class="o">=</span> <span class="n">get_model_class</span><span class="p">(</span><span class="n">plm_type</span> <span class="o">=</span> <span class="s2">&quot;bert&quot;</span><span class="p">)</span>
-<span class="n">model_path</span> <span class="o">=</span> <span class="s2">&quot;bert-base-cased&quot;</span>
-<span class="n">bertConfig</span> <span class="o">=</span> <span class="n">model_class</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
-<span class="n">bertTokenizer</span> <span class="o">=</span> <span class="n">model_class</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
-<span class="n">bertModel</span> <span class="o">=</span> <span class="n">model_class</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.plms</span> <span class="kn">import</span> <span class="n">load_plm</span>
+<span class="n">plm</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">model_config</span><span class="p">,</span> <span class="n">WrapperClass</span> <span class="o">=</span> <span class="n">load_plm</span><span class="p">(</span><span class="s2">&quot;bert&quot;</span><span class="p">,</span> <span class="s2">&quot;bert-base-cased&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -155,8 +151,8 @@ A more advanced tutorial to define a template is in <a class="reference internal
 <p>Here is an example, where the <code class="docutils literal notranslate"><span class="pre">&lt;text_a&gt;</span></code> will be replaced by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">text_a</span></code> in <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code>, and the <code class="docutils literal notranslate"><span class="pre">&lt;mask&gt;</span></code> will be used to predict a label word.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.prompts</span> <span class="kn">import</span> <span class="n">ManualTemplate</span>
 <span class="n">promptTemplate</span> <span class="o">=</span> <span class="n">ManualTemplate</span><span class="p">(</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;text_a&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;It&quot;</span><span class="p">,</span> <span class="s2">&quot;was&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;mask&gt;&quot;</span><span class="p">],</span>
-    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">bertTokenizer</span><span class="p">,</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;{&quot;placeholder&quot;:&quot;text_a&quot;} It was {&quot;mask&quot;}&#39;</span><span class="p">,</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -177,7 +173,7 @@ A more advanced tutorial to define a verbalizer is in <a class="reference intern
         <span class="s2">&quot;negative&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;bad&quot;</span><span class="p">],</span>
         <span class="s2">&quot;positive&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;good&quot;</span><span class="p">,</span> <span class="s2">&quot;wonderful&quot;</span><span class="p">,</span> <span class="s2">&quot;great&quot;</span><span class="p">],</span>
     <span class="p">},</span>
-    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">bertTokenizer</span><span class="p">,</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -189,7 +185,7 @@ A more advanced tutorial to define a verbalizer is in <a class="reference intern
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt</span> <span class="kn">import</span> <span class="n">PromptForClassification</span>
 <span class="n">promptModel</span> <span class="o">=</span> <span class="n">PromptForClassification</span><span class="p">(</span>
     <span class="n">template</span> <span class="o">=</span> <span class="n">promptTemplate</span><span class="p">,</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">bertModel</span><span class="p">,</span>
+    <span class="n">plm</span> <span class="o">=</span> <span class="n">plm</span><span class="p">,</span>
     <span class="n">verbalizer</span> <span class="o">=</span> <span class="n">promptVerbalizer</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -201,8 +197,9 @@ A more advanced tutorial to define a verbalizer is in <a class="reference intern
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt</span> <span class="kn">import</span> <span class="n">PromptDataLoader</span>
 <span class="n">data_loader</span> <span class="o">=</span> <span class="n">PromptDataLoader</span><span class="p">(</span>
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">,</span>
-    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">bertTokenizer</span><span class="p">,</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">,</span>
     <span class="n">template</span> <span class="o">=</span> <span class="n">promptTemplate</span><span class="p">,</span>
+    <span class="n">tokenizer_wrapper_class</span><span class="o">=</span><span class="n">WrapperClass</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -210,15 +207,6 @@ A more advanced tutorial to define a verbalizer is in <a class="reference intern
 <section id="step-7-train-and-inference">
 <h2>Step 7. Train and inference<a class="headerlink" href="#step-7-train-and-inference" title="Permalink to this headline">¶</a></h2>
 <p>Done! We can conduct training and inference the same as other processes in Pytorch.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">promptModel</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">data_loader</span><span class="p">:</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">promptModel</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-        <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">classes</span><span class="p">[</span><span class="n">preds</span><span class="p">])</span>
-<span class="c1"># predictions would be 1, 0 for classes &#39;positive&#39;, &#39;negative&#39;</span>
-</pre></div>
-</div>
 <p>This is a quick start of OpenPrompt, please refer to the APIs for more details.</p>
 </section>
 </section>
