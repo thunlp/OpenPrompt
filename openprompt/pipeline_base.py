@@ -281,21 +281,21 @@ class PromptForClassification(nn.Module):
         '''
         return self.verbalizer.tokenizer
     
-    def state_dict(self):
+    def state_dict(self, *args, **kwargs):
         """ Save the model using template, plm and verbalizer's save methods."""
         _state_dict = {}
         if not self.prompt_model.freeze_plm:
-            _state_dict['plm'] = self.plm.state_dict()
-        _state_dict['template'] = self.template.state_dict()
-        _state_dict['verbalizer'] = self.verbalizer.state_dict()
+            _state_dict['plm'] = self.plm.state_dict(*args, **kwargs)
+        _state_dict['template'] = self.template.state_dict(*args, **kwargs)
+        _state_dict['verbalizer'] = self.verbalizer.state_dict(*args, **kwargs)
         return _state_dict
     
-    def load_state_dict(self, state_dict):
+    def load_state_dict(self, state_dict, *args, **kwargs):
         """ Load the model using template, plm and verbalizer's load methods."""
         if 'plm' in state_dict and not self.prompt_model.freeze_plm:
-            self.plm.load_state_dict(state_dict['plm'])
-        self.template.load_state_dict(state_dict['template'])
-        self.verbalizer.load_state_dict(state_dict['verbalizer'])
+            self.plm.load_state_dict(state_dict['plm'], *args, **kwargs)
+        self.template.load_state_dict(state_dict['template'], *args, **kwargs)
+        self.verbalizer.load_state_dict(state_dict['verbalizer'], *args, **kwargs)
 
     def parallelize(self, device_map=None):
         r"""Parallelize the model across device
@@ -590,19 +590,19 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             model_kwargs["encoder_outputs"] = encoder(return_dict=True, **model_inputs)
         return model_kwargs
     
-    def state_dict(self):
+    def state_dict(self, *args, **kwargs):
         """ Save the model using template and plm's save methods. """
         _state_dict = {}
         if not self.prompt_model.freeze_plm:
-            _state_dict['plm'] = self.plm.state_dict()
-        _state_dict['template'] = self.template.state_dict()
+            _state_dict['plm'] = self.plm.state_dict(*args, **kwargs)
+        _state_dict['template'] = self.template.state_dict(*args, **kwargs)
         return _state_dict
     
-    def load_state_dict(self, state_dict):
+    def load_state_dict(self, state_dict, *args, **kwargs):
         """ Load the model using template and plm's load methods. """
         if 'plm' in state_dict and not self.prompt_model.freeze_plm:
-            self.plm.load_state_dict(state_dict['plm'])
-        self.template.load_state_dict(state_dict['template'])
+            self.plm.load_state_dict(state_dict['plm'], *args, **kwargs)
+        self.template.load_state_dict(state_dict['template'], *args, **kwargs)
     
     def _reorder_cache(self, past, beam_idx):
         r"""Use the plm's default _reorder_cache function
