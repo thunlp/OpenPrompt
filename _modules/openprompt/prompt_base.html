@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../modules/base.html">Base Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/template.html">Templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/prompt_generator.html">Prompt Generator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/data_utils.html">Data Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/data_processors.html">Data Processors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/trainer.html">Trainer</a></li>
@@ -183,26 +184,6 @@
 <span class="sd">            NotImplementedError: if needed, add ``soft_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
-
-    <span class="k">def</span> <span class="nf">incorporate_text_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                 <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span>
-                                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Given an example, replace placeholder of text_a, text_b and meta information by real data</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            List[str]: a list of str of the same length as self.text. the placeholder and meta information are replaced by real data information.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">placeholder_token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
-                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">placeholder_token</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder_mapping</span><span class="p">[</span><span class="n">placeholder_token</span><span class="p">]))</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">example</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)):</span>
-                <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;meta:&quot;</span><span class="o">+</span><span class="n">key</span><span class="o">+</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">text</span>
     
 <div class="viewcode-block" id="Template.incorporate_text_example"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.incorporate_text_example">[docs]</a>    <span class="k">def</span> <span class="nf">incorporate_text_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                  <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span>

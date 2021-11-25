@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../modules/base.html">Base Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/template.html">Templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/prompt_generator.html">Prompt Generator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/data_utils.html">Data Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/data_processors.html">Data Processors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/trainer.html">Trainer</a></li>
@@ -181,7 +182,7 @@
     <span class="k">def</span> <span class="nf">steps_per_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;num of training steps per epoch&quot;&quot;&quot;</span>
         <span class="n">batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">)</span>
-        <span class="n">effective_accum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">num_gpus</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span>
+        <span class="n">effective_accum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">batches</span> <span class="o">//</span> <span class="n">effective_accum</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">wrap_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

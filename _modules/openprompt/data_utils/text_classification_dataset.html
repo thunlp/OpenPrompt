@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/base.html">Base Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/template.html">Templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/prompt_generator.html">Prompt Generator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/data_utils.html">Data Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/data_processors.html">Data Processors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules/trainer.html">Trainer</a></li>
@@ -314,26 +315,73 @@
         <span class="k">return</span> <span class="n">examples</span>
 
 
-<span class="k">class</span> <span class="nc">SST2Processor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+<span class="c1"># class SST2Processor(DataProcessor):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     #TODO test needed</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+<span class="c1">#     def __init__(self):</span>
+<span class="c1">#         raise NotImplementedError</span>
+<span class="c1">#         super().__init__()</span>
+<span class="c1">#         self.labels = [&quot;negative&quot;, &quot;positive&quot;]</span>
+
+<span class="c1">#     def get_examples(self, data_dir, split):</span>
+<span class="c1">#         examples = []</span>
+<span class="c1">#         path = os.path.join(data_dir,&quot;{}.tsv&quot;.format(split))</span>
+<span class="c1">#         with open(path, &#39;r&#39;) as f:</span>
+<span class="c1">#             reader = csv.DictReader(f, delimiter=&#39;\t&#39;)</span>
+<span class="c1">#             for idx, example_json in enumerate(reader):</span>
+<span class="c1">#                 text_a = example_json[&#39;sentence&#39;].strip()</span>
+<span class="c1">#                 example = InputExample(guid=str(idx), text_a=text_a, label=int(example_json[&#39;label&#39;]))</span>
+<span class="c1">#                 examples.append(example)</span>
+<span class="c1">#         return examples</span>
+<div class="viewcode-block" id="SST2Processor"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.text_classification_dataset.SST2Processor">[docs]</a><span class="k">class</span> <span class="nc">SST2Processor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    #TODO test needed</span>
+<span class="sd">    `SST-2 &lt;https://nlp.stanford.edu/sentiment/index.html&gt;`_ dataset is a dataset for sentiment analysis. It is a modified version containing only binary labels (negative or somewhat negative vs somewhat positive or positive with neutral sentences discarded) on top of the original 5-labeled dataset released first in `Recursive Deep Models for Semantic Compositionality Over a Sentiment Treebank &lt;https://aclanthology.org/D13-1170.pdf&gt;`_</span>
+
+<span class="sd">    We use the data released in `Making Pre-trained Language Models Better Few-shot Learners (Gao et al. 2020) &lt;https://arxiv.org/pdf/2012.15723.pdf&gt;`_</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ..  code-block:: python </span>
+
+<span class="sd">        from openprompt.data_utils.lmbff_dataset import PROCESSORS</span>
+
+<span class="sd">        base_path = &quot;datasets/TextClassification&quot;</span>
+
+<span class="sd">        dataset_name = &quot;SST-2&quot;</span>
+<span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
+<span class="sd">        processor = PROCESSORS[dataset_name.lower()]()</span>
+<span class="sd">        train_dataset = processor.get_train_examples(dataset_path)</span>
+<span class="sd">        dev_dataset = processor.get_dev_examples(dataset_path)</span>
+<span class="sd">        test_dataset = processor.get_test_examples(dataset_path)</span>
+
+<span class="sd">        assert processor.get_num_labels() == 2</span>
+<span class="sd">        assert processor.get_labels() == [0,1]</span>
+<span class="sd">        assert len(train_dataset) == 6920</span>
+<span class="sd">        assert len(dev_dataset) == 872</span>
+<span class="sd">        assert len(test_dataset) == 1821</span>
+<span class="sd">        assert train_dataset[0].text_a == &#39;a stirring , funny and finally transporting re-imagining of beauty and the beast and 1930s horror films&#39;</span>
+<span class="sd">        assert train_dataset[0].label == 1</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;negative&quot;</span><span class="p">,</span> <span class="s2">&quot;positive&quot;</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    
+<div class="viewcode-block" id="SST2Processor.get_examples"><a class="viewcode-back" href="../../../modules/data_processors.html#openprompt.data_utils.text_classification_dataset.SST2Processor.get_examples">[docs]</a>    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">split</span><span class="si">}</span><span class="s2">.tsv&quot;</span><span class="p">)</span>
         <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.tsv&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">))</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">example_json</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
-                <span class="n">text_a</span> <span class="o">=</span> <span class="n">example_json</span><span class="p">[</span><span class="s1">&#39;sentence&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">example_json</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="n">linelist</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">guid</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="n">guid</span><span class="p">,</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_label_id</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
                 <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">examples</span>
+        <span class="k">return</span> <span class="n">examples</span></div></div>
 
 <span class="n">PROCESSORS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;agnews&quot;</span><span class="p">:</span> <span class="n">AgnewsProcessor</span><span class="p">,</span>

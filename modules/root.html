@@ -57,6 +57,7 @@
 <li class="toctree-l1"><a class="reference internal" href="base.html">Base Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="template.html">Templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prompt_generator.html">Prompt Generator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_utils.html">Data Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_processors.html">Data Processors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
@@ -411,11 +412,6 @@ Can be re-implemented in advanced verbaliezer.</p>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.normalize">
 <span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.normalize" title="Permalink to this definition">¶</a></dt>
@@ -432,6 +428,11 @@ Can be re-implemented in advanced verbaliezer.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.project">

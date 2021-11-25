@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="modules/base.html">Base Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/template.html">Templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/prompt_generator.html">Prompt Generator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/data_utils.html">Data Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/data_processors.html">Data Processors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/trainer.html">Trainer</a></li>
@@ -155,6 +156,12 @@
 </li>
       <li><a href="modules/trainer.html#openprompt.trainer.ClassificationRunner.configure_loss_function">configure_loss_function() (ClassificationRunner method)</a>
 </li>
+      <li><a href="modules/prompt_generator.html#openprompt.prompts.T5TemplateGenerator.convert_template">convert_template() (T5TemplateGenerator method)</a>
+
+      <ul>
+        <li><a href="modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.convert_template">(TemplateGenerator method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -165,16 +172,20 @@
 </li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.text_classification_dataset.DBpediaProcessor">DBpediaProcessor (class in openprompt.data_utils.text_classification_dataset)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForClassification.deparallelize">deparallelize() (PromptForClassification method)</a>
 
       <ul>
         <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.deparallelize">(PromptForGeneration method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForClassification.device">device (PromptForClassification property)</a>
+
+      <ul>
+        <li><a href="modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.device">(TemplateGenerator property)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -201,14 +212,18 @@
         <li><a href="modules/base.html#openprompt.pipeline_base.PromptModel.forward">(PromptModel method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/base.html#openprompt.prompt_base.Template.from_config">from_config() (Template class method)</a>, <a href="modules/root.html#id15">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.from_config">[2]</a>
 
       <ul>
+        <li><a href="modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.from_config">(TemplateGenerator class method)</a>
+</li>
         <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.from_config">(Verbalizer class method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.from_config">[1]</a>
 </li>
+        <li><a href="modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.from_config">(VerbalizerGenerator class method)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer.from_file">from_file() (AutomaticVerbalizer method)</a>
 
       <ul>
@@ -228,7 +243,13 @@
       <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.gather_outputs">gather_outputs() (Verbalizer method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.gather_outputs">[1]</a>
 </li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.generate">generate() (PromptForGeneration method)</a>
+
+      <ul>
+        <li><a href="modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.generate">(TemplateGenerator method)</a>
 </li>
+        <li><a href="modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.generate">(VerbalizerGenerator method)</a>
+</li>
+      </ul></li>
       <li><a href="modules/verbalizer.html#openprompt.prompts.knowledgeable_verbalizer.KnowledgeableVerbalizer.generate_parameters">generate_parameters() (KnowledgeableVerbalizer method)</a>
 
       <ul>
@@ -268,6 +289,8 @@
 </li>
         <li><a href="modules/data_processors.html#openprompt.data_utils.text_classification_dataset.ImdbProcessor.get_examples">(ImdbProcessor method)</a>
 </li>
+        <li><a href="modules/data_processors.html#openprompt.data_utils.text_classification_dataset.SST2Processor.get_examples">(SST2Processor method)</a>
+</li>
         <li><a href="modules/data_processors.html#openprompt.data_utils.conditional_generation_dataset.WebNLGProcessor.get_examples">(WebNLGProcessor method)</a>
 </li>
       </ul></li>
@@ -277,6 +300,12 @@
 </li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_num_labels">get_num_labels() (DataProcessor method)</a>
 </li>
+      <li><a href="modules/prompt_generator.html#openprompt.prompts.T5TemplateGenerator.get_part_token_id">get_part_token_id() (T5TemplateGenerator method)</a>
+
+      <ul>
+        <li><a href="modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.get_part_token_id">(TemplateGenerator method)</a>
+</li>
+      </ul></li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_test_examples">get_test_examples() (DataProcessor method)</a>
 </li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_train_examples">get_train_examples() (DataProcessor method)</a>
@@ -299,10 +328,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_processors.html#openprompt.data_utils.text_classification_dataset.ImdbProcessor">ImdbProcessor (class in openprompt.data_utils.text_classification_dataset)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/root.html#id5">incorporate_text_example() (Template method)</a>, <a href="modules/root.html#openprompt.prompt_base.Template.incorporate_text_example">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/prompt_generator.html#openprompt.prompts.RobertaVerbalizerGenerator.invalid_label_word">invalid_label_word() (RobertaVerbalizerGenerator method)</a>
+
+      <ul>
+        <li><a href="modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.invalid_label_word">(VerbalizerGenerator method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -318,6 +353,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.label_words">label_words (Verbalizer property)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.label_words">[1]</a>
+</li>
+      <li><a href="modules/trainer.html#openprompt.lm_bff_trainer.LMBFFClassificationRunner">LMBFFClassificationRunner (class in openprompt.lm_bff_trainer)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -424,6 +461,12 @@
       </ul></li>
       <li><a href="modules/root.html#id6">parse_text() (Template method)</a>, <a href="modules/root.html#openprompt.prompt_base.Template.parse_text">[1]</a>
 </li>
+      <li><a href="modules/prompt_generator.html#openprompt.prompts.RobertaVerbalizerGenerator.post_process">post_process() (RobertaVerbalizerGenerator method)</a>
+
+      <ul>
+        <li><a href="modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.post_process">(VerbalizerGenerator method)</a>
+</li>
+      </ul></li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.post_processing">post_processing() (PromptForGeneration method)</a>
 </li>
       <li><a href="modules/base.html#openprompt.prompt_base.Template.post_processing_outputs">post_processing_outputs() (Template method)</a>, <a href="modules/root.html#id9">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.post_processing_outputs">[2]</a>
@@ -500,6 +543,10 @@
 </li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.ReTACREDProcessor">ReTACREDProcessor (class in openprompt.data_utils.relation_classification_dataset)</a>
 </li>
+      <li><a href="modules/prompt_generator.html#openprompt.prompts.RobertaVerbalizerGenerator">RobertaVerbalizerGenerator (class in openprompt.prompts)</a>
+</li>
+      <li><a href="modules/trainer.html#openprompt.lm_bff_trainer.LMBFFClassificationRunner.run">run() (LMBFFClassificationRunner method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -514,13 +561,17 @@
 </li>
       <li><a href="modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_total">sample_total() (FewShotSampler method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/base.html#openprompt.prompt_base.Template.save">save() (Template method)</a>, <a href="modules/root.html#id10">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.save">[2]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.SemEvalProcessor">SemEvalProcessor (class in openprompt.data_utils.relation_classification_dataset)</a>
 </li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.shift_logits_and_labels">shift_logits_and_labels() (PromptForGeneration method)</a>
+</li>
+      <li><a href="modules/data_processors.html#openprompt.data_utils.nli_dataset.SNLIProcessor">SNLIProcessor (class in openprompt.data_utils.nli_dataset)</a>
+</li>
+      <li><a href="modules/data_processors.html#openprompt.data_utils.text_classification_dataset.SST2Processor">SST2Processor (class in openprompt.data_utils.text_classification_dataset)</a>
 </li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForClassification.state_dict">state_dict() (PromptForClassification method)</a>
 
@@ -534,16 +585,20 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/prompt_generator.html#openprompt.prompts.T5TemplateGenerator">T5TemplateGenerator (class in openprompt.prompts)</a>
+</li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.TACREDProcessor">TACREDProcessor (class in openprompt.data_utils.relation_classification_dataset)</a>
 </li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.TACREVProcessor">TACREVProcessor (class in openprompt.data_utils.relation_classification_dataset)</a>
 </li>
       <li><a href="modules/base.html#openprompt.prompt_base.Template">Template (class in openprompt.prompt_base)</a>, <a href="modules/root.html#id0">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template">[2]</a>
 </li>
-      <li><a href="modules/root.html#id11">text (Template property)</a>, <a href="modules/root.html#openprompt.prompt_base.Template.text">[1]</a>
+      <li><a href="modules/prompt_generator.html#openprompt.prompts.TemplateGenerator">TemplateGenerator (class in openprompt.prompts)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/root.html#id11">text (Template property)</a>, <a href="modules/root.html#openprompt.prompt_base.Template.text">[1]</a>
+</li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptDataLoader.tokenize">tokenize() (PromptDataLoader method)</a>
 </li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForClassification.tokenizer">tokenizer (PromptForClassification property)</a>
@@ -563,6 +618,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer">Verbalizer (class in openprompt.prompt_base)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer">[1]</a>
+</li>
+      <li><a href="modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator">VerbalizerGenerator (class in openprompt.prompts)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>

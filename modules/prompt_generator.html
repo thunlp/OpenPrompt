@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt Generator &mdash; OpenPrompt v0.0.1-beta documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/js/custom.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data Utils" href="data_utils.html" />
+    <link rel="prev" title="Verbalizer" href="verbalizer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1-beta
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Prompt Generator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#base-classes">Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#t5templategenerator">T5TemplateGenerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#robertaverbalizergenerator">RobertaVerbalizerGenerator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Prompt Generator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/prompt_generator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="prompt-generator">
+<h1>Prompt Generator<a class="headerlink" href="#prompt-generator" title="Permalink to this headline">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This part contains <cite>TemplateGenerator</cite> and <cite>VerbalizerGenerator</cite>. Both follow the implementation in <a class="reference external" href="https://arxiv.org/pdf/2012.15723.pdf">Making Pre-trained Language Models Better Few-shot Learners(Gao et al. 2020)</a> and conduct automatic generation of hard template and verbalizer based on the given counterpart.</p>
+</section>
+<section id="base-classes">
+<h2>Base Classes<a class="headerlink" href="#base-classes" title="Permalink to this headline">¶</a></h2>
+<p>All prompt generator using LM-BFF method can be realized using the two base classes by simply re-implementing the abstract method in the two classes. The provided implementation <code class="docutils literal notranslate"><span class="pre">T5TemplateGenerator</span></code> and <code class="docutils literal notranslate"><span class="pre">RobertaVerbalizerGenerator</span></code> both inherit from the base classes, respectively.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.prompts.TemplateGenerator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">TemplateGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.modeling_utils.PreTrainedModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer_wrapper</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tokenizers.Tokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbalizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="root.html#openprompt.prompt_base.Verbalizer" title="openprompt.prompt_base.Verbalizer"><span class="pre">openprompt.prompt_base.Verbalizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_number</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forbidden_word_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">yacs.config.CfgNode</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#TemplateGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.TemplateGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the automatic template search implementation for <a class="reference external" href="https://arxiv.org/pdf/2012.15723.pdf">LM-BFF</a>. It uses a generation model to generate multi-part text to fill in the template. By jointly considering all samples in the dataset, it uses beam search decoding method to generate a designated number of templates with the highest probability. The generated template may be uniformly used for all samples in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedModel</span></code>) – A pretrained model for generation.</p></li>
+<li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedTokenizer</span></code>) – A corresponding type tokenizer.</p></li>
+<li><p><strong>tokenizer_wrapper</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">TokenizerWrapper</span></code>) – A corresponding type tokenizer wrapper class.</p></li>
+<li><p><strong>max_length</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[int]</span></code>) – The maximum length of total generated template. Defaults to 20.</p></li>
+<li><p><strong>target_number</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[int]</span></code>) – The number of separate parts to generate, e.g. in T5, every &lt;extra_id_{}&gt; token stands for one part. Defaults to 2.</p></li>
+<li><p><strong>beam_width</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[int]</span></code>) – The beam search width.  Defaults to 100.</p></li>
+<li><p><strong>length_limit</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[List[int]]</span></code>) – The length limit for each part of content, if None, there is no limit. If not None, the list should have a length equal to <cite>target_number</cite>. Defaults to None.</p></li>
+<li><p><strong>forbidden_word_ids</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[List[int]]</span></code>) – Any tokenizer-specific token_id you want to prevent from generating. Defaults to <cite>[]</cite>, i.e. all tokens in the vocabulary are allowed in the generated template.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="openprompt.prompts.TemplateGenerator.device">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">device</span></span><a class="headerlink" href="#openprompt.prompts.TemplateGenerator.device" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the device of the model</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.TemplateGenerator.get_part_token_id">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">get_part_token_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">part_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#TemplateGenerator.get_part_token_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.TemplateGenerator.get_part_token_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the start token id for the current part. It should be specified according to the specific model type. For T5 model, for example, the start token for <cite>part_id=0</cite> is <cite>&lt;extra_id_0&gt;</cite>, this method should return the corresponding token_id.
+:param part_id: The current part id (starts with 0).
+:type part_id: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The corresponding start token_id.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>token_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.TemplateGenerator.convert_template">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">convert_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#TemplateGenerator.convert_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.TemplateGenerator.convert_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the generated template into a standard template for downstream prompt model, return a list of str</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.TemplateGenerator.from_config">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yacs.config.CfgNode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#TemplateGenerator.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.TemplateGenerator.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>template_generator (<a class="reference internal" href="#openprompt.prompts.TemplateGenerator" title="openprompt.prompts.TemplateGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TemplateGenerator</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.TemplateGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">openprompt.data_utils.utils.InputExample</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#TemplateGenerator.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.TemplateGenerator.generate" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dataset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[InputExample]</span></code>) – The dataset based on which template it to be generated.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The generated template text</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>template_text (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[str]</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.prompts.VerbalizerGenerator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">VerbalizerGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.modeling_utils.PreTrainedModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidate_num</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_word_num_per_class</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#VerbalizerGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.VerbalizerGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the automatic label word search implementation in <a href="#id1"><span class="problematic" id="id2">`LM-BFF &lt;https://arxiv.org/pdf/2012.15723.pdf`_</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedModel</span></code>) – A pre-trained model for label word generation.</p></li>
+<li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedTokenizer</span></code>) – The corresponding tokenize.</p></li>
+<li><p><strong>candidate_num</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[int]</span></code>) – The number of label word candidates to generate. Defaults to 100.</p></li>
+<li><p><strong>label_word_num_per_class</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[int]</span></code>) – The number of candidate label words per class. Defaults to 100.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.VerbalizerGenerator.post_process">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#VerbalizerGenerator.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.VerbalizerGenerator.post_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post-processing for generated labrl word.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The original word token.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The post-processed token.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>processed_word (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.VerbalizerGenerator.invalid_label_word">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">invalid_label_word</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#VerbalizerGenerator.invalid_label_word"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.VerbalizerGenerator.invalid_label_word" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decide whether the generated token is a valid label word. Heuristic strategy can be implemented here, e.g. requiring that a label word must be the start token of a word.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The token.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><cite>True</cite> if it cannot be a label word.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>is_invalid (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.VerbalizerGenerator.from_config">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yacs.config.CfgNode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#VerbalizerGenerator.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.VerbalizerGenerator.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>verbalizer_generator (<a class="reference internal" href="#openprompt.prompts.VerbalizerGenerator" title="openprompt.prompts.VerbalizerGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VerbalizerGenerator</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.VerbalizerGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#VerbalizerGenerator.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.VerbalizerGenerator.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate label words.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of generated label word.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>label_words (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[List[str]]</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="t5templategenerator">
+<h2>T5TemplateGenerator<a class="headerlink" href="#t5templategenerator" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.prompts.T5TemplateGenerator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">T5TemplateGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.models.t5.modeling_t5.T5ForConditionalGeneration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.models.t5.tokenization_t5.T5Tokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer_wrapper</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tokenizers.Tokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbalizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="root.html#openprompt.prompt_base.Verbalizer" title="openprompt.prompt_base.Verbalizer"><span class="pre">openprompt.prompt_base.Verbalizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_number</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forbidden_word_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[3,</span> <span class="pre">19794,</span> <span class="pre">22354]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">yacs.config.CfgNode</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#T5TemplateGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.T5TemplateGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic template search using T5 model. This class inherits from <cite>TemplateGenerator</cite>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.T5TemplateGenerator.get_part_token_id">
+<span class="sig-name descname"><span class="pre">get_part_token_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">part_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#T5TemplateGenerator.get_part_token_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.T5TemplateGenerator.get_part_token_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the start token id for the current part. It should be specified according to the specific model type. For T5 model, for example, the start token for <cite>part_id=0</cite> is <cite>&lt;extra_id_0&gt;</cite>, this method should return the corresponding token_id.
+:param part_id: The current part id (starts with 0).
+:type part_id: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The corresponding start token_id.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>token_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.T5TemplateGenerator.convert_template">
+<span class="sig-name descname"><span class="pre">convert_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_text_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#T5TemplateGenerator.convert_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.T5TemplateGenerator.convert_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the generated template into a standard template for downstream prompt model, return a list of str</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="robertaverbalizergenerator">
+<h2>RobertaVerbalizerGenerator<a class="headerlink" href="#robertaverbalizergenerator" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.prompts.RobertaVerbalizerGenerator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">RobertaVerbalizerGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.models.roberta.modeling_roberta.RobertaForMaskedLM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.models.roberta.tokenization_roberta.RobertaTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidate_num</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_word_num_per_class</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#RobertaVerbalizerGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.RobertaVerbalizerGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.RobertaVerbalizerGenerator.invalid_label_word">
+<span class="sig-name descname"><span class="pre">invalid_label_word</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#RobertaVerbalizerGenerator.invalid_label_word"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.RobertaVerbalizerGenerator.invalid_label_word" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decide whether the generated token is a valid label word. Heuristic strategy can be implemented here, e.g. requiring that a label word must be the start token of a word.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The token.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><cite>True</cite> if it cannot be a label word.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>is_invalid (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.RobertaVerbalizerGenerator.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#RobertaVerbalizerGenerator.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.RobertaVerbalizerGenerator.post_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post-processing for generated labrl word.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>word</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The original word token.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The post-processed token.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>processed_word (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="verbalizer.html" class="btn btn-neutral float-left" title="Verbalizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data_utils.html" class="btn btn-neutral float-right" title="Data Utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

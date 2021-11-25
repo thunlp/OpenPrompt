@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openprompt.prompts.prompt_generator &mdash; OpenPrompt v0.0.1-beta documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/js/custom.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> OpenPrompt
+          </a>
+              <div class="version">
+                v0.0.1-beta
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/examples.html">Introduction with an Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/template.html">How to Write a Template?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/verbalizer.html">How to Write a Verbalizer?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/base.html">Base Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/template.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/prompt_generator.html">Prompt Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_utils.html">Data Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data_processors.html">Data Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/trainer.html">Trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/utils.html">Utils Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/configuration.html">Play with Configuration</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPrompt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>openprompt.prompts.prompt_generator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openprompt.prompts.prompt_generator</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="ne">ValueError</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">tokenizers</span> <span class="kn">import</span> <span class="n">Tokenizer</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">from</span> <span class="nn">yacs.config</span> <span class="kn">import</span> <span class="n">CfgNode</span>
+<span class="kn">from</span> <span class="nn">openprompt.data_utils.utils</span> <span class="kn">import</span> <span class="n">InputExample</span><span class="p">,</span> <span class="n">InputFeatures</span>
+<span class="kn">from</span> <span class="nn">openprompt.pipeline_base</span> <span class="kn">import</span> <span class="n">PromptDataLoader</span><span class="p">,</span> <span class="n">PromptModel</span>
+
+<span class="kn">from</span> <span class="nn">openprompt.prompt_base</span> <span class="kn">import</span> <span class="n">Template</span><span class="p">,</span> <span class="n">Verbalizer</span>
+<span class="kn">from</span> <span class="nn">openprompt.prompts</span> <span class="kn">import</span> <span class="n">ManualTemplate</span><span class="p">,</span> <span class="n">ManualVerbalizer</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">T5Tokenizer</span><span class="p">,</span> <span class="n">T5ForConditionalGeneration</span><span class="p">,</span> <span class="n">BertForMaskedLM</span><span class="p">,</span> <span class="n">RobertaForMaskedLM</span><span class="p">,</span> <span class="n">RobertaTokenizer</span><span class="p">,</span> <span class="n">PreTrainedModel</span><span class="p">,</span> <span class="n">PreTrainedTokenizer</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">signature</span>
+<span class="kn">from</span> <span class="nn">..config</span> <span class="kn">import</span> <span class="n">convert_cfg_to_dict</span>
+<span class="kn">from</span> <span class="nn">torch.nn.parallel</span> <span class="kn">import</span> <span class="n">DataParallel</span>
+
+<span class="k">class</span> <span class="nc">LMBFFTemplateGenerationWrapper</span><span class="p">(</span><span class="n">ManualTemplate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a special template used only for earch of template in LM-BFF. For example, a template could be ``{&quot;placeholder&quot;: &quot;text_a&quot;}{&quot;mask&quot;}{&quot;meta&quot;:&quot;labelword&quot;}{&quot;mask&quot;}``, where ``{&quot;meta&quot;:&quot;labelword&quot;}`` is replaced by label_words in verbalizer in `wrap_one_example` method, and ``{&quot;mask&quot;}`` is replaced by special tokens used for generation, for T5, it is ``&lt;extra_id_0&gt;, &lt;extra_id_1&gt;, ...``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.</span>
+<span class="sd">        verbalizer (:obj:`ManualVerbalizer`): A verbalizer to provide label_words.</span>
+<span class="sd">        text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.</span>
+<span class="sd">        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``&lt;mask&gt;``</span>
+<span class="sd">        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{&#39;&lt;text_a&gt;&#39;: &#39;text_a&#39;, &#39;&lt;text_b&gt;&#39;: &#39;text_b&#39;}``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">T5Tokenizer</span><span class="p">,</span>
+                 <span class="n">verbalizer</span><span class="p">:</span> <span class="n">ManualVerbalizer</span><span class="p">,</span>
+                 <span class="n">text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">mask_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">,</span>
+                 <span class="n">placeholder_mapping</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_a&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;text_b&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_b&#39;</span><span class="p">},</span>
+                <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">,</span> 
+                         <span class="n">mask_token</span><span class="o">=</span><span class="n">mask_token</span><span class="p">,</span>
+                         <span class="n">placeholder_mapping</span><span class="o">=</span><span class="n">placeholder_mapping</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span> <span class="o">=</span> <span class="n">verbalizer</span>
+    
+    <span class="k">def</span> <span class="nf">wrap_one_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                         <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">example</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;labelword&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">label_words</span><span class="p">[</span><span class="n">example</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">wrapped_example</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">wrap_one_example</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+
+        <span class="c1"># TODO: replace &lt;mask&gt; with special tokens in each generation model</span>
+        <span class="c1"># e.g. in T5 multi-parts generation use &lt;extra_id_0&gt;, &lt;extra_id_1&gt;, ...</span>
+        <span class="c1"># handle different types of plm</span>
+        <span class="n">current_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_tokens_to_ids</span><span class="p">(</span><span class="s1">&#39;&lt;extra_id_0&gt;&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">wrapped_example</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_ids_to_tokens</span><span class="p">(</span><span class="n">current_idx</span><span class="p">)</span>
+                <span class="n">current_idx</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">wrapped_example</span>
+
+<div class="viewcode-block" id="TemplateGenerator"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.TemplateGenerator">[docs]</a><span class="k">class</span> <span class="nc">TemplateGenerator</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; This is the automatic template search implementation for `LM-BFF &lt;https://arxiv.org/pdf/2012.15723.pdf&gt;`_. It uses a generation model to generate multi-part text to fill in the template. By jointly considering all samples in the dataset, it uses beam search decoding method to generate a designated number of templates with the highest probability. The generated template may be uniformly used for all samples in the dataset.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (:obj:`PretrainedModel`): A pretrained model for generation.</span>
+<span class="sd">        tokenizer (:obj:`PretrainedTokenizer`): A corresponding type tokenizer.</span>
+<span class="sd">        tokenizer_wrapper (:obj:`TokenizerWrapper`): A corresponding type tokenizer wrapper class.</span>
+<span class="sd">        max_length (:obj:`Optional[int]`): The maximum length of total generated template. Defaults to 20.</span>
+<span class="sd">        target_number (:obj:`Optional[int]`): The number of separate parts to generate, e.g. in T5, every &lt;extra_id_{}&gt; token stands for one part. Defaults to 2.</span>
+<span class="sd">        beam_width (:obj:`Optional[int]`): The beam search width.  Defaults to 100.</span>
+<span class="sd">        length_limit (:obj:`Optional[List[int]]`): The length limit for each part of content, if None, there is no limit. If not None, the list should have a length equal to `target_number`. Defaults to None.</span>
+<span class="sd">        forbidden_word_ids (:obj:`Optional[List[int]]`): Any tokenizer-specific token_id you want to prevent from generating. Defaults to `[]`, i.e. all tokens in the vocabulary are allowed in the generated template.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span>
+                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
+                 <span class="n">tokenizer_wrapper</span><span class="p">:</span> <span class="n">Tokenizer</span><span class="p">,</span>
+                 <span class="n">verbalizer</span><span class="p">:</span> <span class="n">Verbalizer</span><span class="p">,</span>
+                 <span class="n">max_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+                 <span class="n">target_number</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                 <span class="n">beam_width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                 <span class="n">length_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">forbidden_word_ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
+                 <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span> <span class="o">=</span> <span class="n">tokenizer_wrapper</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">=</span> <span class="n">verbalizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_number</span> <span class="o">=</span> <span class="n">target_number</span> <span class="c1"># number of parts to generate in one sample</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam_width</span> <span class="o">=</span> <span class="n">beam_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">=</span> <span class="n">max_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length_limit</span> <span class="o">=</span> <span class="n">length_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="c1"># Forbid single space token, &quot;....&quot;, and &quot;..........&quot;, and some other tokens based on vocab</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forbidden_word_ids</span> <span class="o">=</span> <span class="n">forbidden_word_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sent_end_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_tokens_to_ids</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_ids_buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_mask_buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return the device of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">DataParallel</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">device</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span>
+
+    <span class="k">def</span> <span class="nf">_register_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_ids_buffer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_ids_buffer</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">input_ids</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attention_mask_buffer</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">attention_mask</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_ids_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">input_ids_buffer</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">input_ids</span><span class="o">.</span><span class="n">detach</span><span class="p">()])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attention_mask_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">attention_mask_buffer</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">attention_mask</span><span class="o">.</span><span class="n">detach</span><span class="p">()])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">detach</span><span class="p">()])</span>
+
+<div class="viewcode-block" id="TemplateGenerator.get_part_token_id"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.get_part_token_id">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_part_token_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the start token id for the current part. It should be specified according to the specific model type. For T5 model, for example, the start token for `part_id=0` is `&lt;extra_id_0&gt;`, this method should return the corresponding token_id.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            part_id (:obj:`int`): The current part id (starts with 0).</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            token_id (:obj:`int`): The corresponding start token_id.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+    
+<div class="viewcode-block" id="TemplateGenerator.convert_template"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.convert_template">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">convert_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the generated template into a standard template for downstream prompt model, return a list of str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+        
+    <span class="k">def</span> <span class="nf">_get_templates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">inner_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">module</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">DataParallel</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="n">input_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_ids_buffer</span>
+        <span class="n">attention_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_mask_buffer</span>
+
+        <span class="n">ori_decoder_input_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">input_ids</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span><span class="p">))</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+        <span class="n">ori_decoder_input_ids</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">inner_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">decoder_start_token_id</span>
+
+
+        <span class="c1"># decoder_input_ids: decoder inputs for next regressive generation</span>
+        <span class="c1"># ll: log likelihood</span>
+        <span class="c1"># output_id: which part of generated contents we are at</span>
+        <span class="c1"># output: generated content so far</span>
+        <span class="c1"># last_length (deprecated): how long we have generated for this part</span>
+        <span class="n">current_output</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;decoder_input_ids&#39;</span><span class="p">:</span> <span class="n">ori_decoder_input_ids</span><span class="p">,</span> <span class="s1">&#39;ll&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;output_id&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;last_length&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)):</span>
+            <span class="n">new_current_output</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">current_output</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;output_id&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_number</span><span class="p">:</span>
+                    <span class="c1"># Enough contents</span>
+                    <span class="n">new_current_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">decoder_input_ids</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;decoder_input_ids&#39;</span><span class="p">]</span>
+
+                <span class="c1"># Forward</span>
+                <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span>
+                <span class="n">turn</span> <span class="o">=</span> <span class="n">input_ids</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
+                <span class="k">if</span> <span class="n">input_ids</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">%</span> <span class="n">batch_size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">turn</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">aggr_output</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">turn</span><span class="p">):</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">t</span> <span class="o">*</span> <span class="n">batch_size</span>
+                    <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">((</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">input_ids</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+                    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                        <span class="n">aggr_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">input_ids</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="n">attention_mask</span><span class="o">=</span><span class="n">attention_mask</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="n">decoder_input_ids</span><span class="o">=</span><span class="n">decoder_input_ids</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">input_ids</span><span class="o">.</span><span class="n">device</span><span class="p">)[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">aggr_output</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">aggr_output</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                <span class="c1"># Gather results across all input sentences, and sort generated tokens by log likelihood</span>
+                <span class="n">aggr_output</span> <span class="o">=</span> <span class="n">aggr_output</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">log_denominator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">logsumexp</span><span class="p">(</span><span class="n">aggr_output</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">inner_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">))</span>
+                <span class="n">ids</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">aggr_output</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">beam_width</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+                
+                <span class="k">for</span> <span class="n">word_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                    <span class="n">output_id</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;output_id&#39;</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">word_id</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_part_token_id</span><span class="p">(</span><span class="n">output_id</span><span class="p">)</span> <span class="ow">or</span> <span class="n">word_id</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span><span class="p">:</span>
+                        <span class="c1"># Finish one part</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;last_length&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_limit</span><span class="p">[</span><span class="n">output_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+                            <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">output_id</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">last_length</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">last_length</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;last_length&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>
+
+                    <span class="n">output_text</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">word_id</span><span class="p">]</span>
+                    <span class="n">ll</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;ll&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">aggr_output</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">word_id</span><span class="p">]</span> <span class="o">-</span> <span class="n">log_denominator</span>
+                    <span class="n">new_decoder_input_ids</span> <span class="o">=</span> <span class="n">decoder_input_ids</span><span class="o">.</span><span class="n">new_zeros</span><span class="p">(</span><span class="n">decoder_input_ids</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+                    <span class="n">new_decoder_input_ids</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">decoder_input_ids</span>
+                    <span class="n">new_decoder_input_ids</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">word_id</span>
+                    
+                    <span class="k">if</span> <span class="n">word_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidden_word_ids</span><span class="p">:</span>
+                        <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                    
+                    <span class="c1"># Forbid continuous &quot;.&quot;</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">output_text</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">sent_end_id</span> <span class="ow">and</span> <span class="n">output_text</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">sent_end_id</span><span class="p">:</span>
+                        <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+                        <span class="c1"># Add new results to beam search pool</span>
+                        <span class="n">new_item</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;decoder_input_ids&#39;</span><span class="p">:</span> <span class="n">new_decoder_input_ids</span><span class="p">,</span> <span class="s1">&#39;ll&#39;</span><span class="p">:</span> <span class="n">ll</span><span class="p">,</span> <span class="s1">&#39;output_id&#39;</span><span class="p">:</span> <span class="n">output_id</span><span class="p">,</span> <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="n">output_text</span><span class="p">,</span> <span class="s1">&#39;last_length&#39;</span><span class="p">:</span> <span class="n">last_length</span><span class="p">}</span>
+                        <span class="n">new_current_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_item</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_current_output</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">new_current_output</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;ll&#39;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">new_current_output</span> <span class="o">=</span> <span class="n">new_current_output</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">beam_width</span><span class="p">]</span>
+            <span class="n">current_output</span> <span class="o">=</span> <span class="n">new_current_output</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">templates_text</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">current_output</span><span class="p">:</span>
+            <span class="n">generate_text</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]:</span>
+                <span class="n">generate_text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">_convert_id_to_token</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">templates_text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_template</span><span class="p">(</span><span class="n">generate_text</span><span class="p">)))</span>
+    
+    <span class="k">def</span> <span class="nf">_show_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Templates are </span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates_text</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="TemplateGenerator.from_config"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.from_config">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            template_generator (:obj:`TemplateGenerator`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">init_args</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
+        <span class="n">_init_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">convert_cfg_to_dict</span><span class="p">(</span><span class="n">config</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+        <span class="n">init_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_init_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_init_dict</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">init_args</span><span class="p">}</span>
+        <span class="n">init_dict</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="n">template_generator</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">init_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">template_generator</span></div>
+    
+    <span class="k">def</span> <span class="nf">release_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="TemplateGenerator.generate"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">InputExample</span><span class="p">]):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            dataset (:obj:`List[InputExample]`): The dataset based on which template it to be generated.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            template_text (:obj:`List[str]`): The generated template text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">template_for_auto_t</span> <span class="o">=</span> <span class="n">LMBFFTemplateGenerationWrapper</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">verbalizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="p">)</span>
+        <span class="n">dataloader</span> <span class="o">=</span> <span class="n">PromptDataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">template_for_auto_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span> <span class="c1"># register all data at once</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_register_buffer</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_templates</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_show_template</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates_text</span></div></div>
+
+<div class="viewcode-block" id="T5TemplateGenerator"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.T5TemplateGenerator">[docs]</a><span class="k">class</span> <span class="nc">T5TemplateGenerator</span><span class="p">(</span><span class="n">TemplateGenerator</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Automatic template search using T5 model. This class inherits from `TemplateGenerator`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">model</span><span class="p">:</span> <span class="n">T5ForConditionalGeneration</span><span class="p">,</span>
+                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">T5Tokenizer</span><span class="p">,</span>
+                 <span class="n">tokenizer_wrapper</span><span class="p">:</span> <span class="n">Tokenizer</span><span class="p">,</span>
+                 <span class="n">verbalizer</span><span class="p">:</span> <span class="n">Verbalizer</span><span class="p">,</span>
+                 <span class="n">max_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+                 <span class="n">target_number</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                 <span class="n">beam_width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                 <span class="n">length_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">forbidden_word_ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">19794</span><span class="p">,</span> <span class="mi">22354</span><span class="p">],</span>
+                 <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">,</span>
+                        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">,</span>
+                        <span class="n">tokenizer_wrapper</span><span class="o">=</span><span class="n">tokenizer_wrapper</span><span class="p">,</span>
+                        <span class="n">verbalizer</span> <span class="o">=</span> <span class="n">verbalizer</span><span class="p">,</span>
+                        <span class="n">max_length</span> <span class="o">=</span> <span class="n">max_length</span><span class="p">,</span>
+                        <span class="n">target_number</span><span class="o">=</span> <span class="n">target_number</span><span class="p">,</span>
+                        <span class="n">beam_width</span> <span class="o">=</span> <span class="n">beam_width</span><span class="p">,</span>
+                        <span class="n">length_limit</span> <span class="o">=</span> <span class="n">length_limit</span><span class="p">,</span>
+                        <span class="n">forbidden_word_ids</span> <span class="o">=</span> <span class="n">forbidden_word_ids</span><span class="p">,</span>
+                        <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+<div class="viewcode-block" id="T5TemplateGenerator.get_part_token_id"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.T5TemplateGenerator.get_part_token_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_part_token_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_tokens_to_ids</span><span class="p">(</span><span class="s1">&#39;&lt;extra_id_0&gt;&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">part_id</span></div>
+
+<div class="viewcode-block" id="T5TemplateGenerator.convert_template"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.T5TemplateGenerator.convert_template">[docs]</a>    <span class="k">def</span> <span class="nf">convert_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generate_text_list</span><span class="p">):</span>
+        <span class="n">text_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_tokens_to_string</span><span class="p">(</span><span class="n">generate_text_list</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;extra_id_0&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;{&quot;placeholder&quot;:&quot;text_a&quot;}&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;extra_id_1&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39; {&quot;mask&quot;}&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;extra_id_2&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39; {&quot;placeholder&quot;: &quot;text_b&quot;}&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;/s&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="c1"># incase no &lt;extra_id_1&gt; (generation stop by maximum length)</span>
+        <span class="k">if</span> <span class="s1">&#39;{&quot;mask&quot;}&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">text_list</span><span class="p">:</span>
+            <span class="n">text_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{&quot;mask&quot;}&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;{&quot;placeholder&quot;: &quot;text_b&quot;}&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">text_list</span><span class="p">:</span>
+            <span class="n">text_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{&quot;placeholder&quot;: &quot;text_b&quot;}&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text_list</span></div></div>
+
+
+<div class="viewcode-block" id="VerbalizerGenerator"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator">[docs]</a><span class="k">class</span> <span class="nc">VerbalizerGenerator</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    This is the automatic label word search implementation in `LM-BFF &lt;https://arxiv.org/pdf/2012.15723.pdf`_. </span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (:obj:`PretrainedModel`): A pre-trained model for label word generation.</span>
+<span class="sd">        tokenizer (:obj:`PretrainedTokenizer`): The corresponding tokenize.</span>
+<span class="sd">        candidate_num (:obj:`Optional[int]`): The number of label word candidates to generate. Defaults to 100.</span>
+<span class="sd">        label_word_num_per_class (:obj:`Optional[int]`): The number of candidate label words per class. Defaults to 100.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span>
+                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
+                 <span class="n">candidate_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                 <span class="n">label_word_num_per_class</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">candidate_num</span> <span class="o">=</span> <span class="n">candidate_num</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_word_num_per_class</span> <span class="o">=</span> <span class="n">label_word_num_per_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">register_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">inner_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">module</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">DataParallel</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+            <span class="n">forward_keys</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">inner_model</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
+            <span class="n">input_batch</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">forward_keys</span><span class="p">}</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="o">**</span><span class="n">input_batch</span><span class="p">)</span><span class="o">.</span><span class="n">logits</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;loss_ids&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span> <span class="o">=</span> <span class="n">logits</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span><span class="p">,</span> <span class="n">logits</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">detach</span><span class="p">()])</span>
+    
+<div class="viewcode-block" id="VerbalizerGenerator.post_process"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.post_process">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Post-processing for generated labrl word.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            word (:obj:`str`): The original word token.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            processed_word (:obj:`str`): The post-processed token.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">inner_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">module</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">DataParallel</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_model</span><span class="p">,</span> <span class="n">RobertaForMaskedLM</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">word</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;Ġ&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_model</span><span class="p">,</span> <span class="n">BertForMaskedLM</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">word</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not supported yet&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">inner_model</span><span class="p">)))</span> <span class="c1"># TODO add more model</span></div>
+
+<div class="viewcode-block" id="VerbalizerGenerator.invalid_label_word"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.invalid_label_word">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">invalid_label_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decide whether the generated token is a valid label word. Heuristic strategy can be implemented here, e.g. requiring that a label word must be the start token of a word.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            word (:obj:`str`): The token.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            is_invalid (:obj:`bool`): `True` if it cannot be a label word.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">inner_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">module</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">DataParallel</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_model</span><span class="p">,</span> <span class="n">RobertaForMaskedLM</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Ġ&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_model</span><span class="p">,</span> <span class="n">BertForMaskedLM</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not supported yet&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">inner_model</span><span class="p">)))</span> <span class="c1"># TODO</span></div>
+            
+    <span class="k">def</span> <span class="nf">_show_verbalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Verbalizer is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_words</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">_find_verbalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finding verbalizer ...&quot;</span><span class="p">)</span>
+        <span class="n">label_words</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_get_top_words</span><span class="p">()</span>
+        <span class="n">label_words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_top_group</span><span class="p">(</span><span class="n">candidates</span><span class="o">=</span><span class="n">label_words</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">label_words</span>
+
+    <span class="k">def</span> <span class="nf">_eval_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="n">label_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span><span class="p">[:,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">group</span><span class="p">)]</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">label_logits</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">correct</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">correct</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="p">))</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_top_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]):</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">candidates</span><span class="p">))</span>
+        <span class="n">group_scores</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_eval_group</span><span class="p">,</span> <span class="n">groups</span><span class="p">))</span>
+
+        <span class="c1"># Take top-n.</span>
+        <span class="n">best_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">group_scores</span><span class="p">))[:</span><span class="bp">self</span><span class="o">.</span><span class="n">candidate_num</span><span class="p">]</span>
+        <span class="n">best_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">groups</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">best_idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">best_groups</span>
+    
+    <span class="k">def</span> <span class="nf">_get_top_words</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">label_words_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">label_id</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="p">):</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="o">==</span><span class="n">label_id</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">kept</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">scores</span><span class="p">):</span>
+                <span class="n">word</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_ids_to_tokens</span><span class="p">([</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_label_word</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">kept</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">label_words_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kept</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">label_word_num_per_class</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">label_words_ids</span>
+    
+<div class="viewcode-block" id="VerbalizerGenerator.from_config"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.from_config">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            verbalizer_generator (:obj:`VerbalizerGenerator`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">init_args</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
+        <span class="n">_init_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">convert_cfg_to_dict</span><span class="p">(</span><span class="n">config</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+        <span class="n">init_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_init_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_init_dict</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">init_args</span><span class="p">}</span>
+        <span class="n">verbalizer_generator</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">init_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">verbalizer_generator</span></div>
+    
+    <span class="k">def</span> <span class="nf">release_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+
+<div class="viewcode-block" id="VerbalizerGenerator.generate"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate label words.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            label_words (:obj:`List[List[str]]`): A list of generated label word.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_words_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_verbalizer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_ids_to_tokens</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_words_ids</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_show_verbalizer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span></div></div>
+
+<div class="viewcode-block" id="RobertaVerbalizerGenerator"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.RobertaVerbalizerGenerator">[docs]</a><span class="k">class</span> <span class="nc">RobertaVerbalizerGenerator</span><span class="p">(</span><span class="n">VerbalizerGenerator</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">model</span><span class="p">:</span> <span class="n">RobertaForMaskedLM</span><span class="p">,</span>
+                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">RobertaTokenizer</span><span class="p">,</span>
+                 <span class="n">candidate_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                 <span class="n">label_word_num_per_class</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">,</span>
+                        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">,</span>
+                        <span class="n">candidate_num</span> <span class="o">=</span> <span class="n">candidate_num</span><span class="p">,</span>
+                        <span class="n">label_word_num_per_class</span> <span class="o">=</span> <span class="n">label_word_num_per_class</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RobertaVerbalizerGenerator.invalid_label_word"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.RobertaVerbalizerGenerator.invalid_label_word">[docs]</a>    <span class="k">def</span> <span class="nf">invalid_label_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Ġ&#39;</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="RobertaVerbalizerGenerator.post_process"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.RobertaVerbalizerGenerator.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">word</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;Ġ&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -58,12 +58,14 @@
 <li class="toctree-l1"><a class="reference internal" href="base.html">Base Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="template.html">Templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prompt_generator.html">Prompt Generator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_utils.html">Data Utils</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data Processors</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#basic-processor">Basic Processor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#text-classification-processor">Text Classification Processor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#entity-typing-processor">Entity Typing Processor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#relation-classification-processor">Relation Classification Processor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#language-inference-processor">Language Inference Processor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#conditional-generation-processor">Conditional Generation Processor</a></li>
 </ul>
 </li>
@@ -369,6 +371,59 @@ labels file should have label names seperated by any blank characters, such as</
 </dd></dl>
 
 </section>
+<section id="sst2processor">
+<h3>SST2Processor<a class="headerlink" href="#sst2processor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.text_classification_dataset.SST2Processor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SST2Processor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/text_classification_dataset.html#SST2Processor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.text_classification_dataset.SST2Processor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://nlp.stanford.edu/sentiment/index.html">SST-2</a> dataset is a dataset for sentiment analysis. It is a modified version containing only binary labels (negative or somewhat negative vs somewhat positive or positive with neutral sentences discarded) on top of the original 5-labeled dataset released first in <a class="reference external" href="https://aclanthology.org/D13-1170.pdf">Recursive Deep Models for Semantic Compositionality Over a Sentiment Treebank</a></p>
+<p>We use the data released in <a class="reference external" href="https://arxiv.org/pdf/2012.15723.pdf">Making Pre-trained Language Models Better Few-shot Learners (Gao et al. 2020)</a></p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.lmbff_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets/TextClassification&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;SST-2&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_dev_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6920</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">872</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1821</span>
+<span class="k">assert</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_a</span> <span class="o">==</span> <span class="s1">&#39;a stirring , funny and finally transporting re-imagining of beauty and the beast and 1930s horror films&#39;</span>
+<span class="k">assert</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.data_utils.text_classification_dataset.SST2Processor.get_examples">
+<span class="sig-name descname"><span class="pre">get_examples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/data_utils/text_classification_dataset.html#SST2Processor.get_examples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.text_classification_dataset.SST2Processor.get_examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the <code class="xref py py-obj docutils literal notranslate"><span class="pre">split</span></code> of dataset under <code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code> is the base path of the dataset, for example:</p>
+<p>training file could be located in <code class="docutils literal notranslate"><span class="pre">data_dir/train.txt</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – the base path of the dataset</p></li>
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – <code class="docutils literal notranslate"><span class="pre">train</span></code> / <code class="docutils literal notranslate"><span class="pre">dev</span></code> / <code class="docutils literal notranslate"><span class="pre">test</span></code> / <code class="docutils literal notranslate"><span class="pre">unlabeled</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return a list of <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[InputExample]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 <section id="entity-typing-processor">
 <h2>Entity Typing Processor<a class="headerlink" href="#entity-typing-processor" title="Permalink to this headline">¶</a></h2>
@@ -532,6 +587,41 @@ labels file should have label names seperated by any blank characters, such as</
 <span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;head&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;configuration&quot;</span>
 <span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;tail&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;elements&quot;</span>
 <span class="k">assert</span> <span class="n">dev_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="mi">18</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+<section id="language-inference-processor">
+<h2>Language Inference Processor<a class="headerlink" href="#language-inference-processor" title="Permalink to this headline">¶</a></h2>
+<section id="snliprocessor">
+<h3>SNLIProcessor<a class="headerlink" href="#snliprocessor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.data_utils.nli_dataset.SNLIProcessor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SNLIProcessor</span></span><a class="reference internal" href="../_modules/openprompt/data_utils/nli_dataset.html#SNLIProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.data_utils.nli_dataset.SNLIProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://nlp.stanford.edu/projects/snli/">The Stanford Natural Language Inference (SNLI) corpus</a> is a dataset for natural language inference. It is first released in <a class="reference external" href="https://nlp.stanford.edu/pubs/snli_paper.pdf">A large annotated corpus for learning natural language inference (Bowman et al. 2015)</a></p>
+<p>We use the data released in <a class="reference external" href="https://arxiv.org/pdf/2012.15723.pdf">Making Pre-trained Language Models Better Few-shot Learners (Gao et al. 2020)</a></p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openprompt.data_utils.lmbff_dataset</span> <span class="kn">import</span> <span class="n">PROCESSORS</span>
+
+<span class="n">base_path</span> <span class="o">=</span> <span class="s2">&quot;datasets&quot;</span>
+
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;SNLI&quot;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="s1">&#39;16-13&#39;</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_dev_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;entailment&#39;</span><span class="p">,</span> <span class="s1">&#39;neutral&#39;</span><span class="p">,</span> <span class="s1">&#39;contradiction&#39;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">549367</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">9842</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">9824</span>
+<span class="k">assert</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_a</span> <span class="o">==</span> <span class="s1">&#39;A person on a horse jumps over a broken down airplane.&#39;</span>
+<span class="k">assert</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text_b</span> <span class="o">==</span> <span class="s1">&#39;A person is training his horse for a competition.&#39;</span>
+<span class="k">assert</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="mi">1</span>
 </pre></div>
 </div>
 </dd></dl>

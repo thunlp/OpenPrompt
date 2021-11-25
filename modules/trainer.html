@@ -58,11 +58,13 @@
 <li class="toctree-l1"><a class="reference internal" href="base.html">Base Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="template.html">Templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="verbalizer.html">Verbalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prompt_generator.html">Prompt Generator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_utils.html">Data Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_processors.html">Data Processors</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Trainer</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#classification-runner">Classification Runner</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generation-runner">Generation Runner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lm-bff-classification-runner">LM-BFF Classification Runner</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utils Functions</a></li>
@@ -149,6 +151,33 @@ This class is specially implemented for generation.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+</section>
+<section id="lm-bff-classification-runner">
+<h2>LM-BFF Classification Runner<a class="headerlink" href="#lm-bff-classification-runner" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.lm_bff_trainer.LMBFFClassificationRunner">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">LMBFFClassificationRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_dataset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">transformers.data.processors.utils.InputExample</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_dataset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">transformers.data.processors.utils.InputExample</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_dataset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">transformers.data.processors.utils.InputExample</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbalizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="root.html#openprompt.prompt_base.Verbalizer" title="openprompt.prompt_base.Verbalizer"><span class="pre">openprompt.prompt_base.Verbalizer</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">yacs.config.CfgNode</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/lm_bff_trainer.html#LMBFFClassificationRunner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.lm_bff_trainer.LMBFFClassificationRunner" title="Permalink to this definition">¶</a></dt>
+<dd><p>This runner implements the LM-BFF training process in paper <a class="reference external" href="https://arxiv.org/pdf/2012.15723.pdf">Making Pre-trained Language Models Better Few-shot Learners(Gao et al. 2020)</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_dataset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[InputExample]</span></code>) – The dataset for training</p></li>
+<li><p><strong>valid_dataset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[InputExample]</span></code>) – The dataset for validation</p></li>
+<li><p><strong>test_dataset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[InputExample]</span></code>) – The dataset for test</p></li>
+<li><p><strong>verbalizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[Verbalizer]</span></code>) – The manually designed verbalizer for template generation. Defaults to None.</p></li>
+<li><p><strong>template</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[Verbalizer]</span></code>) – The manually designed template for verbalizer generation. Defaults to None.</p></li>
+<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – A configuration object</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.lm_bff_trainer.LMBFFClassificationRunner.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/lm_bff_trainer.html#LMBFFClassificationRunner.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.lm_bff_trainer.LMBFFClassificationRunner.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run LM-BFF. if both <cite>auto_v</cite> and <cite>auto_v</cite> are set to True in <code class="docutils literal notranslate"><span class="pre">config</span></code>, automatic template generation will be performed first.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
