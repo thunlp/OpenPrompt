@@ -2,38 +2,34 @@
 
 <div align="center">
 
-<img src="https://z3.ax1x.com/2021/09/14/4Fzoi6.png" width="300px">
-
+<img src="https://z3.ax1x.com/2021/11/11/IwED0K.png" width="350px">
+  
 **An Open-Source Framework for Prompt-learning.**
 
 ------
-
-
 
 <p align="center">
   <a href="#Overview">Overview</a> •
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
   <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> • 
-  <a href="https://arxiv.org/abs/2111.01998">Paper</a> • 
-
-
-
+  <a href="https://arxiv.org/abs/2111.01998">Paper</a> •  
+  <a href="#citation">Citation</a> •
+  <a href="https://github.com/thunlp/OpenPrompt/tree/main/results/">Performance</a> •
 </p>
 
 </div>
 
 ![version](https://img.shields.io/badge/version-v0.0.1--beta-blue)
 
-
-
 ## What's New?
 
-- Nov 2011: Now we have released a paper [OpenPrompt: An Open-source Framework for Prompt-learning](https://arxiv.org/abs/2111.01998).
 
-- Nov 2011: We made some major changes from the last version, where a flexible template language is newly introduced! Part of the docs is outdated and we will fix it soon. 
+- Nov 2021: Now we have released a paper [OpenPrompt: An Open-source Framework for Prompt-learning](https://arxiv.org/abs/2111.01998).
 
-  ​
+- Nov 2021 PrefixTuning supports t5 now.
+- Nov 2021: We made some major changes from the last version, where a flexible template language is newly introduced! Part of the docs is outdated and we will fix it soon. 
+
 
 ## Overview
 
@@ -122,12 +118,8 @@ dataset = [ # For simplicity, there's only two examples
 Choose a PLM to support your task. Different models have different attributes, we encourge you to use OpenPrompt to explore the potential of various PLMs. OpenPrompt is compatible with models on [huggingface](https://huggingface.co/transformers/).
 
 ```python
-from openprompt.plms import get_model_class
-model_class = get_model_class(plm_type = "bert")
-model_path = "bert-base-cased"
-bertConfig = model_class.config.from_pretrained(model_path)
-bertTokenizer = model_class.tokenizer.from_pretrained(model_path)
-bertModel = model_class.model.from_pretrained(model_path)
+from openprompt.plms import load_plm
+plm, tokenizer, model_config, WrapperClass = load_plm("bert", "bert-base-cased")
 ```
 
 
@@ -135,12 +127,13 @@ bertModel = model_class.model.from_pretrained(model_path)
 #### Step 3: Define a Template.
 
 A `Template` is a modifier of the original input text, which is also one of the most important modules in prompt-learning. 
+We have defined `text_a` in Step 1.
 
 ```python
 from openprompt.prompts import ManualTemplate
 promptTemplate = ManualTemplate(
-    text = ["<text_a>", "It", "was", "<mask>"],
-    tokenizer = bertTokenizer,
+    text = '{"placeholder":"text_a"} It was {"mask"}',
+    tokenizer = tokenizer,
 )
 ```
 
@@ -158,7 +151,7 @@ promptVerbalizer = ManualVerbalizer(
         "negative": ["bad"],
         "positive": ["good", "wonderful", "great"],
     },
-    tokenizer = bertTokenizer,
+    tokenizer = tokenizer,
 )
 ```
 
@@ -172,9 +165,40 @@ Given the task, now we have a `PLM`, a `Template` and a `Verbalizer`, we com
 from openprompt import PromptForClassification
 promptModel = PromptForClassification(
     template = promptTemplate,
-    model = bertModel,
+    plm = plm,
     verbalizer = promptVerbalizer,
 )
+```
+
+#### Step 6: Define a DataLoader
+
+A ``PromptDataLoader`` is basically a prompt version of pytorch Dataloader, which also includes a ``Tokenizer``, a ``Template`` and a ``TokenizerWrapper``.
+
+```python
+
+    from openprompt import PromptDataLoader
+    data_loader = PromptDataLoader(
+        dataset = dataset,
+        tokenizer = tokenizer, 
+        template = promptTemplate, 
+        tokenizer_wrapper_class=WrapperClass,
+    )
+```
+
+#### Step 7: Train and inference
+
+Done! We can conduct training and inference the same as other processes in Pytorch.
+
+
+```python
+    # making zero-shot inference using pretrained MLM with prompt
+    promptModel.eval()
+    with torch.no_grad():
+        for batch in data_loader:
+            logits = promptModel(batch)
+            preds = torch.argmax(logits, dim = -1)
+            print(classes[preds])
+    # predictions would be 1, 0 for classes 'positive', 'negative'
 ```
 
 Please refer to our [tutorial scripts](https://github.com/thunlp/OpenPrompt/tree/main/tutorial), and [documentation](https://thunlp.github.io/OpenPrompt/) for more details.
@@ -196,7 +220,7 @@ Major improvement/enhancement in future.
 ## Citation
 Please cite our paper if you use OpenPrompt in your work
 
-```
+```bibtex
 @article{ding2021openprompt,
   title={OpenPrompt: An Open-source Framework for Prompt-learning},
   author={Ding, Ning and Hu, Shengding and Zhao, Weilin and Chen, Yulin and Liu, Zhiyuan and Zheng, Hai-Tao and Sun, Maosong},

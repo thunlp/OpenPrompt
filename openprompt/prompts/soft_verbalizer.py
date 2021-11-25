@@ -1,5 +1,6 @@
 from inspect import Parameter
 import json
+from os import stat
 from transformers.file_utils import ModelOutput
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.utils.dummy_pt_objects import PreTrainedModel
@@ -45,23 +46,35 @@ class SoftVerbalizer(Verbalizer):
         head_name = [n for n,c in plm.named_children()][-1]
         logger.info(f"The LM head named {head_name} was retrieved.")
         self.head = copy.deepcopy(getattr(plm, head_name))
-        if isinstance(self.head, torch.nn.Linear):
+        max_loop = 5
+        if not isinstance(self.head, torch.nn.Linear):
+            module = self.head
+            found = False
+            last_layer_full_name = []
+            for i in range(max_loop):
+                last_layer_name = [n for n,c in module.named_children()][-1]
+                last_layer_full_name.append(last_layer_name)
+                parent_module = module
+                module = getattr(module, last_layer_name)
+                if isinstance(module, torch.nn.Linear):
+                    found = True
+                    break
+            if not found:
+                raise RuntimeError(f"Can't not retrieve a linear layer in {max_loop} loop from the plm.")
+            self.original_head_last_layer = module.weight.data
+            self.hidden_dims = self.original_head_last_layer.shape[-1]
+            self.head_last_layer_full_name = ".".join(last_layer_full_name)
+            setattr(parent_module, last_layer_name, torch.nn.Linear(self.hidden_dims, self.num_classes, bias=False))
+        else:
             self.hidden_dims = self.head.weight.shape[-1]
-            self.original_head_last_layer = getattr(plm, head_name)
+            self.original_head_last_layer = getattr(plm, head_name).weight.data
             self.head = torch.nn.Linear(self.hidden_dims, self.num_classes, bias=False)
-        else: # The head contains multiple layer
-            self.head_last_layer_name = [n for n,c in self.head.named_children()][-1]
-            head_last_layer = getattr(self.head, self.head_last_layer_name)
-            assert isinstance(head_last_layer, torch.nn.Linear), "The retrieved last layer is not a linear layer."
 
-            self.hidden_dims = head_last_layer.weight.shape[-1]
-            setattr(self.head, self.head_last_layer_name, torch.nn.Linear(self.hidden_dims, self.num_classes, bias=False)) # automatically requires_grad
-            self.original_head_last_layer = head_last_layer
 
         if label_words is not None: # use label words as an initialization
             self.label_words = label_words
-
-        # seperate the last layer with the previous layer.
+        
+        
 
         
     @property
@@ -74,7 +87,7 @@ class SoftVerbalizer(Verbalizer):
         if isinstance(self.head, torch.nn.Linear):
             return []
         else:
-            return [p for n, p in self.head.named_parameters() if self.head_last_layer_name not in n]
+            return [p for n, p in self.head.named_parameters() if self.head_last_layer_full_name not in n]
  
     @property
     def group_parameters_2(self,):
@@ -83,7 +96,7 @@ class SoftVerbalizer(Verbalizer):
         if isinstance(self.head, torch.nn.Linear):
             return [p for n, p in self.head.named_parameters()]
         else:
-            return [p for n, p in getattr(self.head, self.head_last_layer_name).named_parameters()]
+            return [p for n, p in self.head.named_parameters() if self.head_last_layer_full_name in n]
 
     def on_label_words_set(self):
         self.label_words = self.add_prefix(self.label_words, self.prefix)
@@ -140,7 +153,7 @@ class SoftVerbalizer(Verbalizer):
         self.label_words_ids = nn.Parameter(words_ids_tensor, requires_grad=False)
         self.label_words_mask = nn.Parameter(words_ids_mask, requires_grad=False)
         
-        init_data = self.original_head_last_layer.weight[self.label_words_ids,:]*self.label_words_mask.to(self.original_head_last_layer.weight.data.dtype).unsqueeze(-1)
+        init_data = self.original_head_last_layer[self.label_words_ids,:]*self.label_words_mask.to(self.original_head_last_layer.weight.data.dtype).unsqueeze(-1)
         init_data = init_data.sum(dim=1)/self.label_words_mask.sum(dim=-1,keepdim=True)
 
         if isinstance(self.head, torch.nn.Linear):

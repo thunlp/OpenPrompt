@@ -105,9 +105,11 @@ class Template(nn.Module):
             elif 'meta' in d:
                 text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(example.meta[d['meta']])
             elif 'soft' in d:
-                raise RuntimeError("soft token not supported by SoftTemplate, please use hard template or use MixedTemplate instead.")
+                text[i] = ''; # unused
             elif 'mask' in d:
                 text[i] = '<mask>'
+            elif 'special' in d:
+                text[i] = d['special']
             elif 'text' in d:
                 text[i] = d["add_prefix_space"] + d['text']
             else:
@@ -236,7 +238,7 @@ class Template(nn.Module):
         """
         return batch # not being processed
 
-    def post_processing_outputs(self, outputs: torch.Tensor):
+    def post_processing_outputs(self, outputs):
         r"""Post processing the outputs of language models according
         to the need of template. Most templates don't need post processing,
         The template like SoftTemplate, which appends soft template as a module

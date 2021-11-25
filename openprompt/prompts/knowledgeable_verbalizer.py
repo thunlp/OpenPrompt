@@ -36,7 +36,7 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
                  verbalizer_lr: Optional[float]=5e-2,
                  candidate_frac: Optional[float]=0.5,
                  **kwargs):
-        super().__init__(classes=classes, prefix=prefix, multi_token_handler=multi_token_handler, **kwargs)
+        super().__init__(classes=classes, prefix=prefix, multi_token_handler=multi_token_handler, tokenizer=tokenizer, **kwargs)
         self.max_token_split = max_token_split
         self.verbalizer_lr = verbalizer_lr
         self.candidate_frac = candidate_frac

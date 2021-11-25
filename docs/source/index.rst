@@ -7,6 +7,20 @@ Prompt-learning is the latest paradigm to adapt pre-trained language models (PLM
 OpenPrompt supports loading PLMs directly from `huggingface transformers <https://huggingface.co/transformers/>`_. 
 In the future, we will also support PLMs implemented by other libraries.
 
+If you find OpenPrompt useful, please kindly cite our `paper <https://arxiv.org/abs/2111.01998>`_.
+
+.. code-block:: bibtex
+
+   @article{ding2021openprompt,
+      title={OpenPrompt: An Open-source Framework for Prompt-learning},
+      author={Ding, Ning and Hu, Shengding and Zhao, Weilin and Chen, Yulin and Liu, Zhiyuan and Zheng, Hai-Tao and Sun, Maosong},
+      journal={arXiv preprint arXiv:2111.01998},
+      year={2021}
+   }
+
+
+.. image:: demo.gif
+
 .. toctree::
    :glob:
    :maxdepth: 1

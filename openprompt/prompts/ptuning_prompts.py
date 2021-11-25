@@ -60,6 +60,7 @@ class PtuningTemplate(ManualTemplate):
         r"""
         when template text was set, generate parameters needed in p-tuning input embedding phrase
         """
+        self.text = self.parse_text(self.text)
         self.num_soft_token = sum([token == self.soft_token for token in self.text])
         self.generate_parameters()
 

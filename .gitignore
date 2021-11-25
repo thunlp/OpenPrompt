@@ -19,3 +19,4 @@ outputs/
 log.txt
 examples/
 hyperopt/
+docs/source/logs/*

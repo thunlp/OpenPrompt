@@ -1,5 +1,5 @@
-A {"mask"} news: {"placeholder": "text_a"} {"placeholder": "text_b"}
-{"placeholder": "text_a"} {"placeholder": "text_b"} This topic is about {"mask"}.
-[Category: {"mask"}] {"placeholder": "text_a"} {"placeholder": "text_b"}
-[ Topic : {"mask"} ] {"placeholder": "text_a"} {"placeholder": "text_b"}
-{"placeholder": "text_a"} {"placeholder": "text_b"} {"special": "<sep>"} This topic is about {"mask"}.
+ A {"mask"} news : {"placeholder": "text_a"} {"placeholder": "text_b"}
+ {"placeholder": "text_a"} {"placeholder": "text_b"} This topic is about {"mask"} .
+ [ Category : {"mask"} ] {"placeholder": "text_a"} {"placeholder": "text_b"}
+ [ Topic : {"mask"} ] {"placeholder": "text_a"} {"placeholder": "text_b"}
+ {"placeholder": "text_a"} {"placeholder": "text_b"} {"special": "<sep>"} This topic is about {"mask"} .

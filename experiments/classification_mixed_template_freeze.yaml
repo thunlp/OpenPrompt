@@ -4,7 +4,7 @@ dataset:
 
 plm:
   model_name: roberta
-  model_path: roberta-large
+  model_path: ../../plm_cache/roberta-large
   optimize:
     freeze_para: True
     lr: 0.0003
@@ -28,13 +28,13 @@ valid:
   batch_size: 10
 
 
-template: soft_manual_template
+template: mixed_template
 verbalizer: manual_verbalizer
 
 
-soft_manual_template:
+mixed_template:
   choice: 1
-  file_path: scripts/TextClassification/mnli/soft_manual_template.txt
+  file_path: scripts/TextClassification/mnli/mixed_template.txt
   optimize:
     lr: 0.003
     weight_decay: 0.0
@@ -46,26 +46,13 @@ manual_verbalizer:
   file_path: scripts/TextClassification/mnli/multiwords_verbalizer.jsonl
   
 environment:
-  num_gpus: 3
+  num_gpus: 1
   cuda_visible_devices:
     - 0
-    - 1
-    - 2
   local_rank: 0
 
 learning_setting: full
 
-# few_shot:
-#   parent_config: learning_setting
-#   few_shot_sampling: sampling_from_train
-  
-# sampling_from_train:
-#   parent_config: few_shot_sampling
-#   num_examples_per_label: 10000
-#   also_sample_dev: False
-#   num_examples_per_label_dev: 
-#   seed:
-#     - 123
 
 task: classification
 classification:

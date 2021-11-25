@@ -1,0 +1,149 @@
+calibrate: null
+checkpoint:
+  higher_better: true
+  save_best: true
+  save_lastest: true
+classification:
+  auto_t: false
+  auto_v: false
+  loss_function: cross_entropy
+  metric:
+  - accuracy
+  - loose-micro-f1
+  - loose-macro-f1
+  parent_config: task
+dataloader:
+  decoder_max_length: 256
+  max_seq_length: 256
+  truncate_method: head
+dataset:
+  label_path_sep: '-'
+  name: FewNERD
+  path: datasets/Typing/FewNERD
+dev:
+  batch_size: 16
+  shuffle_data: false
+environment:
+  cuda_visible_devices:
+  - 0
+  device_map: null
+  local_rank: 0
+  model_parallel: false
+  num_gpus: 1
+few_shot:
+  few_shot_sampling: sampling_from_train
+  parent_config: learning_setting
+learning_setting: few_shot
+logging:
+  console_level: INFO
+  datetime_format: '%m%d%H%M%S%f'
+  file_level: NOTSET
+  overwrite: true
+  path: logs/FewNERD_bert-base-cased_mixed_template_manual_verbalizer_1107032409468965
+  path_base: logs
+  unique_string: FewNERD_bert-base-cased_mixed_template_manual_verbalizer_1107032409468965
+  unique_string_keys:
+  - dataset.name
+  - plm.model_path
+  - template
+  - verbalizer
+  - datetime
+manual_verbalizer:
+  choice: 0
+  file_path: scripts/Typing/FewNERD/fewnerd_verbalizer.json
+  label_words: null
+  multi_token_handler: first
+  num_classes: null
+  optimize: null
+  parent_config: verbalizer
+  prefix: ' '
+mixed_template:
+  choice: 0
+  file_path: scripts/Typing/FewNERD/mixed_template.txt
+  mask_token: <mask>
+  optimize:
+    adam_epsilon: 1.0e-08
+    betas:
+    - 0.9
+    - 0.999
+    lr: 5.0e-05
+    name: AdamW
+    no_decay:
+    - bias
+    - LayerNorm.weight
+    scheduler:
+      num_warmup_steps: 0
+    weight_decay: 0.0
+  parent_config: template
+  placeholder_mapping:
+    <text_a>: text_a
+    <text_b>: text_b
+  text: null
+plm:
+  model_name: bert
+  model_path: bert-base-cased
+  optimize:
+    betas:
+    - 0.9
+    - 0.999
+    eps: 1.0e-08
+    freeze_para: false
+    lr: 3.0e-05
+    name: AdamW
+    no_decay:
+    - bias
+    - LayerNorm.weight
+    scheduler:
+      num_warmup_steps: 500
+      type: null
+    weight_decay: 0.01
+  specials_to_add:
+  - <pad>
+reproduce:
+  seed: 100
+sampling_from_train:
+  also_sample_dev: true
+  num_examples_per_label: 8
+  num_examples_per_label_dev: 8
+  parent_config: few_shot_sampling
+  seed:
+  - 123
+task: classification
+template: mixed_template
+template_generator:
+  beam_width: 5
+  length_limit: null
+  max_length: 20
+  plm:
+    model_name: t5
+    model_path: null
+    specials_to_add:
+    - <pad>
+  target_number: 2
+  template:
+    choice: 0
+    file_path: null
+    mask_token: <mask>
+    placeholder_mapping:
+      <text_a>: text_a
+      <text_b>: text_b
+    text: null
+test:
+  batch_size: 16
+  shuffle_data: false
+train:
+  batch_size: 8
+  clean: false
+  gradient_accumulation_steps: 1
+  max_grad_norm: -1.0
+  num_epochs: 5
+  num_training_steps: null
+  shuffle_data: true
+  teacher_forcing: false
+verbalizer: manual_verbalizer
+verbalizer_generator:
+  candidate_num: 1
+  label_word_num_per_class: 1
+  normalize: true
+  score_fct: llr
+

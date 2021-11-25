@@ -260,13 +260,32 @@ def get_default_config():
     cfg.prefix_tuning_template.prefix_dropout = 0.0
     cfg.prefix_tuning_template.mid_dim = 512
     cfg.prefix_tuning_template.optimize = CfgNode(new_allowed=True) 
-    cfg.prefix_tuning_template.optimize.name = 'AdamW'  # TODO: curently not in use. 
+    cfg.prefix_tuning_template.optimize.name = 'AdamW' 
     cfg.prefix_tuning_template.optimize.lr = 0.00005
     cfg.prefix_tuning_template.optimize.betas = [0.9, 0.999]
-    cfg.prefix_tuning_template.optimize.eps = 1.0e-8
+    cfg.prefix_tuning_template.optimize.adam_epsilon = 1.0e-8
     cfg.prefix_tuning_template.optimize.weight_decay = 0.0
     cfg.prefix_tuning_template.optimize.no_decay = ['bias', 'LayerNorm.weight']
     cfg.prefix_tuning_template.optimize.scheduler = CfgNode(new_allowed=True)
     cfg.prefix_tuning_template.optimize.scheduler.num_warmup_steps = 0
+
+    cfg.mixed_template = CfgNode(new_allowed=True)
+    cfg.mixed_template.parent_config = 'template'
+    cfg.mixed_template.text = None
+    cfg.mixed_template.mask_token = '<mask>'
+    cfg.mixed_template.placeholder_mapping = CfgNode(new_allowed=True)
+    cfg.mixed_template.placeholder_mapping['<text_a>'] = 'text_a'
+    cfg.mixed_template.placeholder_mapping['<text_b>'] = 'text_b'
+    cfg.mixed_template.optimize = CfgNode(new_allowed=True) 
+    cfg.mixed_template.optimize.name = 'AdamW' 
+    cfg.mixed_template.optimize.lr = 0.00005
+    cfg.mixed_template.optimize.betas = [0.9, 0.999]
+    cfg.mixed_template.optimize.adam_epsilon = 1.0e-8
+    cfg.mixed_template.optimize.weight_decay = 0.0
+    cfg.mixed_template.optimize.no_decay = ['bias', 'LayerNorm.weight']
+    cfg.mixed_template.optimize.scheduler = CfgNode(new_allowed=True)
+    cfg.mixed_template.optimize.scheduler.num_warmup_steps = 0
+
+    
     return cfg
 

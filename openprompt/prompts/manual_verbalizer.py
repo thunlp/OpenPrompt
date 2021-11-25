@@ -143,6 +143,7 @@ class ManualVerbalizer(Verbalizer):
         # project
         label_words_logits = self.project(logits, **kwargs)  #Output: (batch_size, num_classes) or  (batch_size, num_classes, num_label_words_per_label)
 
+        
         if self.post_log_softmax:
             # normalize
             label_words_probs = self.normalize(label_words_logits)
@@ -202,7 +203,8 @@ class ManualVerbalizer(Verbalizer):
         label_words_probs /= (calibrate_label_words_probs+1e-15)
         # normalize # TODO Test the performance
         norm = label_words_probs.reshape(shape[0], -1).sum(dim=-1,keepdim=True) # TODO Test the performance of detaching()
-        label_words_probs /= norm
+        label_words_probs = label_words_probs.reshape(shape[0], -1) / norm
+        label_words_probs = label_words_probs.reshape(*shape)
         return label_words_probs
 
 
