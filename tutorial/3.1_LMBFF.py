@@ -12,9 +12,9 @@
 # args = parser.parse_args()
 from openprompt.data_utils.text_classification_dataset import SST2Processor
 dataset = {}
-dataset['train'] = SST2Processor().get_train_examples("../datasets/TextClassification/SST-2/16-shot/16-13")
-dataset['validation'] = SST2Processor().get_dev_examples("../datasets/TextClassification/SST-2/16-shot/16-13")
-dataset['test'] = SST2Processor().get_test_examples("../datasets/TextClassification/SST-2/16-shot/16-13")
+dataset['train'] = SST2Processor().get_train_examples("./datasets/TextClassification/SST-2/16-shot/16-13")
+dataset['validation'] = SST2Processor().get_dev_examples("./datasets/TextClassification/SST-2/16-shot/16-13")
+dataset['test'] = SST2Processor().get_test_examples("./datasets/TextClassification/SST-2/16-shot/16-13")
 
 # %% [markdown]
 # ### 2. build initial verbalizer and template
@@ -28,11 +28,14 @@ from openprompt.plms import load_plm
 # load mlm model for main tasks
 plm, tokenizer, model_config, WrapperClass = load_plm("roberta", "roberta-large")
 
+# load generation model for template generation
+template_generate_model, template_generate_tokenizer, template_generate_model_config, template_tokenizer_wrapper = load_plm('t5', 't5-large')
+
 from openprompt.prompts import ManualVerbalizer, ManualTemplate
 verbalizer = ManualVerbalizer(tokenizer=tokenizer, num_classes=2, label_words=[['terrible'],['great']])
 
 from openprompt.prompts.prompt_generator import LMBFFTemplateGenerationTemplate
-template = LMBFFTemplateGenerationTemplate(tokenizer=tokenizer, verbalizer=verbalizer, text='{"placeholder":"text_a"} {"mask"} {"meta":"labelword"} {"mask"}.')
+template = LMBFFTemplateGenerationTemplate(tokenizer=template_generate_tokenizer, verbalizer=verbalizer, text='{"placeholder":"text_a"} {"mask"} {"meta":"labelword"} {"mask"}.')
 # template = ManualTemplate(tokenizer=tokenizer, text='{"placeholder":"text_a"} It is {"mask"}.')
 
 # view wrapped example
@@ -41,7 +44,7 @@ print(wrapped_example)
 
 # %%
 # parameter setting
-cuda = False
+cuda = True
 auto_t = True # whether to perform automatic template generation
 auto_v = True # whether to perform automatic label word generation
 
@@ -70,7 +73,6 @@ def fit(model, train_dataloader, val_dataloader, loss_func, optimizer):
 
 def train_epoch(model, train_dataloader, loss_func, optimizer):
     model.train()
-    tot_loss = 0 
     for step, inputs in enumerate(train_dataloader):
         if cuda:
             inputs = inputs.cuda()
@@ -78,7 +80,6 @@ def train_epoch(model, train_dataloader, loss_func, optimizer):
         labels = inputs['label']
         loss = loss_func(logits, labels)
         loss.backward()
-        tot_loss += loss.item()
         optimizer.step()
         optimizer.zero_grad()
 
@@ -106,11 +107,10 @@ from tqdm import tqdm
 # template generation
 if auto_t:
     print('performing auto_t...')
-    # load generation model for template generation
-    template_generate_model, template_generate_tokenizer, template_generate_model_config, template_tokenizer_wrapper = load_plm('t5', 't5-large')
+
     if cuda:
         template_generate_model = template_generate_model.cuda()
-    template_generator = T5TemplateGenerator(template_generate_model, template_generate_tokenizer, template_tokenizer_wrapper, verbalizer)
+    template_generator = T5TemplateGenerator(template_generate_model, template_generate_tokenizer, template_tokenizer_wrapper, verbalizer, beam_width=5)
 
 
     dataloader = PromptDataLoader(dataset['train'], template, template_generate_tokenizer, template_tokenizer_wrapper, batch_size=len(dataset['train'])) # register all data at once
@@ -126,7 +126,7 @@ if auto_t:
     template_generator.release_memory()
     # generate a number of candidate template text
     template_texts = template_generator.templates_text
-    print('num of templates generated ', len(template_texts))
+    print(template_texts)
     # iterate over each candidate and select the best one
     best_metrics = 0.0
     best_template_text = None
@@ -147,10 +147,13 @@ if auto_t:
         ]
 
         optimizer = AdamW(optimizer_grouped_parameters, lr=1e-4)
-
+        if cuda:
+            model = model.cuda()
         score = fit(model, train_dataloader, valid_dataloader, loss_func, optimizer)
 
         if score > best_metrics:
+            print('best score:', score)
+            print('template:', template_text)
             best_metrics = score
             best_template_text = template_text
     # use the best template
@@ -163,7 +166,9 @@ from openprompt.prompts.prompt_generator import RobertaVerbalizerGenerator
 if auto_v:
     print('performing auto_v...')
     # load generation model for template generation
-    verbalizer_generator = RobertaVerbalizerGenerator(model=plm, tokenizer=tokenizer)
+    if cuda:
+        plm = plm.cuda()
+    verbalizer_generator = RobertaVerbalizerGenerator(model=plm, tokenizer=tokenizer, candidate_num=20, label_word_num_per_class=20)
 
     dataloader = PromptDataLoader(dataset['train'], template, tokenizer, WrapperClass, batch_size=32)
     for data in dataloader:
@@ -193,13 +198,15 @@ if auto_v:
         ]
 
         optimizer = AdamW(optimizer_grouped_parameters, lr=1e-4)
-
+        if cuda:
+            model = model.cuda()
         score = fit(model, train_dataloader, valid_dataloader, loss_func, optimizer)
 
         if score > best_metrics:
             best_metrics = score
             best_label_words = label_words
     # use the best verbalizer
+    print(best_label_words)
     verbalizer = ManualVerbalizer(tokenizer, num_classes=2, label_words=best_label_words)
 
 # %% [markdown]
@@ -222,7 +229,8 @@ optimizer_grouped_parameters = [
 ]
 
 optimizer = AdamW(optimizer_grouped_parameters, lr=1e-4)
-
+if cuda:
+    model = model.cuda()
 score = fit(model, train_dataloader, valid_dataloader, loss_func, optimizer)
 test_score = evaluate(model, test_dataloader)
 print(test_score)
