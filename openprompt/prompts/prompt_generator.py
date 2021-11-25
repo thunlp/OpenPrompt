@@ -20,7 +20,7 @@ from ..utils import signature
 from ..config import convert_cfg_to_dict
 from torch.nn.parallel import DataParallel
 
-class LMBFFTemplateGenerationWrapper(ManualTemplate):
+class LMBFFTemplateGenerationTemplate(ManualTemplate):
     """
     This is a special template used only for earch of template in LM-BFF. For example, a template could be ``{"placeholder": "text_a"}{"mask"}{"meta":"labelword"}{"mask"}``, where ``{"meta":"labelword"}`` is replaced by label_words in verbalizer in `wrap_one_example` method, and ``{"mask"}`` is replaced by special tokens used for generation, for T5, it is ``<extra_id_0>, <extra_id_1>, ...``.
 
@@ -259,7 +259,7 @@ class TemplateGenerator:
             template_text (:obj:`List[str]`): The generated template text
         """
 
-        template_for_auto_t = LMBFFTemplateGenerationWrapper.from_config(config=self.config.template, tokenizer=self.tokenizer, verbalizer = self.verbalizer)
+        template_for_auto_t = LMBFFTemplateGenerationTemplate.from_config(config=self.config.template, tokenizer=self.tokenizer, verbalizer = self.verbalizer)
         dataloader = PromptDataLoader(dataset, template_for_auto_t, self.tokenizer, self.tokenizer_wrapper, batch_size=len(dataset)) # register all data at once
         for data in dataloader:
             data = data.to(self.device)
