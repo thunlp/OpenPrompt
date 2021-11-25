@@ -16,8 +16,9 @@ from .ptr_prompts import PTRTemplate, PTRVerbalizer
 from .knowledgeable_verbalizer import KnowledgeableVerbalizer
 from .prefix_tuning_template import PrefixTuningTemplate
 from .soft_template import SoftTemplate
-# from .lmbff_prompts import LMBFFTemplate
-from .prompt_generator import T5TemplateGenerator, TemplateGenerator, VerbalizerGenerator
+
+from .prompt_generator import T5TemplateGenerator, TemplateGenerator, VerbalizerGenerator, RobertaVerbalizerGenerator
+
 from .contextual_verbalizer import ContextualVerbalizer
 from .soft_verbalizer import SoftVerbalizer
 
@@ -42,6 +43,10 @@ VERBALIZER_CLASS = {
 
 TEMPLATE_GENERATOR_CLASS = {
     't5': T5TemplateGenerator
+}
+
+VERBALIZER_GENERATOR_CLASS = {
+    'roberta': RobertaVerbalizerGenerator
 }
 
 
@@ -95,5 +100,6 @@ def load_template_generator(config: CfgNode, **kwargs,):
 def load_verbalizer_generator(config: CfgNode, **kwargs,):
     verbalizer_generator = None
     if config.classification.auto_v:
-        verbalizer_generator = VerbalizerGenerator.from_config(config=config.verbalizer_generator, **kwargs)
+        verbalizer_generator_class = VERBALIZER_GENERATOR_CLASS[config.plm.model_name]
+        verbalizer_generator = verbalizer_generator_class.from_config(config=config.verbalizer_generator, **kwargs)
     return verbalizer_generator

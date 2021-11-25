@@ -1,14 +1,12 @@
-from transformers.tokenization_utils import PreTrainedTokenizer
-from transformers.utils.dummy_pt_objects import PreTrainedModel, T5ForConditionalGeneration
 from transformers.data.processors.utils import InputExample, InputFeatures
 
-from openprompt.plms.utils import TokenizerWrapper
 
-from .prompts import TemplateGenerator, VerbalizerGenerator
 from openprompt import PromptDataLoader, PromptForClassification
+from openprompt.pipeline_base import PromptModel
+
 from openprompt.prompts import ManualVerbalizer, ManualTemplate
 from typing import List, Optional, Dict, Union
-from . import Template, Verbalizer, PromptDataLoader
+from . import Verbalizer, PromptDataLoader
 import copy
 import warnings
 from .trainer import ClassificationRunner
@@ -18,44 +16,7 @@ from openprompt.utils.cuda import model_to_device
 from openprompt.prompts import load_template_generator, load_verbalizer_generator
 from openprompt.plms import load_plm_from_config
 
-class LMBFFTemplate(ManualTemplate):
-    """
-    This is a special template used only for earch of template in LM-BFF. For example, when using T5, a template could be ``<text_a> <extra_id_0> <meta:labelword> <extra_id_1>``, where ``<meta:labelword>`` is replaced by label_words in verbalizer in `wrap_one_example` method.
 
-    Args:
-        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
-        verbalizer (:obj:`ManualVerbalizer`): A verbalizer to provide label_words.
-        text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.
-        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``<mask>``
-        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{'<text_a>': 'text_a', '<text_b>': 'text_b'}``
-    """
-    def __init__(self, 
-                 tokenizer: PreTrainedTokenizer,
-                 verbalizer: ManualVerbalizer,
-                 text: Optional[List[str]] = None,
-                 mask_token: str = '<mask>',
-                 placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
-                ):
-        super().__init__(tokenizer=tokenizer, 
-                         mask_token=mask_token,
-                         placeholder_mapping=placeholder_mapping)
-        self.text = text
-        self.verbalizer = verbalizer
-    
-    def wrap_one_example(self, 
-                         example: InputExample) -> List[Dict]:
-        example.meta['labelword'] = self.verbalizer.label_words[example.label][0].strip()
-        wrapped_example = super().wrap_one_example(example)
-
-        # TODO: replace <mask> with special tokens in each generation model
-        # e.g. in T5 multi-parts generation use <extra_id_0>, <extra_id_1>, ...
-        # handle different types of plm
-        current_idx = self.tokenizer.convert_tokens_to_ids('<extra_id_0>')
-        for d in wrapped_example[0]:
-            if d['text'] == '<mask>':
-                d['text'] = self.tokenizer.convert_ids_to_tokens(current_idx)
-                current_idx -= 1
-        return wrapped_example
 
 
 def build_dataloader(dataset, template, tokenizer,tokenizer_wrapper_class, config, split):
@@ -74,6 +35,17 @@ def build_dataloader(dataset, template, tokenizer,tokenizer_wrapper_class, confi
 
 
 class LMBFFClassificationRunner:
+    r"""
+        This runner implements the LM-BFF training process in paper `Making Pre-trained Language Models Better Few-shot Learners(Gao et al. 2020) <https://arxiv.org/pdf/2012.15723.pdf>`_.
+        
+        Args:
+            train_dataset (:obj:`List[InputExample]`): The dataset for training
+            valid_dataset (:obj:`List[InputExample]`): The dataset for validation
+            test_dataset (:obj:`List[InputExample]`): The dataset for test
+            verbalizer (:obj:`Optional[Verbalizer]`): The manually designed verbalizer for template generation. Defaults to None.
+            template (:obj:`Optional[Verbalizer]`): The manually designed template for verbalizer generation. Defaults to None.
+            config (:obj:`CfgNode`): A configuration object
+        """
     def __init__(self,
                 train_dataset: List[InputExample],
                 valid_dataset: List[InputExample],
@@ -81,26 +53,20 @@ class LMBFFClassificationRunner:
                 verbalizer: Optional[Verbalizer] = None,
                 template: Optional[str] = None,
                 config: CfgNode = None):
-        r"""
-        This class implements the LM-BFF in paper (https://arxiv.org/pdf/2012.15723.pdf)
-        template_text_for_auto_t: '{"placeholder":"text_a"} {"mask"} {"meta": "labelword"} {"mask"}', each {"mask"} stands for one part of template to be generated
-        """
+        
         self.train_dataset = train_dataset
         self.valid_dataset = valid_dataset
         self.test_dataset = test_dataset
         self.model, self.tokenizer, self.model_config, self.tokenizer_wrapper = load_plm_from_config(config)
         self.auto_t = config.classification.auto_t
         self.auto_v = config.classification.auto_v
-        if self.auto_t:
-            print('loading auto_t model...')
-            self.template_generate_model, self.template_generate_tokenizer, self.template_generate_model_config, self.template_tokenizer_wrapper = load_plm_from_config(config.template_generator)
-            print('done')
+        
         self.verbalizer = verbalizer
         self.template = template
         self.config = config
-        self.check_param()
+        self._check_param()
 
-    def check_param(self):
+    def _check_param(self):
         if self.auto_t:
             if self.verbalizer is None:
                 raise ValueError("no verbalizer for template generation provided!")
@@ -115,30 +81,22 @@ class LMBFFClassificationRunner:
             warnings.warn("auto_t and auto_v are both False, the trainer will degenerate to a simple classification trainer")
         
     
-    def _auto_t(self, dataset, template):
+    def _auto_t(self):
         logger.info("performing auto-t...")
-        if self.template_generate_model is None or self.template_generate_tokenizer is None:
-            raise ValueError("template_generate_model or template_generate_tokenizer is None !")
-        model = model_to_device(self.template_generate_model, self.config.environment)
-        template_generator = load_template_generator(config=self.config, template_generate_model=model, tokenizer=self.template_generate_tokenizer)
-        dataloader = PromptDataLoader(dataset, template, self.template_generate_tokenizer, self.template_tokenizer_wrapper, batch_size=len(dataset)) # register all data at once
-        for data in dataloader:
-            if self.config.environment.num_gpus > 0:
-                data = data.to("cuda:{}".format(self.config.environment.local_rank))
-            template_generator.register_buffer(data.input_ids, data.attention_mask, data.label) 
-        template_texts = template_generator.generate() # List[str]
+        template_generate_model, template_generate_tokenizer, template_generate_model_config, template_tokenizer_wrapper = load_plm_from_config(self.config.template_generator)
+        model = model_to_device(template_generate_model, self.config.environment)
+        template_generator = load_template_generator(config=self.config, model = model, tokenizer=template_generate_tokenizer, tokenizer_wrapper = template_tokenizer_wrapper, verbalizer = self.verbalizer)
+        template_texts = template_generator.generate(self.train_dataset) # List[str]
         template_generator.release_memory()
         del template_generator, model
         return template_texts
     
-    def _auto_v(self, dataset, template):
+    def _auto_v(self, template):
         logger.info("performing auto-v...")
         model = copy.deepcopy(self.model)
         model = model_to_device(model, self.config.environment)
         verbalizer_generator = load_verbalizer_generator(config=self.config, model=model, tokenizer=self.tokenizer)
-        if verbalizer_generator is None:
-            raise ValueError("no verbalizer_generator available")
-        dataloader = PromptDataLoader(dataset, template, self.tokenizer, self.tokenizer_wrapper, batch_size=self.config.test.batch_size)
+        dataloader = PromptDataLoader(self.train_dataset, template, self.tokenizer, self.tokenizer_wrapper, batch_size=self.config.test.batch_size)
         for data in dataloader:
             data = template.process_batch(data)
             if self.config.environment.num_gpus > 0:
@@ -187,18 +145,17 @@ class LMBFFClassificationRunner:
         return best_score
     
     def run(self):
-        '''
-        if both auto_v and auto_t are set to True, perform auto_t first and then auto_v
-        '''
+        r"""
+        Run LM-BFF. if both `auto_v` and `auto_v` are set to True in ``config``, automatic template generation will be performed first.
+        """
         best_template = self.template
         best_verbalizer = self.verbalizer
         if self.auto_t:
-            template_for_auto_t = LMBFFTemplate.from_config(config=self.config.template_generator.template, tokenizer=self.template_generate_tokenizer, verbalizer = self.verbalizer)
-            template_texts = self._auto_t(self.train_dataset, template_for_auto_t)
+            template_texts = self._auto_t()
             best_template_text = self._get_best_template_text(template_texts, best_verbalizer)
             best_template = ManualTemplate(self.tokenizer, best_template_text)
         if self.auto_v:
-            label_words_list = self._auto_v(self.train_dataset, best_template)
+            label_words_list = self._auto_v(best_template)
             best_label_words = self._get_best_label_words(label_words_list, best_template, best_verbalizer)
             best_verbalizer.label_words = best_label_words
         

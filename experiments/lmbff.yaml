@@ -1,6 +1,6 @@
 dataset:
   name: sst-2
-  path: datasets/k-shot/SST-2/16-13
+  path: datasets/LMBFF/SST-2/16-13
 
 task: classification
 

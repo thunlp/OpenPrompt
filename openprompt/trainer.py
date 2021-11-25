@@ -92,7 +92,7 @@ class BaseRunner(object):
     def steps_per_epoch(self) -> int:
         """num of training steps per epoch"""
         batches = len(self.train_dataloader)
-        effective_accum = self.config.environment.num_gpus * self.config.train.gradient_accumulation_steps
+        effective_accum = self.config.train.gradient_accumulation_steps
         return (batches // effective_accum)
 
     def wrap_model(self):

@@ -55,5 +55,21 @@ def test_ImdbProcessor():
 #     assert len(trainvalid_dataset) == 3600000
 #     assert len(test_dataset) == 400000
 
+def test_SST2Processor():
+    dataset_name = "SST-2"
+    dataset_path = os.path.join(base_path, dataset_name)
+    processor = PROCESSORS[dataset_name.lower()]()
+    train_dataset = processor.get_train_examples(dataset_path)
+    dev_dataset = processor.get_dev_examples(dataset_path)
+    test_dataset = processor.get_test_examples(dataset_path)
+
+    assert processor.get_num_labels() == 2
+    assert processor.get_labels() == [0,1]
+    assert len(train_dataset) == 6920
+    assert len(dev_dataset) == 872
+    assert len(test_dataset) == 1821
+    assert train_dataset[0].text_a == 'a stirring , funny and finally transporting re-imagining of beauty and the beast and 1930s horror films'
+    assert train_dataset[0].label == 1
+
 if __name__ == "__main__":
-    test_AgnewsProcessor()
+    test_SST2Processor()
