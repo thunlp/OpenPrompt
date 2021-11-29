@@ -38,17 +38,18 @@ plm, tokenizer, model_config, WrapperClass = load_plm(args.model, args.model_nam
 
 # Or use a mix template
 from openprompt.prompts import SoftTemplate
+from openprompt.prompts import MixedTemplate
 
-mytemplate = SoftTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"special": "<eos>"} {"mask"}',num_tokens=100)
+# mytemplate = SoftTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"special": "<eos>"} {"mask"}',num_tokens=100)
 
 # mytemplate = SoftTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"soft"} {"soft"} {"soft"} {"placeholder":"text_b"} {"soft"} {"mask"}.')
 
-# mytemplate = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"soft": "Question:"} {"placeholder":"text_b"}? Is it correct? {"mask"}.')
+mytemplate = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"soft": "Question:"} {"placeholder":"text_b"}? Is it correct? {"soft"} {"mask"}.')
 
 
 # To better understand how does the template wrap the example, we visualize one instance.
 
-wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
+wrapped_example = mytemplate.wrap_one_example(dataset['train'][0])  # If you use template 3, don't worry the {"soft": "Question:"} is replace by an empty template, it is used to initialize the mixed template and then removed. 
 print(wrapped_example)
 
 
@@ -76,8 +77,9 @@ test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate,
 # ## Now is time to build your prompt model!
 # In this section we introduce using prompt to do classification, for other kinds of format, please see
 # `generation_tutorial.ipynb`, `probing_tutorial.ipynb`.
-# 
 
+print(next(iter(train_dataloader)))
+# exit()
 
 from openprompt import PromptForGeneration
 
@@ -153,3 +155,5 @@ for epoch in range(5):
             log_loss = tot_loss
 evaluate(prompt_model, test_dataloader)
 
+
+# %%

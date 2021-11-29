@@ -22,6 +22,17 @@
 
 ![version](https://img.shields.io/badge/version-v0.0.1--beta-blue)
 
+## Contributors
+
+<!-- Copy-paste in your Readme.md file -->
+
+<a href="https://github.com/thunlp/OpenPrompt/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=thunlp/OpenPrompt" />
+</a>
+
+We thank all the  contributors to this project, more contributors are welcome!
+
+
 ## What's New?
 
 
@@ -231,6 +242,3 @@ Please cite our paper if you use OpenPrompt in your work
 
  
 
-## Contributors
-
-We thank all the  contributors to this project, more contributors are welcome!

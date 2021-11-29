@@ -63,8 +63,6 @@ class T5TokenizerWrapper(TokenizerWrapper):
         loss_ids =[0]
         
         for piece_id, piece in enumerate(wrapped_example):
-            if len(piece['text']) == 0:
-                continue
             if piece['text'] == self.template_mask_token:
                 if teacher_forcing:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))

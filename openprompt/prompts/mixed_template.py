@@ -54,6 +54,7 @@ class MixedTemplate(Template):
         soft_token_ids = []
         idx_mp = {}
         emb_mp = {}
+        print("HERERE", flush=True)
         for d in self.text:
             if "soft" not in d and "soft_id" not in d:
                 text.append(d)
@@ -84,9 +85,12 @@ class MixedTemplate(Template):
                 else:
                     num_soft_token += 1
                     id_list = [num_soft_token]
-
+                text.extend([{"soft":""} for _ in range(len(id_list))])
+                print("HERERE2", flush=True)
             else:
                 token_ids = self.tokenizer(d["add_prefix_space"] + d["soft"], add_special_tokens=False)["input_ids"]
+                surface_forms = self.tokenizer.convert_ids_to_tokens(token_ids)
+                assert len(token_ids) == len(surface_forms)
                 # if len(token_ids) > 1 and d.get("single_token", "True"):
                 #     logger.warning(f"""
                 #     soft prompt's hard prompt {d["soft"]} tokenize to more than one tokens: {self.tokenizer.convert_ids_to_tokens(token_ids)}
@@ -98,8 +102,9 @@ class MixedTemplate(Template):
                 id_list = list(range(old_num+1, num_soft_token+1))
                 for idx, soft_id in enumerate(id_list):
                     emb_mp[soft_id] = token_ids[idx]
+                print("HERERE3", flush=True)
 
-            text.extend([{"soft"} for _ in range(len(id_list))])
+                text.extend([{"soft": surface_form} for surface_form in surface_forms])
             soft_token_ids.extend(id_list)
 
             if "soft_id" in d:
@@ -107,6 +112,7 @@ class MixedTemplate(Template):
 
         self.num_soft_token = num_soft_token
         self.text = text
+        print(f"EFF:{self.text}", flush=True)
         self.soft_token_ids = soft_token_ids
 
         # Generate the embedding needed for soft tokens
@@ -189,7 +195,7 @@ class MixedTemplate(Template):
             elif 'meta' in d:
                 text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(example.meta[d['meta']])
             elif 'soft' in d:
-                text[i] = ''; # unused
+                text[i] = d['soft']; # unused
             elif 'mask' in d:
                 text[i] = '<mask>'
             elif 'special' in d:
