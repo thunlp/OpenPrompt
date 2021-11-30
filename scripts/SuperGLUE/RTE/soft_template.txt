@@ -1,1 +1,5 @@
-{"placeholder":"text_a"} {"placeholder":"text_b"} {"mask"} .
+ sentence1: {"placeholder":"text_a"} sentence2: {"placeholder":"text_b"} {"mask"}
+ {"placeholder":"text_a"} {"placeholder":"text_b"} {"mask"}
+ sentence1: {"placeholder":"text_a"} sentence2: {"placeholder":"text_b"} The answer was {"mask"}
+ sentence1: {"placeholder":"text_a"} sentence2: {"placeholder":"text_b"} answer: {"mask"}
+ 

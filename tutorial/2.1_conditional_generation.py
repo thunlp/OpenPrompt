@@ -4,7 +4,7 @@ parser = argparse.ArgumentParser("")
 parser.add_argument("--lr", type=float, default=1e-2)
 parser.add_argument("--plm_eval_mode", action="store_true")
 parser.add_argument("--model", type=str, default='t5')  # tested model are gpt2/t5
-parser.add_argument("--model_name_or_path", default='t5-base')
+parser.add_argument("--model_name_or_path", default='../../plm_cache/t5-large')
 args = parser.parse_args()
 
 

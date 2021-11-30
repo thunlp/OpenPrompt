@@ -1,1 +1,4 @@
-{"placeholder":"text_a"} / {"placeholder":"text_b"} Similar sense of "{"meta":"word"}" ? {"mask"} .
+ sentence1: {"placeholder":"text_a"} sentence2: {"placeholder":"text_b"} word: {"meta":"word", "shortenable": False} {"mask"}
+ {"placeholder":"text_a"} {"placeholder":"text_b"} {"meta":"word", "shortenable": False} {"mask"}
+ sentence1: {"placeholder":"text_a"} sentence2: {"placeholder":"text_b"} word: {"meta":"word", "shortenable": False} The answer was {"mask"}
+ {"placeholder":"text_a"} / {"placeholder":"text_b"} Similar sense of "{"meta":"word"}" ? {"mask"} .

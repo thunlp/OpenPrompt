@@ -77,7 +77,8 @@ class SoftTemplate(Template):
         """
         if self.initialize_from_vocab:
             soft_embeds = self.raw_embedding.weight[:self.num_tokens].clone().detach()
-        soft_embeds = torch.FloatTensor(self.num_tokens, self.raw_embedding.weight.size(1)).uniform_(-self.random_range, self.random_range)
+        else:
+            soft_embeds = torch.FloatTensor(self.num_tokens, self.raw_embedding.weight.size(1)).uniform_(-self.random_range, self.random_range)
         self.soft_embeds = nn.Parameter(soft_embeds, requires_grad=True)
 
 
