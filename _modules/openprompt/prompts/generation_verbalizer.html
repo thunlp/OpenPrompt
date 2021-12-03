@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openprompt.prompts.generation_verbalizer &mdash; OpenPrompt v0.0.1-beta documentation</title>
+  <title>openprompt.prompts.generation_verbalizer &mdash; OpenPrompt v0.1.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../../index.html" class="icon icon-home"> OpenPrompt
           </a>
               <div class="version">
-                v0.0.1-beta
+                v0.1.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -119,7 +119,7 @@
 <span class="sd">    For example, when label word is ``&quot;good&quot;``, the tgt_text is ``&quot;good&quot;``; </span>
 
 <span class="sd">    when label word is ``{&quot;text&quot;:&quot;good&quot;}``, the tgt_text is also ``&quot;good&quot;``; </span>
-<span class="sd">    </span>
+
 <span class="sd">    when label word is ``{&quot;meta&quot;:&quot;choice1&quot;}``, the tgt_text is the ``&quot;meta[&#39;choice1&#39;]&quot;`` field of the ``InputExample``; </span>
 <span class="sd">    </span>
 <span class="sd">    when label word is ``{&quot;meta&quot;:&quot;choice1&quot;} {&quot;placeholder&quot;, &quot;text_a&quot;} .``, the tgt_text is the ``&quot;meta[&#39;choice1&#39;]&quot;`` field of the ``InputExample``, </span>
@@ -156,10 +156,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">example</span><span class="o">.</span><span class="n">tgt_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span><span class="p">[</span><span class="n">example</span><span class="o">.</span><span class="n">label</span><span class="p">](</span><span class="n">example</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">example</span></div>
-    
+
 
 <div class="viewcode-block" id="GenerationVerbalizer.on_label_words_set"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.generation_verbalizer.GenerationVerbalizer.on_label_words_set">[docs]</a>    <span class="k">def</span> <span class="nf">on_label_words_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Do not perform any action in ContextualVerbalizer</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process the text into the label words (sometimes a function) according to the syntax of MixedTemplate</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_words</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span><span class="p">]</span>
