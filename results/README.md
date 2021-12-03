@@ -90,14 +90,14 @@ python tutorial/4.1_all_tasks_are_generation.py --model t5-lm --plm_eval_mode --
 |:------:|:------------:|:------------:|:-------:|:---------:|:-----------:|:--------:|
 | Soft | t5-lg-lm-ad| manual_0 | gen_0\* | [tutorial](../tutorial/4.1_all_tasks_are_generation.py) | Generation Objective|  0.625 |
 
-\* The verbalier [{"text": "Another word}, {"meta": "span1_text"}] Might not be the optimal, just to show a use case of the generation verbalizer.
+\* The verbalier `[{"text": "Another word}, {"meta": "span1_text"}]` Might not be the optimal, just to show a use case of the generation verbalizer.
 
 ### COPA
 | Prompt | LM  | Template | Verbalizer | Ref | Comment | Validation Acc |
 |:------:|:------------:|:------------:|:-------:|:---------:|:-----------:|:--------:|
 | Soft | t5-lg-lm-ad| manual_0 | gen_0\*| [tutorial](../tutorial/4.1_all_tasks_are_generation.py) | Generation Objective|  0.72 |
 
-\* The verbalizer [{"meta":"choice1"}, {"meta":"choice2"}]is differenet from the verbalizer used in T5, ["True", "False"]. Superisingly, Recovering the whole choice1/choice2 sentence is very easy for LM, and yield much better result (0.72 vs 0.60)
+\* The verbalizer `[{"meta":"choice1"}, {"meta":"choice2"}]` is different from the verbalizer used in T5, `["True", "False"]`. Superisingly, recovering the whole choice1/choice2 sentence is very easy for LM, and yield much better result (0.72 vs 0.60)
 
 ### RECORD
 | Prompt | LM  | Template | Verbalizer | Ref | Comment | Validation Acc |
