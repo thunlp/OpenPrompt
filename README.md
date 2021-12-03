@@ -27,7 +27,7 @@
 
 ## What's New?
 
-
+- Dec 2021: `pip install openprompt`
 - Dec 2021: [SuperGLUE performance](https://github.com/thunlp/OpenPrompt/tree/main/results) are added 
 - Dec 2021: We support **generation paradigm for all tasks** by adding a new verbalizer:[GenerationVerbalizer](https://github.com/thunlp/OpenPrompt/blob/main/openprompt/prompts/generation_verbalizer.py) and a [tutorial: 4.1_all_tasks_are_generation.py](https://github.com/thunlp/OpenPrompt/blob/main/tutorial/4.1_all_tasks_are_generation.py)
 - Nov 2021: Now we have released a paper [OpenPrompt: An Open-source Framework for Prompt-learning](https://arxiv.org/abs/2111.01998).
@@ -63,6 +63,13 @@
 
 ## Installation
 
+### Using Pip
+
+Our repo is tested on Python 3.6+ and PyTorch 1.8.1+, install OpenPrompt using pip as follows:
+
+`pip install openprompt`
+
+To play with the latest features, you can also install OpenPrompt from the source.
 
 ### Using Git  
 
