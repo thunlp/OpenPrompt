@@ -43,3 +43,10 @@ The template of PTR from `PTR: Prompt Tuning with Rules for Text Classification 
 
 .. autoclass:: openprompt.prompts.ptr_prompts.PTRTemplate
    :members:
+
+Mixed Template
+--------------------
+Our newly introduced mixed template class to flexibly define your templates.
+
+.. autoclass:: openprompt.prompts.mixed_template.MixedTemplate
+   :members:
