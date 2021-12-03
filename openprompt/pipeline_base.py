@@ -429,7 +429,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         logits, labels = self.shift_logits_and_labels(logits, batch['loss_ids'], reference_ids)
         batch_size, seq_len, vocab_size = logits.shape
         loss = self.loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
-        loss = loss.view(batch_size, -1).sum(dim=-1) #TODO support more objectives
+        loss = loss.view(batch_size, -1).sum(dim=-1) # TODO support more objectives
         loss = loss.mean()
         return loss
     
@@ -531,7 +531,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
             batch = InputFeatures(input_ids=input_ids, **model_kwargs)
             model_inputs = self.prompt_model.prepare_model_inputs(batch)
-            # TODO check the competibility for more models. Having checked gpt2, T5
+            # TODO check the compatibility for more models. Having checked gpt2, T5
         else: # generating the subsequence generation can use the default setting
             model_inputs = self.plm.prepare_inputs_for_generation(input_ids, **model_kwargs)
         self.last_model_inputs = model_inputs  # to update the model_kwargs in _update_model_kwargs_for_generation, in-place operation.

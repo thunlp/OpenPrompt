@@ -102,6 +102,7 @@ class T5TokenizerWrapper(TokenizerWrapper):
         # decoder input ids
         decoder_inputs = {'decoder_input_ids': decoder_input_ids, 'loss_ids':loss_ids}
         decoder_inputs = self.truncate_decoder_inputs(decoder_inputs)
+        print("De:", [self.tokenizer.convert_ids_to_tokens(ids) for ids in decoder_inputs["decoder_input_ids"]])
 
         encoder_inputs = self.truncate(encoder_inputs=encoder_inputs)
 
@@ -126,12 +127,10 @@ class T5TokenizerWrapper(TokenizerWrapper):
         for key in inputs:
             inputs[key] = inputs[key][:self.decoder_max_length - 1]
         
-        inputs['decoder_input_ids'].append(self.tokenizer.eos_token_id)
         if self.predict_eos:
+            inputs['decoder_input_ids'].append(self.tokenizer.eos_token_id)
             inputs['loss_ids'].append(1)
-        else:
-            inputs['loss_ids'].append(0)
-        inputs = self.padding(inputs, max_len = self.decoder_max_length)
+        inputs = self.padding(inputs, max_len = self.decoder_max_length, pad_id_for_inputs=self.tokenizer.pad_token_id)
         return inputs
 
 class T5LMTokenizerWrapper(TokenizerWrapper):
