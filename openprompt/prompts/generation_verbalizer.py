@@ -29,7 +29,7 @@ class GenerationVerbalizer(Verbalizer):
     For example, when label word is ``"good"``, the tgt_text is ``"good"``; 
 
     when label word is ``{"text":"good"}``, the tgt_text is also ``"good"``; 
-    
+
     when label word is ``{"meta":"choice1"}``, the tgt_text is the ``"meta['choice1']"`` field of the ``InputExample``; 
     
     when label word is ``{"meta":"choice1"} {"placeholder", "text_a"} .``, the tgt_text is the ``"meta['choice1']"`` field of the ``InputExample``, 
@@ -66,10 +66,11 @@ class GenerationVerbalizer(Verbalizer):
             else:
                 example.tgt_text = self.label_words[example.label](example)
         return example
-    
+
 
     def on_label_words_set(self):
-        r"""Do not perform any action in ContextualVerbalizer
+        r"""
+        Process the text into the label words (sometimes a function) according to the syntax of MixedTemplate
         """
         if isinstance(self.label_words[0], list):
             self.label_words = [x[0] for x in self.label_words]
