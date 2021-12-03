@@ -121,7 +121,11 @@
 </li>
         <li><a href="modules/verbalizer.html#openprompt.prompts.one2one_verbalizer.One2oneVerbalizer.add_prefix">(One2oneVerbalizer static method)</a>
 </li>
+        <li><a href="modules/verbalizer.html#openprompt.prompts.soft_verbalizer.SoftVerbalizer.add_prefix">(SoftVerbalizer static method)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/verbalizer.html#openprompt.prompts.knowledgeable_verbalizer.KnowledgeableVerbalizer.aggregate">aggregate() (KnowledgeableVerbalizer method)</a>
 
       <ul>
@@ -130,8 +134,6 @@
         <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.aggregate">(Verbalizer static method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.aggregate">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_processors.html#openprompt.data_utils.text_classification_dataset.AgnewsProcessor">AgnewsProcessor (class in openprompt.data_utils.text_classification_dataset)</a>
 </li>
       <li><a href="modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer">AutomaticVerbalizer (class in openprompt.prompts.automatic_verbalizer)</a>
@@ -240,8 +242,12 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.gather_outputs">gather_outputs() (Verbalizer method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.gather_outputs">[1]</a>
+      <li><a href="modules/verbalizer.html#openprompt.prompts.soft_verbalizer.SoftVerbalizer.gather_outputs">gather_outputs() (SoftVerbalizer method)</a>
+
+      <ul>
+        <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.gather_outputs">(Verbalizer method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.gather_outputs">[1]</a>
 </li>
+      </ul></li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.generate">generate() (PromptForGeneration method)</a>
 
       <ul>
@@ -261,18 +267,24 @@
 </li>
         <li><a href="modules/template.html#openprompt.prompts.ptuning_prompts.PtuningTemplate.generate_parameters">(PtuningTemplate method)</a>
 </li>
+        <li><a href="modules/verbalizer.html#openprompt.prompts.soft_verbalizer.SoftVerbalizer.generate_parameters">(SoftVerbalizer method)</a>
+</li>
         <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.generate_parameters">(Verbalizer method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.generate_parameters">[1]</a>
 </li>
       </ul></li>
       <li><a href="modules/trainer.html#openprompt.trainer.GenerationRunner">GenerationRunner (class in openprompt.trainer)</a>
 </li>
+      <li><a href="modules/verbalizer.html#openprompt.prompts.generation_verbalizer.GenerationVerbalizer">GenerationVerbalizer (class in openprompt.prompts.generation_verbalizer)</a>
+</li>
       <li><a href="modules/base.html#openprompt.prompt_base.Template.get_default_loss_ids">get_default_loss_ids() (Template method)</a>, <a href="modules/root.html#id2">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.get_default_loss_ids">[2]</a>
 </li>
       <li><a href="modules/base.html#openprompt.prompt_base.Template.get_default_shortenable_ids">get_default_shortenable_ids() (Template method)</a>, <a href="modules/root.html#id3">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.get_default_shortenable_ids">[2]</a>
 </li>
-      <li><a href="modules/template.html#openprompt.prompts.ptuning_prompts.PtuningTemplate.get_default_soft_token_ids">get_default_soft_token_ids() (PtuningTemplate method)</a>
+      <li><a href="modules/template.html#openprompt.prompts.mixed_template.MixedTemplate.get_default_soft_token_ids">get_default_soft_token_ids() (MixedTemplate method)</a>
 
       <ul>
+        <li><a href="modules/template.html#openprompt.prompts.ptuning_prompts.PtuningTemplate.get_default_soft_token_ids">(PtuningTemplate method)</a>
+</li>
         <li><a href="modules/base.html#openprompt.prompt_base.Template.get_default_soft_token_ids">(Template method)</a>, <a href="modules/root.html#id4">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.get_default_soft_token_ids">[2]</a>
 </li>
       </ul></li>
@@ -311,6 +323,10 @@
       <li><a href="modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_train_examples">get_train_examples() (DataProcessor method)</a>
 </li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.data_processor.DataProcessor.get_unlabeled_examples">get_unlabeled_examples() (DataProcessor method)</a>
+</li>
+      <li><a href="modules/verbalizer.html#openprompt.prompts.soft_verbalizer.SoftVerbalizer.group_parameters_1">group_parameters_1 (SoftVerbalizer property)</a>
+</li>
+      <li><a href="modules/verbalizer.html#openprompt.prompts.soft_verbalizer.SoftVerbalizer.group_parameters_2">group_parameters_2 (SoftVerbalizer property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -374,6 +390,8 @@
 </li>
       <li><a href="modules/verbalizer.html#openprompt.prompts.manual_verbalizer.ManualVerbalizer">ManualVerbalizer (class in openprompt.prompts.manual_verbalizer)</a>
 </li>
+      <li><a href="modules/template.html#openprompt.prompts.mixed_template.MixedTemplate">MixedTemplate (class in openprompt.prompts.mixed_template)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
@@ -405,14 +423,18 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/verbalizer.html#openprompt.prompts.knowledgeable_verbalizer.KnowledgeableVerbalizer.on_label_words_set">on_label_words_set() (KnowledgeableVerbalizer method)</a>
+      <li><a href="modules/verbalizer.html#openprompt.prompts.generation_verbalizer.GenerationVerbalizer.on_label_words_set">on_label_words_set() (GenerationVerbalizer method)</a>
 
       <ul>
+        <li><a href="modules/verbalizer.html#openprompt.prompts.knowledgeable_verbalizer.KnowledgeableVerbalizer.on_label_words_set">(KnowledgeableVerbalizer method)</a>
+</li>
         <li><a href="modules/verbalizer.html#openprompt.prompts.manual_verbalizer.ManualVerbalizer.on_label_words_set">(ManualVerbalizer method)</a>
 </li>
         <li><a href="modules/verbalizer.html#openprompt.prompts.one2one_verbalizer.One2oneVerbalizer.on_label_words_set">(One2oneVerbalizer method)</a>
 </li>
         <li><a href="modules/verbalizer.html#openprompt.prompts.ptr_prompts.PTRVerbalizer.on_label_words_set">(PTRVerbalizer method)</a>
+</li>
+        <li><a href="modules/verbalizer.html#openprompt.prompts.soft_verbalizer.SoftVerbalizer.on_label_words_set">(SoftVerbalizer method)</a>
 </li>
         <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.on_label_words_set">(Verbalizer method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.on_label_words_set">[1]</a>
 </li>
@@ -420,6 +442,8 @@
       <li><a href="modules/template.html#openprompt.prompts.manual_template.ManualTemplate.on_text_set">on_text_set() (ManualTemplate method)</a>
 
       <ul>
+        <li><a href="modules/template.html#openprompt.prompts.mixed_template.MixedTemplate.on_text_set">(MixedTemplate method)</a>
+</li>
         <li><a href="modules/template.html#openprompt.prompts.prefix_tuning_template.PrefixTuningTemplate.on_text_set">(PrefixTuningTemplate method)</a>
 </li>
         <li><a href="modules/template.html#openprompt.prompts.ptuning_prompts.PtuningTemplate.on_text_set">(PtuningTemplate method)</a>
@@ -473,18 +497,26 @@
 </li>
       <li><a href="modules/template.html#openprompt.prompts.prefix_tuning_template.PrefixTuningTemplate">PrefixTuningTemplate (class in openprompt.prompts.prefix_tuning_template)</a>
 </li>
+      <li><a href="modules/template.html#openprompt.prompts.mixed_template.MixedTemplate.prepare">prepare() (MixedTemplate method)</a>
+</li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.prepare_inputs_for_generation">prepare_inputs_for_generation() (PromptForGeneration method)</a>
 </li>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptModel.prepare_model_inputs">prepare_model_inputs() (PromptModel method)</a>
 </li>
-      <li><a href="modules/template.html#openprompt.prompts.prefix_tuning_template.PrefixTuningTemplate.process_batch">process_batch() (PrefixTuningTemplate method)</a>
+      <li><a href="modules/template.html#openprompt.prompts.mixed_template.MixedTemplate.process_batch">process_batch() (MixedTemplate method)</a>
 
       <ul>
+        <li><a href="modules/template.html#openprompt.prompts.prefix_tuning_template.PrefixTuningTemplate.process_batch">(PrefixTuningTemplate method)</a>
+</li>
         <li><a href="modules/template.html#openprompt.prompts.ptuning_prompts.PtuningTemplate.process_batch">(PtuningTemplate method)</a>
 </li>
         <li><a href="modules/base.html#openprompt.prompt_base.Template.process_batch">(Template method)</a>, <a href="modules/root.html#id8">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.process_batch">[2]</a>
 </li>
       </ul></li>
+      <li><a href="modules/verbalizer.html#openprompt.prompts.soft_verbalizer.SoftVerbalizer.process_hiddens">process_hiddens() (SoftVerbalizer method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/verbalizer.html#openprompt.prompts.manual_verbalizer.ManualVerbalizer.process_logits">process_logits() (ManualVerbalizer method)</a>
 
       <ul>
@@ -493,10 +525,12 @@
         <li><a href="modules/verbalizer.html#openprompt.prompts.ptr_prompts.PTRVerbalizer.process_logits">(PTRVerbalizer method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.process_outputs">process_outputs() (Verbalizer method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.process_outputs">[1]</a>
+      <li><a href="modules/verbalizer.html#openprompt.prompts.soft_verbalizer.SoftVerbalizer.process_outputs">process_outputs() (SoftVerbalizer method)</a>
+
+      <ul>
+        <li><a href="modules/base.html#openprompt.prompt_base.Verbalizer.process_outputs">(Verbalizer method)</a>, <a href="modules/root.html#openprompt.prompt_base.Verbalizer.process_outputs">[1]</a>
 </li>
+      </ul></li>
       <li><a href="modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer.project">project() (AutomaticVerbalizer method)</a>
 
       <ul>
@@ -563,13 +597,15 @@
 </li>
       <li><a href="modules/base.html#openprompt.prompt_base.Template.save">save() (Template method)</a>, <a href="modules/root.html#id10">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.save">[2]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_processors.html#openprompt.data_utils.relation_classification_dataset.SemEvalProcessor">SemEvalProcessor (class in openprompt.data_utils.relation_classification_dataset)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/base.html#openprompt.pipeline_base.PromptForGeneration.shift_logits_and_labels">shift_logits_and_labels() (PromptForGeneration method)</a>
 </li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.nli_dataset.SNLIProcessor">SNLIProcessor (class in openprompt.data_utils.nli_dataset)</a>
+</li>
+      <li><a href="modules/verbalizer.html#openprompt.prompts.soft_verbalizer.SoftVerbalizer">SoftVerbalizer (class in openprompt.prompts.soft_verbalizer)</a>
 </li>
       <li><a href="modules/data_processors.html#openprompt.data_utils.text_classification_dataset.SST2Processor">SST2Processor (class in openprompt.data_utils.text_classification_dataset)</a>
 </li>
@@ -639,9 +675,11 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/template.html#openprompt.prompts.prefix_tuning_template.PrefixTuningTemplate.wrap_one_example">wrap_one_example() (PrefixTuningTemplate method)</a>
+      <li><a href="modules/verbalizer.html#openprompt.prompts.generation_verbalizer.GenerationVerbalizer.wrap_one_example">wrap_one_example() (GenerationVerbalizer method)</a>
 
       <ul>
+        <li><a href="modules/template.html#openprompt.prompts.prefix_tuning_template.PrefixTuningTemplate.wrap_one_example">(PrefixTuningTemplate method)</a>
+</li>
         <li><a href="modules/base.html#openprompt.prompt_base.Template.wrap_one_example">(Template method)</a>, <a href="modules/root.html#id7">[1]</a>, <a href="modules/root.html#openprompt.prompt_base.Template.wrap_one_example">[2]</a>
 </li>
       </ul></li>

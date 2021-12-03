@@ -62,6 +62,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#prefix-template">Prefix Template</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ptuning-template">Ptuning Template</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ptr-template">PTR Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixed-template">Mixed Template</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="verbalizer.html">Verbalizer</a></li>
@@ -273,6 +274,68 @@ for new tokens, use a brand new embedding layer, with MLP or LSTM head</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+</section>
+<section id="mixed-template">
+<h2>Mixed Template<a class="headerlink" href="#mixed-template" title="Permalink to this headline">¶</a></h2>
+<p>Our newly introduced mixed template class to flexibly define your templates.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.prompts.mixed_template.MixedTemplate">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MixedTemplate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.modeling_utils.PreTrainedModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/mixed_template.html#MixedTemplate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.mixed_template.MixedTemplate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mixed of manual token, trainable token and trainable that initialized with given hard token</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PreTrainedModel</span></code>) – The pre-trained language model for the current prompt-learning task.</p></li>
+<li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PreTrainedTokenizer</span></code>) – A tokenizer to appoint the vocabulary and the tokenization strategy.</p></li>
+<li><p><strong>text</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[List[str]]</span></code>, optional) – manual template format. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.mixed_template.MixedTemplate.get_default_soft_token_ids">
+<span class="sig-name descname"><span class="pre">get_default_soft_token_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompts/mixed_template.html#MixedTemplate.get_default_soft_token_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.mixed_template.MixedTemplate.get_default_soft_token_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function identifies which tokens are soft tokens.</p>
+<p>Sometimes tokens in the template are not from the vocabulary,
+but a sequence of soft tokens.
+In this case, you need to implement this function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.10)"><strong>NotImplementedError</strong></a> – if needed, add <code class="docutils literal notranslate"><span class="pre">soft_token_ids</span></code> into <code class="docutils literal notranslate"><span class="pre">registered_inputflag_names</span></code> attribute of Template class and implement this method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.mixed_template.MixedTemplate.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/mixed_template.html#MixedTemplate.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.mixed_template.MixedTemplate.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the trainable token indices for the template</p>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;soft_id&quot;</span></code> can be used to reference the previous soft token, which means these tokens use the same embeddings.
+<strong>Note that ``”soft_id”`` should have index start from 1 but not 0</strong></p>
+<p>e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">'{&quot;soft&quot;:</span> <span class="pre">None}</span> <span class="pre">{&quot;soft&quot;:</span> <span class="pre">&quot;the&quot;,</span> <span class="pre">&quot;soft_id&quot;:</span> <span class="pre">1}</span> <span class="pre">{&quot;soft&quot;:</span> <span class="pre">None}</span> <span class="pre">{&quot;soft&quot;:</span> <span class="pre">&quot;it&quot;,</span> <span class="pre">&quot;soft_id&quot;:</span> <span class="pre">3}</span> <span class="pre">{&quot;soft_id&quot;:</span> <span class="pre">1}</span> <span class="pre">{&quot;soft&quot;:</span> <span class="pre">&quot;was&quot;}</span> <span class="pre">{&quot;mask&quot;}'</span></code>,
+output is [1, 2, 3, 4, 2, 5, 0]</p>
+<p>TODO document here</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.mixed_template.MixedTemplate.on_text_set">
+<span class="sig-name descname"><span class="pre">on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/mixed_template.html#MixedTemplate.on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.mixed_template.MixedTemplate.on_text_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>when template text was set</p>
+<ol class="arabic simple">
+<li><p>parse text</p></li>
+<li><p>generate parameter needed</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.mixed_template.MixedTemplate.process_batch">
+<span class="sig-name descname"><span class="pre">process_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><span class="pre">openprompt.data_utils.utils.InputFeatures</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><span class="pre">openprompt.data_utils.utils.InputFeatures</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompts/mixed_template.html#MixedTemplate.process_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.mixed_template.MixedTemplate.process_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert input_ids to inputs_embeds
+for normal tokens, use the embedding layer of PLM
+for soft tokens, use a new embedding layer which is initialized with their corresponding embedding of hard tokens</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>

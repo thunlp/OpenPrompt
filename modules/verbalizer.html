@@ -65,6 +65,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#automatic-verbalizer">Automatic Verbalizer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#knowledgeable-verbalizer">Knowledgeable Verbalizer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ptr-verbalizer">PTR Verbalizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generation-verbalizer">Generation Verbalizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#soft-verbalizer">Soft Verbalizer</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="prompt_generator.html">Prompt Generator</a></li>
@@ -619,6 +621,157 @@ The final label is predicted jointly by these label words using logic rules.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="generation-verbalizer">
+<h2>Generation Verbalizer<a class="headerlink" href="#generation-verbalizer" title="Permalink to this headline">¶</a></h2>
+<p>This verbalizer empower the “generation for all the tasks” paradigm.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.prompts.generation_verbalizer.GenerationVerbalizer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">GenerationVerbalizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_rule</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/generation_verbalizer.html#GenerationVerbalizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.generation_verbalizer.GenerationVerbalizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This verbalizer is usefull when the label prediction is better defined by a piece of input.
+For example, in correference resolution, the tgt_text is a proper noun metioned in the text.
+This is there is no fixed mapping between a class label and its label words. This verbalizer
+is can be used as verbalizer of COPA and WSC dataset in superglue datasets.</p>
+<p>This verbalizer is especially  powerful when combined with
+<a class="reference external" href="https://arxiv.org/abs/2103.10360">All NLP Tasks Are Generation Tasks</a> Paradigm (Also see
+<a class="reference external" href="https://arxiv.org/abs/2104.08835">Crossfit</a>). It can make any piece of text the tgt_text. The tgt_text will then be filled in the <cite>{“mask”}</cite>.</p>
+<p>For example, when label word is “good”, the tgt_text is “good”;</p>
+<p>when label word is <cite>{“text”:”good”}</cite>, the tgt_text is also <cite>“good”</cite>;</p>
+<p>when label word is <cite>{“meta”:”choice1”}</cite>, the tgt_text is the <cite>“meta[‘choice1’]”</cite> field of the InputExample;</p>
+<p>when label word is <cite>{“meta”:”choice1”} {“placeholder”, “text_a”} .</cite>, the tgt_text is the <cite>“meta[‘choice1’]”</cite> field of the InputExample,
+followed by <cite>text_a</cite> field of the InputExample, and then a <cite>‘.’</cite>;</p>
+<p>A use case can be seen in <a class="reference external" href="https://github.com/thunlp/OpenPrompt/blob/main/tutorial/4.1_all_tasks_are_generation.py">Tutorial 4.1</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PreTrainedTokenizer</span></code>) – The tokenizer of the current pre-trained model to point out the vocabulary.</p></li>
+<li><p><strong>classes</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Any]</span></code>) – The classes (or labels) of the current task.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – The prefix string of the verbalizer (used in PLMs like RoBERTa, which is sensitive to prefix space)</p></li>
+<li><p><strong>is_rule</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – When the verbalizer use the rule syntax of MixTemplate.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.generation_verbalizer.GenerationVerbalizer.wrap_one_example">
+<span class="sig-name descname"><span class="pre">wrap_one_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">example</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">openprompt.data_utils.utils.InputExample</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompts/generation_verbalizer.html#GenerationVerbalizer.wrap_one_example"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.generation_verbalizer.GenerationVerbalizer.wrap_one_example" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take an InputExample, and fill the tgt_text with label words</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.generation_verbalizer.GenerationVerbalizer.on_label_words_set">
+<span class="sig-name descname"><span class="pre">on_label_words_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/generation_verbalizer.html#GenerationVerbalizer.on_label_words_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.generation_verbalizer.GenerationVerbalizer.on_label_words_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do not perform any action in ContextualVerbalizer</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="soft-verbalizer">
+<h2>Soft Verbalizer<a class="headerlink" href="#soft-verbalizer" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SoftVerbalizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">transformers.utils.dummy_pt_objects.PreTrainedModel</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_words</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_token_handler</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/soft_verbalizer.html#SoftVerbalizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>The implementation of the verbalizer in <a class="reference external" href="https://aclanthology.org/2021.acl-long.381/">WARP</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PreTrainedTokenizer</span></code>) – The tokenizer of the current pre-trained model to point out the vocabulary.</p></li>
+<li><p><strong>classes</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Any]</span></code>) – The classes (or labels) of the current task.</p></li>
+<li><p><strong>label_words</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[Sequence[str],</span> <span class="pre">Mapping[str,</span> <span class="pre">str]]</span></code>, optional) – The label words that are projected by the labels.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – The prefix string of the verbalizer (used in PLMs like RoBERTa, which is sensitive to prefix space)</p></li>
+<li><p><strong>multi_token_handler</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – The handling strategy for multiple tokens produced by the tokenizer.</p></li>
+<li><p><strong>post_log_softmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – Whether to apply log softmax post processing on label_logits. Default to True.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer.group_parameters_1">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">group_parameters_1</span></span><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer.group_parameters_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Include the parameters of head’s layer but not the last layer
+In soft verbalizer, note that some heads may contain modules
+other than the final projection layer. The parameters of these part should be
+optimized (or freezed) together with the plm.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer.group_parameters_2">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">group_parameters_2</span></span><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer.group_parameters_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Include the last layer’s parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer.on_label_words_set">
+<span class="sig-name descname"><span class="pre">on_label_words_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/soft_verbalizer.html#SoftVerbalizer.on_label_words_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer.on_label_words_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>A hook to do something when textual label words were set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer.add_prefix">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">add_prefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_words</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/soft_verbalizer.html#SoftVerbalizer.add_prefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer.add_prefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add prefix to label words. For example, if a label words is in the middle of a template,
+the prefix should be <code class="docutils literal notranslate"><span class="pre">'</span> <span class="pre">'</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label_words</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[Sequence[str],</span> <span class="pre">Mapping[str,</span> <span class="pre">str]]</span></code>, optional) – The label words that are projected by the labels.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional) – The prefix string of the verbalizer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New label words with prefix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sequence[str]</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer.generate_parameters">
+<span class="sig-name descname"><span class="pre">generate_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/openprompt/prompts/soft_verbalizer.html#SoftVerbalizer.generate_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer.generate_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>In basic manual template, the parameters are generated from label words directly.
+In this implementation, the label_words should not be tokenized into more than one token.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer.process_hiddens">
+<span class="sig-name descname"><span class="pre">process_hiddens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hiddens</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/soft_verbalizer.html#SoftVerbalizer.process_hiddens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer.process_hiddens" title="Permalink to this definition">¶</a></dt>
+<dd><p>A whole framework to process the original logits over the vocabulary, which contains four steps:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer.process_outputs">
+<span class="sig-name descname"><span class="pre">process_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><span class="pre">openprompt.data_utils.utils.InputFeatures</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/soft_verbalizer.html#SoftVerbalizer.process_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer.process_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>By default, the verbalizer will process the logits of the PLM’s
+output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The current logits generated by pre-trained language models.</p></li>
+<li><p><strong>batch</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[Dict,</span> <span class="pre">InputFeatures]</span></code>) – The input features of the data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer.gather_outputs">
+<span class="sig-name descname"><span class="pre">gather_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.file_utils.ModelOutput</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/soft_verbalizer.html#SoftVerbalizer.gather_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer.gather_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>retrieve useful output for the verbalizer from the whole model ouput
+By default, it will only retrieve the logits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>outputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelOutput</span></code>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code> The gathered output, should be of shape (<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>,
+<code class="docutils literal notranslate"><span class="pre">seq_len</span></code>, <code class="docutils literal notranslate"><span class="pre">any</span></code>)</p>
 </dd>
 </dl>
 </dd></dl>
