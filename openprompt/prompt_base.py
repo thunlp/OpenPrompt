@@ -374,6 +374,8 @@ class Verbalizer(nn.Module):
         E.g. if we want to establish a projection in sentiment classification: positive :math:`\rightarrow` {`wonderful`, `good`},
         in this case, `wonderful` and `good` are label words.
         '''
+        if not hasattr(self, "_label_words"):
+            raise RuntimeError("label words haven't been set.")
         return self._label_words
     
     @label_words.setter
