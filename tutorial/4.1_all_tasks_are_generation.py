@@ -1,9 +1,9 @@
 # There is a recent trend to unify all tasks (such as classification) into tasks generation.
 # In fact, unifying the tasks into text generation can be neatly conducted using prompt. 
-# In OpenPrompt, we also provide the interface PromptAllasGen pipeline.
+# In OpenPrompt, we provide a GenerationVerbalizer for this utility.
 # Here we go!
 
-from openprompt.pipeline_base import PromptClassificationAsGeneration, PromptForGeneration
+from openprompt.pipeline_base import PromptForGeneration
 from openprompt.prompts.generation_verbalizer import GenerationVerbalizer
 from tokenizers import PreTokenizedString
 from tqdm import tqdm
@@ -288,7 +288,7 @@ generation_arguments = {
     "max_length": dataset_decoder_max_length,
 }
 
-def evaluate(prompt_model, dataloader, myverbalizer):
+def evaluate(prompt_model, dataloader):
     predictions = []
     ground_truths = []
 
