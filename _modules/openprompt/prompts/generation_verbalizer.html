@@ -110,24 +110,22 @@
 <span class="sd">    This verbalizer is usefull when the label prediction is better defined by a piece of input.</span>
 <span class="sd">    For example, in correference resolution, the tgt_text is a proper noun metioned in the text.</span>
 <span class="sd">    This is there is no fixed mapping between a class label and its label words. This verbalizer</span>
-<span class="sd">    is can be used as verbalizer of COPA and WSC dataset in superglue datasets. </span>
+<span class="sd">    is can be used as verbalizer of ``COPA`` and ``WSC`` dataset in superglue datasets. </span>
 
-<span class="sd">    This verbalizer is especially  powerful when combined with </span>
+<span class="sd">    This verbalizer is especially powerful when combined with </span>
 <span class="sd">    `All NLP Tasks Are Generation Tasks &lt;https://arxiv.org/abs/2103.10360&gt;`_ Paradigm (Also see</span>
 <span class="sd">    `Crossfit &lt;https://arxiv.org/abs/2104.08835&gt;`_). It can make any piece of text the tgt_text. The tgt_text will then be filled in the `{&quot;mask&quot;}`. </span>
 <span class="sd">    </span>
-<span class="sd">    For example, when label word is &quot;good&quot;, the tgt_text is &quot;good&quot;; </span>
+<span class="sd">    For example, when label word is ``&quot;good&quot;``, the tgt_text is ``&quot;good&quot;``; </span>
 
-<span class="sd">    when label word is `{&quot;text&quot;:&quot;good&quot;}`, the tgt_text is also `&quot;good&quot;`; </span>
-
-<span class="sd">    when label word is `{&quot;meta&quot;:&quot;choice1&quot;}`, the tgt_text is the `&quot;meta[&#39;choice1&#39;]&quot;` field of the InputExample; </span>
+<span class="sd">    when label word is ``{&quot;text&quot;:&quot;good&quot;}``, the tgt_text is also ``&quot;good&quot;``; </span>
 <span class="sd">    </span>
-<span class="sd">    when label word is `{&quot;meta&quot;:&quot;choice1&quot;} {&quot;placeholder&quot;, &quot;text_a&quot;} .`, the tgt_text is the `&quot;meta[&#39;choice1&#39;]&quot;` field of the InputExample, </span>
-<span class="sd">    followed by `text_a` field of the InputExample, and then a `&#39;.&#39;`; </span>
+<span class="sd">    when label word is ``{&quot;meta&quot;:&quot;choice1&quot;}``, the tgt_text is the ``&quot;meta[&#39;choice1&#39;]&quot;`` field of the ``InputExample``; </span>
+<span class="sd">    </span>
+<span class="sd">    when label word is ``{&quot;meta&quot;:&quot;choice1&quot;} {&quot;placeholder&quot;, &quot;text_a&quot;} .``, the tgt_text is the ``&quot;meta[&#39;choice1&#39;]&quot;`` field of the ``InputExample``, </span>
+<span class="sd">    followed by ``text_a`` field of the ``InputExample``, and then a ``&#39;.&#39;``; </span>
 
 <span class="sd">    A use case can be seen in `Tutorial 4.1 &lt;https://github.com/thunlp/OpenPrompt/blob/main/tutorial/4.1_all_tasks_are_generation.py&gt;`_</span>
-
-
 
 <span class="sd">    Args:   </span>
 <span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.</span>

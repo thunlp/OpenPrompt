@@ -105,7 +105,7 @@
 <span class="sd">    1). we allow re-selecting the verbalizer after a fixed training steps. </span>
 <span class="sd">    The original implementation only performs one step selection after getting</span>
 <span class="sd">    the inital logits on the training data. To adopt their implementation,</span>
-<span class="sd">    please only do optimize() after the first pass of training data.</span>
+<span class="sd">    please only do ``optimize()`` after the first pass of training data.</span>
 
 <span class="sd">    2). We strictly follows the probility calculation in Equation (3) in the</span>
 <span class="sd">    paper, which take softmax over the logits.</span>
@@ -123,7 +123,7 @@
 <span class="sd">        label_word_num_per_class (:obj:`int`, optional): set to be greater than 1 to support Multi-Verbalizers in Section 4.2</span>
 <span class="sd">        num_searches (:obj:`int`, optional): Maximnum number of label_words search. After reaching this number, the verbalizer will use the same label_words as the previous iterations. </span>
 <span class="sd">        search_id (:obj:`int`, optional): the id of current search, used to determine when to stop label words searching.</span>
-<span class="sd">        score_fct (:obj:`str`, optional): the scoring function of label words selection. ``llr&#39;&#39; means log likelihood ratio, corresponding to Equation (7); ``ce&#39;&#39; means cross entropy, corresponding to Equation (6). As the paper points out, ``llr&#39;&#39; is significantly better than &#39;ce&#39;, we only keep it to match the original code.</span>
+<span class="sd">        score_fct (:obj:`str`, optional): the scoring function of label words selection. ``llr`` means log likelihood ratio, corresponding to Equation (7); ``ce`` means cross entropy, corresponding to Equation (6). As the paper points out, ``llr&#39;&#39; is significantly better than &#39;ce&#39;, we only keep it to match the original code.</span>
 <span class="sd">        balance (:obj:`book`, optional): whether to perform normalization of unbalanced training dataset, as Equation (5).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 

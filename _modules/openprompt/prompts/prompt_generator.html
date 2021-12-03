@@ -139,7 +139,7 @@
         <span class="n">example</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;labelword&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">label_words</span><span class="p">[</span><span class="n">example</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">wrapped_example</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">wrap_one_example</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
 
-        <span class="c1"># TODO: replace &lt;mask&gt; with special tokens in each generation model</span>
+        <span class="c1"># replace &lt;mask&gt; with special tokens in each generation model</span>
         <span class="c1"># e.g. in T5 multi-parts generation use &lt;extra_id_0&gt;, &lt;extra_id_1&gt;, ...</span>
         <span class="c1"># handle different types of plm</span>
         <span class="n">current_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_tokens_to_ids</span><span class="p">(</span><span class="s1">&#39;&lt;extra_id_0&gt;&#39;</span><span class="p">)</span>
@@ -225,7 +225,7 @@
 <div class="viewcode-block" id="TemplateGenerator.convert_template"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.convert_template">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">convert_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert the generated template into a standard template for downstream prompt model, return a list of str</span>
+<span class="sd">        Convert the generated template into a standard template for downstream prompt model, return a ``list`` of ``str``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
         
@@ -363,7 +363,7 @@
 
 <div class="viewcode-block" id="T5TemplateGenerator"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.T5TemplateGenerator">[docs]</a><span class="k">class</span> <span class="nc">T5TemplateGenerator</span><span class="p">(</span><span class="n">TemplateGenerator</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    Automatic template search using T5 model. This class inherits from `TemplateGenerator`.</span>
+<span class="sd">    Automatic template search using T5 model. This class inherits from ``TemplateGenerator``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                  <span class="n">model</span><span class="p">:</span> <span class="n">T5ForConditionalGeneration</span><span class="p">,</span>
@@ -402,7 +402,7 @@
 
 <div class="viewcode-block" id="VerbalizerGenerator"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator">[docs]</a><span class="k">class</span> <span class="nc">VerbalizerGenerator</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    This is the automatic label word search implementation in `LM-BFF &lt;https://arxiv.org/pdf/2012.15723.pdf`_. </span>
+<span class="sd">    This is the automatic label word search implementation in `LM-BFF &lt;https://arxiv.org/pdf/2012.15723.pdf&gt;`_. </span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model (:obj:`PretrainedModel`): A pre-trained model for label word generation.</span>

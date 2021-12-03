@@ -280,7 +280,7 @@
 <span class="sd">            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.</span>
 <span class="sd">       </span>
 <span class="sd">        Returns:</span>
-<span class="sd">            :obj:`List[Dict]` a list of dict of the same length as self.text. e.g. [{&quot;loss_ids&quot;: 0, &quot;text&quot;: &quot;It was&quot;}, {&quot;loss_ids&quot;: 1, &quot;text&quot;: &quot;&lt;mask&gt;&quot;}, ]</span>
+<span class="sd">            :obj:`List[Dict]`: A list of dict of the same length as self.text. e.g. ``[{&quot;loss_ids&quot;: 0, &quot;text&quot;: &quot;It was&quot;}, {&quot;loss_ids&quot;: 1, &quot;text&quot;: &quot;&lt;mask&gt;&quot;}, ]``</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -530,7 +530,7 @@
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The verbalizer can be seen as an extra layer on top of the originial</span>
 <span class="sd">        pre-trained models. In manual verbalizer, it is a fixed one-hot vector of dimension</span>
-<span class="sd">        vocab_size, with the position of the label word being 1 and 0 everywhere else. </span>
+<span class="sd">        ``vocab_size``, with the position of the label word being 1 and 0 everywhere else. </span>
 <span class="sd">        In other situation, the parameters may be a continuous vector over the </span>
 <span class="sd">        vocab, with each dimension representing a weight of that token.</span>
 <span class="sd">        Moreover, the parameters may be set to trainable to allow label words selection.</span>
@@ -539,7 +539,7 @@
 <span class="sd">        of the verbalizer, and must be instantiated in any derived class.</span>
 
 <span class="sd">        Note that the parameters need to be registered as a part of pytorch&#39;s module to </span>
-<span class="sd">        It can be acheived by wrapping a tensor using nn.Parameter().</span>
+<span class="sd">        It can be acheived by wrapping a tensor using ``nn.Parameter()``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
@@ -613,7 +613,7 @@
     <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;This method receives input logits of shape (batch_size, vocab_size), and use the </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;This method receives input logits of shape ``[batch_size, vocab_size]``, and use the </span>
 <span class="sd">        parameters of this verbalizer to project the logits over entire vocab into the</span>
 <span class="sd">        logits of labels words. </span>
 
@@ -655,10 +655,10 @@
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;load a verbalizer from verbalizer&#39;s configuration node. </span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            config (:obj:`CfgNode`): the sub-configuration of verbalizer, i.e. config[config.verbalizer]</span>
+<span class="sd">            config (:obj:`CfgNode`): the sub-configuration of verbalizer, i.e. ``config[config.verbalizer]``</span>
 <span class="sd">                        if config is a global config node. </span>
 <span class="sd">            kwargs: Other kwargs that might be used in initialize the verbalizer. </span>
-<span class="sd">                    The actual value should match the arguments of __init__ functions.</span>
+<span class="sd">                    The actual value should match the arguments of ``__init__`` functions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">init_args</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>

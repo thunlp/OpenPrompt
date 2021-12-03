@@ -209,10 +209,10 @@ these attributes are broadcasted along the tokenized sentence.</p>
 <dd class="field-odd"><p><strong>example</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">InputExample</span></code>) – An <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code> object, which should have attributes that are able to be filled in the template.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0, “text”: “It was”}, {“loss_ids”: 1, “text”: “&lt;mask&gt;”}, ]</p>
+<dd class="field-even"><p>A list of dict of the same length as self.text. e.g. <code class="docutils literal notranslate"><span class="pre">[{&quot;loss_ids&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;text&quot;:</span> <span class="pre">&quot;It</span> <span class="pre">was&quot;},</span> <span class="pre">{&quot;loss_ids&quot;:</span> <span class="pre">1,</span> <span class="pre">&quot;text&quot;:</span> <span class="pre">&quot;&lt;mask&gt;&quot;},</span> <span class="pre">]</span></code></p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code> a list of dict of the same length as self.text. e.g. [{“loss_ids”</p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -346,14 +346,14 @@ in this case, <cite>wonderful</cite> and <cite>good</cite> are label words.</p>
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">generate_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.generate_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.generate_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>The verbalizer can be seen as an extra layer on top of the originial
 pre-trained models. In manual verbalizer, it is a fixed one-hot vector of dimension
-vocab_size, with the position of the label word being 1 and 0 everywhere else.
+<code class="docutils literal notranslate"><span class="pre">vocab_size</span></code>, with the position of the label word being 1 and 0 everywhere else.
 In other situation, the parameters may be a continuous vector over the
 vocab, with each dimension representing a weight of that token.
 Moreover, the parameters may be set to trainable to allow label words selection.</p>
 <p>Therefore, this function serves as an abstract methods for generating the parameters
 of the verbalizer, and must be instantiated in any derived class.</p>
 <p>Note that the parameters need to be registered as a part of pytorch’s module to
-It can be acheived by wrapping a tensor using nn.Parameter().</p>
+It can be acheived by wrapping a tensor using <code class="docutils literal notranslate"><span class="pre">nn.Parameter()</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -437,7 +437,7 @@ Can be re-implemented in advanced verbaliezer.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.project">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.project" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method receives input logits of shape (batch_size, vocab_size), and use the
+<dd><p>This method receives input logits of shape <code class="docutils literal notranslate"><span class="pre">[batch_size,</span> <span class="pre">vocab_size]</span></code>, and use the
 parameters of this verbalizer to project the logits over entire vocab into the
 logits of labels words.</p>
 <dl class="field-list simple">
@@ -476,10 +476,10 @@ Can broadcast to 3-d tensor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – the sub-configuration of verbalizer, i.e. config[config.verbalizer]
+<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – the sub-configuration of verbalizer, i.e. <code class="docutils literal notranslate"><span class="pre">config[config.verbalizer]</span></code>
 if config is a global config node.</p></li>
 <li><p><strong>kwargs</strong> – Other kwargs that might be used in initialize the verbalizer.
-The actual value should match the arguments of __init__ functions.</p></li>
+The actual value should match the arguments of <code class="docutils literal notranslate"><span class="pre">__init__</span></code> functions.</p></li>
 </ul>
 </dd>
 </dl>
@@ -618,10 +618,10 @@ these attributes are broadcasted along the tokenized sentence.</p>
 <dd class="field-odd"><p><strong>example</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">InputExample</span></code>) – An <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code> object, which should have attributes that are able to be filled in the template.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0, “text”: “It was”}, {“loss_ids”: 1, “text”: “&lt;mask&gt;”}, ]</p>
+<dd class="field-even"><p>A list of dict of the same length as self.text. e.g. <code class="docutils literal notranslate"><span class="pre">[{&quot;loss_ids&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;text&quot;:</span> <span class="pre">&quot;It</span> <span class="pre">was&quot;},</span> <span class="pre">{&quot;loss_ids&quot;:</span> <span class="pre">1,</span> <span class="pre">&quot;text&quot;:</span> <span class="pre">&quot;&lt;mask&gt;&quot;},</span> <span class="pre">]</span></code></p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code> a list of dict of the same length as self.text. e.g. [{“loss_ids”</p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code></p>
 </dd>
 </dl>
 </dd></dl>

@@ -196,10 +196,10 @@ these attributes are broadcasted along the tokenized sentence.</p>
 <dd class="field-odd"><p><strong>example</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">InputExample</span></code>) – An <code class="xref py py-class docutils literal notranslate"><span class="pre">InputExample</span></code> object, which should have attributes that are able to be filled in the template.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0, “text”: “It was”}, {“loss_ids”: 1, “text”: “&lt;mask&gt;”}, ]</p>
+<dd class="field-even"><p>A list of dict of the same length as self.text. e.g. <code class="docutils literal notranslate"><span class="pre">[{&quot;loss_ids&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;text&quot;:</span> <span class="pre">&quot;It</span> <span class="pre">was&quot;},</span> <span class="pre">{&quot;loss_ids&quot;:</span> <span class="pre">1,</span> <span class="pre">&quot;text&quot;:</span> <span class="pre">&quot;&lt;mask&gt;&quot;},</span> <span class="pre">]</span></code></p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code> a list of dict of the same length as self.text. e.g. [{“loss_ids”</p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">List[Dict]</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -308,14 +308,14 @@ in this case, <cite>wonderful</cite> and <cite>good</cite> are label words.</p>
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">generate_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.generate_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.generate_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>The verbalizer can be seen as an extra layer on top of the originial
 pre-trained models. In manual verbalizer, it is a fixed one-hot vector of dimension
-vocab_size, with the position of the label word being 1 and 0 everywhere else.
+<code class="docutils literal notranslate"><span class="pre">vocab_size</span></code>, with the position of the label word being 1 and 0 everywhere else.
 In other situation, the parameters may be a continuous vector over the
 vocab, with each dimension representing a weight of that token.
 Moreover, the parameters may be set to trainable to allow label words selection.</p>
 <p>Therefore, this function serves as an abstract methods for generating the parameters
 of the verbalizer, and must be instantiated in any derived class.</p>
 <p>Note that the parameters need to be registered as a part of pytorch’s module to
-It can be acheived by wrapping a tensor using nn.Parameter().</p>
+It can be acheived by wrapping a tensor using <code class="docutils literal notranslate"><span class="pre">nn.Parameter()</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -394,7 +394,7 @@ Can be re-implemented in advanced verbaliezer.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.project">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.project" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method receives input logits of shape (batch_size, vocab_size), and use the
+<dd><p>This method receives input logits of shape <code class="docutils literal notranslate"><span class="pre">[batch_size,</span> <span class="pre">vocab_size]</span></code>, and use the
 parameters of this verbalizer to project the logits over entire vocab into the
 logits of labels words.</p>
 <dl class="field-list simple">
@@ -433,10 +433,10 @@ Can broadcast to 3-d tensor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – the sub-configuration of verbalizer, i.e. config[config.verbalizer]
+<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">CfgNode</span></code>) – the sub-configuration of verbalizer, i.e. <code class="docutils literal notranslate"><span class="pre">config[config.verbalizer]</span></code>
 if config is a global config node.</p></li>
 <li><p><strong>kwargs</strong> – Other kwargs that might be used in initialize the verbalizer.
-The actual value should match the arguments of __init__ functions.</p></li>
+The actual value should match the arguments of <code class="docutils literal notranslate"><span class="pre">__init__</span></code> functions.</p></li>
 </ul>
 </dd>
 </dl>
@@ -575,7 +575,7 @@ Typically, this function aims to predict the <code class="docutils literal notra
 <dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForClassification">
 <em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">PromptForClassification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.utils.dummy_pt_objects.PreTrainedModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="root.html#id0" title="openprompt.prompt_base.Template"><span class="pre">openprompt.prompt_base.Template</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbalizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="root.html#openprompt.prompt_base.Verbalizer" title="openprompt.prompt_base.Verbalizer"><span class="pre">openprompt.prompt_base.Verbalizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">freeze_plm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plm_eval_mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForClassification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForClassification" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">PromptModel</span></code> with a classification head on top. The classification head will map
-the logits in all position of the sequence (return value of a PromptModel) into the
+the logits in all position of the sequence (return value of a <code class="docutils literal notranslate"><span class="pre">PromptModel</span></code>) into the
 logits of the labels, using a verbalizer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -624,7 +624,18 @@ or into logits of shape (if <code class="docutils literal notranslate"><span cla
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForClassification.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><span class="pre">openprompt.data_utils.utils.InputFeatures</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForClassification.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForClassification.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>TODO</p>
+<dd><p>Get the logits of label words.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[Dict,</span> <span class="pre">InputFeatures]</span></code>) – The original batch</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The logits of the lable words (obtained by the current verbalizer).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -685,7 +696,7 @@ loss function.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – </p></li>
-<li><p><strong>(</strong> (<em>batch</em>) – obj:InputFeatures): The input features of batchified data sequences.</p></li>
+<li><p><strong>batch</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">InputFeatures</span></code>) – The input features of batchified data sequences.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -718,17 +729,17 @@ generation_kwargs include all the parameters that are passed in to
 <code class="docutils literal notranslate"><span class="pre">transformers.generation_util.GenerationMixin.generate</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>batch</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[Dict,</span> <span class="pre">InputFeatures]</span></code>) – The input features of batchified data sequences.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union[Dict,</span> <span class="pre">InputFeatures]</span></code>) – The input features of batchified data sequences.</p></li>
+<li><p><strong>verbose</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[bool]</span></code>) – Set to true to verbose the generated sentence.</p></li>
+</ul>
 </dd>
-</dl>
-<p>:param verbose （<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[bool]</span></code>) Set to true to verbose the generated sentence.:</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>obj:List[torch.Tensor]): The raw sequences generated by the generation model.
-generated_sentences (:obj:List[torch.Tensor]): The generated sentences that have been post-processed.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The raw sequences generated by the generation model.
+generated_sentences (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[torch.Tensor]</span></code>): The generated sentences that have been post-processed.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>output_sequences (</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>output_sequences (<code class="xref py py-obj docutils literal notranslate"><span class="pre">List[torch.Tensor]</span></code>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -756,13 +767,13 @@ generated_sentences (:obj:List[torch.Tensor]): The generated sentences that have
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.pipeline_base.PromptForGeneration.prepare_inputs_for_generation">
 <span class="sig-name descname"><span class="pre">prepare_inputs_for_generation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">model_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/pipeline_base.html#PromptForGeneration.prepare_inputs_for_generation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.pipeline_base.PromptForGeneration.prepare_inputs_for_generation" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function wraps the <cite>prepare_inputs_for_generation</cite> function in the huggingface transformers.</p>
+<dd><p>This function wraps the <code class="docutils literal notranslate"><span class="pre">prepare_inputs_for_generation</span></code> function in the huggingface transformers.</p>
 <p>When the <cite>past</cite> not in model_kwargs, we prepare the input from scratch.
 When <cite>past</cite> is in model_kwargs, we don’t need to prepare the template wrapped input,
 instead we use the inner pretrain_models’ function to prepare the next step’s input.
-<cite>model_kwargs</cite> includes all the argument passed in the <cite>batch</cite>: InputFeatures, except <cite>input_ids</cite>
+<cite>model_kwargs</cite> includes all the argument passed in the <cite>batch</cite>: InputFeatures, except <code class="docutils literal notranslate"><span class="pre">input_ids</span></code>
 , as long as they do not conflict with keywords in <code class="docutils literal notranslate"><span class="pre">generation_kwargs</span></code>.    if ‘past’ not in model_kwargs: # the past_key_value not in model_kwargs, then we need to prepare input from scrath
-, as long as they do not conflict with keywords in <a href="#id3"><span class="problematic" id="id4">``</span></a>generation_kwargs’’.</p>
+, as long as they do not conflict with keywords in <code class="docutils literal notranslate"><span class="pre">generation_kwargs</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>input_ids</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – Indices of input sequence tokens in the vocabulary.</p>
