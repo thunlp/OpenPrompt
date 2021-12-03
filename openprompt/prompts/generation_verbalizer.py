@@ -20,24 +20,22 @@ class GenerationVerbalizer(Verbalizer):
     This verbalizer is usefull when the label prediction is better defined by a piece of input.
     For example, in correference resolution, the tgt_text is a proper noun metioned in the text.
     This is there is no fixed mapping between a class label and its label words. This verbalizer
-    is can be used as verbalizer of COPA and WSC dataset in superglue datasets. 
+    is can be used as verbalizer of ``COPA`` and ``WSC`` dataset in superglue datasets. 
 
-    This verbalizer is especially  powerful when combined with 
+    This verbalizer is especially powerful when combined with 
     `All NLP Tasks Are Generation Tasks <https://arxiv.org/abs/2103.10360>`_ Paradigm (Also see
     `Crossfit <https://arxiv.org/abs/2104.08835>`_). It can make any piece of text the tgt_text. The tgt_text will then be filled in the `{"mask"}`. 
     
-    For example, when label word is "good", the tgt_text is "good"; 
+    For example, when label word is ``"good"``, the tgt_text is ``"good"``; 
 
-    when label word is `{"text":"good"}`, the tgt_text is also `"good"`; 
-
-    when label word is `{"meta":"choice1"}`, the tgt_text is the `"meta['choice1']"` field of the InputExample; 
+    when label word is ``{"text":"good"}``, the tgt_text is also ``"good"``; 
     
-    when label word is `{"meta":"choice1"} {"placeholder", "text_a"} .`, the tgt_text is the `"meta['choice1']"` field of the InputExample, 
-    followed by `text_a` field of the InputExample, and then a `'.'`; 
+    when label word is ``{"meta":"choice1"}``, the tgt_text is the ``"meta['choice1']"`` field of the ``InputExample``; 
+    
+    when label word is ``{"meta":"choice1"} {"placeholder", "text_a"} .``, the tgt_text is the ``"meta['choice1']"`` field of the ``InputExample``, 
+    followed by ``text_a`` field of the ``InputExample``, and then a ``'.'``; 
 
     A use case can be seen in `Tutorial 4.1 <https://github.com/thunlp/OpenPrompt/blob/main/tutorial/4.1_all_tasks_are_generation.py>`_
-
-
 
     Args:   
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.

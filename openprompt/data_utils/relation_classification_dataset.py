@@ -19,9 +19,7 @@ from openprompt.data_utils.data_processor import DataProcessor
 class TACREDProcessor(DataProcessor):
     """
     `TAC Relation Extraction Dataset (TACRED) <https://nlp.stanford.edu/projects/tacred/>`_ is one of the largest and most widely used datasets for relation classification.
-
     It was released together with the paper `Position-aware Attention and Supervised Data Improve Slot Filling (Zhang et al. 2017) <https://nlp.stanford.edu/pubs/zhang2017tacred.pdf>`_
-    
     This processor is also inherited by :py:class:`TACREVProcessor` and :py:class:`ReTACREDProcessor`. 
     
     Examples:

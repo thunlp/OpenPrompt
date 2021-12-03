@@ -49,7 +49,7 @@ class LMBFFTemplateGenerationTemplate(ManualTemplate):
         example.meta['labelword'] = self.verbalizer.label_words[example.label][0].strip()
         wrapped_example = super().wrap_one_example(example)
 
-        # TODO: replace <mask> with special tokens in each generation model
+        # replace <mask> with special tokens in each generation model
         # e.g. in T5 multi-parts generation use <extra_id_0>, <extra_id_1>, ...
         # handle different types of plm
         current_idx = self.tokenizer.convert_tokens_to_ids('<extra_id_0>')
@@ -135,7 +135,7 @@ class TemplateGenerator:
     @abstractmethod
     def convert_template(self, text_list: List[str]) -> List[str]:
         r"""
-        Convert the generated template into a standard template for downstream prompt model, return a list of str
+        Convert the generated template into a standard template for downstream prompt model, return a ``list`` of ``str``
         """
         raise NotImplementedError
         
@@ -273,7 +273,7 @@ class TemplateGenerator:
 
 class T5TemplateGenerator(TemplateGenerator):
     r""" 
-    Automatic template search using T5 model. This class inherits from `TemplateGenerator`.
+    Automatic template search using T5 model. This class inherits from ``TemplateGenerator``.
     """
     def __init__(self, 
                  model: T5ForConditionalGeneration,
@@ -312,7 +312,7 @@ class T5TemplateGenerator(TemplateGenerator):
 
 class VerbalizerGenerator:
     r""" 
-    This is the automatic label word search implementation in `LM-BFF <https://arxiv.org/pdf/2012.15723.pdf`_. 
+    This is the automatic label word search implementation in `LM-BFF <https://arxiv.org/pdf/2012.15723.pdf>`_. 
 
     Args:
         model (:obj:`PretrainedModel`): A pre-trained model for label word generation.

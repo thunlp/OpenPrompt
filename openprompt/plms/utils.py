@@ -1,4 +1,3 @@
-## load数据，对每一个batch包装template，返回的和普通data_loader一样
 import itertools
 import warnings
 import torch
@@ -11,7 +10,6 @@ from collections import defaultdict
 from openprompt.utils import round_list
 import numpy as np
 
-# 传入tokenizer，对数据进行截断处理
 
 class TokenizerWrapper:
     def __init__(self,
