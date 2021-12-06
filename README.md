@@ -67,7 +67,10 @@
 
 Our repo is tested on Python 3.6+ and PyTorch 1.8.1+, install OpenPrompt using pip as follows:
 
-`pip install openprompt`
+
+```shell
+pip install openprompt
+```
 
 To play with the latest features, you can also install OpenPrompt from the source.
 
