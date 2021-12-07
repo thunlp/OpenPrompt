@@ -52,6 +52,7 @@ class PromptDataLoader(object):
                  decoder_max_length: Optional[int] = -1,
                  predict_eos_token: Optional[bool] = False,
                  truncate_method: Optional[str] = "tail",
+                 drop_last: Optional[bool] = False,
                  **kwargs,
                 ):
 
@@ -97,7 +98,8 @@ class PromptDataLoader(object):
             self.tensor_dataset, 
             batch_size = self.batch_size,
             sampler= sampler,
-            collate_fn = InputFeatures.collate_fct
+            collate_fn = InputFeatures.collate_fct,
+            drop_last = drop_last,
         )
     
     
