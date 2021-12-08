@@ -39,22 +39,19 @@ class MixedTemplate(Template):
         return self.soft_token_ids
     
     def prepare(self):
-        r"""get the trainable token indices for the template
+        r"""get the soft token indices ( soft_token_ids ) for the template
         
         ``"soft_id"`` can be used to reference the previous soft token, which means these tokens use the same embeddings.
         **Note that ``"soft_id"`` should have index start from 1 but not 0**
 
         e.g. when self.text is ``'{"soft": None} {"soft": "the", "soft_id": 1} {"soft": None} {"soft": "it", "soft_id": 3} {"soft_id": 1} {"soft": "was"} {"mask"}'``,
         output is [1, 2, 3, 4, 2, 5, 0]
-
-        TODO document here
         """
         num_soft_token = 0
         text = []
         soft_token_ids = []
         idx_mp = {}
         emb_mp = {}
-        print("HERERE", flush=True)
         for d in self.text:
             if "soft" not in d and "soft_id" not in d:
                 text.append(d)
@@ -86,7 +83,6 @@ class MixedTemplate(Template):
                     num_soft_token += 1
                     id_list = [num_soft_token]
                 text.extend([{"soft":""} for _ in range(len(id_list))])
-                print("HERERE2", flush=True)
             else:
                 token_ids = self.tokenizer(d["add_prefix_space"] + d["soft"], add_special_tokens=False)["input_ids"]
                 surface_forms = self.tokenizer.convert_ids_to_tokens(token_ids)
@@ -102,7 +98,6 @@ class MixedTemplate(Template):
                 id_list = list(range(old_num+1, num_soft_token+1))
                 for idx, soft_id in enumerate(id_list):
                     emb_mp[soft_id] = token_ids[idx]
-                print("HERERE3", flush=True)
 
                 text.extend([{"soft": surface_form} for surface_form in surface_forms])
             soft_token_ids.extend(id_list)
@@ -112,7 +107,6 @@ class MixedTemplate(Template):
 
         self.num_soft_token = num_soft_token
         self.text = text
-        print(f"EFF:{self.text}", flush=True)
         self.soft_token_ids = soft_token_ids
 
         # Generate the embedding needed for soft tokens

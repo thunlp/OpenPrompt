@@ -1,1 +1,1 @@
-<text_a> <text_b> <meta:answer> <soft> <soft> <soft> <soft> <mask>
+{"placeholder": "text_a"} {"placeholder": "text_b"} {"meta": "answer"} {"soft"} {"soft"} {"soft"} {"soft"} {"mask"}

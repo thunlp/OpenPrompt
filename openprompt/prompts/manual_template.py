@@ -14,7 +14,6 @@ class ManualTemplate(Template):
     Args:
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
         text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.
-        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``<mask>``
         placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{'<text_a>': 'text_a', '<text_b>': 'text_b'}``
     """
 

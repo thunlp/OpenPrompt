@@ -1,1 +1,1 @@
-<text_a> [SEP] <text_b> <soft> <meta:word>? <soft> <mask>
+{"placeholder": "text_a"}  {"placeholder": "text_b"} {"soft"} {"meta": "word"}? {"soft"} {"mask"}

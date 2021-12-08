@@ -1,1 +1,1 @@
-<text_a> [SEP] <text_b> ? <soft> answer : <mask>
+{"placeholder": "text_a"} {"placeholder": "text_b"} ? {"soft"} answer : {"mask"}

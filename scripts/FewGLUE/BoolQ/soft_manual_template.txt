@@ -1,1 +1,1 @@
-<text_a> Question: <text_b> ? <soft>the Answer <soft>is <mask> .
+{"placeholder": "text_a"} Question: {"placeholder": "text_b"} ? {"soft"}the Answer {"soft"}is {"mask"} .

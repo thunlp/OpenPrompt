@@ -28,18 +28,15 @@ class LMBFFTemplateGenerationTemplate(ManualTemplate):
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
         verbalizer (:obj:`ManualVerbalizer`): A verbalizer to provide label_words.
         text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.
-        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``<mask>``
         placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{'<text_a>': 'text_a', '<text_b>': 'text_b'}``
     """
     def __init__(self, 
                  tokenizer: T5Tokenizer,
                  verbalizer: ManualVerbalizer,
                  text: Optional[List[str]] = None,
-                 mask_token: str = '<mask>',
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
         super().__init__(tokenizer=tokenizer, 
-                         mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.text = text
         self.verbalizer = verbalizer
