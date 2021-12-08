@@ -45,7 +45,6 @@ class PtuningTemplate(ManualTemplate):
         e.g. when self.text is ['<text_a>', '<soft>', '<soft>', '<mask>', '.'],
         output is [0, 1, 2, 0, 0]
         """
-        # TODO ptuing supervised use same new token for each <soft> ?
         idx = []
         num_soft_token = 0
         for token in self.text:

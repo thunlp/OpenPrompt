@@ -23,6 +23,7 @@ class ChnSentiCorp(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -31,9 +32,10 @@ class ChnSentiCorp(CLSProcessor):
                         "context": example_json["text_a"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["label"]),
+                    label = self.get_label(example_json["label"]),
                 )
                 examples.append(example)
+        return examples
                 
         
 

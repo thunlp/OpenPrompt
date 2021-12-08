@@ -15,9 +15,10 @@ class CMNLI(CLSProcessor):
 
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
-        
+        examples = []
         with open(path, encoding='utf8') as f:
-            for line in f:
+            for line_i, line in enumerate(f):
+                # print(line_i)
                 example_json = json.loads(line)
                 example = InputExample(
                     meta = {
@@ -25,9 +26,10 @@ class CMNLI(CLSProcessor):
                         "hypothesis": example_json["sentence2"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["label"]),
+                    label = self.get_label(example_json["label"]),
                 )
                 examples.append(example)
+        return examples
                 
         
 

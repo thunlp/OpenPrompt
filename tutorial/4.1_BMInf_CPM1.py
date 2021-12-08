@@ -113,9 +113,6 @@ allpreds = []
 alllabels = []
 with torch.no_grad():
     for step, inputs in enumerate(validation_dataloader):
-        print("step: ", step)
-        print("input shape: ", inputs['input_ids'].shape)
-        print("inputs: ", inputs)
         if use_cuda:
             inputs = inputs.cuda()
         logits = prompt_model(inputs)

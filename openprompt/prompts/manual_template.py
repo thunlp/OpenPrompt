@@ -23,11 +23,9 @@ class ManualTemplate(Template):
     def __init__(self, 
                  tokenizer: PreTrainedTokenizer,
                  text: Optional[List[str]] = None,
-                 mask_token: str = '<mask>',
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
         super().__init__(tokenizer=tokenizer, 
-                         mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.text = text
     
