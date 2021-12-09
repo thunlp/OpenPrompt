@@ -15,7 +15,7 @@ class AutomaticVerbalizer(Verbalizer):
     1). we allow re-selecting the verbalizer after a fixed training steps. 
     The original implementation only performs one step selection after getting
     the inital logits on the training data. To adopt their implementation,
-    please only do optimize() after the first pass of training data.
+    please only do ``optimize()`` after the first pass of training data.
 
     2). We strictly follows the probility calculation in Equation (3) in the
     paper, which take softmax over the logits.
@@ -33,7 +33,7 @@ class AutomaticVerbalizer(Verbalizer):
         label_word_num_per_class (:obj:`int`, optional): set to be greater than 1 to support Multi-Verbalizers in Section 4.2
         num_searches (:obj:`int`, optional): Maximnum number of label_words search. After reaching this number, the verbalizer will use the same label_words as the previous iterations. 
         search_id (:obj:`int`, optional): the id of current search, used to determine when to stop label words searching.
-        score_fct (:obj:`str`, optional): the scoring function of label words selection. ``llr'' means log likelihood ratio, corresponding to Equation (7); ``ce'' means cross entropy, corresponding to Equation (6). As the paper points out, ``llr'' is significantly better than 'ce', we only keep it to match the original code.
+        score_fct (:obj:`str`, optional): the scoring function of label words selection. ``llr`` means log likelihood ratio, corresponding to Equation (7); ``ce`` means cross entropy, corresponding to Equation (6). As the paper points out, ``llr'' is significantly better than 'ce', we only keep it to match the original code.
         balance (:obj:`book`, optional): whether to perform normalization of unbalanced training dataset, as Equation (5).
     """
     def __init__(self, 

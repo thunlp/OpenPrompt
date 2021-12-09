@@ -34,8 +34,8 @@ class PTRTemplate(PtuningTemplate):
 
 class PTRVerbalizer(Verbalizer):
     """
-    In `PTR <https://arxiv.org/pdf/2105.11259.pdf>`, each prompt has more than one `<mask>` tokens.
-    Different `<mask>` tokens have different label words.
+    In `PTR <https://arxiv.org/pdf/2105.11259.pdf>`_, each prompt has more than one ``<mask>`` tokens.
+    Different ``<mask>`` tokens have different label words.
     The final label is predicted jointly by these label words using logic rules.
 
     Args: 

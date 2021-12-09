@@ -13,8 +13,6 @@ class T5TokenizerWrapper(TokenizerWrapper):
     The input tokens is:  A fun movie ! it is <extra_id_0> and <extra_id_1> . </s>
     The decoder tokens is: <pad> <extra_id_0> <extra_id_1> </s>
     The expected output is <extra_id_0> good interesting </s>
-    Another solution is add verbalizer label words into the labels, thus generating
-    'interesting' given 'good'. However, it is not implemented in this version.
     """
     def __init__(self,
                  max_seq_length: int,
@@ -60,24 +58,24 @@ class T5TokenizerWrapper(TokenizerWrapper):
         num_mask_token_used = 0
         
         decoder_input_ids = []
-        loss_ids =[0]
+        loss_ids =[]
         
         for piece_id, piece in enumerate(wrapped_example):
             if piece['text'] == self.template_mask_token:
                 if teacher_forcing:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
+                    loss_ids.append(0)
                     encode_text = [self.mask_token_ids(num_mask_token_used)] 
                     tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
                     # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
-                    loss_ids.append(1)
                 else:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
                     encode_text = [self.mask_token_ids(num_mask_token_used)] 
                     # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
-                    loss_ids[-1] = 1 # shift loss_ids
-                    loss_ids.append(0)
+                    # loss_ids[-1] = 1 # shift loss_ids
+                    loss_ids.append(1)
                 num_mask_token_used += 1
             else:
                 if piece['text'] in self.special_tokens_maps.keys():
@@ -134,12 +132,17 @@ class T5TokenizerWrapper(TokenizerWrapper):
 
 class T5LMTokenizerWrapper(TokenizerWrapper):
     r"""
-    Given wrapped example, e.g. A fun movie ! it is <mask> and <mask> .
-    The input tokens is:  A fun movie ! it is <extra_id_0> and <extra_id_1> . </s>
-    The decoder tokens is: <pad> <extra_id_0> <extra_id_1> </s>
-    The expected output is <extra_id_0> good interesting </s>
-    Another solution is add verbalizer label words into the labels, thus generating
-    'interesting' given 'good'. However, it is not implemented in this version.
+    The tokenizerwrapper is for the t5-lm-adapted version proposed by
+    `The Power of Scale for Parameter-Efficient Prompt Tuning <https://arxiv.org/abs/2104.08691>`_
+    Since this model is a autogressive language model fashion, it only support generation from the 
+    and of the text. 
+
+    Given wrapped example, e.g. A fun movie ! it is {"mask"}
+    The encoder input is :  A fun movie ! it is </s>  
+    (Note that </s> is added in T5 encoder inputs, this will yield better result compared to not using </s>)
+    The decoder input is : <pad> <extra_id_0> </s>
+    The expected output is : good
+    Under teacher forcing mode, the decoder input is   <pad> <extra_id_0>  good </s>, where good and </s> requires loss
     """
     def __init__(self,
                  max_seq_length: int,
@@ -174,8 +177,7 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
         ''' # TODO doens't consider the situation that input has two parts
         '''
         wrapped_example, others = wrapped_example
-        
-        if teacher_forcing:
+        if teacher_forcing: 
             tgt_text = others['tgt_text']
             if isinstance(tgt_text, str):
                 tgt_text = [tgt_text]
@@ -185,26 +187,21 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
         num_mask_token_used = 0
         
         decoder_input_ids = []
-        loss_ids =[0]
+        loss_ids =[]
         
         for piece_id, piece in enumerate(wrapped_example):
-            if len(piece['text']) == 0:
-                continue
             if piece['text'] == self.template_mask_token:
                 if teacher_forcing:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
-                    encode_text = [self.mask_token_ids(num_mask_token_used)] 
+                    loss_ids.append(0)
+                    encode_text = [] 
                     tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
-                    # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
-                    loss_ids.append(1)
                 else:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
                     encode_text = [] # not add extra_id_0 to input_ids
-                    # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
-                    loss_ids[-1] = 1 # shift loss_ids
-                    loss_ids.append(0)
+                    loss_ids.append(1)
                 break
             else:
                 if piece['text'] in self.special_tokens_maps.keys():

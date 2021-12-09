@@ -1,3 +1,11 @@
+# There is a recent trend to unify all tasks (such as classification) into tasks generation.
+# In fact, unifying the tasks into text generation can be neatly conducted using prompt. 
+# In OpenPrompt, we provide a GenerationVerbalizer for this utility.
+# Here we go!
+
+from openprompt.pipeline_base import PromptForGeneration
+from openprompt.prompts.generation_verbalizer import GenerationVerbalizer
+from tokenizers import PreTokenizedString
 from tqdm import tqdm
 from openprompt.data_utils import PROCESSORS
 import torch
@@ -11,6 +19,8 @@ from openprompt.prompts import SoftTemplate
 from openprompt import PromptForClassification
 import time
 import os
+import re
+from openprompt.utils.crossfit_metrics import evaluate as crossfit_evaluate
 
 
 parser = argparse.ArgumentParser("")
@@ -80,6 +90,7 @@ if args.dataset == "boolq":
     class_labels =Processor().get_labels()
     scriptsbase = "SuperGLUE/BoolQ"
     scriptformat = "txt"
+    dataset_decoder_max_length = 10
     max_seq_l = 480 # this should be specified according to the running GPU's capacity 
     if args.tune_plm: # tune the entire plm will use more gpu-memories, thus we should use a smaller batch_size.
         batchsize_t = 4 
@@ -99,7 +110,8 @@ elif args.dataset == "multirc":
     class_labels =Processor().get_labels()
     scriptsbase = "SuperGLUE/MultiRC"
     scriptformat = "txt"
-    max_seq_l = 480
+    dataset_decoder_max_length = 10
+    max_seq_l = 480 # may be a bit less, but to keep a smaller training overhead, we use 480
     if args.tune_plm:
         batchsize_t = 4
         batchsize_e = 4
@@ -119,6 +131,7 @@ elif args.dataset == "rte":
     scriptsbase = "SuperGLUE/RTE"
     scriptformat = "txt"
     max_seq_l = 480
+    dataset_decoder_max_length = 10
     if args.tune_plm:
         batchsize_t = 4
         batchsize_e = 4 
@@ -138,6 +151,7 @@ elif args.dataset == "cb":
     scriptsbase = "SuperGLUE/CB"
     scriptformat = "txt"
     max_seq_l = 480
+    dataset_decoder_max_length = 10
     if args.tune_plm:
         batchsize_t = 4
         batchsize_e = 4 
@@ -157,6 +171,7 @@ elif args.dataset == "wic":
     scriptsbase = "SuperGLUE/WiC"
     scriptformat = "txt"
     max_seq_l = 480
+    dataset_decoder_max_length = 10
     if args.tune_plm:
         batchsize_t = 4
         batchsize_e = 4 
@@ -167,17 +182,16 @@ elif args.dataset == "wic":
         batchsize_e = 4 
         gradient_accumulation_steps = 4
         model_parallelize = False
-elif args.dataset == "fewshot_boolq":
-    Processor = PROCESSORS["super_glue.boolq"]
+elif args.dataset == "copa":
+    Processor = PROCESSORS["super_glue.copa"]
     dataset['train'] = Processor().get_train_examples(args.data_dir)
     dataset['validation'] = Processor().get_dev_examples(args.data_dir)
     dataset['test'] = Processor().get_test_examples(args.data_dir)
     class_labels =Processor().get_labels()
-    scriptsbase = "SuperGLUE/BoolQ"
+    scriptsbase = "SuperGLUE/COPA"
     scriptformat = "txt"
-    sampler = FewShotSampler(num_examples_per_label=32)
-    dataset['train']= sampler(dataset['train'], seed=args.seed)
     max_seq_l = 480
+    dataset_decoder_max_length = 50
     if args.tune_plm:
         batchsize_t = 4
         batchsize_e = 4 
@@ -188,17 +202,16 @@ elif args.dataset == "fewshot_boolq":
         batchsize_e = 4 
         gradient_accumulation_steps = 4
         model_parallelize = False
-elif args.dataset == "fewshot_multirc":
-    Processor = PROCESSORS["super_glue.multirc"]
+elif args.dataset == "wsc":
+    Processor = PROCESSORS["super_glue.wsc"]
     dataset['train'] = Processor().get_train_examples(args.data_dir)
     dataset['validation'] = Processor().get_dev_examples(args.data_dir)
     dataset['test'] = Processor().get_test_examples(args.data_dir)
     class_labels =Processor().get_labels()
-    scriptsbase = "SuperGLUE/MultiRC"
+    scriptsbase = "SuperGLUE/WSC"
     scriptformat = "txt"
-    sampler = FewShotSampler(num_examples_per_label=32)
-    dataset['train']= sampler(dataset['train'], seed=args.seed)
     max_seq_l = 480
+    dataset_decoder_max_length = 10
     if args.tune_plm:
         batchsize_t = 4
         batchsize_e = 4 
@@ -209,17 +222,16 @@ elif args.dataset == "fewshot_multirc":
         batchsize_e = 4 
         gradient_accumulation_steps = 4
         model_parallelize = False
-elif args.dataset == "fewshot_wic":
-    Processor = PROCESSORS["super_glue.wic"]
+elif args.dataset == "record":
+    Processor = PROCESSORS["super_glue.record"]
     dataset['train'] = Processor().get_train_examples(args.data_dir)
     dataset['validation'] = Processor().get_dev_examples(args.data_dir)
     dataset['test'] = Processor().get_test_examples(args.data_dir)
     class_labels =Processor().get_labels()
-    scriptsbase = "SuperGLUE/WiC"
+    scriptsbase = "SuperGLUE/RECORD"
     scriptformat = "txt"
-    sampler = FewShotSampler(num_examples_per_label=32)
-    dataset['train']= sampler(dataset['train'], seed=args.seed)
     max_seq_l = 480
+    dataset_decoder_max_length = 20
     if args.tune_plm:
         batchsize_t = 4
         batchsize_e = 4 
@@ -239,13 +251,14 @@ else:
 # For example, the template in soft_template.txt is {}
 # The choice_id 1 is the hard template 
 mytemplate = SoftTemplate(model=plm, tokenizer=tokenizer, num_tokens=args.soft_token_num, initialize_from_vocab=args.init_from_vocab).from_file(f"scripts/{scriptsbase}/soft_template.txt", choice=args.template_id)
-myverbalizer = ManualVerbalizer(tokenizer, classes=class_labels).from_file(f"scripts/{scriptsbase}/manual_verbalizer.{scriptformat}", choice=args.verbalizer_id)
-wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
-print(wrapped_example)
+if os.path.exists(f"scripts/{scriptsbase}/generation_verbalizer.{scriptformat}"):
+    myverbalizer = GenerationVerbalizer(tokenizer, classes=class_labels, is_rule=True).from_file(f"scripts/{scriptsbase}/generation_verbalizer.{scriptformat}", choice=args.verbalizer_id)
+else:
+    myverbalizer = GenerationVerbalizer(tokenizer, classes=class_labels, is_rule=False).from_file(f"scripts/{scriptsbase}/manual_verbalizer.{scriptformat}", choice=args.verbalizer_id)
 
 
 use_cuda = True
-prompt_model = PromptForClassification(plm=plm,template=mytemplate, verbalizer=myverbalizer, freeze_plm=(not args.tune_plm), plm_eval_mode=args.plm_eval_mode)
+prompt_model = PromptForGeneration(plm=plm,template=mytemplate, freeze_plm=(not args.tune_plm), plm_eval_mode=args.plm_eval_mode)
 if use_cuda:
     prompt_model=  prompt_model.cuda()
 
@@ -253,39 +266,47 @@ if model_parallelize:
     prompt_model.parallelize()
 
 
-train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=max_seq_l, decoder_max_length=3, 
-    batch_size=batchsize_t,shuffle=True, teacher_forcing=False, predict_eos_token=False,
+train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, verbalizer=myverbalizer, tokenizer=tokenizer, # be sure to add verbalizer 
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=max_seq_l, decoder_max_length=dataset_decoder_max_length,  # be sure to use larger decoder_max_length for teacher forcing.
+    batch_size=batchsize_t,shuffle=True, teacher_forcing=True, predict_eos_token=True,  # be sure to use teacher_forcing and predict_eos_token=True
     truncate_method="tail")
 
-validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
+validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, verbalizer=myverbalizer, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=max_seq_l, decoder_max_length=3, 
-    batch_size=batchsize_e,shuffle=False, teacher_forcing=False, predict_eos_token=False,
+    batch_size=batchsize_e,shuffle=False, teacher_forcing=False, predict_eos_token=False, # predict_eos_token=True or False are both ok 
     truncate_method="tail")
 
-# zero-shot test
-test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer, 
+test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, verbalizer=myverbalizer, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=max_seq_l, decoder_max_length=3, 
     batch_size=batchsize_e,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="tail")
 
 print("truncate rate: {}".format(test_dataloader.tokenizer_wrapper.truncate_rate), flush=True)
 
-def evaluate(prompt_model, dataloader, desc):
-    prompt_model.eval()
-    allpreds = []
-    alllabels = []
-   
+
+generation_arguments = {
+    "max_length": dataset_decoder_max_length,
+}
+
+def evaluate(prompt_model, dataloader):
+    predictions = []
+    ground_truths = []
+
     for step, inputs in enumerate(dataloader):
         if use_cuda:
             inputs = inputs.cuda()
-        logits = prompt_model(inputs)
-        labels = inputs['label']
-        alllabels.extend(labels.cpu().tolist())
-        allpreds.extend(torch.argmax(logits, dim=-1).cpu().tolist())
-    acc = sum([int(i==j) for i,j in zip(allpreds, alllabels)])/len(allpreds)
-    return acc
+        _, output_sentence = prompt_model.generate(inputs, **generation_arguments, verbose=False)
+        predictions.extend(output_sentence)
+        ground_truths.extend(inputs['tgt_text'])
+    assert len(predictions)==len(ground_truths), (len(predictions), len(ground_truths))
+    predictions = [prediction.strip() for prediction in predictions]
+    ground_truths = [ground_truth.strip() for ground_truth in ground_truths]
+    # shown one example
+    print(f"predictions {predictions[0]}, ground_truths {ground_truths[0]}")
+    score =  crossfit_evaluate(predictions, ground_truths, metric="ACC")
+    return score
 
+    
 from transformers import  AdamW, get_linear_schedule_with_warmup,get_constant_schedule_with_warmup  # use AdamW is a standard practice for transformer 
 from transformers.optimization import Adafactor, AdafactorSchedule  # use Adafactor is the default setting for T5
 loss_func = torch.nn.CrossEntropyLoss()
@@ -342,9 +363,7 @@ for epoch in range(1000000):
         if use_cuda:
             inputs = inputs.cuda()
         tot_train_time -= time.time()
-        logits = prompt_model(inputs)
-        labels = inputs['label']
-        loss = loss_func(logits, labels)
+        loss = prompt_model(inputs)
         loss.backward()
         tot_loss += loss.item()
         actual_step += 1
@@ -373,7 +392,7 @@ for epoch in range(1000000):
         tot_train_time += time.time()
 
         if actual_step % gradient_accumulation_steps == 0 and glb_step >0 and glb_step % args.eval_every_steps == 0:
-            val_acc = evaluate(prompt_model, validation_dataloader, desc="Valid")
+            val_acc = evaluate(prompt_model, validation_dataloader, myverbalizer)
             if val_acc >= best_val_acc:
                 torch.save(prompt_model.state_dict(),f"{args.project_root}/../ckpts/{this_run_unicode}.ckpt")
                 best_val_acc = val_acc

@@ -87,13 +87,6 @@ class MixedTemplate(Template):
                 token_ids = self.tokenizer(d["add_prefix_space"] + d["soft"], add_special_tokens=False)["input_ids"]
                 surface_forms = self.tokenizer.convert_ids_to_tokens(token_ids)
                 assert len(token_ids) == len(surface_forms)
-                # if len(token_ids) > 1 and d.get("single_token", "True"):
-                #     logger.warning(f"""
-                #     soft prompt's hard prompt {d["soft"]} tokenize to more than one tokens: {self.tokenizer.convert_ids_to_tokens(token_ids)}
-                #     By default we use the first token {self.tokenizer.convert_ids_to_tokens(token_ids)[0]}.
-                #     You can use {{"soft": "complicated", "single_token": False}} to support multiple tokens
-                #     """)
-                #     token_ids = token_ids[:1]
                 num_soft_token += len(token_ids)
                 id_list = list(range(old_num+1, num_soft_token+1))
                 for idx, soft_id in enumerate(id_list):

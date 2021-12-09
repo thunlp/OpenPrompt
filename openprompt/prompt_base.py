@@ -191,7 +191,7 @@ class Template(nn.Module):
             example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.
        
         Returns:
-            :obj:`List[Dict]` a list of dict of the same length as self.text. e.g. [{"loss_ids": 0, "text": "It was"}, {"loss_ids": 1, "text": "<mask>"}, ]
+            :obj:`List[Dict]`: A list of dict of the same length as self.text. e.g. ``[{"loss_ids": 0, "text": "It was"}, {"loss_ids": 1, "text": "<mask>"}, ]``
         '''
         
         if self.text is None:
@@ -375,6 +375,8 @@ class Verbalizer(nn.Module):
         E.g. if we want to establish a projection in sentiment classification: positive :math:`\rightarrow` {`wonderful`, `good`},
         in this case, `wonderful` and `good` are label words.
         '''
+        if not hasattr(self, "_label_words"):
+            raise RuntimeError("label words haven't been set.")
         return self._label_words
     
     @label_words.setter
@@ -439,7 +441,7 @@ class Verbalizer(nn.Module):
         r"""
         The verbalizer can be seen as an extra layer on top of the originial
         pre-trained models. In manual verbalizer, it is a fixed one-hot vector of dimension
-        vocab_size, with the position of the label word being 1 and 0 everywhere else. 
+        ``vocab_size``, with the position of the label word being 1 and 0 everywhere else. 
         In other situation, the parameters may be a continuous vector over the 
         vocab, with each dimension representing a weight of that token.
         Moreover, the parameters may be set to trainable to allow label words selection.
@@ -448,7 +450,7 @@ class Verbalizer(nn.Module):
         of the verbalizer, and must be instantiated in any derived class.
 
         Note that the parameters need to be registered as a part of pytorch's module to 
-        It can be acheived by wrapping a tensor using nn.Parameter().
+        It can be acheived by wrapping a tensor using ``nn.Parameter()``.
         """
         raise NotImplementedError
 
@@ -522,7 +524,7 @@ class Verbalizer(nn.Module):
     def project(self,
                 logits: torch.Tensor,
                 **kwargs) -> torch.Tensor:
-        r"""This method receives input logits of shape (batch_size, vocab_size), and use the 
+        r"""This method receives input logits of shape ``[batch_size, vocab_size]``, and use the 
         parameters of this verbalizer to project the logits over entire vocab into the
         logits of labels words. 
 
@@ -564,10 +566,10 @@ class Verbalizer(nn.Module):
         r"""load a verbalizer from verbalizer's configuration node. 
 
         Args:
-            config (:obj:`CfgNode`): the sub-configuration of verbalizer, i.e. config[config.verbalizer]
+            config (:obj:`CfgNode`): the sub-configuration of verbalizer, i.e. ``config[config.verbalizer]``
                         if config is a global config node. 
             kwargs: Other kwargs that might be used in initialize the verbalizer. 
-                    The actual value should match the arguments of __init__ functions.
+                    The actual value should match the arguments of ``__init__`` functions.
         """
 
         init_args = signature(cls.__init__).args

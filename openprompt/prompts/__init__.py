@@ -19,7 +19,7 @@ from .soft_template import SoftTemplate
 
 from .prompt_generator import T5TemplateGenerator, TemplateGenerator, VerbalizerGenerator, RobertaVerbalizerGenerator
 
-from .contextual_verbalizer import ContextualVerbalizer
+from .generation_verbalizer import GenerationVerbalizer
 from .soft_verbalizer import SoftVerbalizer
 
 TEMPLATE_CLASS = {
@@ -37,7 +37,7 @@ VERBALIZER_CLASS = {
     'automatic_verbalizer': AutomaticVerbalizer,
     'ptr_verbalizer': PTRVerbalizer,
     'one2one_verbalizer': One2oneVerbalizer,
-    'contextual_verbalizer': ContextualVerbalizer,
+    'generation_verbalizer': GenerationVerbalizer,
     'soft_verbalizer': SoftVerbalizer,
 }
 
