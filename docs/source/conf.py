@@ -31,8 +31,8 @@ author = 'THUNLP, The OpenPrompt Team'
 project = 'OpenPrompt'
 copyright = '{}, {}, Licenced under the Apache License, Version 2.0'.format(datetime.datetime.now().year, author)
 
-version = "v0.1.1"
-release = "v0.1.1"
+version = "v0.1.2"
+release = "v0.1.2"
 
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
