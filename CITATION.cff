@@ -1,5 +1,5 @@
 cff-version: "1.0.0"
-date-released: 2021-09
+date-released: 2021-9
 message: "If you use this toolkit, please cite it using these metadata."
 title: "OpenPrompt: An Open-source Framework for Prompt-learning"
 url: "https://github.com/thunlp/OpenPrompt"
@@ -35,5 +35,5 @@ preferred-citation:
     given-names: Hai-Tao
   - family-names: Sun
     given-names: Maosong
-journal: "arXiv preprint arXiv:2111.01998"
-year: 2021
+  journal: "arXiv preprint arXiv:2111.01998"
+  year: 2021
