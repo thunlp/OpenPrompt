@@ -118,18 +118,15 @@
 <span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.</span>
 <span class="sd">        verbalizer (:obj:`ManualVerbalizer`): A verbalizer to provide label_words.</span>
 <span class="sd">        text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.</span>
-<span class="sd">        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``&lt;mask&gt;``</span>
 <span class="sd">        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{&#39;&lt;text_a&gt;&#39;: &#39;text_a&#39;, &#39;&lt;text_b&gt;&#39;: &#39;text_b&#39;}``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">T5Tokenizer</span><span class="p">,</span>
                  <span class="n">verbalizer</span><span class="p">:</span> <span class="n">ManualVerbalizer</span><span class="p">,</span>
                  <span class="n">text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">mask_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&lt;mask&gt;&#39;</span><span class="p">,</span>
                  <span class="n">placeholder_mapping</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_a&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;text_b&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_b&#39;</span><span class="p">},</span>
                 <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">,</span> 
-                         <span class="n">mask_token</span><span class="o">=</span><span class="n">mask_token</span><span class="p">,</span>
                          <span class="n">placeholder_mapping</span><span class="o">=</span><span class="n">placeholder_mapping</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span> <span class="o">=</span> <span class="n">verbalizer</span>

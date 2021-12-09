@@ -143,6 +143,7 @@
                  <span class="n">decoder_max_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">predict_eos_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">truncate_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;tail&quot;</span><span class="p">,</span>
+                 <span class="n">drop_last</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">):</span>
 
@@ -189,7 +190,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">tensor_dataset</span><span class="p">,</span> 
             <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
             <span class="n">sampler</span><span class="o">=</span> <span class="n">sampler</span><span class="p">,</span>
-            <span class="n">collate_fn</span> <span class="o">=</span> <span class="n">InputFeatures</span><span class="o">.</span><span class="n">collate_fct</span>
+            <span class="n">collate_fn</span> <span class="o">=</span> <span class="n">InputFeatures</span><span class="o">.</span><span class="n">collate_fct</span><span class="p">,</span>
+            <span class="n">drop_last</span> <span class="o">=</span> <span class="n">drop_last</span><span class="p">,</span>
         <span class="p">)</span>
     
     
@@ -527,7 +529,7 @@
         <span class="n">logits</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift_logits_and_labels</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;loss_ids&#39;</span><span class="p">],</span> <span class="n">reference_ids</span><span class="p">)</span>
         <span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">,</span> <span class="n">vocab_size</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fct</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">logits</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">labels</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#TODO support more objectives</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># TODO support more objectives</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">loss</span>
     
@@ -631,7 +633,7 @@
 
             <span class="n">batch</span> <span class="o">=</span> <span class="n">InputFeatures</span><span class="p">(</span><span class="n">input_ids</span><span class="o">=</span><span class="n">input_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
             <span class="n">model_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">prepare_model_inputs</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-            <span class="c1"># check the competibility for more models. Having checked gpt2, T5</span>
+            <span class="c1"># check the compatibility for more models. Having checked gpt2, T5</span>
         <span class="k">else</span><span class="p">:</span> <span class="c1"># generating the subsequence generation can use the default setting</span>
             <span class="n">model_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">prepare_inputs_for_generation</span><span class="p">(</span><span class="n">input_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_model_inputs</span> <span class="o">=</span> <span class="n">model_inputs</span>  <span class="c1"># to update the model_kwargs in _update_model_kwargs_for_generation, in-place operation.</span>
