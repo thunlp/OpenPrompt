@@ -154,6 +154,11 @@ class TokenizerWrapper:
     def padding(input_dict: Dict,
                 max_len: int, pad_id_for_inputs: int=0, pad_id_for_others: int=0) -> None:
         for key, value in input_dict.items():
+            if (len(input_dict[key]) > max_len):
+                raise ValueError(f'''
+                    Truncated seq length of '{key}' still greater than max length '{max_len}.'
+                    One possible reason is that no enough shortenable parts in template. Try add {{"shortenable": "True"}} property.
+                ''')
             if 'input' in key:
                 input_dict[key].extend([pad_id_for_inputs]*(max_len-len(value)))
             else:

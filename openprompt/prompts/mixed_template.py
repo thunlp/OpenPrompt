@@ -39,15 +39,13 @@ class MixedTemplate(Template):
         return self.soft_token_ids
     
     def prepare(self):
-        r"""get the trainable token indices for the template
+        r"""get the soft token indices ( soft_token_ids ) for the template
         
         ``"soft_id"`` can be used to reference the previous soft token, which means these tokens use the same embeddings.
         **Note that ``"soft_id"`` should have index start from 1 but not 0**
 
         e.g. when self.text is ``'{"soft": None} {"soft": "the", "soft_id": 1} {"soft": None} {"soft": "it", "soft_id": 3} {"soft_id": 1} {"soft": "was"} {"mask"}'``,
         output is [1, 2, 3, 4, 2, 5, 0]
-
-        TODO document here
         """
         num_soft_token = 0
         text = []
@@ -110,11 +108,11 @@ class MixedTemplate(Template):
         for soft_id, token_id in emb_mp.items():
             self.soft_embedding.weight.data[soft_id, :] = self.raw_embedding.weight.data[token_id, :].clone().detach().requires_grad_(True)
 
-        if "post_processing" in d:
-            if d["post_processing"] == "mlp":
-                pass # TODO one mlp or more than one
-            else:
-                raise ValueError(f'post_processing of {d["post_processing"]} is not supported yet')
+        # if "post_processing" in d:
+        #     if d["post_processing"] == "mlp":
+        #         pass # TODO one mlp or more than one
+        #     else:
+        #         raise ValueError(f'post_processing of {d["post_processing"]} is not supported yet')
 
     def parse_text(self, text: str) -> List[Dict]:
         parsed = []
@@ -137,9 +135,13 @@ class MixedTemplate(Template):
 
             else:
                 j = i + 1
+                mixed_token_cnt = 1 # { {} {} } nested support
                 while j < len(text):
                     if text[j] == self.mixed_token_end:
-                        break
+                        mixed_token_cnt -= 1
+                        if mixed_token_cnt == 0: break
+                    elif text[j] == self.mixed_token_start:
+                        mixed_token_cnt += 1
                     j = j + 1
                 if j == len(text):
                     raise ValueError(f"mixed_token_start {self.mixed_token_start} at position {i} has no corresponding mixed_token_end {self.mixed_token_end}")

@@ -1,1 +1,1 @@
-<text_a> Question: <text_b> ? the Answer: <mask> .
+{"placeholder": "text_a"} Question: {"placeholder": "text_b"} ? the Answer: {"mask"} .

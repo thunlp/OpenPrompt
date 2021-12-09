@@ -26,7 +26,6 @@ class Template(nn.Module):
 
     Args: 
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
-        mask_token (:obj:`str`): The special token that is masked and need to be predicted by the model.
         placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. 
     '''
 
@@ -34,12 +33,10 @@ class Template(nn.Module):
 
     def __init__(self, 
                  tokenizer: PreTrainedTokenizer,
-                 mask_token: str = '<mask>',
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
         super().__init__()
         self.tokenizer = tokenizer
-        self.mask_token = mask_token
         self.placeholder_mapping = placeholder_mapping
         self._in_on_text_set = False
 
@@ -152,9 +149,13 @@ class Template(nn.Module):
 
             else:
                 j = i + 1
+                mixed_token_cnt = 1 # { {} {} } nested support
                 while j < len(text):
                     if text[j] == self.mixed_token_end:
-                        break
+                        mixed_token_cnt -= 1
+                        if mixed_token_cnt == 0: break
+                    elif text[j] == self.mixed_token_start:
+                        mixed_token_cnt += 1
                     j = j + 1
                 if j == len(text):
                     raise ValueError(f"mixed_token_start {self.mixed_token_start} at position {i} has no corresponding mixed_token_end {self.mixed_token_end}")

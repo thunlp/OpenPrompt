@@ -10,7 +10,7 @@ plm:
     freeze_para: False
     lr: 0.00003
     weight_decay: 0.01
-    eps: 1.0E-6
+    adam_epsilon: 1.0E-6
     scheduler:
       type: 
       num_warmup_steps: 500
@@ -43,6 +43,8 @@ ptr_template:
   choice: 0
   file_path: scripts/RelationClassification/TACRED/ptr_template.txt
   optimize:
+    name: AdamW
+    adam_epsilon: 1.0e-8
     lr: 0.00001
 
 ptr_verbalizer:

@@ -29,7 +29,6 @@ class PrefixTuningTemplate(Template):
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model.
         mapping_hook (:obj:`nn.Module`, optional):
         text (:obj:`str`, optional): 
-        mask_token (:obj:`str`, optional):
         num_token (:obj:`int`, optional):
         placeholder_mapping (:obj:`dict`):
         prefix_dropout (:obj:`float`, optional): The dropout rate for the prefix sequence.
@@ -41,7 +40,6 @@ class PrefixTuningTemplate(Template):
                  tokenizer: PreTrainedTokenizer,
                  mapping_hook: Optional[nn.Module] = None,
                  text: Optional[str] = None,
-                 mask_token: str = '<mask>',
                  num_token: Optional[int] = 5,
                  placeholder_mapping: dict = {'<text_a>':'text_a', '<text_b>':'text_b'},
                  prefix_dropout: Optional[float] = 0.0,
@@ -50,7 +48,6 @@ class PrefixTuningTemplate(Template):
                  using_decoder_past_key_values: Optional[bool] = True,
                 ):
         super().__init__(tokenizer=tokenizer,
-                         mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         raw_embedding = model.get_input_embeddings()
         self.config = model.config
