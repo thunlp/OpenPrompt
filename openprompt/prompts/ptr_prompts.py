@@ -16,7 +16,6 @@ class PTRTemplate(PtuningTemplate):
         model (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
         text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.
-        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``<mask>``
         soft_token (:obj:`str`, optional): The special token for soft token. Default to ``<soft>``
         placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{'<text_a>': 'text_a', '<text_b>': 'text_b'}``
     """
@@ -24,23 +23,19 @@ class PTRTemplate(PtuningTemplate):
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  text:  Optional[str] = None,
-                 mask_token: str = '<mask>',
-                 soft_token: str = '<soft>',
                  placeholder_mapping: dict = {'<text_a>':'text_a', '<text_b>':'text_b'},
                 ):
         super().__init__(model=model,
                          tokenizer=tokenizer,
                          prompt_encoder_type="mlp",
                          text=text,
-                         mask_token=mask_token,
-                         soft_token=soft_token,
                          placeholder_mapping=placeholder_mapping)
 
 
 class PTRVerbalizer(Verbalizer):
     """
-    In `PTR <https://arxiv.org/pdf/2105.11259.pdf>`, each prompt has more than one `<mask>` tokens.
-    Different `<mask>` tokens have different label words.
+    In `PTR <https://arxiv.org/pdf/2105.11259.pdf>`_, each prompt has more than one ``<mask>`` tokens.
+    Different ``<mask>`` tokens have different label words.
     The final label is predicted jointly by these label words using logic rules.
 
     Args: 

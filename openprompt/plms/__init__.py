@@ -3,7 +3,7 @@ from transformers.modeling_utils import PreTrainedModel
 from .utils import TokenizerWrapper
 from transformers.tokenization_utils import PreTrainedTokenizer
 from .mlm import MLMTokenizerWrapper
-from .seq2seq import T5TokenizerWrapper
+from .seq2seq import T5LMTokenizerWrapper, T5TokenizerWrapper
 from .lm import LMTokenizerWrapper
 from transformers import BertConfig, BertTokenizer, BertModel, BertForMaskedLM, \
                          RobertaConfig, RobertaTokenizer, RobertaModel, RobertaForMaskedLM, \
@@ -60,7 +60,7 @@ _MODEL_CLASSES = {
         'config': T5Config,
         'tokenizer': T5Tokenizer,
         'model': T5ForConditionalGeneration,
-        'wrapper': LMTokenizerWrapper,
+        'wrapper': T5LMTokenizerWrapper,
     }),
 }
 

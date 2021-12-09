@@ -86,7 +86,7 @@ plm:
     betas:
     - 0.9
     - 0.999
-    eps: 1.0e-08
+    adam_epsilon: 1.0e-08
     freeze_para: false
     lr: 3.0e-05
     name: AdamW

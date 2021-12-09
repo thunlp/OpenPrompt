@@ -1,1 +1,5 @@
-{"placeholder":"text_a"} {"placeholder":"text_b"} {"mask"} .
+ hypothesis: {"placeholder":"text_b","post_processing": lambda x:x+"."} premise: {"placeholder":"text_a"} {"mask"}
+ {"placeholder":"text_b","post_processing": lambda x:x+"."} {"placeholder":"text_a"} {"mask"}
+ hypothesis: {"placeholder":"text_b","post_processing": lambda x:x+"."} premise: {"placeholder":"text_a"} The answer was {"mask"}
+ hypothesis: {"placeholder":"text_b","post_processing": lambda x:x+"."} premise: {"placeholder":"text_a"} answer: {"mask"}
+ {"placeholder":"text_a"} {"placeholder":"text_b"} {"mask"} .

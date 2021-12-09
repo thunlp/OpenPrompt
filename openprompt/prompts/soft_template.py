@@ -34,14 +34,12 @@ class SoftTemplate(Template):
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  text: Optional[str] = None,
-                 mask_token: str = '<mask>',
                  num_tokens: int=20,
                  initialize_from_vocab: Optional[bool] = True,
                  random_range: Optional[float] = 0.5,
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
         super().__init__(tokenizer=tokenizer,
-                         mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.raw_embedding = model.get_input_embeddings()
         self.model_is_encoder_decoder = model.config.is_encoder_decoder
@@ -77,7 +75,8 @@ class SoftTemplate(Template):
         """
         if self.initialize_from_vocab:
             soft_embeds = self.raw_embedding.weight[:self.num_tokens].clone().detach()
-        soft_embeds = torch.FloatTensor(self.num_tokens, self.raw_embedding.weight.size(1)).uniform_(-self.random_range, self.random_range)
+        else:
+            soft_embeds = torch.FloatTensor(self.num_tokens, self.raw_embedding.weight.size(1)).uniform_(-self.random_range, self.random_range)
         self.soft_embeds = nn.Parameter(soft_embeds, requires_grad=True)
 
 

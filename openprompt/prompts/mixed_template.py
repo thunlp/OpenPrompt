@@ -39,15 +39,13 @@ class MixedTemplate(Template):
         return self.soft_token_ids
     
     def prepare(self):
-        r"""get the trainable token indices for the template
+        r"""get the soft token indices ( soft_token_ids ) for the template
         
         ``"soft_id"`` can be used to reference the previous soft token, which means these tokens use the same embeddings.
         **Note that ``"soft_id"`` should have index start from 1 but not 0**
 
         e.g. when self.text is ``'{"soft": None} {"soft": "the", "soft_id": 1} {"soft": None} {"soft": "it", "soft_id": 3} {"soft_id": 1} {"soft": "was"} {"mask"}'``,
         output is [1, 2, 3, 4, 2, 5, 0]
-
-        TODO document here
         """
         num_soft_token = 0
         text = []
@@ -84,22 +82,17 @@ class MixedTemplate(Template):
                 else:
                     num_soft_token += 1
                     id_list = [num_soft_token]
-
+                text.extend([{"soft":""} for _ in range(len(id_list))])
             else:
                 token_ids = self.tokenizer(d["add_prefix_space"] + d["soft"], add_special_tokens=False)["input_ids"]
-                # if len(token_ids) > 1 and d.get("single_token", "True"):
-                #     logger.warning(f"""
-                #     soft prompt's hard prompt {d["soft"]} tokenize to more than one tokens: {self.tokenizer.convert_ids_to_tokens(token_ids)}
-                #     By default we use the first token {self.tokenizer.convert_ids_to_tokens(token_ids)[0]}.
-                #     You can use {{"soft": "complicated", "single_token": False}} to support multiple tokens
-                #     """)
-                #     token_ids = token_ids[:1]
+                surface_forms = self.tokenizer.convert_ids_to_tokens(token_ids)
+                assert len(token_ids) == len(surface_forms)
                 num_soft_token += len(token_ids)
                 id_list = list(range(old_num+1, num_soft_token+1))
                 for idx, soft_id in enumerate(id_list):
                     emb_mp[soft_id] = token_ids[idx]
 
-            text.extend([{"soft"} for _ in range(len(id_list))])
+                text.extend([{"soft": surface_form} for surface_form in surface_forms])
             soft_token_ids.extend(id_list)
 
             if "soft_id" in d:
@@ -115,11 +108,11 @@ class MixedTemplate(Template):
         for soft_id, token_id in emb_mp.items():
             self.soft_embedding.weight.data[soft_id, :] = self.raw_embedding.weight.data[token_id, :].clone().detach().requires_grad_(True)
 
-        if "post_processing" in d:
-            if d["post_processing"] == "mlp":
-                pass # TODO one mlp or more than one
-            else:
-                raise ValueError(f'post_processing of {d["post_processing"]} is not supported yet')
+        # if "post_processing" in d:
+        #     if d["post_processing"] == "mlp":
+        #         pass # TODO one mlp or more than one
+        #     else:
+        #         raise ValueError(f'post_processing of {d["post_processing"]} is not supported yet')
 
     def parse_text(self, text: str) -> List[Dict]:
         parsed = []
@@ -142,9 +135,13 @@ class MixedTemplate(Template):
 
             else:
                 j = i + 1
+                mixed_token_cnt = 1 # { {} {} } nested support
                 while j < len(text):
                     if text[j] == self.mixed_token_end:
-                        break
+                        mixed_token_cnt -= 1
+                        if mixed_token_cnt == 0: break
+                    elif text[j] == self.mixed_token_start:
+                        mixed_token_cnt += 1
                     j = j + 1
                 if j == len(text):
                     raise ValueError(f"mixed_token_start {self.mixed_token_start} at position {i} has no corresponding mixed_token_end {self.mixed_token_end}")
@@ -189,7 +186,7 @@ class MixedTemplate(Template):
             elif 'meta' in d:
                 text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(example.meta[d['meta']])
             elif 'soft' in d:
-                text[i] = ''; # unused
+                text[i] = d['soft']; # unused
             elif 'mask' in d:
                 text[i] = '<mask>'
             elif 'special' in d:

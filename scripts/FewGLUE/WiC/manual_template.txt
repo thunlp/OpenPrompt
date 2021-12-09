@@ -1,1 +1,1 @@
-<text_a> [SEP] <text_b> the <meta:word>? the <mask>
+{"placeholder": "text_a"}  {"placeholder": "text_b"} the {"meta": "word"}? the {"mask"}

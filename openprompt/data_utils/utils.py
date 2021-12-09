@@ -289,5 +289,9 @@ class InputFeatures(dict):
             if key == "encoded_tgt_text":
                 return_dict[key] = [d[key] for d in batch]
             else:
-                return_dict[key] = default_collate([d[key] for d in batch])
+                try:
+                    return_dict[key] = default_collate([d[key] for d in batch])
+                except:
+                    print(f"key{key}\n d {[batch[i][key] for i in range(len(batch))]} ")
+
         return InputFeatures(**return_dict)

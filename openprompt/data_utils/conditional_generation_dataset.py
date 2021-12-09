@@ -24,10 +24,6 @@ from typing import List, Dict, Callable
 from openprompt.utils.logging import logger
 from openprompt.data_utils.data_processor import DataProcessor
 
-
-
-
-
 class WebNLGProcessor(DataProcessor):
     """
     # TODO citation

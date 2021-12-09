@@ -1,0 +1,1 @@
+ query: {"meta":"query"} context: {"meta": "passage", "shortenable":True} entities: {"meta":"entities", "shortenable":True} {"mask"}

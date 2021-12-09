@@ -20,6 +20,7 @@ from openprompt.data_utils.utils import InputExample
 from openprompt.data_utils.data_processor import DataProcessor
 from datasets import load_dataset
 from openprompt.utils.logging import logger
+from datasets import load_from_disk
 import os
 
 HUGGING_FACE_SCRIPTS = 'super_glue' # if you can not connect huggingface in our machine, you can download the scripts manually and change this line.
@@ -31,7 +32,10 @@ class SuperglueMultiRCProcessor(DataProcessor):
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset("super_glue", "multirc", split=split)
+        try:
+            dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='multirc', cache_dir=data_dir, split=split)
+        except:
+            dataset = load_from_disk(f"{data_dir}/super_glue.multirc")[split]
         return list(map(self.transform, dataset))
 
     def transform(self, example):
@@ -49,8 +53,11 @@ class SuperglueBoolQProcessor(DataProcessor):
 
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
-            split = "validation" 
-        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='boolq', cache_dir=data_dir, split=split)
+            split = "validation"
+        try:
+            dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='boolq', cache_dir=data_dir, split=split)
+        except:
+            dataset = load_from_disk(f"{data_dir}/super_glue.boolq")[split]
         return list(map(self.transform, dataset))
 
     def transform(self, example):
@@ -68,7 +75,10 @@ class SuperglueCBProcessor(DataProcessor):
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='cb', cache_dir=data_dir, split=split)
+        try:
+            dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='cb', cache_dir=data_dir, split=split)
+        except:
+            dataset = load_from_disk(f"{data_dir}/super_glue.cb")[split]
         return list(map(self.transform, dataset))
 
     def transform(self, example):
@@ -87,7 +97,10 @@ class SuperglueCOPAProcessor(DataProcessor):
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset(HUGGING_FACE_SCRIPTS, "copa", cache_dir=data_dir, split=split)
+        try:
+            dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='copa', cache_dir=data_dir, split=split)
+        except:
+            dataset = load_from_disk(f"{data_dir}/super_glue.copa")[split]
         return list(map(self.transform, dataset))
 
     def transform(self, example):
@@ -101,9 +114,8 @@ class SuperglueCOPAProcessor(DataProcessor):
         meta['choice2'] = choice2
         meta['question'] = question
         label = int(example['label'])
-        tgt_text = [choice1, choice2]  #TODO used in contextualverbalizer. 
         guid = "{}".format(example['idx'])
-        return InputExample(guid = guid, text_a = premise, meta=meta, label=label,tgt_text=tgt_text)
+        return InputExample(guid = guid, text_a = premise, meta=meta, label=label)
 
 class SuperglueRTEProcessor(DataProcessor):
     def __init__(self):
@@ -113,7 +125,10 @@ class SuperglueRTEProcessor(DataProcessor):
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='rte', cache_dir=data_dir, split=split)
+        try:
+            dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='rte', cache_dir=data_dir, split=split)
+        except:
+            dataset = load_from_disk(f"{data_dir}/super_glue.rte")[split]
         return list(map(self.transform, dataset))
 
     def transform(self, example):
@@ -131,7 +146,10 @@ class SuperglueWiCProcessor(DataProcessor):
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='wic', cache_dir=data_dir, split=split)
+        try:
+            dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='wic', cache_dir=data_dir, split=split)
+        except:
+            dataset = load_from_disk(f"{data_dir}/super_glue.wic")[split]
         return list(map(self.transform, dataset))
 
     def transform(self, example):
@@ -151,33 +169,54 @@ class SuperglueWSCProcessor(DataProcessor):
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='wsc', cache_dir=data_dir, split=split)
+        try:
+            dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='wsc', cache_dir=data_dir, split=split)
+        except:
+            dataset = load_from_disk(f"{data_dir}/super_glue.wsc")[split]
         return list(map(self.transform, dataset))
 
     def transform(self, example):
+        modified_text =  example["text"].split()
+        indices = sorted([example['span2_index'], example['span1_index']])
+        for idx in indices[::-1]:
+            modified_text.insert(idx+1, "*")
+            modified_text.insert(idx, "*")
+        modified_text = " ".join(modified_text)
+
         meta = {}
-        text_a = example["text"]
         meta['span1_text'] = example['span1_text']
         meta['span2_text'] = example['span2_text']
         label = int(example['label'])
         guid = "{}".format(example['idx'])
-        return InputExample(guid = guid, text_a=text_a, meta=meta, label=label)
+        return InputExample(guid = guid, text_a=modified_text, meta=meta, label=label)
 
 
-class YahooAnswersTopicProcessor(DataProcessor):
+class SuperglueRecordProcessor(DataProcessor):
     def __init__(self):
         super().__init__()
-        self.labels = []
+        self.labels = [None]
     
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
-        dataset = load_dataset(path="yahoo_answer_topic", cache_dir=data_dir, split=split)
+        try:
+            dataset = load_dataset(path=HUGGING_FACE_SCRIPTS, name='record', cache_dir=data_dir, split=split)
+        except:
+            dataset = load_from_disk(f"{data_dir}/super_glue.record")[split]
         return list(map(self.transform, dataset))
-    
+
     def transform(self, example):
         meta = {}
-        
+        meta['passage'] = example["passage"].replace("\n", " ")
+        meta['query'] = example["query"]
+        meta['entities'] = ", ".join(example['entities'])
+        if len(example['answers'])>0:
+            meta['answers'] = example['answers'][0]
+        else:
+            meta['answers'] = ''
+        guid = "{}".format(example['idx'])
+        return InputExample(guid = guid, meta=meta, label=0)
+
 
         
 
@@ -194,5 +233,5 @@ PROCESSORS = {
     "super_glue.rte": SuperglueRTEProcessor,
     "super_glue.wic": SuperglueWiCProcessor,
     "super_glue.wsc": SuperglueWSCProcessor,
-    "yahoo_answers_topic": YahooAnswersTopicProcessor
+    "super_glue.record": SuperglueRecordProcessor, 
 }

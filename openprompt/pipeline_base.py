@@ -45,6 +45,7 @@ class PromptDataLoader(object):
                  template: Template,
                  tokenizer: PreTrainedTokenizer,
                  tokenizer_wrapper_class: TokenizerWrapper,
+                 verbalizer: Optional[Verbalizer] = None,
                  max_seq_length: Optional[str] = 512,
                  batch_size: Optional[int] = 1,
                  shuffle: Optional[bool] = False,
@@ -52,6 +53,7 @@ class PromptDataLoader(object):
                  decoder_max_length: Optional[int] = -1,
                  predict_eos_token: Optional[bool] = False,
                  truncate_method: Optional[str] = "tail",
+                 drop_last: Optional[bool] = False,
                  **kwargs,
                 ):
 
@@ -62,6 +64,7 @@ class PromptDataLoader(object):
         self.wrapped_dataset = []
         self.tensor_dataset = []
         self.template = template
+        self.verbalizer = verbalizer
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.teacher_forcing = teacher_forcing
@@ -97,17 +100,20 @@ class PromptDataLoader(object):
             self.tensor_dataset, 
             batch_size = self.batch_size,
             sampler= sampler,
-            collate_fn = InputFeatures.collate_fct
+            collate_fn = InputFeatures.collate_fct,
+            drop_last = drop_last,
         )
     
     
     def wrap(self):
         r"""A simple interface to pass the examples to prompt, and wrap the text with template.
         """
-        if isinstance(self.raw_dataset, Dataset) or isinstance(self.raw_dataset, List): # TODO change to iterable 
+        if isinstance(self.raw_dataset, Dataset) or isinstance(self.raw_dataset, List): 
             assert len(self.raw_dataset) > 0, 'The dataset to be wrapped is empty.'
             # for idx, example in tqdm(enumerate(self.raw_dataset),desc='Wrapping'):
             for idx, example in enumerate(self.raw_dataset):
+                if self.verbalizer is not None and hasattr(self.verbalizer, 'wrap_one_example'): # some verbalizer may also process the example.
+                    example = self.verbalizer.wrap_one_example(example)
                 wrapped_example = self.template.wrap_one_example(example)
                 self.wrapped_dataset.append(wrapped_example)
         else:
@@ -171,7 +177,6 @@ class PromptModel(nn.Module):
                 module.train(mode)
         return self
         
-        
     def forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
         r""" 
         This is a forward method to make wrapped input data go through the model, and return the output logits.
@@ -193,11 +198,9 @@ class PromptModel(nn.Module):
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
         return input_batch
     
-
-
 class PromptForClassification(nn.Module):
     r'''``PromptModel`` with a classification head on top. The classification head will map
-    the logits in all position of the sequence (return value of a PromptModel) into the
+    the logits in all position of the sequence (return value of a ``PromptModel``) into the
     logits of the labels, using a verbalizer. 
 
     Args:
@@ -258,7 +261,14 @@ class PromptForClassification(nn.Module):
         return outputs
         
     def forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
-        r""" TODO
+        r""" 
+        Get the logits of label words.
+        
+        Args:
+            batch (:obj:`Union[Dict, InputFeatures]`): The original batch
+        
+        Returns:
+            :obj:`torch.Tensor`: The logits of the lable words (obtained by the current verbalizer). 
         """
         outputs = self.prompt_model(batch)
         outputs = self.verbalizer.gather_outputs(outputs)
@@ -382,7 +392,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
         Args:
             logits (:obj:`torch.Tensor`):
-            batch (:obj:InputFeatures): The input features of batchified data sequences.
+            batch (:obj:`InputFeatures`): The input features of batchified data sequences.
         
         Returns:
             shift_logits (:obj:`torch.Tensor`):
@@ -429,12 +439,12 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         logits, labels = self.shift_logits_and_labels(logits, batch['loss_ids'], reference_ids)
         batch_size, seq_len, vocab_size = logits.shape
         loss = self.loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
-        loss = loss.view(batch_size, -1).sum(dim=-1) #TODO support more objectives
+        loss = loss.view(batch_size, -1).sum(dim=-1) # TODO support more objectives
         loss = loss.mean()
         return loss
     
     
-    def generate(self, batch: Union[Dict, InputFeatures], **generation_kwargs):
+    def generate(self, batch: Union[Dict, InputFeatures], verbose: Optional[bool]=False, **generation_kwargs):
         r""" This function wraps the generate() methods in parent class ``GenerationMixin``.
         Forward uses the ``PretrainedModel``'s forward method. 
         generation_kwargs include all the parameters that are passed in to 
@@ -442,10 +452,11 @@ class PromptForGeneration(nn.Module, GenerationMixin):
     
         Args:
             batch (:obj:`Union[Dict, InputFeatures]`): The input features of batchified data sequences.
+            verbose (:obj:`Optional[bool]`): Set to true to verbose the generated sentence. 
         
         Returns:
-            output_sequences (:obj:List[torch.Tensor]): The raw sequences generated by the generation model.
-            generated_sentences (:obj:List[torch.Tensor]): The generated sentences that have been post-processed.
+            output_sequences (:obj:`List[torch.Tensor]`): The raw sequences generated by the generation model.
+            generated_sentences (:obj:`List[torch.Tensor]`): The generated sentences that have been post-processed.
         """
         input_generation_kwargs = {key: value for key,value in generation_kwargs.items() if key in signature(GenerationMixin.generate).args}
         if self.config.is_encoder_decoder:
@@ -482,6 +493,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
                 self.in_generation_function = False
                 output_sequences.extend(output_sequence.cpu().tolist()) # TODO: to support generate multiple sentence
             generated_sentences = self.post_processing(output_sequences=output_sequences, input_lengths=input_real_lens.cpu().tolist())
+        if verbose:
+            logger.info(f"Generated:{generated_sentences}")
         return output_sequences, generated_sentences
     
 
@@ -508,21 +521,20 @@ class PromptForGeneration(nn.Module, GenerationMixin):
                 text_output = text_output[:idx]
             text_output = text_output.strip()
             generated_sentences.append(text_output)
-        print(generated_sentences)
         return generated_sentences
 
 
     
     def prepare_inputs_for_generation(self, input_ids: Optional[torch.Tensor] = None,
                                          **model_kwargs):
-        r"""This function wraps the `prepare_inputs_for_generation` function in the huggingface transformers.
+        r"""This function wraps the ``prepare_inputs_for_generation`` function in the huggingface transformers.
 
         When the `past` not in model_kwargs, we prepare the input from scratch. 
         When `past` is in model_kwargs, we don't need to prepare the template wrapped input,
         instead we use the inner pretrain_models' function to prepare the next step's input.
-        `model_kwargs` includes all the argument passed in the `batch`: InputFeatures, except `input_ids`
+        `model_kwargs` includes all the argument passed in the `batch`: InputFeatures, except ``input_ids``
         , as long as they do not conflict with keywords in ``generation_kwargs``.    if 'past' not in model_kwargs: # the past_key_value not in model_kwargs, then we need to prepare input from scrath
-        , as long as they do not conflict with keywords in ``generation_kwargs''.
+        , as long as they do not conflict with keywords in ``generation_kwargs``.
 
         Args:
             input_ids(:obj:`torch.Tensor`): Indices of input sequence tokens in the vocabulary.
@@ -531,7 +543,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
             batch = InputFeatures(input_ids=input_ids, **model_kwargs)
             model_inputs = self.prompt_model.prepare_model_inputs(batch)
-            # TODO check the competibility for more models. Having checked gpt2, T5
+            # check the compatibility for more models. Having checked gpt2, T5
         else: # generating the subsequence generation can use the default setting
             model_inputs = self.plm.prepare_inputs_for_generation(input_ids, **model_kwargs)
         self.last_model_inputs = model_inputs  # to update the model_kwargs in _update_model_kwargs_for_generation, in-place operation.
@@ -542,7 +554,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         outputs, model_kwargs: Dict[str, Any], is_encoder_decoder: bool = False
     ) -> Dict[str, Any]:
         r""" The parents class's ``_update_model_kwargs_for_generation`` method will
-        add past_key_values to model_kwargs, and update ``token_type_ids``, and ``attention_mask_ids``.
+        add ``past_key_values`` to model_kwargs, and update ``token_type_ids``, and ``attention_mask_ids``.
 
         In case some of the model_kwargs are modified in the prepare_inputs_for_generation function
         and should be used as the subsequent model_kwargs, we upate these kwargs before the parent class
@@ -626,4 +638,3 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             self.device_map = None
         else:
             raise NotImplementedError("parallelize method was not implemented for this plm.")
-

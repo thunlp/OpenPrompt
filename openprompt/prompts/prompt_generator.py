@@ -28,18 +28,15 @@ class LMBFFTemplateGenerationTemplate(ManualTemplate):
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
         verbalizer (:obj:`ManualVerbalizer`): A verbalizer to provide label_words.
         text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.
-        mask_token (:obj:`str`, optional): The special token that is masked and need to be predicted by the model. Default to ``<mask>``
         placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{'<text_a>': 'text_a', '<text_b>': 'text_b'}``
     """
     def __init__(self, 
                  tokenizer: T5Tokenizer,
                  verbalizer: ManualVerbalizer,
                  text: Optional[List[str]] = None,
-                 mask_token: str = '<mask>',
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
         super().__init__(tokenizer=tokenizer, 
-                         mask_token=mask_token,
                          placeholder_mapping=placeholder_mapping)
         self.text = text
         self.verbalizer = verbalizer
@@ -49,7 +46,7 @@ class LMBFFTemplateGenerationTemplate(ManualTemplate):
         example.meta['labelword'] = self.verbalizer.label_words[example.label][0].strip()
         wrapped_example = super().wrap_one_example(example)
 
-        # TODO: replace <mask> with special tokens in each generation model
+        # replace <mask> with special tokens in each generation model
         # e.g. in T5 multi-parts generation use <extra_id_0>, <extra_id_1>, ...
         # handle different types of plm
         current_idx = self.tokenizer.convert_tokens_to_ids('<extra_id_0>')
@@ -135,7 +132,7 @@ class TemplateGenerator:
     @abstractmethod
     def convert_template(self, text_list: List[str]) -> List[str]:
         r"""
-        Convert the generated template into a standard template for downstream prompt model, return a list of str
+        Convert the generated template into a standard template for downstream prompt model, return a ``list`` of ``str``
         """
         raise NotImplementedError
         
@@ -273,7 +270,7 @@ class TemplateGenerator:
 
 class T5TemplateGenerator(TemplateGenerator):
     r""" 
-    Automatic template search using T5 model. This class inherits from `TemplateGenerator`.
+    Automatic template search using T5 model. This class inherits from ``TemplateGenerator``.
     """
     def __init__(self, 
                  model: T5ForConditionalGeneration,
@@ -312,7 +309,7 @@ class T5TemplateGenerator(TemplateGenerator):
 
 class VerbalizerGenerator:
     r""" 
-    This is the automatic label word search implementation in `LM-BFF <https://arxiv.org/pdf/2012.15723.pdf`_. 
+    This is the automatic label word search implementation in `LM-BFF <https://arxiv.org/pdf/2012.15723.pdf>`_. 
 
     Args:
         model (:obj:`PretrainedModel`): A pre-trained model for label word generation.

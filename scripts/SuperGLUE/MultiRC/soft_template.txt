@@ -1,1 +1,3 @@
-{"placeholder":"text_a"} Question: {"placeholder":"text_b"} Is this the answer? {"meta":"answer"} . {"mask"} .
+ question: {"placeholder":"text_b", "shortenable":False} answer: {"meta":"answer", "shortenable":False, "post_processing": lambda x:x+"."} paragraph: {"placeholder":"text_a"} {"mask"}
+ {"placeholder":"text_b", "shortenable":False} {"meta":"answer", "shortenable":False, "post_processing": lambda x:x+"."} {"placeholder":"text_a"} {"mask"}
+ question: {"placeholder":"text_b", "shortenable":False} answer: {"meta":"answer", "shortenable":False, "post_processing": lambda x:x+"."} paragraph: {"placeholder":"text_a"} The answer was {"mask"}

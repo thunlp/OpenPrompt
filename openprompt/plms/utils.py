@@ -1,4 +1,3 @@
-## load数据，对每一个batch包装template，返回的和普通data_loader一样
 import itertools
 import warnings
 import torch
@@ -11,7 +10,6 @@ from collections import defaultdict
 from openprompt.utils import round_list
 import numpy as np
 
-# 传入tokenizer，对数据进行截断处理
 
 class TokenizerWrapper:
     def __init__(self,
@@ -51,6 +49,18 @@ class TokenizerWrapper:
         self.cls_token_map = {self.template_cls_token: self.tokenizer.cls_token if hasattr(self.tokenizer, 'cls_token') else ''}
         self.pad_token_map = {self.template_pad_token: self.tokenizer.pad_token if hasattr(self.tokenizer, 'pad_token') else ''}
         logging.set_verbosity(verbosity_before)
+
+        self.num_truncated_sentences = 0
+        self.total_passed_sentences = 0
+    
+    @property
+    def truncate_rate(self,):
+        r"""Using this function, one can easily identify how many sentence has be truncated, thus help the user to choose a better thresthold for chunking.
+        """
+        if self.total_passed_sentences==0:
+            return None
+        else:
+            return self.num_truncated_sentences/self.total_passed_sentences
         
     @property
     def special_tokens_maps(self,) -> Dict:
@@ -144,6 +154,11 @@ class TokenizerWrapper:
     def padding(input_dict: Dict,
                 max_len: int, pad_id_for_inputs: int=0, pad_id_for_others: int=0) -> None:
         for key, value in input_dict.items():
+            if (len(input_dict[key]) > max_len):
+                raise ValueError(f'''
+                    Truncated seq length of '{key}' still greater than max length '{max_len}.'
+                    One possible reason is that no enough shortenable parts in template. Try add {{"shortenable": "True"}} property.
+                ''')
             if 'input' in key:
                 input_dict[key].extend([pad_id_for_inputs]*(max_len-len(value)))
             else:
@@ -172,7 +187,9 @@ class TokenizerWrapper:
         total_tokens = sum([len(part) for part in encoder_inputs['input_ids']])
         num_specials = self.num_special_tokens_to_add
         num_tokens_to_truncate = total_tokens - self.max_seq_length + num_specials
+        self.total_passed_sentences+=1
         if num_tokens_to_truncate>0:
+            self.num_truncated_sentences += 1
             encoder_inputs = self.truncate_fct(input_dict=encoder_inputs,
                           num_tokens_to_truncate=num_tokens_to_truncate)
         return encoder_inputs

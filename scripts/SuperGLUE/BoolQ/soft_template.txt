@@ -1,1 +1,4 @@
-{"placeholder":"text_a"} Question: {"placeholder":"text_b"} ? The answer was {"mask"} .
+ hypothesis: {"placeholder":"text_b", "shortenable":False, "post_processing": lambda x:x+"."} premise: {"placeholder":"text_a"} {"mask"}
+ {"placeholder":"text_b", "shortenable":False, "post_processing": lambda x:x+"."} {"placeholder":"text_a"} {"mask"}
+ hypothesis: {"placeholder":"text_b", "shortenable":False, "post_processing": lambda x:x+"."} premise: {"placeholder":"text_a"} The answer was {"mask"}
+ {"placeholder":"text_a"} Question: {"placeholder":"text_b"} ? The answer was {"mask"} .

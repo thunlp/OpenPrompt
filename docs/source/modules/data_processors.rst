@@ -179,7 +179,6 @@ Conditional Generation Processor
 WebNLGProcessor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 .. autoclass:: openprompt.data_utils.conditional_generation_dataset.WebNLGProcessor
    :members:
 
