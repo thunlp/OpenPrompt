@@ -6,6 +6,7 @@ from openprompt.data_utils import InputExample
 from openprompt.data_utils.ZH import ChnSentiCorp
 from openprompt.data_utils.data_sampler import FewShotSampler
 processor = ChnSentiCorp()
+# TODO other chinese datasets are not fully adapted yet
 trainset = processor.get_train_examples("datasets/ZH/ChnSentiCorp")
 devset = processor.get_dev_examples("datasets/ZH/ChnSentiCorp")
 # sampler  = FewShotSampler(num_examples_per_label=8, num_examples_per_label_dev=8, also_sample_dev=True)
