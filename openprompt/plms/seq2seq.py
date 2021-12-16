@@ -21,11 +21,13 @@ class T5TokenizerWrapper(TokenizerWrapper):
                  decoder_max_length: Optional[int] = 128,
                  decode_from_pad: Optional[bool] = True,
                  predict_eos_token: Optional[bool] = False,
+                 prefix: Optional[str] = ' ',
                  **kwargs):
         super().__init__(max_seq_length=max_seq_length, tokenizer=tokenizer,truncate_method=truncate_method)
         self.decoder_max_length = decoder_max_length
         self.decode_from_pad = decode_from_pad
         self.predict_eos = predict_eos_token
+        self.prefix = prefix
         if self.create_token_type_ids:
             logger.warning("token_type_ids is not valid in T5. will be depreciated.")
 
@@ -66,7 +68,7 @@ class T5TokenizerWrapper(TokenizerWrapper):
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
                     loss_ids.append(0)
                     encode_text = [self.mask_token_ids(num_mask_token_used)] 
-                    tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
+                    tgt_text_ids = self.tokenizer.encode(self.prefix + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
                     # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
@@ -151,11 +153,13 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
                  decoder_max_length: Optional[int] = 128,
                  decode_from_pad: Optional[bool] = True,
                  predict_eos_token: Optional[bool] = False,
+                 prefix: Optional[str] = ' ',
                  **kwargs):
         super().__init__(max_seq_length=max_seq_length, tokenizer=tokenizer,truncate_method=truncate_method)
         self.decoder_max_length = decoder_max_length
         self.decode_from_pad = decode_from_pad
         self.predict_eos = predict_eos_token
+        self.prefix = prefix
         if self.create_token_type_ids:
             logger.warning("token_type_ids is not valid in T5. will be depreciated.")
 
@@ -195,7 +199,7 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
                     loss_ids.append(0)
                     encode_text = [] 
-                    tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
+                    tgt_text_ids = self.tokenizer.encode(self.prefix + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
                 else:
@@ -277,11 +281,13 @@ class CPM2TokenizerWrapper(TokenizerWrapper):
                  decoder_max_length: Optional[int] = 128,
                  decode_from_start: Optional[bool] = True,
                  predict_eos_token: Optional[bool] = False,
+                 prefix: Optional[str] = '',
                  **kwargs):
         super().__init__(max_seq_length=max_seq_length, tokenizer=tokenizer,truncate_method=truncate_method)
         self.decoder_max_length = decoder_max_length
         self.decode_from_start = decode_from_start
         self.predict_eos = predict_eos_token
+        self.prefix = prefix
         if self.create_token_type_ids:
             logger.warning("token_type_ids is not valid in T5. will be depreciated.")
 
@@ -321,7 +327,7 @@ class CPM2TokenizerWrapper(TokenizerWrapper):
                 if teacher_forcing:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
                     encode_text = [self.mask_token_ids(num_mask_token_used)] 
-                    tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
+                    tgt_text_ids = self.tokenizer.encode(self.prefix + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
                     # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))

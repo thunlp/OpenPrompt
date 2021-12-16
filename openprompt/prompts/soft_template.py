@@ -60,7 +60,7 @@ class SoftTemplate(Template):
 
     def wrap_one_example(self, example) -> List[Dict]:  #TODO this automatic generated template may not be able to process diverse data format.
         if self.text is None:
-            logger.warning("You didn't provide text templat efor softprompt. Using default template, is this intended?")
+            logger.warning("You didn't provide text template for softprompt. Using default template, is this intended?")
             if example.text_b is None:
                 self.text = self.default_text1
             else:

@@ -69,6 +69,7 @@ class Resume_NER(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonline")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -79,16 +80,15 @@ class Resume_NER(CLSProcessor):
                             "entity":  "".join(example_json["tokens"][span["start"]: span["end"]+1]),
                             "options": self.labels_mapped,
                         },
-                        tgt_text = self.get_label(span["type"]),
+                        label = self.get_label(span["type"]),
                     )
                     examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '文本：{context} 问题：上文中，实体“{entity}”是什么类型的? {options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{context} 问题：上文中，实体“{entity}”是什么类型的? {options}',
+    #     ]
 
 
 class Weibo_NER(CLSProcessor):
@@ -134,6 +134,7 @@ class Weibo_NER(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonline")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -144,16 +145,15 @@ class Weibo_NER(CLSProcessor):
                             "entity": "".join(example_json["tokens"][span["start"]: span["end"]+1]),
                             "options": self.labels_mapped,
                         },
-                        tgt_text = self.get_label(span["type"]),
+                        label = self.get_label(span["type"]),
                     )
                     examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '文本：{context} 问题：上文中，实体“{entity}”是什么类型的? {options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{context} 问题：上文中，实体“{entity}”是什么类型的? {options}',
+    #     ]
 
 
 class DH_MSRA(CLSProcessor):
@@ -173,6 +173,7 @@ class DH_MSRA(CLSProcessor):
         if split != 'train': raise ValueError
         path = os.path.join(data_dir, f"{split}.txt")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             xs, ys = [], []
             for line in f:
@@ -192,7 +193,7 @@ class DH_MSRA(CLSProcessor):
                                     "entity": "".join(xs[i:j]),
                                     "options": self.labels_mapped,
                                 },
-                                tgt_text = self.get_label(ys[i][2:]),
+                                label = self.get_label(ys[i][2:]),
                             )
                             examples.append(example)
                             
@@ -204,11 +205,9 @@ class DH_MSRA(CLSProcessor):
                 else:
                     xs.append(l[0])
                     ys.append(l[1])
+        return examples
 
-                
-        
-
-    def get_templates(self):
-        return [
-            '文本：{context} 问题：上文中，实体“{entity}”是什么类型的? {options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{context} 问题：上文中，实体“{entity}”是什么类型的? {options}',
+    #     ]

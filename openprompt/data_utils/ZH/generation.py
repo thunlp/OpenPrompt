@@ -22,6 +22,7 @@ class E_reviews(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -32,13 +33,12 @@ class E_reviews(DataProcessor):
                     tgt_text = example_json["desc"],
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            "关键词：{key_values} 目标：根据上述关键词信息，生成一段广告文案. 文案：",
-        ]
+    # def get_templates(self):
+    #     return [
+    #         "关键词：{key_values} 目标：根据上述关键词信息，生成一段广告文案. 文案：",
+    #     ]
 
 
 class OutGen(DataProcessor):
@@ -51,6 +51,7 @@ class OutGen(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -62,13 +63,12 @@ class OutGen(DataProcessor):
                     tgt_text = example_json["story"],
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '标题:{title} 大纲:{outline} 目标:根据上述标题和大纲, 写一个故事。故事：',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '标题:{title} 大纲:{outline} 目标:根据上述标题和大纲, 写一个故事。故事：',
+    #     ]
 
 
 class PC(DataProcessor):
@@ -81,6 +81,7 @@ class PC(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -93,13 +94,12 @@ class PC(DataProcessor):
                     tgt_text = example_json["plot"],
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '文本：{text} 目标：根据上文，填充{blank}处缺失的情节。情节：',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{text} 目标：根据上文，填充{blank}处缺失的情节。情节：',
+    #     ]
 
 
 class STORAL1(DataProcessor):
@@ -112,6 +112,7 @@ class STORAL1(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -122,13 +123,12 @@ class STORAL1(DataProcessor):
                     tgt_text = example_json["moral"],
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            "故事：{story} 目标：根据故事，提炼一句哲理句。哲理句：",
-        ]
+    # def get_templates(self):
+    #     return [
+    #         "故事：{story} 目标：根据故事，提炼一句哲理句。哲理句：",
+    #     ]
 
 
 class STORAL2(DataProcessor):
@@ -141,6 +141,7 @@ class STORAL2(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -153,10 +154,9 @@ class STORAL2(DataProcessor):
                     tgt_text = example_json["beginning"]+example_json["story"],
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            "开头：{beginning} 大纲：{outline} 哲理：{moral} 目标：根据上述内容，写出一个故事。故事:",
-        ]
+    # def get_templates(self):
+    #     return [
+    #         "开头：{beginning} 大纲：{outline} 哲理：{moral} 目标：根据上述内容，写出一个故事。故事:",
+    #     ]

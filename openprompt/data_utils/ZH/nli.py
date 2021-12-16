@@ -54,6 +54,7 @@ class CSNLI(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -63,16 +64,15 @@ class CSNLI(CLSProcessor):
                         "hypothesis": example_json["sentence2"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["label"]),
+                    label = self.get_label(example_json["label"]),
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '前提：{premise} 假设: {hypothesis} 问题：前提和假设是什么关系? {options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '前提：{premise} 假设: {hypothesis} 问题：前提和假设是什么关系? {options}',
+    #     ]
 
 class OCNLI(CLSProcessor):
     """
@@ -98,6 +98,7 @@ class OCNLI(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -108,13 +109,12 @@ class OCNLI(CLSProcessor):
                         "hypothesis": example_json["sentence2"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["label"]),
+                    label = self.get_label(example_json["label"]),
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '前提：{premise} 假设: {hypothesis} 问题：前提和假设是什么关系? {options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '前提：{premise} 假设: {hypothesis} 问题：前提和假设是什么关系? {options}',
+    #     ]

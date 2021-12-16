@@ -9,6 +9,7 @@ class ZhiDao(DataProcessor):
     def get_examples(self, data_dir, split):
         if split != 'train': raise ValueError
         path = os.path.join(data_dir, f"{split}.csv")
+        examples = []
         with open(path, encoding='utf8') as f:
             reader = csv.reader(f, delimiter=",")
             for i, row in enumerate(reader):
@@ -23,8 +24,9 @@ class ZhiDao(DataProcessor):
                     tgt_text = reply,
                 )
                 examples.append(example)
+        return example
 
-    def get_templates(self):
-        return [
-            '问题：{title} {question} 回答：',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '问题：{title} {question} 回答：',
+    #     ]

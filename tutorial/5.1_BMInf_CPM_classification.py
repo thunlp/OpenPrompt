@@ -2,14 +2,16 @@ import sys
 sys.path.append(".")
 sys.path.append("..")
 
+from openprompt.utils.zh import num2zh
+
 from openprompt.data_utils import InputExample
-from openprompt.data_utils.ZH import ChnSentiCorp
+from openprompt.data_utils.ZH import LCQMC
+# dataset tested on CPM2: CMNLI, ChnSentiCorp, LCQMC
 from openprompt.data_utils.data_sampler import FewShotSampler
-processor = ChnSentiCorp()
-# TODO other chinese datasets are not fully adapted yet
-trainset = processor.get_train_examples("datasets/ZH/ChnSentiCorp")
-devset = processor.get_dev_examples("datasets/ZH/ChnSentiCorp")
-# sampler  = FewShotSampler(num_examples_per_label=8, num_examples_per_label_dev=8, also_sample_dev=True)
+processor = LCQMC()
+trainset = processor.get_train_examples("datasets/ZH/LCQMC")
+devset = processor.get_dev_examples("datasets/ZH/LCQMC")
+# sampler  = FewShotSampler(num_examples_per_label=64, num_examples_per_label_dev=64, also_sample_dev=True)
 # trainset, devset = sampler(trainset, devset)
 
 import bminf.torch as bt
@@ -30,9 +32,13 @@ from openprompt.prompts import SoftTemplate, MixedTemplate
 mytemplate = SoftTemplate(
     model = plm,
     tokenizer = tokenizer,
+    num_tokens = 100,
     # text = '{"meta": "context", "shortenable": True} 上文中，{"meta": "entity"} 是一个{"mask"}。选项：{"meta": "options", "post_processing": lambda lis: ",".join([f"{i}:{choice}" for i, choice in enumerate(lis)])}',
     # text = '前提：{"meta": "premise", "shortenable": True} 假设: {"meta": "hypothesis", "shortenable": True} 问题：前提和假设是什么关系? 选项：{"meta": "options", "post_processing": lambda lis: ",".join([f"{i}:{choice}" for i, choice in enumerate(lis)])} 回答:{"mask"}',
-    text = '文本：{"meta": "context", "shortenable": True} 问题:上述文本所表达的情感是积极的还是消极的? 回答：{"mask"}',
+    # text = '文本：{"meta": "context", "shortenable": True} 问题:上述文本所表达的情感是积极的还是消极的? 回答：{"mask"}',
+    # text = '文章：{"meta": "text", "shortenable": True} 问题: {"meta": "question"} 选项：{"meta": "options", "post_processing": lambda lis: ";".join([f"{i}、{choice}" for i, choice in enumerate(lis)])} 回答:{"mask"}',
+    # text = '释义：{"meta": "text"} 问题: 这句释义对应的古文是? 选项：{"meta": "options", "post_processing": lambda lis: ",".join([f"{i}:{choice}" for i, choice in enumerate(lis)])} 回答:{"mask"}',
+    text = '句子一:{"placeholder": "text_a"} 句子二:{"placeholder": "text_b"} 问题：两个句子表达的意思相似吗？回答:{"mask"}'
 )
 
 wrapped_example = mytemplate.wrap_one_example(trainset[0]) 
@@ -45,16 +51,16 @@ from openprompt.prompts import ManualVerbalizer
 import torch
 
 # for example the verbalizer contains multiple label words in each class
-label_words = processor.labels_mapped
+label_words = [str(l) for l in processor.get_labels()]
 myverbalizer = ManualVerbalizer(tokenizer, num_classes=len(label_words), label_words=label_words, prefix = '')
 print("Verbalizer token id:", myverbalizer.label_words_ids.data)
 
-from openprompt import PromptForClassification
+from openprompt import PromptForClassification # TODO generation is not supported yet
 
 use_cuda = True
 prompt_model = PromptForClassification(plm=plm, template=mytemplate, verbalizer=myverbalizer, freeze_plm=False)
 if use_cuda:
-    prompt_model=  prompt_model.cuda()
+    prompt_model = prompt_model.cuda()
 
 # ## below is standard training
 
@@ -62,14 +68,14 @@ from openprompt import PromptDataLoader
 
 train_dataloader = PromptDataLoader(dataset=trainset, template=mytemplate, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=8, 
-    batch_size=16, shuffle=True, teacher_forcing=False, predict_eos_token=False,
-    truncate_method="head")
+    batch_size=32, shuffle=True, teacher_forcing=False, predict_eos_token=False,
+    truncate_method="tail")
 # next(iter(train_dataloader))
 
 validation_dataloader = PromptDataLoader(dataset=devset, template=mytemplate, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=8,
-    batch_size=16, shuffle=False, teacher_forcing=False, predict_eos_token=False,
-    truncate_method="head")
+    batch_size=32, shuffle=False, teacher_forcing=False, predict_eos_token=False,
+    truncate_method="tail")
 
 from transformers import  AdamW, get_linear_schedule_with_warmup
 loss_func = torch.nn.CrossEntropyLoss()
@@ -93,7 +99,7 @@ optimizer_grouped_parameters2 = [
 optimizer1 = AdamW(optimizer_grouped_parameters1, lr=0)
 optimizer2 = AdamW(optimizer_grouped_parameters2, lr=5e-1/1024)
 
-for epoch in range(3):
+for epoch in range(1):
     # ## train
     prompt_model.train()
 
@@ -111,7 +117,7 @@ for epoch in range(3):
         optimizer1.zero_grad()
         optimizer2.step()
         optimizer2.zero_grad()
-        print(f"epoch {epoch} - step {step}: ", loss.item(), tot_loss/(step+1))
+        print(f"epoch {epoch} - step {step} / {len(train_dataloader)}: ", loss.item(), tot_loss/(step+1))
     
     # ## evaluate
 

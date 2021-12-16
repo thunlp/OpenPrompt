@@ -23,6 +23,7 @@ class Mandarinograd(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for example_json in json.load(f).values():
                 example = InputExample(
@@ -31,16 +32,15 @@ class Mandarinograd(CLSProcessor):
                         "after": example_json["hypothesis"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["class_id"]),
+                    label = self.get_label(example_json["class_id"]),
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '文本：{before} 问题：上述文本进行指代消解后，可以理解为 "{after}" 吗？{options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{before} 问题：上述文本进行指代消解后，可以理解为 "{after}" 吗？{options}',
+    #     ]
 
 
 class CLUEWSC2020(CLSProcessor):
@@ -59,6 +59,7 @@ class CLUEWSC2020(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -69,13 +70,12 @@ class CLUEWSC2020(CLSProcessor):
                         "text": example_json["text"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["label"]),
+                    label = self.get_label(example_json["label"]),
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '文本：{text} 问题：在上文中，“{it}“ 指代 "{that}" 吗？{options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{text} 问题：在上文中，“{it}“ 指代 "{that}" 吗？{options}',
+    #     ]

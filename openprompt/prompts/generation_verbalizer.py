@@ -48,9 +48,10 @@ class GenerationVerbalizer(Verbalizer):
                  classes: Optional[List] = None,
                  num_classes: Optional[Sequence[str]] = None,
                  is_rule: Optional[bool] = False,
+                 prefix: Optional[str] = '',
                 ):
         super().__init__(tokenizer=tokenizer, num_classes=num_classes, classes=classes)
-        self.prefix = ''
+        self.prefix = prefix
         self.is_rule = is_rule
         self.mixed_token_start = "{"
         self.mixed_token_end = "}"
@@ -81,7 +82,7 @@ class GenerationVerbalizer(Verbalizer):
                     d = self.parse_text(label_word)
                 except:
                     raise RuntimeError(f"is_rule={self.is_rule} but label_word: {label_word} can't be converted to object.")
-                print(d)
+                print("parse_dict: ", d)
                 self.label_words[id] = partial(lambda x, text: self.incorporate_text_example(text, x), text=d)
 
 
@@ -139,7 +140,7 @@ class GenerationVerbalizer(Verbalizer):
             if 'placeholder' in d:
                 text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example, d['placeholder']))
             elif 'meta' in d:
-                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(example.meta[d['meta']])
+                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:str(x))(example.meta[d['meta']])
             elif 'soft' in d:
                 raise RuntimeError("soft token not supported in verbalizer") # unused
             elif 'mask' in d:
