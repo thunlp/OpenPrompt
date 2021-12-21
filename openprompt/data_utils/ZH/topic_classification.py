@@ -21,6 +21,7 @@ class THUCNews(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -30,16 +31,15 @@ class THUCNews(CLSProcessor):
                         "content": example_json["context"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["class"]),
+                    label = self.get_label(example_json["class"]),
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '新闻标题：{headline} 新闻正文：{content} 问题：上述新闻属于什么什么类别？{options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '新闻标题：{headline} 新闻正文：{content} 问题：上述新闻属于什么什么类别？{options}'
+    #     ]
 
 
 class TNews(CLSProcessor):
@@ -59,6 +59,7 @@ class TNews(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.tsv")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             reader = csv.reader(f, delimiter='\t')
             for i, row in enumerate(reader):
@@ -69,16 +70,15 @@ class TNews(CLSProcessor):
                         "text": text,
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(label),
+                    label = self.get_label(label),
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '新闻：{text} 问题：上述新闻属于什么什么类别？{options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '新闻：{text} 问题：上述新闻属于什么什么类别？{options}'
+    #     ]
 
 
 class IFLYTEK(CLSProcessor):
@@ -97,6 +97,7 @@ class IFLYTEK(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -105,13 +106,12 @@ class IFLYTEK(CLSProcessor):
                         "text": example_json["sentence"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["label_des"]),
+                    label = self.get_label(example_json["label_des"]),
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '文本：{text} 问题：上述文段属于什么什么类别？{options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{text} 问题：上述文段属于什么什么类别？{options}'
+    #     ]

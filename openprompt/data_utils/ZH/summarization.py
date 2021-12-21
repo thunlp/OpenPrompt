@@ -22,6 +22,7 @@ class CEPSUM(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -35,14 +36,12 @@ class CEPSUM(DataProcessor):
                     tgt_text = example_json["targets"][0], # TODO on dev and test, there's more than one answer available
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '产品属性：{properties} 产品描述：{description} 目标：根据产品的属性和描述，为该产品写一个摘要。 摘要：'
-        ]
-
+    # def get_templates(self):
+    #     return [
+    #         '产品属性：{properties} 产品描述：{description} 目标：根据产品的属性和描述，为该产品写一个摘要。 摘要：'
+    #     ]
 
 class LCSTS(DataProcessor):
     """
@@ -60,6 +59,7 @@ class LCSTS(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -70,10 +70,9 @@ class LCSTS(DataProcessor):
                     tgt_text = example_json["summary"],
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '文本：{text} 目标：为上述文本写一个摘要。摘要：'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{text} 目标：为上述文本写一个摘要。摘要：'
+    #     ]

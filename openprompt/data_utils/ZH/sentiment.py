@@ -37,12 +37,10 @@ class ChnSentiCorp(CLSProcessor):
                 examples.append(example)
         return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '文本：{context} 问题:上述文本所表达的情感为？{options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{context} 问题:上述文本所表达的情感为？{options}',
+    #     ]
 
 
 class ECISA(CLSProcessor):
@@ -71,6 +69,7 @@ class ECISA(CLSProcessor):
         if split == 'dev': return []
         path = os.path.join(data_dir, f"{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for example_json in json.load(f):
                 sents = example_json["Sentence"]
@@ -88,16 +87,15 @@ class ECISA(CLSProcessor):
                                 ]),
                                 "options": self.labels_mapped,
                             },
-                            tgt_text = self.get_label(sent["label"]),
+                            label = self.get_label(sent["label"]),
                         )
                         examples.append(example)
+        return examples
                 
-        
-        
-    def get_templates(self):
-        return [
-            '文本：{context_before} {text} {context_after} 问题：上述文本中，"{text}"所表达的情感为？{options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{context_before} {text} {context_after} 问题：上述文本中，"{text}"所表达的情感为？{options}',
+    #     ]
 
 
 class JD_FULL(CLSProcessor):
@@ -128,6 +126,7 @@ class JD_FULL(CLSProcessor):
         if split == 'dev': return []
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -137,16 +136,15 @@ class JD_FULL(CLSProcessor):
                         "review": example_json["review"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["label"]),
+                    label = self.get_label(example_json["label"]),
                 )
                 examples.append(example)
+        return examples
                 
-        
-        
-    def get_templates(self):
-        return [
-            '评价：{title} {review} 问题：据此分析，这段评价给出的评分为？{options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '评价：{title} {review} 问题：据此分析，这段评价给出的评分为？{options}'
+    #     ]
 
 
 class SimplifyWeibo4Moods(CLSProcessor):
@@ -166,6 +164,7 @@ class SimplifyWeibo4Moods(CLSProcessor):
         if split!='train': return []
         path = os.path.join(data_dir, f"{split}.csv")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             reader = csv.reader(f, delimiter=",")
             for i, row in enumerate(reader):
@@ -176,16 +175,15 @@ class SimplifyWeibo4Moods(CLSProcessor):
                         "context": review,
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(label),
+                    label = self.get_label(label),
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '文本：{context} 问题：上述文本所表达的情感为？{options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{context} 问题：上述文本所表达的情感为？{options}',
+    #     ]
 
 
 class PositiveNegative(CLSProcessor):
@@ -205,6 +203,7 @@ class PositiveNegative(CLSProcessor):
         if split != 'train': raise ValueError
         path = os.path.join(data_dir, f"{split}.csv")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             reader = csv.reader(f, delimiter=",")
             for i, row in enumerate(reader):
@@ -215,16 +214,15 @@ class PositiveNegative(CLSProcessor):
                         "context": review,
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(label),
+                    label = self.get_label(label),
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '文本：{context} 问题：上述文本所表达的情感为？{options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{context} 问题：上述文本所表达的情感为？{options}',
+    #     ]
 
 
 class RatingMovie(CLSProcessor):
@@ -244,6 +242,7 @@ class RatingMovie(CLSProcessor):
         if split != 'train': raise ValueError
         path = os.path.join(data_dir, f"{split}.csv")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             reader = csv.reader(f, delimiter=",")
             for i, row in enumerate(reader):
@@ -254,16 +253,15 @@ class RatingMovie(CLSProcessor):
                         "text": text,
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(rating),
+                    label = self.get_label(rating),
                 )
                 examples.append(example)
-                
+        return examples
         
-        
-    def get_templates(self):
-        return [
-            '评价：{text} 问题：据此估计，这段对电影的评价对应的评分为？{options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '评价：{text} 问题：据此估计，这段对电影的评价对应的评分为？{options}'
+    #     ]
 
 
 class RatingShopping(CLSProcessor):
@@ -283,6 +281,7 @@ class RatingShopping(CLSProcessor):
         if split != 'train': raise ValueError
         path = os.path.join(data_dir, f"{split}.csv")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             reader = csv.reader(f, delimiter=",")
             for i, row in enumerate(reader):
@@ -294,16 +293,15 @@ class RatingShopping(CLSProcessor):
                         "text": text,
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(rating),
+                    label = self.get_label(rating),
                 )
                 examples.append(example)
+        return examples
                 
-        
-        
-    def get_templates(self):
-        return [
-            '评价：{text} 问题：这段评价对商品的评分为？{options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '评价：{text} 问题：这段评价对商品的评分为？{options}'
+    #     ]
 
 
 class RatingDianping(CLSProcessor):
@@ -323,6 +321,7 @@ class RatingDianping(CLSProcessor):
         if split != 'train': raise ValueError
         path = os.path.join(data_dir, f"{split}.csv")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             reader = csv.reader(f, delimiter=",")
             for i, row in enumerate(reader):
@@ -335,7 +334,7 @@ class RatingDianping(CLSProcessor):
                         "question": "环境",
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(rating_env)
+                    label = self.get_label(rating_env)
                 )
                 examples.append(example)
                 example = InputExample(
@@ -344,7 +343,7 @@ class RatingDianping(CLSProcessor):
                         "question": "特色",
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(rating_flavor)
+                    label = self.get_label(rating_flavor)
                 )
                 examples.append(example)
                 example = InputExample(
@@ -353,12 +352,12 @@ class RatingDianping(CLSProcessor):
                         "question": "设施",
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(rating_service)
+                    label = self.get_label(rating_service)
                 )
                 examples.append(example)
+        return examples
         
-        
-    def get_templates(self):
-        return [
-            '评价:{text} 问题：据此估计，这段评价对{question}的评分为？{options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '评价:{text} 问题：据此估计，这段评价对{question}的评分为？{options}'
+    #     ]

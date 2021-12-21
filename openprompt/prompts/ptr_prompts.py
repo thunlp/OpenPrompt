@@ -23,13 +23,12 @@ class PTRTemplate(PtuningTemplate):
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  text:  Optional[str] = None,
-                 placeholder_mapping: dict = {'<text_a>':'text_a', '<text_b>':'text_b'},
                 ):
         super().__init__(model=model,
                          tokenizer=tokenizer,
                          prompt_encoder_type="mlp",
-                         text=text,
-                         placeholder_mapping=placeholder_mapping)
+                         text=text
+                        )
 
 
 class PTRVerbalizer(Verbalizer):

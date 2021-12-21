@@ -4,8 +4,11 @@ data/
 logs/*
 experiments/logs
 !logs/.gitkeep
-datasets/* 
+datasets/*
 !datasets/*.sh
+!datasets/ZH
+datasets/ZH/*
+!datasets/ZH/*.sh
 .vscode/
 *.egg-info/
 eggs/

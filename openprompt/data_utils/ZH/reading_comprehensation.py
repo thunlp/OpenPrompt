@@ -1,6 +1,6 @@
 from .processor import *
 
-class C3(DataProcessor):
+class C3(OptionProcessor):
     """
     @article{sun2020investigating,
       title={Investigating prior knowledge for challenging chinese machine reading comprehension},
@@ -18,6 +18,7 @@ class C3(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for example_json in json.load(f):
                 example = InputExample(
@@ -26,19 +27,19 @@ class C3(DataProcessor):
                         "question": example_json[1][0]["question"],
                         "options": example_json[1][0]["choice"],
                     },
-                    tgt_text = example_json[1][0]["choice"].index(example_json[1][0]["answer"]),
+                    label = example_json[1][0]["choice"].index(example_json[1][0]["answer"]),
                 )
+                self.update_options(example)
                 examples.append(example)
-                
+        return examples
         
+    # def get_templates(self):
+    #     return [
+    #         '文本：{text} 问题: {question} {options}'
+    #     ]
 
-    def get_templates(self):
-        return [
-            '文本：{text} 问题: {question} {options}'
-        ]
 
-
-class CCPM(DataProcessor):
+class CCPM(OptionProcessor):
     """
     """
     def __init__(self):
@@ -47,6 +48,7 @@ class CCPM(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -55,19 +57,19 @@ class CCPM(DataProcessor):
                         "text": example_json["translation"],
                         "options": example_json["choices"],
                     },
-                    tgt_text = example_json["answer"],
+                    label = example_json["answer"],
                 )
+                self.update_options(example)
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '释义：{text} 问题: 这句释义对应的古文是? {options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '释义：{text} 问题: 这句释义对应的古文是? {options}',
+    #     ]
 
 
-class SPP(DataProcessor):
+class SPP(OptionProcessor):
     """
     """
     def __init__(self):
@@ -76,6 +78,7 @@ class SPP(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -99,19 +102,18 @@ class SPP(DataProcessor):
                         "blank": "[空白]",
                         "options": ",".join(f'[空白{i}]' for i in range(1, count+1))
                     },
-                    tgt_text = int(example_json["label"])
+                    label = int(example_json["label"])
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '故事：{story} 情节：{plot} 问题：上述情节应该填充到故事中的哪一个{blank}处？{options}',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '故事：{story} 情节：{plot} 问题：上述情节应该填充到故事中的哪一个{blank}处？{options}',
+    #     ]
 
 
-class CMedQA(DataProcessor):
+class CMedQA(OptionProcessor):
     """
     @article{zhang2017chinese,
     title={Chinese Medical Question Answer Matching Using End-to-End Character-Level Multi-Scale CNNs},
@@ -158,6 +160,7 @@ class CMedQA(DataProcessor):
 
         path = os.path.join(data_dir, f"{split}_candidates.txt")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             reader = csv.reader(f, delimiter=',')
             for i, row in enumerate(reader):
@@ -168,7 +171,7 @@ class CMedQA(DataProcessor):
                         "question": questions[q_id],
                         "options": [answers[pos_id], answers[neg_id]],
                     },
-                    tgt_text = 0,
+                    label = 0,
                 )
                 examples.append(example)
                 example = InputExample(
@@ -176,16 +179,15 @@ class CMedQA(DataProcessor):
                         "question": questions[q_id],
                         "options": [answers[neg_id], answers[pos_id]],
                     },
-                    tgt_text = 1,
+                    label = 1,
                 )
                 examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '问题：{question} {options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '问题：{question} {options}'
+    #     ]
 
 
 class ChiD(DataProcessor):
@@ -216,6 +218,7 @@ class ChiD(DataProcessor):
             answer_map = json.load(f)
         path = os.path.join(data_dir, f"{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -247,13 +250,12 @@ class ChiD(DataProcessor):
                         tgt_text = ",".join(answers)
                     )
                     examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '文段：{text} 成语：{candidates} 问题：文段的{blank}处应依次填入哪些成语? 回答：',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文段：{text} 成语：{candidates} 问题：文段的{blank}处应依次填入哪些成语? 回答：',
+    #     ]
 
 
 class CSL(CLSProcessor):
@@ -273,6 +275,7 @@ class CSL(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -283,16 +286,15 @@ class CSL(CLSProcessor):
                         "keywords": ",".join(example_json["keyword"]),
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["label"])
+                    label = self.get_label(example_json["label"])
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '文章摘要：{text} 关键词：{keywords} 问题：上述关键词和这篇文章关联吗？回答：'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文章摘要：{text} 关键词：{keywords} 问题：上述关键词和这篇文章关联吗？回答：'
+    #     ]
 
 class CJRC(DataProcessor):
     """
@@ -313,6 +315,7 @@ class CJRC(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             jsons = json.load(f)
             for example_json in jsons["data"]:
@@ -328,13 +331,12 @@ class CJRC(DataProcessor):
                             tgt_text = qa["answers"][0]["text"],
                         )
                         examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '法律案例：{casename}:{context} 问题：根据上述法律案例，{question} 回答：'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '法律案例：{casename}:{context} 问题：根据上述法律案例，{question} 回答：'
+    #     ]
 
 
 class CMRC2018(DataProcessor):
@@ -365,6 +367,7 @@ class CMRC2018(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"data/{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             jsons = json.load(f)
             for example_json in jsons:
@@ -377,6 +380,7 @@ class CMRC2018(DataProcessor):
                         tgt_text = qa["answers"][0],
                     )
                     examples.append(example)
+        return examples
                 
         
 
@@ -401,6 +405,7 @@ class CMRC2019(DataProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"data/{split}.json")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             jsons = json.load(f)["data"]
             for example_json in jsons:
@@ -413,13 +418,12 @@ class CMRC2019(DataProcessor):
                     tgt_text = ",".join([example_json["choices"][a] for a in example_json["answers"]])
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '故事：{story} 情节:{plots} 问题：故事中{blank}处依次填入什么情节？回答：'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '故事：{story} 情节:{plots} 问题：故事中{blank}处依次填入什么情节？回答：'
+    #     ]
 
 
 class DuReader(DataProcessor):
@@ -454,6 +458,7 @@ class DuReader(DataProcessor):
         super().__init__()
 
     def get_examples(self, data_dir, split):
+        examples = []
         for which in ["search", "zhidao"]:
             path = os.path.join(data_dir, f"{split}set/{which}.{split}.json")
             
@@ -468,10 +473,9 @@ class DuReader(DataProcessor):
                         tgt_text = ";".join(example_json["answers"])
                     )
                     examples.append(example)
+        return examples
                 
-        
-
-    def get_templates(self):
-        return [
-            '文本：{context} 问题:根据上文，{question} 回答：',
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{context} 问题:根据上文，{question} 回答：',
+    #     ]

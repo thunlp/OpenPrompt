@@ -18,6 +18,8 @@ from openprompt.utils.logging import logger
 import numpy as np
 import torch.nn.functional as F
 
+from openprompt.utils.zh import num2zh
+
 
 class Template(nn.Module):
     r'''

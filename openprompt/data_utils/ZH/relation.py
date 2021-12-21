@@ -28,6 +28,7 @@ class FinRE(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -38,16 +39,15 @@ class FinRE(CLSProcessor):
                         "tail": example_json["tail"]["mention"],
                         "options": self.labels_mapped,
                     },
-                    tgt_text = self.get_label(example_json["label"]),
+                    label = self.get_label(example_json["label"]),
                 )
                 examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '文本：{text} 问题:上述文本中，“{head}”和“{tail}”的关系为？{options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{text} 问题:上述文本中，“{head}”和“{tail}”的关系为？{options}'
+    #     ]
 
 
 class Chinese_Literature_NER_RE(CLSProcessor):
@@ -72,6 +72,7 @@ class Chinese_Literature_NER_RE(CLSProcessor):
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.jsonl")
         
+        examples = []
         with open(path, encoding='utf8') as f:
             for line in f:
                 example_json = json.loads(line)
@@ -83,13 +84,12 @@ class Chinese_Literature_NER_RE(CLSProcessor):
                             "tail": example_json["entities"][relation["tail"]][0]["mention"],
                             "options": self.labels_mapped,
                         },
-                        tgt_text = self.get_label(relation["label"]),
+                        label = self.get_label(relation["label"]),
                     )
                     examples.append(example)
-                
-        
+        return examples
 
-    def get_templates(self):
-        return [
-            '文本：{text} 问题:上述文本中，“{head}”和“{tail}”的关系为？{options}'
-        ]
+    # def get_templates(self):
+    #     return [
+    #         '文本：{text} 问题:上述文本中，“{head}”和“{tail}”的关系为？{options}'
+    #     ]
