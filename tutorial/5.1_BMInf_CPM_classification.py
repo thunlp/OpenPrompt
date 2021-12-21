@@ -9,12 +9,21 @@ from openprompt.data_utils.ZH import LCQMC
 # dataset tested on CPM2: CMNLI, ChnSentiCorp, LCQMC
 from openprompt.data_utils.data_sampler import FewShotSampler
 processor = LCQMC()
-trainset = processor.get_train_examples("datasets/ZH/LCQMC")
-devset = processor.get_dev_examples("datasets/ZH/LCQMC")
+trainset = processor.get_train_examples("datasets/ZH/paraphrase/LCQMC")
+devset = processor.get_dev_examples("datasets/ZH/paraphrase/LCQMC")
 # sampler  = FewShotSampler(num_examples_per_label=64, num_examples_per_label_dev=64, also_sample_dev=True)
 # trainset, devset = sampler(trainset, devset)
 
 import bminf.torch as bt
+"""
+tutorial for using bminf
+( using pip inside conda for enviroment management is preferable )
+tested on: pip3 install torch==1.8.1+cu111 -f https://download.pytorch.org/whl/cu111/torch_stable.html
+1. git clone git@github.com:OpenBMB/BMInf.git
+2. git checkout dev
+3. pip install -r requirements.txt
+4. python setup.py install
+"""
 use_cpm_version = 2
 if use_cpm_version == 1:
     from openprompt.plms.lm import LMTokenizerWrapper
@@ -23,7 +32,8 @@ if use_cpm_version == 1:
     WrapperClass = LMTokenizerWrapper
 elif use_cpm_version == 2:
     from openprompt.plms.seq2seq import CPM2TokenizerWrapper
-    plm = bt.models.CPM2()
+    plm = bt.models.CPM2() # model size 11 G，downloading would take some time.
+    # default cache path: ~/.cache/bigmodels/cpm2.1-new/
     tokenizer = plm.tokenizer
     WrapperClass = CPM2TokenizerWrapper
 
@@ -68,13 +78,13 @@ from openprompt import PromptDataLoader
 
 train_dataloader = PromptDataLoader(dataset=trainset, template=mytemplate, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=8, 
-    batch_size=32, shuffle=True, teacher_forcing=False, predict_eos_token=False,
+    batch_size=8, shuffle=True, teacher_forcing=False, predict_eos_token=False,
     truncate_method="tail")
 # next(iter(train_dataloader))
 
 validation_dataloader = PromptDataLoader(dataset=devset, template=mytemplate, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=8,
-    batch_size=32, shuffle=False, teacher_forcing=False, predict_eos_token=False,
+    batch_size=8, shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="tail")
 
 from transformers import  AdamW, get_linear_schedule_with_warmup
