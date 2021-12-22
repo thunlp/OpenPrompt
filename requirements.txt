@@ -1,4 +1,4 @@
-torch>=1.9.0
+#torch>=1.9.0
 transformers>=4.10.0
 sentencepiece==0.1.96
 scikit-learn>=0.24.2
