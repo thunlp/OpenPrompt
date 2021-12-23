@@ -24,9 +24,6 @@ class SoftTemplate(Template):
     concatenated into the input ids. There are two initializations of the new tokens. 
     (1). random initialization. (2) initialize with the tokens of the plm (We simply take 
     the first n_tokens similar to their implementation).
-
-    Note that this template can be simply achieved by :obj:`SoftManualTemplate`, in which
-    you set `n_token` <soft> tokens template before the <text_a> will give the same result.
     """
     registered_inputflag_names = ["loss_ids", "shortenable_ids"]
 
@@ -34,6 +31,7 @@ class SoftTemplate(Template):
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  text: Optional[str] = None,
+                 soft_embeds: Optional[torch.FloatTensor] = None,
                  num_tokens: int=20,
                  initialize_from_vocab: Optional[bool] = True,
                  random_range: Optional[float] = 0.5,
@@ -42,25 +40,31 @@ class SoftTemplate(Template):
         super().__init__(tokenizer=tokenizer,
                          placeholder_mapping=placeholder_mapping)
         self.raw_embedding = model.get_input_embeddings()
+        self.raw_embedding.requires_grad_(False)
         self.model_is_encoder_decoder = model.config.is_encoder_decoder
         self.random_range = random_range
         self.num_tokens = num_tokens
         self.initialize_from_vocab = initialize_from_vocab
 
-        self.text = text 
+        self.text = text
         # self.default_text1 = {"placeholder<text_a> <mask>"
         # self.default_text2 = "<text_a> <text_b> <mask>".split()
 
-        if self.num_tokens>0:
-            self.generate_parameters()
+        if soft_embeds is not None:
+            self.soft_embeds = soft_embeds
+            self.num_tokens = len(soft_embeds)
+        else:
+            if self.num_tokens>0:
+                self.generate_parameters()
 
 
     def on_text_set(self):
         self.text = self.parse_text(self.text)
 
+
     def wrap_one_example(self, example) -> List[Dict]:  #TODO this automatic generated template may not be able to process diverse data format.
         if self.text is None:
-            logger.warning("You didn't provide text templat efor softprompt. Using default template, is this intended?")
+            logger.warning("You didn't provide text template for softprompt. Using default template, is this intended?")
             if example.text_b is None:
                 self.text = self.default_text1
             else:
