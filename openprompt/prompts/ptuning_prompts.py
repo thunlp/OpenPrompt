@@ -28,9 +28,9 @@ class PtuningTemplate(MixedTemplate):
                 ):
         super().__init__(model = model,
                          tokenizer=tokenizer, 
-                         text = text
                         )
         self.prompt_encoder_type = prompt_encoder_type
+        self.text = text
 
     def on_text_set(self):
         r"""
