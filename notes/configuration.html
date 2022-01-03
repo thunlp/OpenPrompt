@@ -117,11 +117,11 @@ that you want to change or specify.</p>
 <li><p><strong>local_rank:</strong> The indices of devices for the current process.</p></li>
 </ul>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">environment</span><span class="p">:</span>
-    <span class="nt">num_gpus</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-    <span class="nt">cuda_visible_devices</span><span class="p">:</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
-    <span class="nt">local_rank</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_gpus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cuda_visible_devices</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">local_rank</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -133,8 +133,8 @@ Specifically, seeds for all potential randomness.</p>
 <ul class="simple">
 <li><p><strong>seed</strong>: If seed this seed, and other seeds are unset, then all the seeds will use this value.</p></li>
 </ul>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reproduce</span><span class="p">:</span>
-    <span class="nt">seed</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reproduce</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -165,19 +165,19 @@ Specifically, seeds for all potential randomness.</p>
 </li>
 </ul>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plm</span><span class="p">:</span>
-    <span class="nt">model_name</span><span class="p">:</span>
-    <span class="nt">model_path</span><span class="p">:</span>
-    <span class="nt">optimize</span><span class="p">:</span>
-        <span class="nt">freeze_para</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
-        <span class="nt">no_decay</span><span class="p">:</span>
-            <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bias</span>
-            <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">LayerNorm.weight</span>
-        <span class="nt">lr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0005</span>
-        <span class="nt">weight_decay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.01</span>
-        <span class="nt">scheduler</span><span class="p">:</span>
-            <span class="nt">type</span><span class="p">:</span>
-            <span class="nt">num_warmup_steps</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">500</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plm</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">model_name</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">model_path</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">optimize</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">freeze_para</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="w">        </span><span class="nt">no_decay</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bias</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LayerNorm.weight</span><span class="w"></span>
+<span class="w">        </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0005</span><span class="w"></span>
+<span class="w">        </span><span class="nt">weight_decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+<span class="w">        </span><span class="nt">scheduler</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">num_warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -214,20 +214,20 @@ Specifically, seeds for all potential randomness.</p>
 </li>
 </ul>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">train</span><span class="p">:</span>
-    <span class="nt">num_epochs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
-    <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
-    <span class="nt">shuffle_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
-    <span class="nt">teacher_forcing</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
-    <span class="nt">clean</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">train</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shuffle_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="w">    </span><span class="nt">teacher_forcing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="w">    </span><span class="nt">clean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
 
-<span class="nt">dev</span><span class="p">:</span>
-    <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
-    <span class="nt">shuffle_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="nt">dev</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shuffle_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
 
-<span class="nt">test</span><span class="p">:</span>
-    <span class="nt">batch_size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
-    <span class="nt">shuffle_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="nt">test</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shuffle_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -237,20 +237,20 @@ Specifically, seeds for all potential randomness.</p>
 There will be a parent configuration <code class="docutils literal notranslate"><span class="pre">task</span></code> to determine the current type of task, e.g. classfiication.
 And for the specific task, a user could specifically set the corresponding attributes.</p>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">task</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">classification</span>
-<span class="nt">classification</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">task</span>
-    <span class="nt">metric</span><span class="p">:</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">micro-f1</span>
-    <span class="nt">loss_function</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cross_entropy</span> <span class="c1">## select from cross_entropy</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">classification</span><span class="w"></span>
+<span class="nt">classification</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">task</span><span class="w"></span>
+<span class="w">    </span><span class="nt">metric</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">micro-f1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">loss_function</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cross_entropy</span><span class="w"> </span><span class="c1">## select from cross_entropy</span><span class="w"></span>
 
-<span class="nt">generation</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">task</span>
-    <span class="nt">gen_max_length</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>
-    <span class="nt">decoding_strategy</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">greedy</span>
+<span class="nt">generation</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">task</span><span class="w"></span>
+<span class="w">    </span><span class="nt">gen_max_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span><span class="w"></span>
+<span class="w">    </span><span class="nt">decoding_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">greedy</span><span class="w"></span>
 
-<span class="nt">relation_classification</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">task</span>
+<span class="nt">relation_classification</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">task</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -260,34 +260,34 @@ And for the specific task, a user could specifically set the corresponding attri
 <p>This is the configuration about the dataloader,
 which sets some attributes like <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>, etc.</p>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dataloader</span><span class="p">:</span>
-    <span class="nt">max_seq_length</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">256</span>
-    <span class="nt">decoder_max_length</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">256</span>
-    <span class="nt">predict_eos_token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>  <span class="c1"># necessary to set to true in generation.</span>
-    <span class="nt">truncate_method</span><span class="p">:</span> <span class="s">&quot;head&quot;</span> <span class="c1"># choosing from balanced, head, tail</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dataloader</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">max_seq_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span><span class="w"></span>
+<span class="w">    </span><span class="nt">decoder_max_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span><span class="w"></span>
+<span class="w">    </span><span class="nt">predict_eos_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># necessary to set to true in generation.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">truncate_method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;head&quot;</span><span class="w"> </span><span class="c1"># choosing from balanced, head, tail</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="learning-setting">
 <h3>Learning Setting<a class="headerlink" href="#learning-setting" title="Permalink to this headline">¶</a></h3>
 <p>Configuration about the learning settings, including <code class="docutils literal notranslate"><span class="pre">full</span></code>, <code class="docutils literal notranslate"><span class="pre">few-shot</span></code> and <code class="docutils literal notranslate"><span class="pre">zero-shot</span></code>.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">learning_setting</span><span class="p">:</span>   <span class="c1"># selecting from &quot;full&quot;, &quot;zero-shot&quot;, &quot;few-shot&quot;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">learning_setting</span><span class="p">:</span><span class="w">   </span><span class="c1"># selecting from &quot;full&quot;, &quot;zero-shot&quot;, &quot;few-shot&quot;</span><span class="w"></span>
 
-<span class="nt">zero_shot</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">learning_setting</span>
+<span class="nt">zero_shot</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">learning_setting</span><span class="w"></span>
 
-<span class="nt">few_shot</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">learning_setting</span>
-    <span class="nt">few_shot_sampling</span><span class="p">:</span>
+<span class="nt">few_shot</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">learning_setting</span><span class="w"></span>
+<span class="w">    </span><span class="nt">few_shot_sampling</span><span class="p">:</span><span class="w"></span>
 
-<span class="nt">sampling_from_train</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">few_shot_sampling</span>
-    <span class="nt">num_examples_per_label</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-    <span class="nt">also_sample_dev</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-    <span class="nt">num_examples_per_label_dev</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
-    <span class="nt">seed</span><span class="p">:</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">123</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">456</span>
+<span class="nt">sampling_from_train</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">few_shot_sampling</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_examples_per_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">also_sample_dev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_examples_per_label_dev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+<span class="w">    </span><span class="nt">seed</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">456</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -295,64 +295,64 @@ which sets some attributes like <code class="docutils literal notranslate"><span
 <h3>Prompt-specific Config<a class="headerlink" href="#prompt-specific-config" title="Permalink to this headline">¶</a></h3>
 <p>Configuration about templates and verbalizers, there are different attributes for different classes.
 Here are some examples:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">template</span><span class="p">:</span>
-<span class="nt">verbalizer</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">template</span><span class="p">:</span><span class="w"></span>
+<span class="nt">verbalizer</span><span class="p">:</span><span class="w"></span>
 
-<span class="nt">manual_template</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">template</span>
-    <span class="nt">text</span><span class="p">:</span>
-    <span class="nt">mask_token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;mask&gt;</span>
-    <span class="nt">placeholder_mapping</span><span class="p">:</span>
-    <span class="nt">&lt;text_a&gt;</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">text_a</span>
-    <span class="nt">&lt;text_b&gt;</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">text_b</span>
-<span class="nt">file_path</span><span class="p">:</span>
-    <span class="nt">choice</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
-    <span class="nt">optimize</span><span class="p">:</span>  <span class="c1"># the parameters related to optimize the tempalte</span>
+<span class="nt">manual_template</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">template</span><span class="w"></span>
+<span class="w">    </span><span class="nt">text</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">mask_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;mask&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">placeholder_mapping</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&lt;text_a&gt;</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">text_a</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&lt;text_b&gt;</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">text_b</span><span class="w"></span>
+<span class="nt">file_path</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">choice</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">optimize</span><span class="p">:</span><span class="w">  </span><span class="c1"># the parameters related to optimize the tempalte</span><span class="w"></span>
 
 
-<span class="nt">automatic_verbalizer</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">verbalizer</span>
-    <span class="nt">num_cadidates</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
-    <span class="nt">label_word_num_per_class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-    <span class="nt">num_searches</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-    <span class="nt">score_fct</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">llr</span>
-    <span class="nt">balance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="nt">optimize</span><span class="p">:</span>
-    <span class="nt">level</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">epoch</span>
-<span class="nt">num_classes</span><span class="p">:</span>
-    <span class="nt">init_using_split</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">valid</span>
+<span class="nt">automatic_verbalizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">verbalizer</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_cadidates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"></span>
+<span class="w">    </span><span class="nt">label_word_num_per_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_searches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">score_fct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">llr</span><span class="w"></span>
+<span class="w">    </span><span class="nt">balance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="nt">optimize</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">epoch</span><span class="w"></span>
+<span class="nt">num_classes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">init_using_split</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valid</span><span class="w"></span>
 
-<span class="nt">one2one_verbalizer</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">verbalizer</span>
-    <span class="nt">label_words</span><span class="p">:</span>
-    <span class="nt">prefix</span><span class="p">:</span> <span class="s">&quot;</span><span class="nv"> </span><span class="s">&quot;</span>
-    <span class="nt">multi_token_handler</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">first</span>
-    <span class="nt">file_path</span><span class="p">:</span>
-    <span class="nt">choice</span><span class="p">:</span>
-    <span class="nt">num_classes</span><span class="p">:</span>
-    <span class="nt">optimize</span><span class="p">:</span>
+<span class="nt">one2one_verbalizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">verbalizer</span><span class="w"></span>
+<span class="w">    </span><span class="nt">label_words</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;</span><span class="nv"> </span><span class="s">&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">multi_token_handler</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">first</span><span class="w"></span>
+<span class="w">    </span><span class="nt">file_path</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">choice</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_classes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">optimize</span><span class="p">:</span><span class="w"></span>
 
-<span class="nt">manual_verbalizer</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">verbalizer</span>
-    <span class="nt">label_words</span><span class="p">:</span>
-    <span class="nt">prefix</span><span class="p">:</span> <span class="s">&quot;</span><span class="nv"> </span><span class="s">&quot;</span>
-    <span class="nt">multi_token_handler</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">first</span>
-    <span class="nt">file_path</span><span class="p">:</span>
-    <span class="nt">choice</span><span class="p">:</span>
-    <span class="nt">num_classes</span><span class="p">:</span>
-    <span class="nt">optimize</span><span class="p">:</span>
+<span class="nt">manual_verbalizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">verbalizer</span><span class="w"></span>
+<span class="w">    </span><span class="nt">label_words</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;</span><span class="nv"> </span><span class="s">&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">multi_token_handler</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">first</span><span class="w"></span>
+<span class="w">    </span><span class="nt">file_path</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">choice</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_classes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">optimize</span><span class="p">:</span><span class="w"></span>
 
-<span class="nt">prefix_tuning_template</span><span class="p">:</span>
-    <span class="nt">parent_config</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">template</span>
-    <span class="nt">text</span><span class="p">:</span>
-        <span class="nt">mask_token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;mask&gt;</span>
-    <span class="nt">num_token</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
-    <span class="nt">placeholder_mapping</span><span class="p">:</span>
-        <span class="nt">&lt;text_a&gt;</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">text_a</span>
-        <span class="nt">&lt;text_b&gt;</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">text_b</span>
-    <span class="nt">prefix_dropout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
-    <span class="nt">optimize</span><span class="p">:</span>
-        <span class="nt">lr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0001</span>
+<span class="nt">prefix_tuning_template</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">template</span><span class="w"></span>
+<span class="w">    </span><span class="nt">text</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">mask_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;mask&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">    </span><span class="nt">placeholder_mapping</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&lt;text_a&gt;</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">text_a</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&lt;text_b&gt;</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">text_b</span><span class="w"></span>
+<span class="w">    </span><span class="nt">prefix_dropout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w"></span>
+<span class="w">    </span><span class="nt">optimize</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0001</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -369,7 +369,7 @@ Here are some examples:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
+    <p>&#169; Copyright 2022, THUNLP, The OpenPrompt Team, Licenced under the Apache License, Version 2.0.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
