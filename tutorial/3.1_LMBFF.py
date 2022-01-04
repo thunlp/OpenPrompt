@@ -110,10 +110,10 @@ if auto_t:
 
     if cuda:
         template_generate_model = template_generate_model.cuda()
-    template_generator = T5TemplateGenerator(template_generate_model, template_generate_tokenizer, template_tokenizer_wrapper, verbalizer, beam_width=5)
+    template_generator = T5TemplateGenerator(template_generate_model, template_generate_tokenizer, template_tokenizer_wrapper, verbalizer, beam_width=5) # beam_width is set to 5 here for efficiency, to improve performance, try a larger number.
 
 
-    dataloader = PromptDataLoader(dataset['train'], template, template_generate_tokenizer, template_tokenizer_wrapper, batch_size=len(dataset['train'])) # register all data at once
+    dataloader = PromptDataLoader(dataset['train'], template, template_generate_tokenizer, template_tokenizer_wrapper, batch_size=len(dataset['train']), decoder_max_length=128) # register all data at once
     for data in dataloader:
         if cuda:
             data = data.cuda()
@@ -121,11 +121,13 @@ if auto_t:
         
     template_generate_model.eval()
     print('generating...')
-    template_generator._get_templates()
+    template_texts = template_generator._get_templates()
+
+    original_template = template.text
+    template_texts = [template_generator.convert_template(template_text, original_template) for template_text in template_texts]
     # template_generator._show_template()
     template_generator.release_memory()
     # generate a number of candidate template text
-    template_texts = template_generator.templates_text
     print(template_texts)
     # iterate over each candidate and select the best one
     best_metrics = 0.0
@@ -169,6 +171,7 @@ if auto_v:
     if cuda:
         plm = plm.cuda()
     verbalizer_generator = RobertaVerbalizerGenerator(model=plm, tokenizer=tokenizer, candidate_num=20, label_word_num_per_class=20)
+    # to improve performace , try larger numbers
 
     dataloader = PromptDataLoader(dataset['train'], template, tokenizer, WrapperClass, batch_size=32)
     for data in dataloader:

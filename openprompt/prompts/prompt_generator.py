@@ -2,6 +2,7 @@ from abc import abstractmethod
 from builtins import ValueError
 from typing import List, Optional, Dict, Union
 from tokenizers import Tokenizer
+import json
 import torch
 import torch.nn.functional as F
 from yacs.config import CfgNode
@@ -36,24 +37,15 @@ class LMBFFTemplateGenerationTemplate(ManualTemplate):
                  text: Optional[List[str]] = None,
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
-        super().__init__(tokenizer=tokenizer, 
+        super().__init__(tokenizer=tokenizer,
+                         text = text, 
                          placeholder_mapping=placeholder_mapping)
-        self.text = text
         self.verbalizer = verbalizer
     
     def wrap_one_example(self, 
                          example: InputExample) -> List[Dict]:
         example.meta['labelword'] = self.verbalizer.label_words[example.label][0].strip()
         wrapped_example = super().wrap_one_example(example)
-
-        # replace <mask> with special tokens in each generation model
-        # e.g. in T5 multi-parts generation use <extra_id_0>, <extra_id_1>, ...
-        # handle different types of plm
-        current_idx = self.tokenizer.convert_tokens_to_ids('<extra_id_0>')
-        for d in wrapped_example[0]:
-            if d['text'] == '<mask>':
-                d['text'] = self.tokenizer.convert_ids_to_tokens(current_idx)
-                current_idx -= 1
         return wrapped_example
 
 class TemplateGenerator:
@@ -129,12 +121,41 @@ class TemplateGenerator:
         """
         raise NotImplementedError
     
-    @abstractmethod
-    def convert_template(self, text_list: List[str]) -> List[str]:
+    def convert_template(self, generated_template: List[str], original_template: List[Dict]) -> str:
         r"""
-        Convert the generated template into a standard template for downstream prompt model, return a ``list`` of ``str``
+        Given original template used for template generation,convert the generated template into a standard template for downstream prompt model, return a ``str``
+        Example:
+        generated_template: ['<extra_id_0>', 'it', 'is', '<extra_id_1>', 'one', '</s>']
+        original_template: [{'add_prefix_space': '', 'placeholder': 'text_a'}, {'add_prefix_space': ' ', 'mask': None}, {'add_prefix_space': ' ', 'meta': 'labelword'}, {'add_prefix_space': ' ', 'mask': None}, {'add_prefix_space': '', 'text': '.'}]
+        return: "{'placeholder':'text_a'} it is {"mask"} one."
         """
-        raise NotImplementedError
+        i = 0
+        part_id = 0
+        while generated_template[i] != self.tokenizer.additional_special_tokens[part_id] and i < len(generated_template) - 1:
+            i += 1
+        assert generated_template[i] == self.tokenizer.additional_special_tokens[part_id], print('invalid generated_template {}, missing token {}'.format(generated_template, self.tokenizer.additional_special_tokens[part_id]))
+        i += 1
+
+        output = []
+        for d in original_template:
+            if 'mask' in d:
+                j = i + 1
+                part_id += 1
+                while generated_template[j] != self.tokenizer.additional_special_tokens[part_id] and j < len(generated_template) - 1:
+                    j += 1
+                output.append(d.get('add_prefix_space', '') + self.tokenizer.convert_tokens_to_string(generated_template[i:j]))
+                i = j + 1
+            elif 'meta' in d and d['meta'] == 'labelword':
+                output.append(d.get('add_prefix_space', '') + '{"mask"}')
+            elif 'text' in d:
+                output.append(d.get('add_prefix_space', '') + d['text'])
+            else:
+                prefix = d.get('add_prefix_space', '')
+                if 'add_prefix_space' in d:
+                    d.pop('add_prefix_space')
+                output.append(prefix + json.dumps(d))
+        return ''.join(output)
+
         
     def _get_templates(self):
         inner_model = self.model.module if isinstance(self.model, DataParallel) else self.model
@@ -221,12 +242,7 @@ class TemplateGenerator:
             new_current_output = new_current_output[:self.beam_width]
             current_output = new_current_output
 
-        self.templates_text = []
-        for item in current_output:
-            generate_text = []
-            for i in item['output']:
-                generate_text.append(self.tokenizer._convert_id_to_token(i))
-            self.templates_text.append(' '.join(self.convert_template(generate_text)))
+        return [self.tokenizer.convert_ids_to_tokens(item['output']) for item in current_output]
     
     def _show_template(self):
         logger.info("Templates are \n{}".format('\n'.join(self.templates_text)))
@@ -255,16 +271,18 @@ class TemplateGenerator:
         Returns:
             template_text (:obj:`List[str]`): The generated template text
         """
-
         template_for_auto_t = LMBFFTemplateGenerationTemplate.from_config(config=self.config.template, tokenizer=self.tokenizer, verbalizer = self.verbalizer)
-        dataloader = PromptDataLoader(dataset, template_for_auto_t, self.tokenizer, self.tokenizer_wrapper, batch_size=len(dataset)) # register all data at once
+
+        dataloader = PromptDataLoader(dataset, template_for_auto_t, self.tokenizer, self.tokenizer_wrapper, batch_size=len(dataset), decoder_max_length=128) # register all data at once
         for data in dataloader:
             data = data.to(self.device)
             self._register_buffer(data)
         
         self.model.eval()
         with torch.no_grad():
-            self._get_templates()
+            self.templates_text = self._get_templates() # List[str]
+            original_template = template_for_auto_t.text
+            self.templates_text = [self.convert_template(template_text, original_template) for template_text in self.templates_text]
             self._show_template()
         return self.templates_text
 
@@ -295,16 +313,17 @@ class T5TemplateGenerator(TemplateGenerator):
                         config=config)
 
     def get_part_token_id(self, part_id):
-        return self.tokenizer.convert_tokens_to_ids('<extra_id_0>') - part_id
+        return self.tokenizer.additional_special_tokens_ids[part_id]
 
-    def convert_template(self, generate_text_list):
-        text_list = self.tokenizer.convert_tokens_to_string(generate_text_list).replace('<extra_id_0>', '{"placeholder":"text_a"}').replace('<extra_id_1>', ' {"mask"}').replace('<extra_id_2>', ' {"placeholder": "text_b"}').replace('</s>', '').replace('  ', ' ').split(' ')
-        # incase no <extra_id_1> (generation stop by maximum length)
-        if '{"mask"}' not in text_list:
-            text_list.append('{"mask"}')
-        if '{"placeholder": "text_b"}' not in text_list:
-            text_list.append('{"placeholder": "text_b"}')
-        return text_list
+    # def convert_template(self, generate_text_list):
+    #     # original_template = self.template_for_auto_t.text
+    #     text_list = self.tokenizer.convert_tokens_to_string(generate_text_list).replace('<extra_id_0>', '{"placeholder":"text_a"}').replace('<extra_id_1>', ' {"mask"}').replace('<extra_id_2>', ' {"placeholder":"text_b"}').replace('</s>', '').replace('  ', ' ').split(' ')
+    #     # incase no <extra_id_1> (generation stop by maximum length)
+    #     if '{"mask"}' not in text_list:
+    #         text_list.append('{"mask"}')
+    #     if '{"placeholder":"text_b"}' not in text_list:
+    #         text_list.append('{"placeholder":"text_b"}')
+    #     return text_list
 
 
 class VerbalizerGenerator:
@@ -314,7 +333,7 @@ class VerbalizerGenerator:
     Args:
         model (:obj:`PretrainedModel`): A pre-trained model for label word generation.
         tokenizer (:obj:`PretrainedTokenizer`): The corresponding tokenize.
-        candidate_num (:obj:`Optional[int]`): The number of label word candidates to generate. Defaults to 100.
+        candidate_num (:obj:`Optional[int]`): The number of label word combinations to generate. Validation will then be performed on each combination. Defaults to 100.
         label_word_num_per_class (:obj:`Optional[int]`): The number of candidate label words per class. Defaults to 100.
     """
     def __init__(self, 

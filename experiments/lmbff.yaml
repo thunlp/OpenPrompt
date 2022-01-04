@@ -1,6 +1,6 @@
 dataset:
   name: sst-2
-  path: datasets/LMBFF/SST-2/16-13
+  path: datasets/TextClassification/SST-2/16-shot/16-13
 
 task: classification
 
@@ -24,7 +24,7 @@ template_generator:
     model_path: t5-large
   max_length: 20
   target_number: 2
-  beam_width: 3
+  beam_width: 100
   template: 
     file_path: scripts/LMBFF/SST-2/template_for_auto_t.txt
 
