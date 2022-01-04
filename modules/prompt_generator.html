@@ -147,8 +147,12 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompts.TemplateGenerator.convert_template">
-<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">convert_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#TemplateGenerator.convert_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.TemplateGenerator.convert_template" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert the generated template into a standard template for downstream prompt model, return a <code class="docutils literal notranslate"><span class="pre">list</span></code> of <code class="docutils literal notranslate"><span class="pre">str</span></code></p>
+<span class="sig-name descname"><span class="pre">convert_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generated_template</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_template</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#TemplateGenerator.convert_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.TemplateGenerator.convert_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given original template used for template generation,convert the generated template into a standard template for downstream prompt model, return a <code class="docutils literal notranslate"><span class="pre">str</span></code>
+Example:
+generated_template: [‘&lt;extra_id_0&gt;’, ‘it’, ‘is’, ‘&lt;extra_id_1&gt;’, ‘one’, ‘&lt;/s&gt;’]
+original_template: [{‘add_prefix_space’: ‘’, ‘placeholder’: ‘text_a’}, {‘add_prefix_space’: ‘ ‘, ‘mask’: None}, {‘add_prefix_space’: ‘ ‘, ‘meta’: ‘labelword’}, {‘add_prefix_space’: ‘ ‘, ‘mask’: None}, {‘add_prefix_space’: ‘’, ‘text’: ‘.’}]
+return: “{‘placeholder’:’text_a’} it is {“mask”} one.”</p>
 </dd></dl>
 
 <dl class="py method">
@@ -188,7 +192,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedModel</span></code>) – A pre-trained model for label word generation.</p></li>
 <li><p><strong>tokenizer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">PretrainedTokenizer</span></code>) – The corresponding tokenize.</p></li>
-<li><p><strong>candidate_num</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[int]</span></code>) – The number of label word candidates to generate. Defaults to 100.</p></li>
+<li><p><strong>candidate_num</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[int]</span></code>) – The number of label word combinations to generate. Validation will then be performed on each combination. Defaults to 100.</p></li>
 <li><p><strong>label_word_num_per_class</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Optional[int]</span></code>) – The number of candidate label words per class. Defaults to 100.</p></li>
 </ul>
 </dd>
@@ -274,12 +278,6 @@
 <dd class="field-even"><p>token_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>)</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openprompt.prompts.T5TemplateGenerator.convert_template">
-<span class="sig-name descname"><span class="pre">convert_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_text_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/prompt_generator.html#T5TemplateGenerator.convert_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.T5TemplateGenerator.convert_template" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert the generated template into a standard template for downstream prompt model, return a <code class="docutils literal notranslate"><span class="pre">list</span></code> of <code class="docutils literal notranslate"><span class="pre">str</span></code></p>
 </dd></dl>
 
 </dd></dl>
