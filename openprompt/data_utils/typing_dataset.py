@@ -34,7 +34,7 @@ class FewNERDProcessor(DataProcessor):
 
         dataset_name = "FewNERD"
         dataset_path = os.path.join(base_path, dataset_name)
-        processor = PROCESSORS[dataset_name.lower()](dataset_path)
+        processor = PROCESSORS[dataset_name.lower()]()
         train_dataset = processor.get_train_examples(dataset_path)
         dev_dataset = processor.get_dev_examples(dataset_path)
         test_dataset = processor.get_test_examples(dataset_path)

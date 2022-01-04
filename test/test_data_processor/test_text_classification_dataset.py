@@ -64,12 +64,9 @@ def test_SST2Processor():
     test_dataset = processor.get_test_examples(dataset_path)
 
     assert processor.get_num_labels() == 2
-    assert processor.get_labels() == [0,1]
+    assert processor.get_labels() == ['0','1']
     assert len(train_dataset) == 6920
     assert len(dev_dataset) == 872
     assert len(test_dataset) == 1821
     assert train_dataset[0].text_a == 'a stirring , funny and finally transporting re-imagining of beauty and the beast and 1930s horror films'
     assert train_dataset[0].label == 1
-
-if __name__ == "__main__":
-    test_SST2Processor()

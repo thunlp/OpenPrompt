@@ -267,7 +267,7 @@ class SST2Processor(DataProcessor):
         test_dataset = processor.get_test_examples(dataset_path)
 
         assert processor.get_num_labels() == 2
-        assert processor.get_labels() == [0,1]
+        assert processor.get_labels() == ['0','1']
         assert len(train_dataset) == 6920
         assert len(dev_dataset) == 872
         assert len(test_dataset) == 1821
