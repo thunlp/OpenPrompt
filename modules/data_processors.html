@@ -391,7 +391,7 @@ labels file should have label names seperated by any blank characters, such as</
 <span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
 
 <span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_num_labels</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span>
-<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6920</span>
 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">872</span>
 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1821</span>
@@ -441,7 +441,7 @@ labels file should have label names seperated by any blank characters, such as</
 
 <span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;FewNERD&quot;</span>
 <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
-<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()](</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
 <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
 <span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_dev_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
 <span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
@@ -574,7 +574,7 @@ This processor is also inherited by <a class="reference internal" href="#openpro
 
 <span class="n">dataset_name</span> <span class="o">=</span> <span class="s2">&quot;SemEval&quot;</span>
 <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
-<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()](</span><span class="n">dataset_path</span><span class="p">)</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">PROCESSORS</span><span class="p">[</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
 <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_train_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
 <span class="n">dev_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_dev_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
 <span class="n">test_dataset</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_test_examples</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>

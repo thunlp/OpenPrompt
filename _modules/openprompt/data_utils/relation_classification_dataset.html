@@ -246,7 +246,7 @@
 
 <span class="sd">        dataset_name = &quot;SemEval&quot;</span>
 <span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
-<span class="sd">        processor = PROCESSORS[dataset_name.lower()](dataset_path)</span>
+<span class="sd">        processor = PROCESSORS[dataset_name.lower()]()</span>
 <span class="sd">        train_dataset = processor.get_train_examples(dataset_path)</span>
 <span class="sd">        dev_dataset = processor.get_dev_examples(dataset_path)</span>
 <span class="sd">        test_dataset = processor.get_test_examples(dataset_path)</span>
