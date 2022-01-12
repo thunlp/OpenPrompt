@@ -49,7 +49,7 @@ from openprompt.prompts import ManualVerbalizer
 import torch
 
 # for example the verbalizer contains multiple label words in each class
-myverbalizer = ManualVerbalizer(tokenizer, num_classes=2, 
+myverbalizer = ManualVerbalizer(tokenizer, num_classes=3, 
                         label_words=[["yes"], ["no"], ["maybe"]])
 
 print(myverbalizer.label_words_ids)
