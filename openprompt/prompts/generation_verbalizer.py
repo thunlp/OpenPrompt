@@ -42,18 +42,40 @@ class GenerationVerbalizer(Verbalizer):
         classes (:obj:`List[Any]`): The classes (or labels) of the current task.
         prefix (:obj:`str`, optional): The prefix string of the verbalizer (used in PLMs like RoBERTa, which is sensitive to prefix space)
         is_rule (:obj:`bool`, optional): When the verbalizer use the rule syntax of MixTemplate. 
+        label_words (:obj:`dict`, optional): The label words of the generation verbalizer
+    
+    Example: 
+    To use this verbalizer to train the T5 model to predict answer and explanation using two masks.
+    
+    When the template is:
+    >>> input_example = InputExample(text_a = "Can fish run?", meta={"answer":"no", "explanation": "The fish have no legs"}, label=0)
+    >>> template = "{'placeholder':'text_a'} answer: {'mask'} explanation: {'mask'}"
+    
+    The verbalizer can be:
+    >>> label_words = {0:["no", "{'meta':'explanation'}"], 1:["yes", "{'meta':'explanation'}"]}
+    >>> verbalizer = GenerationVerbalizer(tokenizer, classes=None, is_rule=True, label_words=label_words)
+    
+
+        
+
     """
     def __init__(self, 
                  tokenizer: PreTrainedTokenizer,
                  classes: Optional[List] = None,
                  num_classes: Optional[Sequence[str]] = None,
                  is_rule: Optional[bool] = False,
+                 label_words = None,
                 ):
+        if classes is None and label_words is not None:
+            classes = list(label_words.keys())
         super().__init__(tokenizer=tokenizer, num_classes=num_classes, classes=classes)
         self.prefix = ''
         self.is_rule = is_rule
         self.mixed_token_start = "{"
         self.mixed_token_end = "}"
+ 
+        if label_words is not None: # use label words as an initialization
+            self.label_words = label_words
     
     def wrap_one_example(self, example: InputExample) -> List[Dict]:
         r"""Take an InputExample, and fill the tgt_text with label words
@@ -62,9 +84,13 @@ class GenerationVerbalizer(Verbalizer):
             logger.warning(f"The example already has tgt_text {example.tgt_text}, and will be filled with new label words, is this intended?")
         else:
             if not self.is_rule:
-                example.tgt_text = self.label_words[example.label]
+                instance_label_word =  self.label_words[example.label]
             else:
-                example.tgt_text = self.label_words[example.label](example)
+                instance_label_word = [i(example) for i in self.label_words[example.label]]  #(example)
+        if len(instance_label_word) == 1:
+            example.tgt_text = instance_label_word[0]
+        else:
+            example.tgt_text = instance_label_word
         return example
 
 
@@ -81,7 +107,6 @@ class GenerationVerbalizer(Verbalizer):
                     d = self.parse_text(label_word)
                 except:
                     raise RuntimeError(f"is_rule={self.is_rule} but label_word: {label_word} can't be converted to object.")
-                print(d)
                 self.label_words[id] = partial(lambda x, text: self.incorporate_text_example(text, x), text=d)
 
 
