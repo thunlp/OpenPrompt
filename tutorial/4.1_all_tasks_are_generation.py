@@ -392,7 +392,7 @@ for epoch in range(1000000):
         tot_train_time += time.time()
 
         if actual_step % gradient_accumulation_steps == 0 and glb_step >0 and glb_step % args.eval_every_steps == 0:
-            val_acc = evaluate(prompt_model, validation_dataloader, myverbalizer)
+            val_acc = evaluate(prompt_model, validation_dataloader)
             if val_acc >= best_val_acc:
                 torch.save(prompt_model.state_dict(),f"{args.project_root}/../ckpts/{this_run_unicode}.ckpt")
                 best_val_acc = val_acc

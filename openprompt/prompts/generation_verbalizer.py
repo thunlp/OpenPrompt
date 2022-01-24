@@ -1,5 +1,6 @@
 from functools import partial
 import json
+from selectors import EpollSelector
 from openprompt.data_utils.utils import InputExample
 from transformers.tokenization_utils import PreTrainedTokenizer
 from yacs.config import CfgNode
@@ -80,13 +81,18 @@ class GenerationVerbalizer(Verbalizer):
     def wrap_one_example(self, example: InputExample) -> List[Dict]:
         r"""Take an InputExample, and fill the tgt_text with label words
         """
+        if not isinstance(self.label_words[example.label], list):
+            label_word = [self.label_words[example.label]]
+        else:
+            label_word = self.label_words[example.label]
+
         if example.tgt_text is not None:
             logger.warning(f"The example already has tgt_text {example.tgt_text}, and will be filled with new label words, is this intended?")
         else:
             if not self.is_rule:
-                instance_label_word =  self.label_words[example.label]
+                instance_label_word =  label_word
             else:
-                instance_label_word = [i(example) for i in self.label_words[example.label]]  #(example)
+                instance_label_word = [i(example) for i in label_word]  #(example)
         if len(instance_label_word) == 1:
             example.tgt_text = instance_label_word[0]
         else:
