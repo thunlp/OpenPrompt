@@ -64,17 +64,19 @@ class T5TokenizerWrapper(TokenizerWrapper):
             if piece['text'] == self.template_mask_token:
                 if teacher_forcing:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
-                    loss_ids.append(0)
+                    if num_mask_token_used > 0: 
+                        # if used in multiple mask setting, the <extra_id_1> etc. are also required
+                        # to be predicted. 
+                        loss_ids.append(1)
+                    else:
+                        loss_ids.append(0)
                     encode_text = [self.mask_token_ids(num_mask_token_used)] 
                     tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
-                    # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
                 else:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
                     encode_text = [self.mask_token_ids(num_mask_token_used)] 
-                    # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
-                    # loss_ids[-1] = 1 # shift loss_ids
                     loss_ids.append(1)
                 num_mask_token_used += 1
             else:
@@ -174,8 +176,6 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
 
 
     def tokenize_one_example(self, wrapped_example, teacher_forcing):
-        ''' # TODO doens't consider the situation that input has two parts
-        '''
         wrapped_example, others = wrapped_example
         if teacher_forcing: 
             tgt_text = others['tgt_text']
