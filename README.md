@@ -27,6 +27,7 @@
 
 ## What's New?
 
+- Feb 2022: Check out our sister repo [OpenDelta](https://github.com/thunlp/OpenDelta)!
 - Dec 2021: `pip install openprompt`
 - Dec 2021: [SuperGLUE performance](https://github.com/thunlp/OpenPrompt/tree/main/results) are added 
 - Dec 2021: We support **generation paradigm for all tasks** by adding a new verbalizer:[GenerationVerbalizer](https://github.com/thunlp/OpenPrompt/blob/main/openprompt/prompts/generation_verbalizer.py) and a [tutorial: 4.1_all_tasks_are_generation.py](https://github.com/thunlp/OpenPrompt/blob/main/tutorial/4.1_all_tasks_are_generation.py)
