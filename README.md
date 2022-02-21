@@ -207,6 +207,8 @@ Done! We can conduct training and inference the same as other processes in Pytor
 
 
 ```python
+    import torch
+    
     # making zero-shot inference using pretrained MLM with prompt
     promptModel.eval()
     with torch.no_grad():
