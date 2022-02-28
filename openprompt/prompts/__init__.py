@@ -21,6 +21,7 @@ from .prompt_generator import T5TemplateGenerator, TemplateGenerator, Verbalizer
 
 from .generation_verbalizer import GenerationVerbalizer
 from .soft_verbalizer import SoftVerbalizer
+from .prototypical_verbalizer import ProtoVerbalizer
 
 TEMPLATE_CLASS = {
     'manual_template': ManualTemplate,
@@ -39,6 +40,7 @@ VERBALIZER_CLASS = {
     'one2one_verbalizer': One2oneVerbalizer,
     'generation_verbalizer': GenerationVerbalizer,
     'soft_verbalizer': SoftVerbalizer,
+    'proto_verbalizer': ProtoVerbalizer,
 }
 
 TEMPLATE_GENERATOR_CLASS = {

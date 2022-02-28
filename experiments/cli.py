@@ -157,6 +157,14 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
                                                 verbalizer=verbalizer,
                                                 config = config
                                                 )
+        elif config.verbalizer == "proto_verbalizer":
+            runner = ProtoVerbClassificationRunner(model = prompt_model,
+                                    train_dataloader = train_dataloader,
+                                    valid_dataloader = valid_dataloader,
+                                    test_dataloader = test_dataloader,
+                                    id2label = Processor.id2label,
+                                    config = config
+            )                                   
         else:
             runner = ClassificationRunner(model = prompt_model,
                                     train_dataloader = train_dataloader,
