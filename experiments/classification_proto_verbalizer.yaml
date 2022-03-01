@@ -32,7 +32,7 @@ proto_verbalizer:
   choice: 0
   file_path: scripts/TextClassification/agnews/manual_verbalizer.txt
   num_classes: 4
-  lr: 1e-5
+  lr: 0.001
   mid_dim: 64
   epochs: 5
   multi_verb: multi

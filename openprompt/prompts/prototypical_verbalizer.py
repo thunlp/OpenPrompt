@@ -32,12 +32,13 @@ class ProtoVerbalizer(Verbalizer):
     """
     def __init__(self, 
                  tokenizer: Optional[PreTrainedTokenizer],
-                 plm: Optional[PreTrainedModel],
+                 model: Optional[PreTrainedModel],
                  classes: Optional[List] = None,
                  num_classes: Optional[Sequence[str]] = None,
                  label_words: Optional[Union[Sequence[str], Mapping[str, str]]] = None,
                  prefix: Optional[str] = " ",
                  multi_token_handler: Optional[str] = "first",
+                 post_log_softmax: Optional[bool] = True,
                  lr: Optional[float] = 1e-5,
                  mid_dim: Optional[int] = 64,
                  epochs: Optional[int] = 5,
@@ -46,14 +47,15 @@ class ProtoVerbalizer(Verbalizer):
         super().__init__(tokenizer=tokenizer, num_classes=num_classes, classes=classes)
         self.prefix = prefix
         self.multi_token_handler = multi_token_handler
+        self.post_log_softmax = post_log_softmax
         self.multi_verb = multi_verb
         self.lr = lr
         self.mid_dim = mid_dim
         self.epochs = epochs
         self.trained = False
-        head_name = [n for n,c in plm.named_children()][-1]
+        head_name = [n for n,c in model.named_children()][-1]
         logger.info(f"The LM head named {head_name} was retrieved.")
-        self.head = copy.deepcopy(getattr(plm, head_name))
+        self.head = copy.deepcopy(getattr(model, head_name))
         max_loop = 5
         if not isinstance(self.head, torch.nn.Linear):
             module = self.head
@@ -68,21 +70,22 @@ class ProtoVerbalizer(Verbalizer):
                     found = True
                     break
             if not found:
-                raise RuntimeError(f"Can't not retrieve a linear layer in {max_loop} loop from the plm.")
+                raise RuntimeError(f"Can't not retrieve a linear layer in {max_loop} loop from the model.")
             self.original_head_last_layer = module.weight.data
             self.hidden_dims = self.original_head_last_layer.shape[-1]
             self.head_last_layer_full_name = ".".join(last_layer_full_name)
             setattr(parent_module, last_layer_name, torch.nn.Linear(self.hidden_dims, self.mid_dim, bias=False))
         else:
             self.hidden_dims = self.head.weight.shape[-1]
-            self.original_head_last_layer = getattr(plm, head_name).weight.data
+            self.original_head_last_layer = getattr(model, head_name).weight.data
             self.head = torch.nn.Linear(self.hidden_dims, self.mid_dim, bias=False)
 
 
         if label_words is not None: # use label words as an initialization
             self.label_words = label_words
-        
-        self.proto = nn.Parameter(torch.FloatTensor(self.num_classes, self.mid_dim))
+        w = torch.empty((self.num_classes, self.mid_dim))
+        nn.init.xavier_uniform_(w)
+        self.proto = nn.Parameter(w, requires_grad=True)
         self.optimizer = torch.optim.Adam(self.group_parameters_proto, lr=self.lr)
         
         
@@ -143,36 +146,29 @@ class ProtoVerbalizer(Verbalizer):
         r"""In basic manual template, the parameters are generated from label words directly.
         In this implementation, the label_words should not be tokenized into more than one token. 
         """
-        words_ids = []
-        for word in self.label_words:
-            if isinstance(word, list):
-                logger.warning("Label word for a class is a list, only use the first word.")
-            word = word[0]
-            word_ids = self.tokenizer.encode(word, add_special_tokens=False)
-            if len(word_ids) > 1:
-                logger.warning("Word {} is split into multiple tokens: {}. \
-                    If this is not what you expect, try using another word for this verbalizer" \
-                    .format(word, self.tokenizer.convert_ids_to_tokens(word_ids)))
-            words_ids.append(word_ids)
+        all_ids = []
+        for words_per_label in self.label_words:
+            ids_per_label = []
+            for word in words_per_label:
+                ids = self.tokenizer.encode(word, add_special_tokens=False)
+                ids_per_label.append(ids)
+            all_ids.append(ids_per_label)
 
-        max_len  = max([len(ids) for ids in words_ids])
-        words_ids_mask = [[1]*len(ids) + [0]*(max_len-len(ids)) for ids in words_ids]
-        words_ids = [ids+[0]*(max_len-len(ids)) for ids in words_ids]
+        max_len  = max([max([len(ids) for ids in ids_per_label]) for ids_per_label in all_ids])
+        max_num_label_words = max([len(ids_per_label) for ids_per_label in all_ids])
+        words_ids_mask = torch.zeros(max_num_label_words, max_len)
+        words_ids_mask = [[[1]*len(ids) + [0]*(max_len-len(ids)) for ids in ids_per_label]
+                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label)) 
+                             for ids_per_label in all_ids]
+        words_ids = [[ids + [0]*(max_len-len(ids)) for ids in ids_per_label]
+                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label)) 
+                             for ids_per_label in all_ids]
         
         words_ids_tensor = torch.tensor(words_ids)
         words_ids_mask = torch.tensor(words_ids_mask)
         self.label_words_ids = nn.Parameter(words_ids_tensor, requires_grad=False)
-        self.label_words_mask = nn.Parameter(words_ids_mask, requires_grad=False)
-        
-        init_data = self.original_head_last_layer[self.label_words_ids,:]*self.label_words_mask.to(self.original_head_last_layer.weight.data.dtype).unsqueeze(-1)
-        init_data = init_data.sum(dim=1)/self.label_words_mask.sum(dim=-1,keepdim=True)
-
-        if isinstance(self.head, torch.nn.Linear):
-            self.head.weight.data = init_data
-            self.head.weight.data.requires_grad=True
-        else:
-            getattr(self.head, self.head_last_layer_name).weight.data = init_data
-            getattr(self.head, self.head_last_layer_name).weight.data.requires_grad=True # To be sure
+        self.words_ids_mask = nn.Parameter(words_ids_mask, requires_grad=False) # A 3-d mask
+        self.label_words_mask = nn.Parameter(torch.clamp(words_ids_mask.sum(dim=-1), max=1), requires_grad=False)
 
     def process_hiddens(self, hiddens: torch.Tensor, **kwargs):
         r"""A whole framework to process the original logits over the vocabulary, which contains four steps: 
@@ -290,7 +286,7 @@ class ProtoVerbalizer(Verbalizer):
             m = logits.mean(-1, keepdim=True)
             s = logits.std(-1, keepdim=True)
             return (logits - m) / s
-        logits = torch.stack([label_words_logits, proto_logits])
+        logits = torch.stack([manual_logits, proto_logits])
         logits = logits.permute(1,0,2)
         logits = scaler(logits)
         logits = torch.mean(logits, 1)
@@ -329,7 +325,7 @@ class ProtoVerbalizer(Verbalizer):
         return torch.matmul(norm_x, norm_y.transpose(1,0))
     
     def pcl_loss(self, v_ins):
-        sim_mat = torch.exp(self.sim(v_ins, self.proto_embedding))
+        sim_mat = torch.exp(self.sim(v_ins, self.proto))
         num = sim_mat.shape[1]
         loss = 0.
         for i in range(num):
@@ -352,30 +348,31 @@ class ProtoVerbalizer(Verbalizer):
         return loss
 
 
-    def train_proto(self, model, dataloader):
+    def train_proto(self, model, dataloader, device):
         model.eval()
         embeds = [[] for _ in range(self.num_classes)]
         with torch.no_grad():
             for i, batch in enumerate(dataloader):
+                batch = batch.to("cuda:{}".format(device)).to_dict()
                 outputs = model.prompt_model(batch)
-                outputs = self.gather_outputs(outputs)
-                outputs_at_mask = model.extract_at_mask(outputs, batch)
-                for j in range(len(embed)):
+                hidden, _ = self.gather_outputs(outputs)
+                outputs_at_mask = model.extract_at_mask(hidden, batch)
+                for j in range(len(outputs_at_mask)):
                     label = batch['label'][j]
-                    outputs_at_mask[label].append(embed[j])
+                    embeds[label].append(outputs_at_mask[j])
         #embeds = [torch.stack(e).mean(0) for e in embeds]
         embeds = [torch.stack(e) for e in embeds]
         embeds = torch.stack(embeds)
 
-        instance_mean = instance_weight.mean(1)
+        instance_mean = embeds.mean(1)
         loss = 0.
         for epoch in range(self.epochs):
-            x = self.head(instance_weight)
+            x = self.head(embeds)
             self.optimizer.zero_grad()
             loss = self.pcl_loss(x)
             loss.backward()
             self.optimizer.step()
-
+        logger.info("ProtoVerb loss: {}".format(loss))
         self.trained = True
 
     

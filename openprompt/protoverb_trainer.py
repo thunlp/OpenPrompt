@@ -134,7 +134,7 @@ class ProtoVerbClassificationRunner(BaseRunner):
     def on_fit_start(self):
         """Some initialization works"""
         if self.config.train.train_verblizer != "post":
-            self.verbalizer.train_proto(self.model, self.train_dataloader)
+            self.inner_model.verbalizer.train_proto(self.model, self.train_dataloader, self.config.environment.local_rank)
 
     def fit(self, ckpt: Optional[str] = None):
         self.set_stop_criterion()
@@ -158,9 +158,9 @@ class ProtoVerbClassificationRunner(BaseRunner):
                 logger.info("Stop training by reaching maximum num_training_steps")
                 break
             if self.config.train.train_verblizer == "alternate":
-                self.verbalizer.train_proto(self.model, self.train_dataloader)
+                self.inner_model.verbalizer.train_proto(self.model, self.train_dataloader, self.config.environment.local_rank)
         
         if self.config.train_verblizer == "post":
-            self.verbalizer.train_proto(self.model, self.train_dataloader)
+            self.inner_model.verbalizer.train_proto(self.model, self.train_dataloader, self.config.environment.local_rank)
 
         return self.best_score

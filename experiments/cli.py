@@ -6,6 +6,7 @@ import argparse
 
 from openprompt.trainer import ClassificationRunner, GenerationRunner
 from openprompt.lm_bff_trainer import LMBFFClassificationRunner
+from openprompt.protoverb_trainer import ProtoVerbClassificationRunner
 from re import template
 from openprompt.pipeline_base import PromptForClassification, PromptForGeneration
 from openprompt.utils.reproduciblity import set_seed
