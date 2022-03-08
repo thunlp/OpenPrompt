@@ -116,7 +116,6 @@ def main():
             valid_dataset = valid_dataset,
             test_dataset = test_dataset,
         )
-    print("metric:", res)
 
 def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = None, test_dataset = None, resume = None, test = None, zero = False):
     if not os.path.exists(EXP_PATH):

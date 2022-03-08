@@ -20,7 +20,7 @@ from transformers.models.t5 import  T5ForConditionalGeneration
 
 class ProtoVerbalizer(Verbalizer):
     r"""
-    The implementation of the verbalizer in `WARP <https://aclanthology.org/2021.acl-long.381/>`_
+    The implementation of the verbalizer in `Prototypical Verbalizer for Prompt-based Few-shot Tuning`
 
     Args:   
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.
@@ -29,6 +29,10 @@ class ProtoVerbalizer(Verbalizer):
         prefix (:obj:`str`, optional): The prefix string of the verbalizer (used in PLMs like RoBERTa, which is sensitive to prefix space)
         multi_token_handler (:obj:`str`, optional): The handling strategy for multiple tokens produced by the tokenizer.
         post_log_softmax (:obj:`bool`, optional): Whether to apply log softmax post processing on label_logits. Default to True.
+        lr: (:obj:`float`, optional): The learning rate for prototypes.
+        mid_dim: (:obj:`int`, optional): The dimension of prototype embeddings.
+        epochs: (:obj:`int`, optional): The training epochs of prototypes.
+        multi_verb (:obj:`str`, optional): `multi` to ensemble with manual verbalizers, `proto` to use only ProtoVerb.
     """
     def __init__(self, 
                  tokenizer: Optional[PreTrainedTokenizer],
@@ -39,7 +43,7 @@ class ProtoVerbalizer(Verbalizer):
                  prefix: Optional[str] = " ",
                  multi_token_handler: Optional[str] = "first",
                  post_log_softmax: Optional[bool] = True,
-                 lr: Optional[float] = 1e-5,
+                 lr: Optional[float] = 1e-3,
                  mid_dim: Optional[int] = 64,
                  epochs: Optional[int] = 5,
                  multi_verb: Optional[str] = "multi",
@@ -53,33 +57,10 @@ class ProtoVerbalizer(Verbalizer):
         self.mid_dim = mid_dim
         self.epochs = epochs
         self.trained = False
-        head_name = [n for n,c in model.named_children()][-1]
-        logger.info(f"The LM head named {head_name} was retrieved.")
-        self.head = copy.deepcopy(getattr(model, head_name))
-        max_loop = 5
-        if not isinstance(self.head, torch.nn.Linear):
-            module = self.head
-            found = False
-            last_layer_full_name = []
-            for i in range(max_loop):
-                last_layer_name = [n for n,c in module.named_children()][-1]
-                last_layer_full_name.append(last_layer_name)
-                parent_module = module
-                module = getattr(module, last_layer_name)
-                if isinstance(module, torch.nn.Linear):
-                    found = True
-                    break
-            if not found:
-                raise RuntimeError(f"Can't not retrieve a linear layer in {max_loop} loop from the model.")
-            self.original_head_last_layer = module.weight.data
-            self.hidden_dims = self.original_head_last_layer.shape[-1]
-            self.head_last_layer_full_name = ".".join(last_layer_full_name)
-            setattr(parent_module, last_layer_name, torch.nn.Linear(self.hidden_dims, self.mid_dim, bias=False))
-        else:
-            self.hidden_dims = self.head.weight.shape[-1]
-            self.original_head_last_layer = getattr(model, head_name).weight.data
-            self.head = torch.nn.Linear(self.hidden_dims, self.mid_dim, bias=False)
-
+        
+        self.hidden_dims = model.config.hidden_size
+           
+        self.head = torch.nn.Linear(self.hidden_dims, self.mid_dim, bias=False)
 
         if label_words is not None: # use label words as an initialization
             self.label_words = label_words
@@ -88,21 +69,6 @@ class ProtoVerbalizer(Verbalizer):
         self.proto = nn.Parameter(w, requires_grad=True)
         self.optimizer = torch.optim.Adam(self.group_parameters_proto, lr=self.lr)
         
-        
-
-        
-    @property
-    def group_parameters_1(self,):
-        r"""Include the parameters of head's layer but not the last layer
-        In soft verbalizer, note that some heads may contain modules 
-        other than the final projection layer. The parameters of these part should be
-        optimized (or freezed) together with the plm.
-        """
-        if isinstance(self.head, torch.nn.Linear):
-            return []
-        else:
-            return [p for n, p in self.head.named_parameters() if self.head_last_layer_full_name not in n]
- 
     @property
     def group_parameters_proto(self,):
         r"""Include the last layer's parameters
@@ -110,7 +76,7 @@ class ProtoVerbalizer(Verbalizer):
         if isinstance(self.head, torch.nn.Linear):
             return [p for n, p in self.head.named_parameters()] + [self.proto]
         else:
-            return [p for n, p in self.head.named_parameters() if self.head_last_layer_full_name in n] + [self.proto]
+            return [p for n, p in self.head.named_parameters()] + [self.proto]
 
     def on_label_words_set(self):
         self.label_words = self.add_prefix(self.label_words, self.prefix)
@@ -220,14 +186,14 @@ class ProtoVerbalizer(Verbalizer):
         
         if self.post_log_softmax:
             # normalize
-            label_words_probs = self.normalize(label_words_logits)
+            # label_words_probs = self.normalize(label_words_logits)
 
             # calibrate
             if  hasattr(self, "_calibrate_logits") and self._calibrate_logits is not None:
                 label_words_probs = self.calibrate(label_words_probs=label_words_probs)
 
             # convert to logits
-            label_words_logits = torch.log(label_words_probs+1e-15)
+            # label_words_logits = torch.log(label_words_probs+1e-15)
 
         # aggreate
         label_logits = self.aggregate(label_words_logits)
@@ -282,16 +248,18 @@ class ProtoVerbalizer(Verbalizer):
         return label_words_probs
 
     def ensemble_logits(self, manual_logits, proto_logits):
-        def scaler(logits):
-            m = logits.mean(-1, keepdim=True)
-            s = logits.std(-1, keepdim=True)
-            return (logits - m) / s
+        
         logits = torch.stack([manual_logits, proto_logits])
         logits = logits.permute(1,0,2)
-        logits = scaler(logits)
+        logits = self.scaler(logits)
         logits = torch.mean(logits, 1)
         return logits
 
+    @staticmethod
+    def scaler(logits):
+        m = logits.mean(-1, keepdim=True)
+        s = logits.std(-1, keepdim=True)
+        return (logits - m) / s
 
     def process_outputs(self, outputs: Union[torch.Tensor, torch.Tensor], batch: Union[Dict, InputFeatures], **kwargs):
         manual_logits = self.process_logits(outputs[1])
@@ -325,6 +293,8 @@ class ProtoVerbalizer(Verbalizer):
         return torch.matmul(norm_x, norm_y.transpose(1,0))
     
     def pcl_loss(self, v_ins):
+        # instance-prototype loss
+
         sim_mat = torch.exp(self.sim(v_ins, self.proto))
         num = sim_mat.shape[1]
         loss = 0.
@@ -332,9 +302,9 @@ class ProtoVerbalizer(Verbalizer):
             pos_score = torch.diag(sim_mat[:,i,:])
             neg_score = (sim_mat[:,i,:].sum(1) - pos_score) 
             loss += - torch.log(pos_score / (pos_score + neg_score)).sum()
-        loss = loss / (num * self.num_classes)
+        loss = loss / (num * self.num_classes * self.num_classes)
 
-        # instance instance loss
+        # instance-instance loss
         
         loss_ins = 0.
         for i in range(v_ins.shape[0]):
@@ -342,7 +312,7 @@ class ProtoVerbalizer(Verbalizer):
             pos_ins = sim_instance[i]
             neg_ins = (sim_instance.sum(0) - pos_ins).sum(0)
             loss_ins += - torch.log(pos_ins / (pos_ins + neg_ins)).sum()
-        loss_ins = loss_ins / (num * self.num_classes * num)
+        loss_ins = loss_ins / (num * self.num_classes * num * self.num_classes)
         loss = loss + loss_ins
         
         return loss
@@ -360,7 +330,6 @@ class ProtoVerbalizer(Verbalizer):
                 for j in range(len(outputs_at_mask)):
                     label = batch['label'][j]
                     embeds[label].append(outputs_at_mask[j])
-        #embeds = [torch.stack(e).mean(0) for e in embeds]
         embeds = [torch.stack(e) for e in embeds]
         embeds = torch.stack(embeds)
 
@@ -372,7 +341,7 @@ class ProtoVerbalizer(Verbalizer):
             loss = self.pcl_loss(x)
             loss.backward()
             self.optimizer.step()
-        logger.info("ProtoVerb loss: {}".format(loss))
+        logger.info("Total epoch: {}. ProtoVerb loss: {}".format(self.epochs, loss))
         self.trained = True
 
     

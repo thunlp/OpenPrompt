@@ -225,6 +225,38 @@ class AmazonProcessor(DataProcessor):
         return examples
 
 
+class YahooProcessor(DataProcessor):
+    """
+    Yahoo! Answers Topic Classification Dataset
+    
+    Examples:
+
+    ..  code-block:: python
+
+        from openprompt.data_utils.text_classification_dataset import PROCESSORS
+
+        base_path = "datasets/TextClassification"
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.labels = ["Society & Culture", "Science & Mathematics", "Health", "Education & Reference", "Computers & Internet", "Sports", "Business & Finance", "Entertainment & Music"
+                        ,"Family & Relationships", "Politics & Government"]
+
+    def get_examples(self, data_dir, split):
+        path = os.path.join(data_dir, "{}.csv".format(split))
+        examples = []
+        with open(path, encoding='utf8') as f:
+            reader = csv.reader(f, delimiter=',')
+            for idx, row in enumerate(reader):
+                label, question_title, question_body, answer = row
+                text_a = ' '.join([question_title.replace('\\n', ' ').replace('\\', ' '),
+                                   question_body.replace('\\n', ' ').replace('\\', ' ')])
+                text_b = answer.replace('\\n', ' ').replace('\\', ' ')
+                example = InputExample(guid=str(idx), text_a=text_a, text_b=text_b, label=int(label)-1)
+                examples.append(example)
+        return examples
+
 # class SST2Processor(DataProcessor):
 #     """
 #     #TODO test needed
@@ -300,4 +332,5 @@ PROCESSORS = {
     "imdb": ImdbProcessor,
     "sst-2": SST2Processor,
     "mnli": MnliProcessor,
+    "yahoo": YahooProcessor,
 }

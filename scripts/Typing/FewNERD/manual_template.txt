@@ -1,0 +1,3 @@
+{"placeholder": "text_a"} {"meta": "entity"} is {"mask"}.
+{"placeholder": "text_a"} {"meta": "entity"} is a {"mask"}.
+{"placeholder": "text_a"} In this sentence, {"meta": "entity"} is a {"mask"}.

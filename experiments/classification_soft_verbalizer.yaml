@@ -19,30 +19,26 @@ checkpoint:
 
 train:
   batch_size: 2
-  num_epochs: 5
-  train_verblizer: post
+  num_epochs: 2
+  train_verblizer: pre
   clean: True
 
 test:
   batch_size: 2
 
 template: manual_template
-verbalizer: proto_verbalizer
+verbalizer: soft_verbalizer
 
 manual_template:
   choice: 0
   file_path: scripts/TextClassification/agnews/manual_template.txt
 
-proto_verbalizer:
+
+soft_verbalizer:
   parent_config: verbalizer
   choice: 0
   file_path: scripts/TextClassification/agnews/manual_verbalizer.txt
-  lr: 0.01
-  mid_dim: 64
-  epochs: 30
-  multi_verb: multi
-
-  
+  num_classes: 4
 
 environment:
   num_gpus: 1
@@ -58,11 +54,10 @@ few_shot:
   
 sampling_from_train:
   parent_config: few_shot_sampling
-  num_examples_per_label: 1
+  num_examples_per_label: 16
   also_sample_dev: True
-  num_examples_per_label_dev: 1
+  num_examples_per_label_dev: 16
   seed:
     - 123
 
-reproduce:  # seed for reproduction 
-  seed: 123  # a seed for all random part
+

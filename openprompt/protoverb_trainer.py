@@ -33,8 +33,6 @@ from transformers.optimization import  Adafactor, AdafactorSchedule
 class ProtoVerbClassificationRunner(BaseRunner):
     r"""A runner for prototypical verbalizer
     This class is specially implemented for classification.
-    For generation task, though it can be integrated in this class
-    via `task` option, we keep it as another class for simplicity.
 
     Args:
         model (:obj:`PromptForClassification`): One ``PromptForClassification`` object.
@@ -160,7 +158,7 @@ class ProtoVerbClassificationRunner(BaseRunner):
             if self.config.train.train_verblizer == "alternate":
                 self.inner_model.verbalizer.train_proto(self.model, self.train_dataloader, self.config.environment.local_rank)
         
-        if self.config.train_verblizer == "post":
+        if self.config.train.train_verblizer == "post":
             self.inner_model.verbalizer.train_proto(self.model, self.train_dataloader, self.config.environment.local_rank)
 
         return self.best_score

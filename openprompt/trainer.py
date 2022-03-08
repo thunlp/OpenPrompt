@@ -252,7 +252,6 @@ class BaseRunner(object):
             shutil.copyfile(self.checkpoint_path(ckpt), self.checkpoint_path(copy))
         logger.info(f"Save Checkpoint finished")
 
-
     def save_results(self, split, results:dict):
         if self.clean: return
         for name, values in results.items():
@@ -324,6 +323,7 @@ class BaseRunner(object):
     def fit(self, ckpt: Optional[str] = None):
         self.set_stop_criterion()
         self.configure_optimizers()
+        
 
         if ckpt:
             if not self.load_checkpoint(ckpt):
@@ -429,6 +429,10 @@ class ClassificationRunner(BaseRunner):
         loss = self.loss_function(logits, batch['label'])
         return loss
     
+    def on_fit_start(self):
+        """Some initialization works"""
+        self.prompt_initialize()
+    
     def prompt_initialize(self):
         verbalizer_config = self.config[self.config.verbalizer]
         template_config = self.config[self.config.template]
@@ -457,6 +461,8 @@ class ClassificationRunner(BaseRunner):
                 self.inner_model.verbalizer.optimize_to_initialize()
             if hasattr(self.inner_model.template, "optimize_to_initialize" ):
                 self.inner_model.template.optimize_to_initialize()
+        
+        self.wrap_model()
 
 
 class GenerationRunner(BaseRunner):

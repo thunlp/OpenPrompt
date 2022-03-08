@@ -64,7 +64,8 @@ class SoftVerbalizer(Verbalizer):
             self.original_head_last_layer = module.weight.data
             self.hidden_dims = self.original_head_last_layer.shape[-1]
             self.head_last_layer_full_name = ".".join(last_layer_full_name)
-            setattr(parent_module, last_layer_name, torch.nn.Linear(self.hidden_dims, self.num_classes, bias=False))
+            self.head_last_layer = torch.nn.Linear(self.hidden_dims, self.num_classes, bias=False)
+            setattr(parent_module, last_layer_name, self.head_last_layer)
         else:
             self.hidden_dims = self.head.weight.shape[-1]
             self.original_head_last_layer = getattr(model, head_name).weight.data
@@ -160,9 +161,13 @@ class SoftVerbalizer(Verbalizer):
             self.head.weight.data = init_data
             self.head.weight.data.requires_grad=True
         else:
-            getattr(self.head, self.head_last_layer_name).weight.data = init_data
-            getattr(self.head, self.head_last_layer_name).weight.data.requires_grad=True # To be sure
-
+            '''
+            getattr(self.head, self.head_last_layer_full_name).weight.data = init_data
+            getattr(self.head, self.head_last_layer_full_name).weight.data.requires_grad=True # To be sure
+            '''
+            self.head_last_layer.weight.data = init_data
+            self.head_last_layer.weight.data.requires_grad=True
+            
     def process_hiddens(self, hiddens: torch.Tensor, **kwargs):
         r"""A whole framework to process the original logits over the vocabulary, which contains four steps: 
         """
