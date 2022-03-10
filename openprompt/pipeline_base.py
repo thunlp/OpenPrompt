@@ -272,7 +272,10 @@ class PromptForClassification(nn.Module):
         """
         outputs = self.prompt_model(batch)
         outputs = self.verbalizer.gather_outputs(outputs)
-        outputs_at_mask = self.extract_at_mask(outputs, batch)
+        if isinstance(outputs, tuple):
+            outputs_at_mask = [self.extract_at_mask(output, batch) for output in outputs]
+        else:
+            outputs_at_mask = self.extract_at_mask(outputs, batch)
         label_words_logits = self.verbalizer.process_outputs(outputs_at_mask, batch=batch)
         return label_words_logits
     

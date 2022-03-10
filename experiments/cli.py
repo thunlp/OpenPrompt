@@ -6,6 +6,7 @@ import argparse
 
 from openprompt.trainer import ClassificationRunner, GenerationRunner
 from openprompt.lm_bff_trainer import LMBFFClassificationRunner
+from openprompt.protoverb_trainer import ProtoVerbClassificationRunner
 from re import template
 from openprompt.pipeline_base import PromptForClassification, PromptForGeneration
 from openprompt.utils.reproduciblity import set_seed
@@ -115,7 +116,6 @@ def main():
             valid_dataset = valid_dataset,
             test_dataset = test_dataset,
         )
-    print("metric:", res)
 
 def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = None, test_dataset = None, resume = None, test = None, zero = False):
     if not os.path.exists(EXP_PATH):
@@ -157,6 +157,14 @@ def trainer(EXP_PATH, config, Processor, train_dataset = None, valid_dataset = N
                                                 verbalizer=verbalizer,
                                                 config = config
                                                 )
+        elif config.verbalizer == "proto_verbalizer":
+            runner = ProtoVerbClassificationRunner(model = prompt_model,
+                                    train_dataloader = train_dataloader,
+                                    valid_dataloader = valid_dataloader,
+                                    test_dataloader = test_dataloader,
+                                    id2label = Processor.id2label,
+                                    config = config
+            )                                   
         else:
             runner = ClassificationRunner(model = prompt_model,
                                     train_dataloader = train_dataloader,

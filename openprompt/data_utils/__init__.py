@@ -62,7 +62,6 @@ def load_dataset(config: CfgNode, return_class=True, test=False):
         test_dataset = processor.get_test_examples(dataset_config.path)
     except FileNotFoundError:
         logger.warning(f"Has no test dataset in {dataset_config.path}.")
-
     # checking whether donwloaded.
     if (train_dataset is None) and \
        (valid_dataset is None) and \

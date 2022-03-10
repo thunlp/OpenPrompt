@@ -32,7 +32,7 @@ class SoftVerbalizer(Verbalizer):
     """
     def __init__(self, 
                  tokenizer: Optional[PreTrainedTokenizer],
-                 plm: Optional[PreTrainedModel],
+                 model: Optional[PreTrainedModel],
                  classes: Optional[List] = None,
                  num_classes: Optional[Sequence[str]] = None,
                  label_words: Optional[Union[Sequence[str], Mapping[str, str]]] = None,
@@ -43,9 +43,9 @@ class SoftVerbalizer(Verbalizer):
         self.prefix = prefix
         self.multi_token_handler = multi_token_handler
 
-        head_name = [n for n,c in plm.named_children()][-1]
+        head_name = [n for n,c in model.named_children()][-1]
         logger.info(f"The LM head named {head_name} was retrieved.")
-        self.head = copy.deepcopy(getattr(plm, head_name))
+        self.head = copy.deepcopy(getattr(model, head_name))
         max_loop = 5
         if not isinstance(self.head, torch.nn.Linear):
             module = self.head
@@ -64,10 +64,11 @@ class SoftVerbalizer(Verbalizer):
             self.original_head_last_layer = module.weight.data
             self.hidden_dims = self.original_head_last_layer.shape[-1]
             self.head_last_layer_full_name = ".".join(last_layer_full_name)
-            setattr(parent_module, last_layer_name, torch.nn.Linear(self.hidden_dims, self.num_classes, bias=False))
+            self.head_last_layer = torch.nn.Linear(self.hidden_dims, self.num_classes, bias=False)
+            setattr(parent_module, last_layer_name, self.head_last_layer)
         else:
             self.hidden_dims = self.head.weight.shape[-1]
-            self.original_head_last_layer = getattr(plm, head_name).weight.data
+            self.original_head_last_layer = getattr(model, head_name).weight.data
             self.head = torch.nn.Linear(self.hidden_dims, self.num_classes, bias=False)
 
 
@@ -153,16 +154,20 @@ class SoftVerbalizer(Verbalizer):
         self.label_words_ids = nn.Parameter(words_ids_tensor, requires_grad=False)
         self.label_words_mask = nn.Parameter(words_ids_mask, requires_grad=False)
         
-        init_data = self.original_head_last_layer[self.label_words_ids,:]*self.label_words_mask.to(self.original_head_last_layer.weight.data.dtype).unsqueeze(-1)
+        init_data = self.original_head_last_layer[self.label_words_ids,:]*self.label_words_mask.to(self.original_head_last_layer.dtype).unsqueeze(-1)
         init_data = init_data.sum(dim=1)/self.label_words_mask.sum(dim=-1,keepdim=True)
 
         if isinstance(self.head, torch.nn.Linear):
             self.head.weight.data = init_data
             self.head.weight.data.requires_grad=True
         else:
-            getattr(self.head, self.head_last_layer_name).weight.data = init_data
-            getattr(self.head, self.head_last_layer_name).weight.data.requires_grad=True # To be sure
-
+            '''
+            getattr(self.head, self.head_last_layer_full_name).weight.data = init_data
+            getattr(self.head, self.head_last_layer_full_name).weight.data.requires_grad=True # To be sure
+            '''
+            self.head_last_layer.weight.data = init_data
+            self.head_last_layer.weight.data.requires_grad=True
+            
     def process_hiddens(self, hiddens: torch.Tensor, **kwargs):
         r"""A whole framework to process the original logits over the vocabulary, which contains four steps: 
         """
