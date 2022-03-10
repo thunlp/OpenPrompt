@@ -315,6 +315,38 @@
         <span class="k">return</span> <span class="n">examples</span>
 
 
+<span class="k">class</span> <span class="nc">YahooProcessor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Yahoo! Answers Topic Classification Dataset</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ..  code-block:: python</span>
+
+<span class="sd">        from openprompt.data_utils.text_classification_dataset import PROCESSORS</span>
+
+<span class="sd">        base_path = &quot;datasets/TextClassification&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Society &amp; Culture&quot;</span><span class="p">,</span> <span class="s2">&quot;Science &amp; Mathematics&quot;</span><span class="p">,</span> <span class="s2">&quot;Health&quot;</span><span class="p">,</span> <span class="s2">&quot;Education &amp; Reference&quot;</span><span class="p">,</span> <span class="s2">&quot;Computers &amp; Internet&quot;</span><span class="p">,</span> <span class="s2">&quot;Sports&quot;</span><span class="p">,</span> <span class="s2">&quot;Business &amp; Finance&quot;</span><span class="p">,</span> <span class="s2">&quot;Entertainment &amp; Music&quot;</span>
+                        <span class="p">,</span><span class="s2">&quot;Family &amp; Relationships&quot;</span><span class="p">,</span> <span class="s2">&quot;Politics &amp; Government&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.csv&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">))</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
+                <span class="n">label</span><span class="p">,</span> <span class="n">question_title</span><span class="p">,</span> <span class="n">question_body</span><span class="p">,</span> <span class="n">answer</span> <span class="o">=</span> <span class="n">row</span>
+                <span class="n">text_a</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">question_title</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">),</span>
+                                   <span class="n">question_body</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)])</span>
+                <span class="n">text_b</span> <span class="o">=</span> <span class="n">answer</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">text_b</span><span class="o">=</span><span class="n">text_b</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">examples</span>
+
 <span class="c1"># class SST2Processor(DataProcessor):</span>
 <span class="c1">#     &quot;&quot;&quot;</span>
 <span class="c1">#     #TODO test needed</span>
@@ -390,6 +422,7 @@
     <span class="s2">&quot;imdb&quot;</span><span class="p">:</span> <span class="n">ImdbProcessor</span><span class="p">,</span>
     <span class="s2">&quot;sst-2&quot;</span><span class="p">:</span> <span class="n">SST2Processor</span><span class="p">,</span>
     <span class="s2">&quot;mnli&quot;</span><span class="p">:</span> <span class="n">MnliProcessor</span><span class="p">,</span>
+    <span class="s2">&quot;yahoo&quot;</span><span class="p">:</span> <span class="n">YahooProcessor</span><span class="p">,</span>
 <span class="p">}</span>
 </pre></div>
 

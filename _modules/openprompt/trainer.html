@@ -342,7 +342,6 @@
             <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_path</span><span class="p">(</span><span class="n">ckpt</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_path</span><span class="p">(</span><span class="n">copy</span><span class="p">))</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Save Checkpoint finished&quot;</span><span class="p">)</span>
 
-
     <span class="k">def</span> <span class="nf">save_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span><span class="nb">dict</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean</span><span class="p">:</span> <span class="k">return</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -414,6 +413,7 @@
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ckpt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_stop_criterion</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">configure_optimizers</span><span class="p">()</span>
+        
 
         <span class="k">if</span> <span class="n">ckpt</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">ckpt</span><span class="p">):</span>
@@ -519,6 +519,10 @@
         <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">batch</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">loss</span>
     
+<div class="viewcode-block" id="ClassificationRunner.on_fit_start"><a class="viewcode-back" href="../../modules/trainer.html#openprompt.trainer.ClassificationRunner.on_fit_start">[docs]</a>    <span class="k">def</span> <span class="nf">on_fit_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Some initialization works&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_initialize</span><span class="p">()</span></div>
+    
     <span class="k">def</span> <span class="nf">prompt_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">verbalizer_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">verbalizer</span><span class="p">]</span>
         <span class="n">template_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">template</span><span class="p">]</span>
@@ -546,7 +550,9 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inner_model</span><span class="o">.</span><span class="n">verbalizer</span><span class="p">,</span> <span class="s2">&quot;optimize_to_initialize&quot;</span> <span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">inner_model</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">optimize_to_initialize</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inner_model</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="s2">&quot;optimize_to_initialize&quot;</span> <span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inner_model</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">optimize_to_initialize</span><span class="p">()</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inner_model</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">optimize_to_initialize</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrap_model</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="GenerationRunner"><a class="viewcode-back" href="../../modules/trainer.html#openprompt.trainer.GenerationRunner">[docs]</a><span class="k">class</span> <span class="nc">GenerationRunner</span><span class="p">(</span><span class="n">BaseRunner</span><span class="p">):</span>
