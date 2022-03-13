@@ -35,7 +35,7 @@ dataset['support'] = support_sampler(dataset['train'], seed=1)
 # dataset['support'] = [InputExample(text_a="",text_b="")] # uncomment this line to use template-only calibration
 
 for example in dataset['support']:
-    example.label = -1 # remove the labels of support set for clarification
+    example.label = -1 # remove the labels of support set for classification
 support_dataloader = PromptDataLoader(dataset=dataset["support"], template=mytemplate, tokenizer=tokenizer, 
     tokenizer_wrapper_class=WrapperClass, max_seq_length=512, decoder_max_length=3, 
     batch_size=5,shuffle=False, teacher_forcing=False, predict_eos_token=False,
