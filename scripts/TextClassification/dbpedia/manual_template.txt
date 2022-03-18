@@ -1,4 +1,4 @@
-{"placeholder": "text_a"} {"placeholder": "text_b"} {"placeholder": "text_a"} is a {"mask"}.
-{"placeholder": "text_a"} {"placeholder": "text_b"} In this sentence, {"placeholder": "text_a"} is a {"mask"}.
-{"placeholder": "text_a"} {"placeholder": "text_b"} The type of {"placeholder": "text_a"} is {"mask"}.
-{"placeholder": "text_a"} {"placeholder": "text_b"} The category of {"placeholder": "text_a"} is {"mask"}.
+ {"placeholder": "text_a","shortenable": False} {"placeholder": "text_b"} {"placeholder": "text_a", "post_processing": "lambda x:x.strip('.')", "shortenable": False} is a {"mask"} .
+ {"placeholder": "text_a"} {"placeholder": "text_b"} In this sentence, {"placeholder": "text_a"} is a {"mask"} .
+ {"placeholder": "text_a"} {"placeholder": "text_b"} The type of {"placeholder": "text_a"} is {"mask"} .
+ {"placeholder": "text_a"} {"placeholder": "text_b"} The category of {"placeholder": "text_a"} is {"mask"} .

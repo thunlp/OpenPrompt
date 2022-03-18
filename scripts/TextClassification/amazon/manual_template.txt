@@ -1,4 +1,4 @@
  It was {"mask"} . {"placeholder": "text_a"}
  Just {"mask"} ! {"placeholder": "text_a"}
  {"placeholder": "text_a"} All in all , it was {"mask"} .
- {"placeholder": "text_a"} In summary , the film was {"mask"} .
+ {"placeholder": "text_a"} In summary , it was {"mask"} .

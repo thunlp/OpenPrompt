@@ -35,14 +35,34 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
                  max_token_split: Optional[int] = -1,
                  verbalizer_lr: Optional[float]=5e-2,
                  candidate_frac: Optional[float]=0.5,
+                 pred_temp: Optional[float]=1.0,
                  **kwargs):
         super().__init__(classes=classes, prefix=prefix, multi_token_handler=multi_token_handler, tokenizer=tokenizer, **kwargs)
         self.max_token_split = max_token_split
         self.verbalizer_lr = verbalizer_lr
         self.candidate_frac = candidate_frac
+        self.pred_temp = pred_temp
 
     def on_label_words_set(self):
+        self.label_words = self.delete_common_words(self.label_words)
+        self.label_words = self.add_prefix(self.label_words, self.prefix)
         self.generate_parameters()
+
+    def delete_common_words(self, d):
+        word_count = {}
+        for d_perclass in d:
+            for w in d_perclass:
+                if w not in word_count:
+                    word_count[w]=1
+                else:
+                    word_count[w]+=1
+        for w in word_count:
+            if word_count[w]>=2:
+                for d_perclass in d:
+                    if w in d_perclass[1:]:
+                        findidx = d_perclass[1:].index(w)
+                        d_perclass.pop(findidx+1)
+        return d
 
     @staticmethod
     def add_prefix(label_words, prefix):
@@ -59,8 +79,11 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
         In this implementation, the label_words should not be tokenized into more one token. 
         """
         all_ids = []
+        label_words = []
+        # print([len(x) for x in self.label_words], flush=True)
         for words_per_label in self.label_words:
             ids_per_label = []
+            words_keep_per_label = []
             for word in words_per_label:
                 ids = self.tokenizer.encode(word, add_special_tokens=False)
                 if self.max_token_split>0  and len(ids) > self.max_token_split: 
@@ -70,8 +93,12 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
                                     len(ids), self.max_token_split,
                                     self.tokenizer.convert_ids_to_tokens(ids)))
                     continue
-                ids_per_label.append(ids)
+                else:
+                    words_keep_per_label.append(word)
+                    ids_per_label.append(ids)
+            label_words.append(words_keep_per_label)
             all_ids.append(ids_per_label)
+        self.label_words = label_words
         
         
 
@@ -91,8 +118,13 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
         self.words_ids_mask = nn.Parameter(words_ids_mask, requires_grad=False) # A 3-d mask
         self.label_words_mask = nn.Parameter(torch.clamp(words_ids_mask.sum(dim=-1), max=1), requires_grad=False)
         self.label_words_weights = nn.Parameter(torch.zeros(self.num_classes, max_num_label_words), requires_grad=True)
-        logger.info("Num of label words for each label: {}".format(self.label_words_mask.sum(-1).cpu().tolist()))
-        self.verbalizer_optimizer = torch.optim.AdamW(self.parameters(), lr=self.verbalizer_lr)
+        print("##Num of label words for each label: {}".format(self.label_words_mask.sum(-1).cpu().tolist()), flush=True)
+        # print(self.label_words_ids.data.shape, flush=True)
+        # print(self.words_ids_mask.data.shape, flush=True)
+        # print(self.label_words_mask.data.shape, flush=True)
+        # print(self.label_words_weights.data.shape, flush=True)
+        # exit()
+        # self.verbalizer_optimizer = torch.optim.AdamW(self.parameters(), lr=self.verbalizer_lr)
 
 
     def register_calibrate_logits(self, logits: torch.Tensor):
@@ -137,26 +169,14 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
         Returns:
             :obj:`torch.Tensor`: The aggregated logits from the label words. 
         """
-        label_words_weights = F.softmax(self.label_words_weights-10000*(1-self.label_words_mask), dim=-1)
+        if not self.training:
+            label_words_weights = F.softmax(self.pred_temp*self.label_words_weights-10000*(1-self.label_words_mask), dim=-1)
+        else:
+            label_words_weights = F.softmax(self.label_words_weights-10000*(1-self.label_words_mask), dim=-1)
         label_words_logits = (label_words_logits * self.label_words_mask * label_words_weights).sum(-1)
         return label_words_logits
 
-        
-    def from_file(self,
-                  path: str,
-                  separator: Optional[str] = ',', 
-                  ):
-        r"""Load the predefined  label words from verbalizer file 
-        """
-        with open(path, 'r') as fin:
-            label_words = fin.readlines()
-            label_words = [words_per_label.strip().split(separator) for words_per_label in label_words]
-        num_classes = len(label_words)
-        assert num_classes==self.num_classes, 'number of classes in the verbalizer file\
-                                           does not match the predefined num_classes.'
-        self.label_words = self.add_prefix(label_words, self.prefix)
-        return self
     
-    def optimize(self,):
-        self.verbalizer_optimizer.step()
-        self.verbalizer_optimizer.zero_grad()
+    # def optimize(self,):
+    #     self.verbalizer_optimizer.step()
+    #     self.verbalizer_optimizer.zero_grad()

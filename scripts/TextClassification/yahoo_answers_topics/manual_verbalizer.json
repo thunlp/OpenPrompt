@@ -1,0 +1,12 @@
+{
+    "Society & Culture": ["society"],
+    "Science & Mathematics": ["science"],
+    "Health": ["health"],
+    "Education & Reference": ["education"],
+    "Computers & Internet": ["computers"],
+    "Sports": ["sports"],
+    "Business & Finance": ["business"],
+    "Entertainment & Music": ["entertainment"],
+    "Family & Relationships": ["relationships"],
+    "Politics & Government": ["politics"]
+}
