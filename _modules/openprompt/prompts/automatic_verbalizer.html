@@ -100,9 +100,9 @@
 
 
 <div class="viewcode-block" id="AutomaticVerbalizer"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer">[docs]</a><span class="k">class</span> <span class="nc">AutomaticVerbalizer</span><span class="p">(</span><span class="n">Verbalizer</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; </span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This implementation is slightly different from the original code in that</span>
-<span class="sd">    1). we allow re-selecting the verbalizer after a fixed training steps. </span>
+<span class="sd">    1). we allow re-selecting the verbalizer after a fixed training steps.</span>
 <span class="sd">    The original implementation only performs one step selection after getting</span>
 <span class="sd">    the inital logits on the training data. To adopt their implementation,</span>
 <span class="sd">    please only do ``optimize()`` after the first pass of training data.</span>
@@ -111,22 +111,22 @@
 <span class="sd">    paper, which take softmax over the logits.</span>
 
 <span class="sd">    3). We do not implements the ``combine_patterns&#39;&#39; if-branch. Since it&#39;s</span>
-<span class="sd">    not a pure verbalizer type, and doesn&#39;t yield much improvement. However, </span>
-<span class="sd">    it can be achieve by using EnsembleTrainer to pass text wrapped by </span>
-<span class="sd">    multiple templates together with this verbalizer. </span>
-<span class="sd">    </span>
-<span class="sd">    We use a probs_buffer to store the probability :math:`q_{P,t}(1|\mathbf{x})` that to be used in later verbalizer selection, </span>
+<span class="sd">    not a pure verbalizer type, and doesn&#39;t yield much improvement. However,</span>
+<span class="sd">    it can be achieve by using EnsembleTrainer to pass text wrapped by</span>
+<span class="sd">    multiple templates together with this verbalizer.</span>
+
+<span class="sd">    We use a probs_buffer to store the probability :math:`q_{P,t}(1|\mathbf{x})` that to be used in later verbalizer selection,</span>
 <span class="sd">    and a label_buffer to store the label :math:`y` that to be used in later verbalizer selection.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        num_candidates (:obj:`int`, optional): the number of candidates for further selection based on Section 4.1</span>
 <span class="sd">        label_word_num_per_class (:obj:`int`, optional): set to be greater than 1 to support Multi-Verbalizers in Section 4.2</span>
-<span class="sd">        num_searches (:obj:`int`, optional): Maximnum number of label_words search. After reaching this number, the verbalizer will use the same label_words as the previous iterations. </span>
+<span class="sd">        num_searches (:obj:`int`, optional): Maximnum number of label_words search. After reaching this number, the verbalizer will use the same label_words as the previous iterations.</span>
 <span class="sd">        search_id (:obj:`int`, optional): the id of current search, used to determine when to stop label words searching.</span>
 <span class="sd">        score_fct (:obj:`str`, optional): the scoring function of label words selection. ``llr`` means log likelihood ratio, corresponding to Equation (7); ``ce`` means cross entropy, corresponding to Equation (6). As the paper points out, ``llr&#39;&#39; is significantly better than &#39;ce&#39;, we only keep it to match the original code.</span>
 <span class="sd">        balance (:obj:`book`, optional): whether to perform normalization of unbalanced training dataset, as Equation (5).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">num_candidates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
                  <span class="n">label_word_num_per_class</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -145,7 +145,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">num_searches</span> <span class="o">=</span> <span class="n">num_searches</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">search_id</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">accumulate_step</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># currently not used, to support not epoch-level optimize.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">accumulate</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># A flag to indicate whether to </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accumulate</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># A flag to indicate whether to</span>
                                <span class="c1"># accumulate examples for optimization.</span>
                                <span class="c1"># set to False after finish optimization.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">score_fct</span> <span class="o">=</span> <span class="n">score_fct</span>
@@ -154,12 +154,12 @@
 
 <div class="viewcode-block" id="AutomaticVerbalizer.register_buffer"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer.register_buffer">[docs]</a>    <span class="k">def</span> <span class="nf">register_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            logits (:obj:`torch.Tensor`): </span>
-<span class="sd">            labels (:obj:`List`): </span>
+<span class="sd">            logits (:obj:`torch.Tensor`):</span>
+<span class="sd">            labels (:obj:`List`):</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        
+
         <span class="n">logits</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
@@ -170,7 +170,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="p">,</span> <span class="n">labels</span><span class="p">])</span></div>
 
     <span class="k">def</span> <span class="nf">process_logits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">accumulate</span><span class="p">:</span> <span class="c1"># inherit from nn.Module, only store buffer in training mode.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">accumulate_step</span><span class="o">+=</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;batch&#39;</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
@@ -198,18 +198,18 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">((</span><span class="n">logits</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        
+
 <div class="viewcode-block" id="AutomaticVerbalizer.project"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="c1"># TODO </span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="c1"># TODO</span>
                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;When this verbalizer hasn&#39;t perform optimize(), it has no </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;When this verbalizer hasn&#39;t perform optimize(), it has no</span>
 <span class="sd">        ``label_words_ids``, thus will give random predictions, and should</span>
 <span class="sd">        have no connection to the model to give (miss-leading) grads.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            logits (:obj:`torch.Tensor`): The original logits over the vocabulary.</span>
-<span class="sd">            </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`torch.Tensor`: The projected logits of label words.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -219,8 +219,8 @@
 
     <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
-        
-        
+
+
 <div class="viewcode-block" id="AutomaticVerbalizer.optimize_to_initialize"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer.optimize_to_initialize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize_to_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;This is an epoch-level optimize. If used in batch-level like an ordinary</span>
 <span class="sd">        gradient descend optimizer, the result may not be very satisfying since the accumated</span>
@@ -228,7 +228,7 @@
 <span class="sd">        is small.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_id</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_searches</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">label_words_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_verbalizer</span><span class="p">(</span><span class="n">words_per_label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">label_word_num_per_class</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_words_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_verbalizer</span><span class="p">(</span><span class="n">words_per_label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">label_word_num_per_class</span><span class="p">,</span>
                                                          <span class="n">num_candidates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_candidates</span><span class="p">,</span>
                                                          <span class="n">score_fct</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">score_fct</span><span class="p">,</span>
                                                          <span class="n">balance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">balance</span><span class="p">)</span>
@@ -239,8 +239,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Verbalizer&#39;s max num_searches reached, use the previous label words.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_show_verbalizer</span><span class="p">()</span></div>
-        
-            
+
+
     <span class="k">def</span> <span class="nf">_show_verbalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_ids_to_tokens</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_words_ids</span><span class="p">]</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Verbalizer is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
@@ -259,7 +259,7 @@
                                     <span class="n">score_fct</span><span class="o">=</span><span class="n">score_fct</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">label_words</span>
 
-    <span class="k">def</span> <span class="nf">_get_candidates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">_get_candidates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                         <span class="n">num_candidates</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                         <span class="n">probs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
                         <span class="n">labels</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
@@ -275,8 +275,8 @@
             <span class="n">candidate_id</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">num_candidates</span><span class="p">]</span>
             <span class="n">candidate_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">candidate_id</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">candidate_ids</span>
-    
-    <span class="k">def</span> <span class="nf">_get_top_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+
+    <span class="k">def</span> <span class="nf">_get_top_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                        <span class="n">probs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
                        <span class="n">candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
                        <span class="n">balance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -309,7 +309,7 @@
         <span class="n">pos_score</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probs</span><span class="o">+</span><span class="mf">1e-15</span><span class="p">)</span> <span class="o">*</span> <span class="n">label_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">probs</span> <span class="o">+</span> <span class="mf">1e-15</span><span class="p">)</span> <span class="o">*</span> <span class="n">label_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">neg_score</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">probs</span> <span class="o">+</span><span class="mf">1e-15</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probs</span><span class="o">+</span><span class="mf">1e-15</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pos_score</span> <span class="o">+</span> <span class="n">neg_score</span>
-    
+
     <span class="k">def</span> <span class="nf">_cross_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span> <span class="n">label_mask</span><span class="p">,</span> <span class="n">balance</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">balance</span><span class="p">:</span>
             <span class="n">scale_factor</span> <span class="o">=</span>  <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">label_mask</span><span class="p">)</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">label_mask</span><span class="p">)</span> \
@@ -321,9 +321,9 @@
         <span class="n">pos_score</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probs</span><span class="o">+</span><span class="mf">1e-15</span><span class="p">)</span> <span class="o">*</span> <span class="n">label_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">neg_score</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">probs</span> <span class="o">+</span><span class="mf">1e-15</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pos_score</span> <span class="o">+</span> <span class="n">neg_score</span>
-    
+
 <div class="viewcode-block" id="AutomaticVerbalizer.from_file"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.automatic_verbalizer.AutomaticVerbalizer.from_file">[docs]</a>    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                  <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                  <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                   <span class="n">choice</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This verbalizer is learned and can&#39;t be set from file.&quot;</span><span class="p">)</span></div></div>
 </pre></div>

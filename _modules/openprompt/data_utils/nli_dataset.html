@@ -117,7 +117,7 @@
 
 <span class="sd">    Examples:</span>
 
-<span class="sd">    ..  code-block:: python </span>
+<span class="sd">    ..  code-block:: python</span>
 
 <span class="sd">        from openprompt.data_utils.lmbff_dataset import PROCESSORS</span>
 
@@ -142,7 +142,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;entailment&#39;</span><span class="p">,</span> <span class="s1">&#39;neutral&#39;</span><span class="p">,</span> <span class="s1">&#39;contradiction&#39;</span><span class="p">]</span>
-    
+
     <span class="k">def</span> <span class="nf">get_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">split</span><span class="si">}</span><span class="s2">.tsv&quot;</span><span class="p">)</span>
         <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>

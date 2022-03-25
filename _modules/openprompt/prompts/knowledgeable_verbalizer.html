@@ -107,17 +107,17 @@
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is the implementation of knowledeagble verbalizer, which uses external knowledge to expand the set of label words.</span>
 <span class="sd">    This class inherit the ``ManualVerbalizer`` class.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.</span>
 <span class="sd">        classes (:obj:`classes`): The classes (or labels) of the current task.</span>
 <span class="sd">        prefix (:obj:`str`, optional): The prefix string of the verbalizer.</span>
 <span class="sd">        multi_token_handler (:obj:`str`, optional): The handling strategy for multiple tokens produced by the tokenizer.</span>
-<span class="sd">        max_token_split (:obj:`int`, optional): </span>
+<span class="sd">        max_token_split (:obj:`int`, optional):</span>
 <span class="sd">        verbalizer_lr (:obj:`float`, optional): The learning rate of the verbalizer optimization.</span>
-<span class="sd">        candidate_frac (:obj:`float`, optional): </span>
+<span class="sd">        candidate_frac (:obj:`float`, optional):</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">classes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="p">,</span>
@@ -163,10 +163,10 @@
         <span class="k">for</span> <span class="n">words</span> <span class="ow">in</span> <span class="n">label_words</span><span class="p">:</span>
             <span class="n">new_label_words</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">word</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">new_label_words</span></div>
-        
+
 <div class="viewcode-block" id="KnowledgeableVerbalizer.generate_parameters"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.knowledgeable_verbalizer.KnowledgeableVerbalizer.generate_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">generate_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;In basic manual template, the parameters are generated from label words directly.</span>
-<span class="sd">        In this implementation, the label_words should not be tokenized into more one token. </span>
+<span class="sd">        In this implementation, the label_words should not be tokenized into more one token.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">all_ids</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">label_words</span> <span class="o">=</span> <span class="p">[]</span>
@@ -176,8 +176,8 @@
             <span class="n">words_keep_per_label</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words_per_label</span><span class="p">:</span>
                 <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">add_special_tokens</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_token_split</span><span class="o">&gt;</span><span class="mi">0</span>  <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_token_split</span><span class="p">:</span> 
-                    <span class="c1"># in knowledgebale verbalizer, the labelwords may be very rare, so we may </span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_token_split</span><span class="o">&gt;</span><span class="mi">0</span>  <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_token_split</span><span class="p">:</span>
+                    <span class="c1"># in knowledgebale verbalizer, the labelwords may be very rare, so we may</span>
                     <span class="c1"># want to remove the label words which are not recogonized by tokenizer.</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Word </span><span class="si">{}</span><span class="s2"> is split into </span><span class="si">{}</span><span class="s2"> (&gt;</span><span class="si">{}</span><span class="s2">) tokens: </span><span class="si">{}</span><span class="s2">. Ignored.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> \
                                     <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_token_split</span><span class="p">,</span>
@@ -189,19 +189,19 @@
             <span class="n">label_words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">words_keep_per_label</span><span class="p">)</span>
             <span class="n">all_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ids_per_label</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span> <span class="o">=</span> <span class="n">label_words</span>
-        
-        
+
+
 
         <span class="n">max_len</span>  <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">max</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">ids_per_label</span><span class="p">])</span> <span class="k">for</span> <span class="n">ids_per_label</span> <span class="ow">in</span> <span class="n">all_ids</span><span class="p">])</span>
         <span class="n">max_num_label_words</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">ids_per_label</span><span class="p">)</span> <span class="k">for</span> <span class="n">ids_per_label</span> <span class="ow">in</span> <span class="n">all_ids</span><span class="p">])</span>
         <span class="n">words_ids_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">max_num_label_words</span><span class="p">,</span> <span class="n">max_len</span><span class="p">)</span>
         <span class="n">words_ids_mask</span> <span class="o">=</span> <span class="p">[[[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">max_len</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span> <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">ids_per_label</span><span class="p">]</span>
-                             <span class="o">+</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">max_len</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">max_num_label_words</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ids_per_label</span><span class="p">))</span> 
+                             <span class="o">+</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">max_len</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">max_num_label_words</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ids_per_label</span><span class="p">))</span>
                              <span class="k">for</span> <span class="n">ids_per_label</span> <span class="ow">in</span> <span class="n">all_ids</span><span class="p">]</span>
         <span class="n">words_ids</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ids</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">max_len</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span> <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">ids_per_label</span><span class="p">]</span>
-                             <span class="o">+</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">max_len</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">max_num_label_words</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ids_per_label</span><span class="p">))</span> 
+                             <span class="o">+</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">max_len</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">max_num_label_words</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ids_per_label</span><span class="p">))</span>
                              <span class="k">for</span> <span class="n">ids_per_label</span> <span class="ow">in</span> <span class="n">all_ids</span><span class="p">]</span>
-        
+
         <span class="n">words_ids_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">words_ids</span><span class="p">)</span>
         <span class="n">words_ids_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">words_ids_mask</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label_words_ids</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">words_ids_tensor</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -237,13 +237,13 @@
                     <span class="n">new_label_words</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_words</span><span class="p">[</span><span class="n">i_label</span><span class="p">][</span><span class="n">j_word</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span> <span class="o">=</span> <span class="n">new_label_words</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibrate_logits</span><span class="o">.</span><span class="n">device</span><span class="p">)</span></div>
-    
+
 
 <div class="viewcode-block" id="KnowledgeableVerbalizer.project"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.knowledgeable_verbalizer.KnowledgeableVerbalizer.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;The return value if the normalized (sum to 1) probs of label words. </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;The return value if the normalized (sum to 1) probs of label words.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">label_words_logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_words_ids</span><span class="p">]</span>
         <span class="n">label_words_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_multi_token</span><span class="p">(</span><span class="n">label_words_logits</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">words_ids_mask</span><span class="p">)</span>
@@ -255,9 +255,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            label_words_logits(:obj:`torch.Tensor`): The logits of the label words.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            :obj:`torch.Tensor`: The aggregated logits from the label words. </span>
+<span class="sd">            :obj:`torch.Tensor`: The aggregated logits from the label words.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
             <span class="n">label_words_weights</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pred_temp</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">label_words_weights</span><span class="o">-</span><span class="mi">10000</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">label_words_mask</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -266,7 +266,7 @@
         <span class="n">label_words_logits</span> <span class="o">=</span> <span class="p">(</span><span class="n">label_words_logits</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_words_mask</span> <span class="o">*</span> <span class="n">label_words_weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">label_words_logits</span></div></div>
 
-    
+
     <span class="c1"># def optimize(self,):</span>
     <span class="c1">#     self.verbalizer_optimizer.step()</span>
     <span class="c1">#     self.verbalizer_optimizer.zero_grad()</span>

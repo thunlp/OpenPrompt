@@ -111,10 +111,10 @@
 
 <span class="k">def</span> <span class="nf">build_dataloader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span><span class="n">tokenizer_wrapper_class</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
     <span class="n">dataloader</span> <span class="o">=</span> <span class="n">PromptDataLoader</span><span class="p">(</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">,</span> 
-        <span class="n">template</span> <span class="o">=</span> <span class="n">template</span><span class="p">,</span> 
-        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">,</span> 
-        <span class="n">tokenizer_wrapper_class</span><span class="o">=</span><span class="n">tokenizer_wrapper_class</span><span class="p">,</span> 
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">,</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">template</span><span class="p">,</span>
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">,</span>
+        <span class="n">tokenizer_wrapper_class</span><span class="o">=</span><span class="n">tokenizer_wrapper_class</span><span class="p">,</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">split</span><span class="p">]</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="n">shuffle</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">split</span><span class="p">]</span><span class="o">.</span><span class="n">shuffle_data</span><span class="p">,</span>
         <span class="n">teacher_forcing</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">split</span><span class="p">]</span><span class="o">.</span><span class="n">teacher_forcing</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="n">split</span><span class="p">],</span><span class="s1">&#39;teacher_forcing&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
@@ -127,7 +127,7 @@
 <div class="viewcode-block" id="LMBFFClassificationRunner"><a class="viewcode-back" href="../../modules/trainer.html#openprompt.lm_bff_trainer.LMBFFClassificationRunner">[docs]</a><span class="k">class</span> <span class="nc">LMBFFClassificationRunner</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This runner implements the LM-BFF training process in paper `Making Pre-trained Language Models Better Few-shot Learners(Gao et al. 2020) &lt;https://arxiv.org/pdf/2012.15723.pdf&gt;`_.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            train_dataset (:obj:`List[InputExample]`): The dataset for training</span>
 <span class="sd">            valid_dataset (:obj:`List[InputExample]`): The dataset for validation</span>
@@ -143,14 +143,14 @@
                 <span class="n">verbalizer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Verbalizer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">train_dataset</span> <span class="o">=</span> <span class="n">train_dataset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">valid_dataset</span> <span class="o">=</span> <span class="n">valid_dataset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_dataset</span> <span class="o">=</span> <span class="n">test_dataset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span> <span class="o">=</span> <span class="n">load_plm_from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_t</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">auto_t</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_v</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">auto_v</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span> <span class="o">=</span> <span class="n">verbalizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="n">template</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
@@ -169,8 +169,8 @@
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;auto_v is set True, ignore the given verbalizer&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;auto_t and auto_v are both False, the trainer will degenerate to a simple classification trainer&quot;</span><span class="p">)</span>
-        
-    
+
+
     <span class="k">def</span> <span class="nf">_auto_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;performing auto-t...&quot;</span><span class="p">)</span>
         <span class="n">template_generate_model</span><span class="p">,</span> <span class="n">template_generate_tokenizer</span><span class="p">,</span> <span class="n">template_generate_model_config</span><span class="p">,</span> <span class="n">template_tokenizer_wrapper</span> <span class="o">=</span> <span class="n">load_plm_from_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">template_generator</span><span class="p">)</span>
@@ -180,7 +180,7 @@
         <span class="n">template_generator</span><span class="o">.</span><span class="n">release_memory</span><span class="p">()</span>
         <span class="k">del</span> <span class="n">template_generator</span><span class="p">,</span> <span class="n">model</span>
         <span class="k">return</span> <span class="n">template_texts</span>
-    
+
     <span class="k">def</span> <span class="nf">_auto_v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;performing auto-v...&quot;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
@@ -211,7 +211,7 @@
                 <span class="n">best_template_text</span> <span class="o">=</span> <span class="n">template_text</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;best template:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_template_text</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">best_template_text</span>
-    
+
     <span class="k">def</span> <span class="nf">_get_best_label_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbalizer_labelwords_candidates</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">verbalizer</span><span class="p">):</span>
         <span class="n">current_verbalizer</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">verbalizer</span><span class="p">)</span>
         <span class="n">best_metrics</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -233,7 +233,7 @@
         <span class="n">runner</span><span class="o">.</span><span class="n">clean</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">best_score</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">best_score</span>
-    
+
 <div class="viewcode-block" id="LMBFFClassificationRunner.run"><a class="viewcode-back" href="../../modules/trainer.html#openprompt.lm_bff_trainer.LMBFFClassificationRunner.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run LM-BFF. if both `auto_v` and `auto_v` are set to True in ``config``, automatic template generation will be performed first.</span>
@@ -248,7 +248,7 @@
             <span class="n">label_words_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_v</span><span class="p">(</span><span class="n">best_template</span><span class="p">)</span>
             <span class="n">best_label_words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_best_label_words</span><span class="p">(</span><span class="n">label_words_list</span><span class="p">,</span> <span class="n">best_template</span><span class="p">,</span> <span class="n">best_verbalizer</span><span class="p">)</span>
             <span class="n">best_verbalizer</span><span class="o">.</span><span class="n">label_words</span> <span class="o">=</span> <span class="n">best_label_words</span>
-        
+
         <span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">build_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">best_template</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;train&#39;</span><span class="p">)</span>
         <span class="n">valid_dataloader</span> <span class="o">=</span> <span class="n">build_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valid_dataset</span><span class="p">,</span> <span class="n">best_template</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;dev&#39;</span><span class="p">)</span>
         <span class="n">test_dataloader</span> <span class="o">=</span> <span class="n">build_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_dataset</span><span class="p">,</span> <span class="n">best_template</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>

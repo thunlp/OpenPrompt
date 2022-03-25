@@ -110,11 +110,11 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `TAC Relation Extraction Dataset (TACRED) &lt;https://nlp.stanford.edu/projects/tacred/&gt;`_ is one of the largest and most widely used datasets for relation classification.</span>
 <span class="sd">    It was released together with the paper `Position-aware Attention and Supervised Data Improve Slot Filling (Zhang et al. 2017) &lt;https://nlp.stanford.edu/pubs/zhang2017tacred.pdf&gt;`_</span>
-<span class="sd">    This processor is also inherited by :py:class:`TACREVProcessor` and :py:class:`ReTACREDProcessor`. </span>
-<span class="sd">    </span>
+<span class="sd">    This processor is also inherited by :py:class:`TACREVProcessor` and :py:class:`ReTACREDProcessor`.</span>
+
 <span class="sd">    Examples:</span>
 
-<span class="sd">    ..  code-block:: python </span>
+<span class="sd">    ..  code-block:: python</span>
 
 <span class="sd">        from openprompt.data_utils.relation_classification_dataset import PROCESSORS</span>
 
@@ -167,9 +167,9 @@
 <span class="sd">    `TACRED Revisted (TACREV) &lt;https://github.com/DFKI-NLP/tacrev&gt;`_ is a variant of the TACRED dataset</span>
 
 <span class="sd">    It was proposed by the paper `TACRED Revisited: A Thorough Evaluation of the TACRED Relation Extraction Task (Alt et al. 2020) &lt;https://aclanthology.org/2020.acl-main.142.pdf&gt;`_</span>
-<span class="sd">    </span>
+
 <span class="sd">    This processor inherit :py:class:`TACREDProcessor` and can be used similarly</span>
-<span class="sd">    </span>
+
 <span class="sd">    Examples:</span>
 
 <span class="sd">    ..  code-block:: python</span>
@@ -177,7 +177,7 @@
 <span class="sd">        from openprompt.data_utils.relation_classification_dataset import PROCESSORS</span>
 
 <span class="sd">        base_path = &quot;datasets/RelationClassification&quot;</span>
-<span class="sd">    </span>
+
 <span class="sd">        dataset_name = &quot;TACREV&quot;</span>
 <span class="sd">        dataset_path = os.path.join(base_path, dataset_name)</span>
 <span class="sd">        processor = PROCESSORS[dataset_name.lower()]()</span>
@@ -201,9 +201,9 @@
 <span class="sd">    `Re-TACRED &lt;https://github.com/gstoica27/Re-TACRED&gt;`_ is a variant of the TACRED dataset</span>
 
 <span class="sd">    It was proposed by the paper `Re-TACRED: Addressing Shortcomings of the TACRED Dataset (Stoica et al. 2021) &lt;https://arxiv.org/pdf/2104.08398.pdf&gt;`_</span>
-<span class="sd">    </span>
+
 <span class="sd">    This processor inherit :py:class:`TACREDProcessor` and can be used similarly</span>
-<span class="sd">    </span>
+
 <span class="sd">    Examples:</span>
 
 <span class="sd">    ..  code-block:: python</span>
@@ -235,7 +235,7 @@
 <span class="sd">    `SemEval-2010 Task 8 &lt;https://aclanthology.org/S10-1006.pdf&gt;`_ is a  a traditional dataset in relation classification.</span>
 
 <span class="sd">    It was released together with the paper `SemEval-2010 Task 8: Multi-Way Classification of Semantic Relations Between Pairs of Nominals (Hendrickx et al. 2010) &lt;https://aclanthology.org/S10-1006.pdf&gt;`_</span>
-<span class="sd">    </span>
+
 <span class="sd">    Examples:</span>
 
 <span class="sd">    ..  code-block:: python</span>

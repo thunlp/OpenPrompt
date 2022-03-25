@@ -111,7 +111,7 @@
 <span class="sd">        also_sample_dev(:obj:`bool`, optional): Whether to apply the sampler to the dev data.</span>
 <span class="sd">        num_examples_total_dev(:obj:`int`, optional): Sampling strategy ``I``: Use total number of examples for few-shot sampling.</span>
 <span class="sd">        num_examples_per_label_dev(:obj:`int`, optional): Sampling strategy ``II``: Use the number of examples for each label for few-shot sampling.</span>
-<span class="sd">    </span>
+
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -125,7 +125,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_examples_total and num_examples_per_label can&#39;t be both None.&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">num_examples_total</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_examples_per_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_examples_total and num_examples_per_label can&#39;t be both set.&quot;</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">also_sample_dev</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">num_examples_total_dev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_examples_per_label_dev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_examples_total and num_examples_per_label can&#39;t be both set.&quot;</span><span class="p">)</span>
@@ -142,7 +142,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label</span> <span class="o">=</span> <span class="n">num_examples_per_label</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">also_sample_dev</span> <span class="o">=</span> <span class="n">also_sample_dev</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">train_dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span>
                  <span class="n">valid_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -154,7 +154,7 @@
 <span class="sd">            train_dataset (:obj:`Union[Dataset, List]`): The train datset for the sampler.</span>
 <span class="sd">            valid_dataset (:obj:`Union[Dataset, List]`, optional): The valid datset for the sampler. Default to None.</span>
 <span class="sd">            seed (:obj:`int`, optional): The random seed for the sampling.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`(Union[Dataset, List], Union[Dataset, List])`: The sampled dataset (train_dataset, valid_dataset), whose type is identical to the input.</span>
 
@@ -169,9 +169,9 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">also_sample_dev</span><span class="p">:</span>
                 <span class="n">valid_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample</span><span class="p">(</span><span class="n">valid_dataset</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">train_dataset</span><span class="p">,</span> <span class="n">valid_dataset</span>
-    
-    <span class="k">def</span> <span class="nf">_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
-                <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span> 
+
+    <span class="k">def</span> <span class="nf">_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span>
                 <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
                 <span class="n">sample_twice</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
@@ -187,7 +187,7 @@
             <span class="n">selected_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_per_label</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label</span><span class="p">)</span> <span class="c1"># TODO fix: use num_examples_per_label_dev for dev</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">selected_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_total</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_total</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">sample_twice</span><span class="p">:</span>
             <span class="n">selected_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span>
             <span class="n">remain_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selected_set</span><span class="p">]</span>
@@ -197,30 +197,30 @@
                 <span class="n">selected_ids_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_per_label</span><span class="p">(</span><span class="n">remain_ids</span><span class="p">,</span> <span class="n">remain_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_per_label_dev</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">selected_ids_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_total</span><span class="p">(</span><span class="n">remain_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_examples_total_dev</span><span class="p">)</span>
-        
+
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">Subset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">selected_ids</span><span class="p">),</span> <span class="n">Subset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">selected_ids_dev</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
                 <span class="k">return</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selected_ids</span><span class="p">],</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selected_ids_dev</span><span class="p">]</span>
-        
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">Subset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">selected_ids</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
                 <span class="k">return</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selected_ids</span><span class="p">]</span>
-        
-    
+
+
 <div class="viewcode-block" id="FewShotSampler.sample_total"><a class="viewcode-back" href="../../../modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_total">[docs]</a>    <span class="k">def</span> <span class="nf">sample_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">num_examples_total</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Use the total number of examples for few-shot sampling (Strategy ``I``).</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            indices(:obj:`List`): The random indices of the whole datasets.</span>
 <span class="sd">            num_examples_total(:obj:`int`): The total number of examples.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`List`: The selected indices with the size of ``num_examples_total``.</span>
-<span class="sd">            </span>
+
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
         <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[:</span><span class="n">num_examples_total</span><span class="p">]</span>
@@ -229,14 +229,14 @@
 
 <div class="viewcode-block" id="FewShotSampler.sample_per_label"><a class="viewcode-back" href="../../../modules/data_utils.html#openprompt.data_utils.data_sampler.FewShotSampler.sample_per_label">[docs]</a>    <span class="k">def</span> <span class="nf">sample_per_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">num_examples_per_label</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Use the number of examples per class for few-shot sampling (Strategy ``II``). </span>
+<span class="sd">        Use the number of examples per class for few-shot sampling (Strategy ``II``).</span>
 <span class="sd">        If the number of examples is not enough, a warning will pop up.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            indices(:obj:`List`): The random indices of the whole datasets.</span>
 <span class="sd">            labels(:obj:`List`): The list of the labels.</span>
 <span class="sd">            num_examples_per_label(:obj:`int`): The total number of examples for each class.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`List`: The selected indices with the size of ``num_examples_total``.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -253,10 +253,9 @@
             <span class="n">selected_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tmp</span><span class="p">[:</span><span class="n">num_examples_per_label</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
         <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span>
-        <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">selected_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>    
+        <span class="n">selected_ids</span> <span class="o">=</span> <span class="n">selected_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Selected examples </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">selected_ids</span></div></div>
-    
 </pre></div>
 
            </div>

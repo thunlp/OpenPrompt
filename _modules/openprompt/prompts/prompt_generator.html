@@ -121,18 +121,18 @@
 <span class="sd">        text (:obj:`Optional[List[str]]`, optional): manual template format. Defaults to None.</span>
 <span class="sd">        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{&#39;&lt;text_a&gt;&#39;: &#39;text_a&#39;, &#39;&lt;text_b&gt;&#39;: &#39;text_b&#39;}``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">T5Tokenizer</span><span class="p">,</span>
                  <span class="n">verbalizer</span><span class="p">:</span> <span class="n">ManualVerbalizer</span><span class="p">,</span>
                  <span class="n">text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">placeholder_mapping</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_a&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;text_b&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_b&#39;</span><span class="p">},</span>
                 <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">,</span>
-                         <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">,</span> 
+                         <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">,</span>
                          <span class="n">placeholder_mapping</span><span class="o">=</span><span class="n">placeholder_mapping</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span> <span class="o">=</span> <span class="n">verbalizer</span>
-    
-    <span class="k">def</span> <span class="nf">wrap_one_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+
+    <span class="k">def</span> <span class="nf">wrap_one_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                          <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="n">example</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;labelword&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">label_words</span><span class="p">[</span><span class="n">example</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">wrapped_example</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">wrap_one_example</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
@@ -151,7 +151,7 @@
 <span class="sd">        length_limit (:obj:`Optional[List[int]]`): The length limit for each part of content, if None, there is no limit. If not None, the list should have a length equal to `target_number`. Defaults to None.</span>
 <span class="sd">        forbidden_word_ids (:obj:`Optional[List[int]]`): Any tokenizer-specific token_id you want to prevent from generating. Defaults to `[]`, i.e. all tokens in the vocabulary are allowed in the generated template.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
                  <span class="n">tokenizer_wrapper</span><span class="p">:</span> <span class="n">Tokenizer</span><span class="p">,</span>
@@ -159,7 +159,7 @@
                  <span class="n">max_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
                  <span class="n">target_number</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
                  <span class="n">beam_width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-                 <span class="n">length_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">length_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">forbidden_word_ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
                  <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
@@ -179,7 +179,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">input_ids_buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention_mask_buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -210,7 +210,7 @@
 <span class="sd">            token_id (:obj:`int`): The corresponding start token_id.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
-    
+
 <div class="viewcode-block" id="TemplateGenerator.convert_template"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.convert_template">[docs]</a>    <span class="k">def</span> <span class="nf">convert_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generated_template</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">original_template</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given original template used for template generation,convert the generated template into a standard template for downstream prompt model, return a ``str``</span>
@@ -246,7 +246,7 @@
                 <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">)</span></div>
 
-        
+
     <span class="k">def</span> <span class="nf">_get_templates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">inner_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">module</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">DataParallel</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
         <span class="n">input_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_ids_buffer</span>
@@ -291,7 +291,7 @@
                 <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">inner_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">))</span>
                 <span class="n">ids</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">aggr_output</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">beam_width</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
-                
+
                 <span class="k">for</span> <span class="n">word_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
                     <span class="n">output_id</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;output_id&#39;</span><span class="p">]</span>
 
@@ -312,10 +312,10 @@
                     <span class="n">new_decoder_input_ids</span> <span class="o">=</span> <span class="n">decoder_input_ids</span><span class="o">.</span><span class="n">new_zeros</span><span class="p">(</span><span class="n">decoder_input_ids</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
                     <span class="n">new_decoder_input_ids</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">decoder_input_ids</span>
                     <span class="n">new_decoder_input_ids</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">word_id</span>
-                    
+
                     <span class="k">if</span> <span class="n">word_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidden_word_ids</span><span class="p">:</span>
                         <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
-                    
+
                     <span class="c1"># Forbid continuous &quot;.&quot;</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">output_text</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">sent_end_id</span> <span class="ow">and</span> <span class="n">output_text</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">sent_end_id</span><span class="p">:</span>
                         <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
@@ -333,7 +333,7 @@
             <span class="n">current_output</span> <span class="o">=</span> <span class="n">new_current_output</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">convert_ids_to_tokens</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">current_output</span><span class="p">]</span>
-    
+
     <span class="k">def</span> <span class="nf">_show_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Templates are </span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates_text</span><span class="p">)))</span>
 
@@ -350,10 +350,10 @@
         <span class="n">init_dict</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span>
         <span class="n">template_generator</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">init_dict</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">template_generator</span></div>
-    
+
     <span class="k">def</span> <span class="nf">release_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
-        
+
 <div class="viewcode-block" id="TemplateGenerator.generate"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.TemplateGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">InputExample</span><span class="p">]):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
@@ -367,7 +367,7 @@
         <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_register_buffer</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">templates_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_templates</span><span class="p">()</span> <span class="c1"># List[str]</span>
@@ -377,10 +377,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates_text</span></div></div>
 
 <div class="viewcode-block" id="T5TemplateGenerator"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.T5TemplateGenerator">[docs]</a><span class="k">class</span> <span class="nc">T5TemplateGenerator</span><span class="p">(</span><span class="n">TemplateGenerator</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; </span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Automatic template search using T5 model. This class inherits from ``TemplateGenerator``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">model</span><span class="p">:</span> <span class="n">T5ForConditionalGeneration</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">T5Tokenizer</span><span class="p">,</span>
                  <span class="n">tokenizer_wrapper</span><span class="p">:</span> <span class="n">Tokenizer</span><span class="p">,</span>
@@ -417,8 +417,8 @@
 
 
 <div class="viewcode-block" id="VerbalizerGenerator"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator">[docs]</a><span class="k">class</span> <span class="nc">VerbalizerGenerator</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    This is the automatic label word search implementation in `LM-BFF &lt;https://arxiv.org/pdf/2012.15723.pdf&gt;`_. </span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the automatic label word search implementation in `LM-BFF &lt;https://arxiv.org/pdf/2012.15723.pdf&gt;`_.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model (:obj:`PretrainedModel`): A pre-trained model for label word generation.</span>
@@ -426,7 +426,7 @@
 <span class="sd">        candidate_num (:obj:`Optional[int]`): The number of label word combinations to generate. Validation will then be performed on each combination. Defaults to 100.</span>
 <span class="sd">        label_word_num_per_class (:obj:`Optional[int]`): The number of candidate label words per class. Defaults to 100.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
                  <span class="n">candidate_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
@@ -451,7 +451,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">probs_buffer</span><span class="p">,</span> <span class="n">logits</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">detach</span><span class="p">()])</span>
-    
+
 <div class="viewcode-block" id="VerbalizerGenerator.post_process"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.post_process">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -459,7 +459,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            word (:obj:`str`): The original word token.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            processed_word (:obj:`str`): The post-processed token.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -488,7 +488,7 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not supported yet&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">inner_model</span><span class="p">)))</span> <span class="c1"># TODO</span></div>
-            
+
     <span class="k">def</span> <span class="nf">_show_verbalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Verbalizer is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_words</span><span class="p">))</span>
 
@@ -513,7 +513,7 @@
         <span class="n">best_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">group_scores</span><span class="p">))[:</span><span class="bp">self</span><span class="o">.</span><span class="n">candidate_num</span><span class="p">]</span>
         <span class="n">best_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">groups</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">best_idx</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">best_groups</span>
-    
+
     <span class="k">def</span> <span class="nf">_get_top_words</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">label_words_ids</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">label_id</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels_buffer</span><span class="p">):</span>
@@ -526,7 +526,7 @@
                 <span class="n">kept</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="n">label_words_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kept</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">label_word_num_per_class</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">label_words_ids</span>
-    
+
 <div class="viewcode-block" id="VerbalizerGenerator.from_config"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.VerbalizerGenerator.from_config">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -538,7 +538,7 @@
         <span class="n">init_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_init_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_init_dict</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">init_args</span><span class="p">}</span>
         <span class="n">verbalizer_generator</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">init_dict</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">verbalizer_generator</span></div>
-    
+
     <span class="k">def</span> <span class="nf">release_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
 
@@ -556,7 +556,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span></div></div>
 
 <div class="viewcode-block" id="RobertaVerbalizerGenerator"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.RobertaVerbalizerGenerator">[docs]</a><span class="k">class</span> <span class="nc">RobertaVerbalizerGenerator</span><span class="p">(</span><span class="n">VerbalizerGenerator</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">model</span><span class="p">:</span> <span class="n">RobertaForMaskedLM</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">RobertaTokenizer</span><span class="p">,</span>
                  <span class="n">candidate_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
@@ -569,7 +569,7 @@
 
 <div class="viewcode-block" id="RobertaVerbalizerGenerator.invalid_label_word"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.RobertaVerbalizerGenerator.invalid_label_word">[docs]</a>    <span class="k">def</span> <span class="nf">invalid_label_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Ġ&#39;</span><span class="p">))</span></div>
-    
+
 <div class="viewcode-block" id="RobertaVerbalizerGenerator.post_process"><a class="viewcode-back" href="../../../modules/prompt_generator.html#openprompt.prompts.RobertaVerbalizerGenerator.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">word</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;Ġ&#39;</span><span class="p">)</span></div></div>
 </pre></div>

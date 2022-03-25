@@ -109,7 +109,7 @@
 <span class="sd">        soft_token (:obj:`str`, optional): The special token for soft token. Default to ``&lt;soft&gt;``</span>
 <span class="sd">        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{&#39;&lt;text_a&gt;&#39;: &#39;text_a&#39;, &#39;&lt;text_b&gt;&#39;: &#39;text_b&#39;}``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
                  <span class="n">text</span><span class="p">:</span>  <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -128,7 +128,7 @@
 <span class="sd">    Different ``&lt;mask&gt;`` tokens have different label words.</span>
 <span class="sd">    The final label is predicted jointly by these label words using logic rules.</span>
 
-<span class="sd">    Args: </span>
+<span class="sd">    Args:</span>
 <span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.</span>
 <span class="sd">        classes (:obj:`Sequence[str]`): A sequence of classes that need to be projected.</span>
 <span class="sd">        label_words (:obj:`Union[Sequence[Sequence[str]], Mapping[str, Sequence[str]]]`, optional): The label words that are projected by the labels.</span>

@@ -111,17 +111,17 @@
 
 <div class="viewcode-block" id="Template"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template">[docs]</a><span class="k">class</span> <span class="nc">Template</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Base class for all the templates. </span>
+<span class="sd">    Base class for all the templates.</span>
 <span class="sd">    Most of methods are abstract, with some expections to hold the common methods for all template, such as ``loss_ids``, ``save``, ``load``.</span>
 
-<span class="sd">    Args: </span>
+<span class="sd">    Args:</span>
 <span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.</span>
-<span class="sd">        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. </span>
+<span class="sd">        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">registered_inputflag_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;loss_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;shortenable_ids&quot;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
                  <span class="n">placeholder_mapping</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;text_a&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_a&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;text_b&gt;&#39;</span><span class="p">:</span><span class="s1">&#39;text_b&#39;</span><span class="p">},</span>
                 <span class="p">):</span>
@@ -141,7 +141,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`List[int]`: A list of integers in the range [0, 1]:</span>
-<span class="sd">            </span>
+
 <span class="sd">            - 1 for a masked tokens.</span>
 <span class="sd">            - 0 for a sequence tokens.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -150,11 +150,11 @@
 <div class="viewcode-block" id="Template.get_default_shortenable_ids"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.get_default_shortenable_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_shortenable_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Every template needs shortenable_ids, denoting which part of the template can be trucate to fit</span>
 <span class="sd">        the language model&#39;s ``max_seq_length``. Default: the input text is shortenable, while the template text and other</span>
-<span class="sd">        special tokens are not shortenable. </span>
+<span class="sd">        special tokens are not shortenable.</span>
 
 <span class="sd">        e.g. when self.text is ``&#39;{&quot;placeholder&quot;: &quot;text_a&quot;} {&quot;placeholder&quot;: &quot;text_b&quot;, &quot;shortenable&quot;: False} {&quot;meta&quot;: &quot;word&quot;} is {&quot;mask&quot;}.&#39;``,</span>
 <span class="sd">        output is ``[1, 0, 0, 0, 0, 0, 0]``.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`List[int]`: A list of integers in the range ``[0, 1]``:</span>
 
@@ -173,7 +173,7 @@
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This function identifies which tokens are soft tokens.</span>
 
-<span class="sd">        Sometimes tokens in the template are not from the vocabulary, </span>
+<span class="sd">        Sometimes tokens in the template are not from the vocabulary,</span>
 <span class="sd">        but a sequence of soft tokens.</span>
 <span class="sd">        In this case, you need to implement this function</span>
 
@@ -181,7 +181,7 @@
 <span class="sd">            NotImplementedError: if needed, add ``soft_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
-    
+
 <div class="viewcode-block" id="Template.incorporate_text_example"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.incorporate_text_example">[docs]</a>    <span class="k">def</span> <span class="nf">incorporate_text_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                  <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span>
                                 <span class="p">):</span>
@@ -202,7 +202,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;can not parse </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">text</span></div>
-    
+
     <span class="k">def</span> <span class="nf">_check_template_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;check whether the template format is correct.</span>
 <span class="sd">        TODO: add more</span>
@@ -211,13 +211,13 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">):</span>
             <span class="k">if</span> <span class="s1">&#39;mask&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
                 <span class="n">mask_num</span> <span class="o">+=</span> <span class="mi">1</span>
-        
+
         <span class="k">if</span> <span class="n">mask_num</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;mask&#39; position not found in the template: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">. Please Check!&quot;</span><span class="p">)</span>
 
 
 
-    
+
 <div class="viewcode-block" id="Template.parse_text"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.parse_text">[docs]</a>    <span class="k">def</span> <span class="nf">parse_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="n">parsed</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
@@ -267,23 +267,23 @@
         <span class="k">return</span> <span class="n">parsed</span></div>
 
     <span class="c1"># @abstractmethod</span>
-<div class="viewcode-block" id="Template.wrap_one_example"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.wrap_one_example">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_one_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+<div class="viewcode-block" id="Template.wrap_one_example"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.wrap_one_example">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_one_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                          <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Given an input example which contains input text, which can be referenced</span>
-<span class="sd">        by self.template.placeholder_mapping &#39;s value. </span>
+<span class="sd">        by self.template.placeholder_mapping &#39;s value.</span>
 <span class="sd">        This function process the example into a list of dict,</span>
 <span class="sd">        Each dict functions as a group, which has the sample properties, such as</span>
 <span class="sd">        whether it&#39;s shortenable, whether it&#39;s the masked position, whether it&#39;s soft token, etc.</span>
 <span class="sd">        Since a text will be tokenized in the subsequent processing procedure,</span>
 <span class="sd">        these attributes are broadcasted along the tokenized sentence.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.</span>
-<span class="sd">       </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`List[Dict]`: A list of dict of the same length as self.text. e.g. ``[{&quot;loss_ids&quot;: 0, &quot;text&quot;: &quot;It was&quot;}, {&quot;loss_ids&quot;: 1, &quot;text&quot;: &quot;&lt;mask&gt;&quot;}, ]``</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;template text has not been initialized&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">InputExample</span><span class="p">):</span>
@@ -302,14 +302,14 @@
                     <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;get_default_&quot;</span><span class="o">+</span><span class="n">inputflag_name</span><span class="p">):</span>
                     <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;get_default_&quot;</span><span class="o">+</span><span class="n">inputflag_name</span><span class="p">)()</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="c1"># cache </span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="c1"># cache</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">                    Template&#39;s inputflag &#39;</span><span class="si">{}</span><span class="s2">&#39; is registered but not initialize.</span>
 <span class="s2">                    Try using template.</span><span class="si">{}</span><span class="s2"> = [...] to initialize</span>
 <span class="s2">                    or create an method get_default_</span><span class="si">{}</span><span class="s2">(self) in your template.</span>
 <span class="s2">                    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inputflag_name</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">,</span> <span class="n">inputflag_name</span><span class="p">))</span>
-                
+
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Template: len(</span><span class="si">{}</span><span class="s2">)=</span><span class="si">{}</span><span class="s2"> doesn&#39;t match len(text)=</span><span class="si">{}</span><span class="s2">.&quot;</span>\
                         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inputflag_name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)))</span>
@@ -321,8 +321,8 @@
             <span class="n">wrapped_parts_not_tokenize</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">example</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">not_empty_keys</span><span class="p">}</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">wrapped_parts_to_tokenize</span><span class="p">,</span> <span class="n">wrapped_parts_not_tokenize</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;InputExample&quot;</span><span class="p">)</span>      </div>
-    
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;InputExample&quot;</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Template.process_batch"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.process_batch">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">process_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Template should rewrite this method if you need to process the batch input such as substituting embeddings.</span>
@@ -337,13 +337,13 @@
 <span class="sd">        should remove the outputs on these positions to keep the seq_len the same</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">outputs</span></div>
-        
+
 <div class="viewcode-block" id="Template.save"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        A save method API.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            path (str): A path to save your template.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -353,7 +353,7 @@
     <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_text</span>
 
-    <span class="nd">@text</span><span class="o">.</span><span class="n">setter</span> 
+    <span class="nd">@text</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_text</span> <span class="o">=</span> <span class="n">text</span>
         <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -371,7 +371,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_on_text_set</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">on_text_set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_on_text_set</span> <span class="o">=</span> <span class="kc">False</span></div>
-   
+
 <div class="viewcode-block" id="Template.on_text_set"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.on_text_set">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">on_text_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -379,7 +379,7 @@
 <span class="sd">        The designer of the template should explictly know what should be down when the template text is set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
-    
+
 <div class="viewcode-block" id="Template.from_file"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.from_file">[docs]</a>    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                   <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                   <span class="n">choice</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -387,7 +387,7 @@
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Read the template from a local file.</span>
 
-<span class="sd">        Args: </span>
+<span class="sd">        Args:</span>
 <span class="sd">            path (:obj:`str`): The path of the local template file.</span>
 <span class="sd">            choice (:obj:`int`): The id-th line of the file.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -401,12 +401,12 @@
     <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
                     <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;load a template from template&#39;s configuration node. </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;load a template from template&#39;s configuration node.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            config (:obj:`CfgNode`): the sub-configuration of template, i.e. config[config.template]</span>
-<span class="sd">                        if config is a global config node. </span>
-<span class="sd">            kwargs: Other kwargs that might be used in initialize the verbalizer. </span>
+<span class="sd">                        if config is a global config node.</span>
+<span class="sd">            kwargs: Other kwargs that might be used in initialize the verbalizer.</span>
 <span class="sd">                    The actual value should match the arguments of __init__ functions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -425,16 +425,16 @@
                 <span class="k">elif</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">file_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The text can&#39;t be both set from `text` and `file_path`.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">template</span></div></div>
-    
+
 
 
 
 
 <div class="viewcode-block" id="Verbalizer"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer">[docs]</a><span class="k">class</span> <span class="nc">Verbalizer</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Base class for all the verbalizers. </span>
+<span class="sd">    Base class for all the verbalizers.</span>
 
-<span class="sd">    Args: </span>
+<span class="sd">    Args:</span>
 <span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.</span>
 <span class="sd">        classes (:obj:`Sequence[str]`): A sequence of classes that need to be projected.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -461,14 +461,14 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">label_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Label words means the words in the vocabulary projected by the labels. </span>
+<span class="sd">        Label words means the words in the vocabulary projected by the labels.</span>
 <span class="sd">        E.g. if we want to establish a projection in sentiment classification: positive :math:`\rightarrow` {`wonderful`, `good`},</span>
 <span class="sd">        in this case, `wonderful` and `good` are label words.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_label_words&quot;</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;label words haven&#39;t been set.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_words</span>
-    
+
     <span class="nd">@label_words</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">label_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_words</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">label_words</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -525,21 +525,21 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vocab_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">vocab_size</span>
-    
+
 <div class="viewcode-block" id="Verbalizer.generate_parameters"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.generate_parameters">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">generate_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The verbalizer can be seen as an extra layer on top of the originial</span>
 <span class="sd">        pre-trained models. In manual verbalizer, it is a fixed one-hot vector of dimension</span>
-<span class="sd">        ``vocab_size``, with the position of the label word being 1 and 0 everywhere else. </span>
-<span class="sd">        In other situation, the parameters may be a continuous vector over the </span>
+<span class="sd">        ``vocab_size``, with the position of the label word being 1 and 0 everywhere else.</span>
+<span class="sd">        In other situation, the parameters may be a continuous vector over the</span>
 <span class="sd">        vocab, with each dimension representing a weight of that token.</span>
 <span class="sd">        Moreover, the parameters may be set to trainable to allow label words selection.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Therefore, this function serves as an abstract methods for generating the parameters</span>
 <span class="sd">        of the verbalizer, and must be instantiated in any derived class.</span>
 
-<span class="sd">        Note that the parameters need to be registered as a part of pytorch&#39;s module to </span>
+<span class="sd">        Note that the parameters need to be registered as a part of pytorch&#39;s module to</span>
 <span class="sd">        It can be acheived by wrapping a tensor using ``nn.Parameter()``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
@@ -551,13 +551,13 @@
         <span class="k">if</span> <span class="n">logits</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">:</span>
             <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_calibrate_logits</span> <span class="o">=</span> <span class="n">logits</span></div>
-        
+
 <div class="viewcode-block" id="Verbalizer.process_outputs"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.process_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">process_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                        <span class="n">outputs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
                        <span class="n">batch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">InputFeatures</span><span class="p">],</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;By default, the verbalizer will process the logits of the PLM&#39;s </span>
-<span class="sd">        output. </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;By default, the verbalizer will process the logits of the PLM&#39;s</span>
+<span class="sd">        output.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            logits (:obj:`torch.Tensor`): The current logits generated by pre-trained language models.</span>
@@ -574,11 +574,11 @@
 <span class="sd">            outputs (:obj:`ModelOutput`) The output from the pretrained language model.</span>
 
 <span class="sd">        Return:</span>
-<span class="sd">            :obj:`torch.Tensor` The gathered output, should be of shape (``batch_size``, </span>
+<span class="sd">            :obj:`torch.Tensor` The gathered output, should be of shape (``batch_size``,</span>
 <span class="sd">            ``seq_len``, ``any``)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span></div>
-    
+
 <div class="viewcode-block" id="Verbalizer.aggregate"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.aggregate">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="n">label_words_logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; To aggregate logits on multiple label words into the label&#39;s logits</span>
@@ -600,7 +600,7 @@
 <div class="viewcode-block" id="Verbalizer.normalize"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.normalize">[docs]</a>    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given logits regarding the entire vocab, calculate the probs over the label words set by softmax.</span>
-<span class="sd">       </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            logits(:obj:`Tensor`): The logits of the entire vocab.</span>
 
@@ -614,27 +614,27 @@
     <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;This method receives input logits of shape ``[batch_size, vocab_size]``, and use the </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;This method receives input logits of shape ``[batch_size, vocab_size]``, and use the</span>
 <span class="sd">        parameters of this verbalizer to project the logits over entire vocab into the</span>
-<span class="sd">        logits of labels words. </span>
+<span class="sd">        logits of labels words.</span>
 
-<span class="sd">        Args: </span>
-<span class="sd">            logits (:obj:`Tensor`): The logits over entire vocab generated by the pre-trained lanuage model with shape [``batch_size``, ``max_seq_length``, ``vocab_size``] </span>
-<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            logits (:obj:`Tensor`): The logits over entire vocab generated by the pre-trained lanuage model with shape [``batch_size``, ``max_seq_length``, ``vocab_size``]</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`Tensor`: The normalized probs (sum to 1) of each label .</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
-    
+
 <div class="viewcode-block" id="Verbalizer.handle_multi_token"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.handle_multi_token">[docs]</a>    <span class="k">def</span> <span class="nf">handle_multi_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_words_logits</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Support multiple methods to handle the multi tokens produced by the tokenizer.</span>
 <span class="sd">        We suggest using &#39;first&#39; or &#39;max&#39; if the some parts of the tokenization is not meaningful.</span>
 <span class="sd">        Can broadcast to 3-d tensor.</span>
-<span class="sd">    </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            label_words_logits (:obj:`torch.Tensor`):</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`torch.Tensor`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -648,17 +648,17 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;multi_token_handler </span><span class="si">{}</span><span class="s2"> not configured&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">multi_token_handler</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">label_words_logits</span></div>
-    
+
 <div class="viewcode-block" id="Verbalizer.from_config"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.from_config">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> 
-                    <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                    <span class="n">config</span><span class="p">:</span> <span class="n">CfgNode</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;load a verbalizer from verbalizer&#39;s configuration node. </span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;load a verbalizer from verbalizer&#39;s configuration node.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            config (:obj:`CfgNode`): the sub-configuration of verbalizer, i.e. ``config[config.verbalizer]``</span>
-<span class="sd">                        if config is a global config node. </span>
-<span class="sd">            kwargs: Other kwargs that might be used in initialize the verbalizer. </span>
+<span class="sd">                        if config is a global config node.</span>
+<span class="sd">            kwargs: Other kwargs that might be used in initialize the verbalizer.</span>
 <span class="sd">                    The actual value should match the arguments of ``__init__`` functions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -677,26 +677,26 @@
                 <span class="k">elif</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;label_words&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">label_words</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">file_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The text can&#39;t be both set from `text` and `file_path`.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">verbalizer</span></div>
-    
+
 <div class="viewcode-block" id="Verbalizer.from_file"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.from_file">[docs]</a>    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                  <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                  <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                   <span class="n">choice</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Load the predefined label words from verbalizer file.</span>
 <span class="sd">        Currently support three types of file format:</span>
-<span class="sd">        1. a .jsonl or .json file, in which is a single verbalizer </span>
+<span class="sd">        1. a .jsonl or .json file, in which is a single verbalizer</span>
 <span class="sd">        in dict format.</span>
 <span class="sd">        2. a .jsonal or .json file, in which is a list of verbalizers in dict format</span>
-<span class="sd">        3.  a .txt or a .csv file, in which is the label words of a class are listed in line, </span>
+<span class="sd">        3.  a .txt or a .csv file, in which is the label words of a class are listed in line,</span>
 <span class="sd">        seperated by commas. Begin a new verbalizer by an empty line.</span>
 <span class="sd">        This format is recommended when you don&#39;t know the name of each class.</span>
 
-<span class="sd">        The details of verbalizer format can be seen in :ref:`How_to_write_a_verbalizer`. </span>
+<span class="sd">        The details of verbalizer format can be seen in :ref:`How_to_write_a_verbalizer`.</span>
 
-<span class="sd">        Args: </span>
+<span class="sd">        Args:</span>
 <span class="sd">            path (:obj:`str`): The path of the local template file.</span>
 <span class="sd">            choice (:obj:`int`): The choice of verbalizer in a file containing</span>
 <span class="sd">                             multiple verbalizers.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            Template : `self` object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -722,7 +722,7 @@
                 <span class="n">label_words</span> <span class="o">=</span> <span class="n">label_words_all</span><span class="p">[</span><span class="n">choice</span><span class="p">]</span>
                 <span class="n">label_words</span> <span class="o">=</span> <span class="p">[</span><span class="n">label_words_per_label</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> \
                             <span class="k">for</span> <span class="n">label_words_per_label</span> <span class="ow">in</span> <span class="n">label_words</span><span class="p">]</span>
-            
+
         <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.jsonl&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">label_words_all</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -737,7 +737,7 @@
                     <span class="k">if</span> <span class="n">choice</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Choice of verbalizer is 1, but the file  </span><span class="se">\</span>
 <span class="s2">                        only contains one verbalizer.&quot;</span><span class="p">)</span>
-                
+
         <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span> <span class="o">=</span> <span class="n">label_words</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_words</span><span class="p">)</span>

@@ -111,46 +111,46 @@
 <span class="sd">    This verbalizer is usefull when the label prediction is better defined by a piece of input.</span>
 <span class="sd">    For example, in correference resolution, the tgt_text is a proper noun metioned in the text.</span>
 <span class="sd">    This is there is no fixed mapping between a class label and its label words. This verbalizer</span>
-<span class="sd">    is can be used as verbalizer of ``COPA`` and ``WSC`` dataset in superglue datasets. </span>
+<span class="sd">    is can be used as verbalizer of ``COPA`` and ``WSC`` dataset in superglue datasets.</span>
 
-<span class="sd">    This verbalizer is especially powerful when combined with </span>
+<span class="sd">    This verbalizer is especially powerful when combined with</span>
 <span class="sd">    `All NLP Tasks Are Generation Tasks &lt;https://arxiv.org/abs/2103.10360&gt;`_ Paradigm (Also see</span>
-<span class="sd">    `Crossfit &lt;https://arxiv.org/abs/2104.08835&gt;`_). It can make any piece of text the tgt_text. The tgt_text will then be filled in the `{&quot;mask&quot;}`. </span>
-<span class="sd">    </span>
-<span class="sd">    For example, when label word is ``&quot;good&quot;``, the tgt_text is ``&quot;good&quot;``; </span>
+<span class="sd">    `Crossfit &lt;https://arxiv.org/abs/2104.08835&gt;`_). It can make any piece of text the tgt_text. The tgt_text will then be filled in the `{&quot;mask&quot;}`.</span>
 
-<span class="sd">    when label word is ``{&quot;text&quot;:&quot;good&quot;}``, the tgt_text is also ``&quot;good&quot;``; </span>
+<span class="sd">    For example, when label word is ``&quot;good&quot;``, the tgt_text is ``&quot;good&quot;``;</span>
 
-<span class="sd">    when label word is ``{&quot;meta&quot;:&quot;choice1&quot;}``, the tgt_text is the ``&quot;meta[&#39;choice1&#39;]&quot;`` field of the ``InputExample``; </span>
-<span class="sd">    </span>
-<span class="sd">    when label word is ``{&quot;meta&quot;:&quot;choice1&quot;} {&quot;placeholder&quot;, &quot;text_a&quot;} .``, the tgt_text is the ``&quot;meta[&#39;choice1&#39;]&quot;`` field of the ``InputExample``, </span>
-<span class="sd">    followed by ``text_a`` field of the ``InputExample``, and then a ``&#39;.&#39;``; </span>
+<span class="sd">    when label word is ``{&quot;text&quot;:&quot;good&quot;}``, the tgt_text is also ``&quot;good&quot;``;</span>
+
+<span class="sd">    when label word is ``{&quot;meta&quot;:&quot;choice1&quot;}``, the tgt_text is the ``&quot;meta[&#39;choice1&#39;]&quot;`` field of the ``InputExample``;</span>
+
+<span class="sd">    when label word is ``{&quot;meta&quot;:&quot;choice1&quot;} {&quot;placeholder&quot;, &quot;text_a&quot;} .``, the tgt_text is the ``&quot;meta[&#39;choice1&#39;]&quot;`` field of the ``InputExample``,</span>
+<span class="sd">    followed by ``text_a`` field of the ``InputExample``, and then a ``&#39;.&#39;``;</span>
 
 <span class="sd">    A use case can be seen in `Tutorial 4.1 &lt;https://github.com/thunlp/OpenPrompt/blob/main/tutorial/4.1_all_tasks_are_generation.py&gt;`_</span>
 
-<span class="sd">    Args:   </span>
+<span class="sd">    Args:</span>
 <span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.</span>
 <span class="sd">        classes (:obj:`List[Any]`): The classes (or labels) of the current task.</span>
 <span class="sd">        prefix (:obj:`str`, optional): The prefix string of the verbalizer (used in PLMs like RoBERTa, which is sensitive to prefix space)</span>
-<span class="sd">        is_rule (:obj:`bool`, optional): When the verbalizer use the rule syntax of MixTemplate. </span>
+<span class="sd">        is_rule (:obj:`bool`, optional): When the verbalizer use the rule syntax of MixTemplate.</span>
 <span class="sd">        label_words (:obj:`dict`, optional): The label words of the generation verbalizer</span>
-<span class="sd">    </span>
-<span class="sd">    Example: </span>
+
+<span class="sd">    Example:</span>
 <span class="sd">    To use this verbalizer to train the T5 model to predict answer and explanation using two masks.</span>
-<span class="sd">    </span>
+
 <span class="sd">    When the template is:</span>
 <span class="sd">    &gt;&gt;&gt; input_example = InputExample(text_a = &quot;Can fish run?&quot;, meta={&quot;answer&quot;:&quot;no&quot;, &quot;explanation&quot;: &quot;The fish have no legs&quot;}, label=0)</span>
 <span class="sd">    &gt;&gt;&gt; template = &quot;{&#39;placeholder&#39;:&#39;text_a&#39;} answer: {&#39;mask&#39;} explanation: {&#39;mask&#39;}&quot;</span>
-<span class="sd">    </span>
+
 <span class="sd">    The verbalizer can be:</span>
 <span class="sd">    &gt;&gt;&gt; label_words = {0:[&quot;no&quot;, &quot;{&#39;meta&#39;:&#39;explanation&#39;}&quot;], 1:[&quot;yes&quot;, &quot;{&#39;meta&#39;:&#39;explanation&#39;}&quot;]}</span>
 <span class="sd">    &gt;&gt;&gt; verbalizer = GenerationVerbalizer(tokenizer, classes=None, is_rule=True, label_words=label_words)</span>
-<span class="sd">    </span>
 
-<span class="sd">        </span>
+
+
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
                  <span class="n">classes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">num_classes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -164,10 +164,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_rule</span> <span class="o">=</span> <span class="n">is_rule</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mixed_token_start</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mixed_token_end</span> <span class="o">=</span> <span class="s2">&quot;}&quot;</span>
- 
+
         <span class="k">if</span> <span class="n">label_words</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># use label words as an initialization</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span> <span class="o">=</span> <span class="n">label_words</span>
-    
+
 <div class="viewcode-block" id="GenerationVerbalizer.wrap_one_example"><a class="viewcode-back" href="../../../modules/verbalizer.html#openprompt.prompts.generation_verbalizer.GenerationVerbalizer.wrap_one_example">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_one_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Take an InputExample, and fill the tgt_text with label words</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -206,7 +206,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">label_words</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">incorporate_text_example</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">d</span><span class="p">)</span></div>
 
 
-    
+
     <span class="k">def</span> <span class="nf">parse_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="n">parsed</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
@@ -250,7 +250,7 @@
             <span class="n">parsed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">parsed</span>
-    
+
     <span class="k">def</span> <span class="nf">incorporate_text_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                  <span class="n">text</span><span class="p">,</span>
                                  <span class="n">example</span><span class="p">:</span> <span class="n">InputExample</span>
@@ -273,14 +273,14 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;can not parse </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">text</span></div>
-    
 
 
 
-    
 
 
-        
+
+
+
 </pre></div>
 
            </div>
