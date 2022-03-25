@@ -22,7 +22,7 @@ class ProtoVerbalizer(Verbalizer):
     r"""
     The implementation of the verbalizer in `Prototypical Verbalizer for Prompt-based Few-shot Tuning`
 
-    Args:   
+    Args:
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.
         classes (:obj:`List[Any]`): The classes (or labels) of the current task.
         label_words (:obj:`Union[List[str], List[List[str]], Dict[List[str]]]`, optional): The label words that are projected by the labels.
@@ -34,7 +34,7 @@ class ProtoVerbalizer(Verbalizer):
         epochs: (:obj:`int`, optional): The training epochs of prototypes.
         multi_verb (:obj:`str`, optional): `multi` to ensemble with manual verbalizers, `proto` to use only ProtoVerb.
     """
-    def __init__(self, 
+    def __init__(self,
                  tokenizer: Optional[PreTrainedTokenizer],
                  model: Optional[PreTrainedModel],
                  classes: Optional[List] = None,
@@ -57,9 +57,9 @@ class ProtoVerbalizer(Verbalizer):
         self.mid_dim = mid_dim
         self.epochs = epochs
         self.trained = False
-        
+
         self.hidden_dims = model.config.hidden_size
-           
+
         self.head = torch.nn.Linear(self.hidden_dims, self.mid_dim, bias=False)
 
         if label_words is not None: # use label words as an initialization
@@ -68,7 +68,7 @@ class ProtoVerbalizer(Verbalizer):
         nn.init.xavier_uniform_(w)
         self.proto = nn.Parameter(w, requires_grad=True)
         self.optimizer = torch.optim.Adam(self.group_parameters_proto, lr=self.lr)
-        
+
     @property
     def group_parameters_proto(self,):
         r"""Include the last layer's parameters
@@ -81,7 +81,7 @@ class ProtoVerbalizer(Verbalizer):
     def on_label_words_set(self):
         self.label_words = self.add_prefix(self.label_words, self.prefix)
         self.generate_parameters()
-        
+
     @staticmethod
     def add_prefix(label_words, prefix):
         r"""Add prefix to label words. For example, if a label words is in the middle of a template,
@@ -90,7 +90,7 @@ class ProtoVerbalizer(Verbalizer):
         Args:
             label_words (:obj:`Union[Sequence[str], Mapping[str, str]]`, optional): The label words that are projected by the labels.
             prefix (:obj:`str`, optional): The prefix string of the verbalizer.
-        
+
         Returns:
             :obj:`Sequence[str]`: New label words with prefix.
         """
@@ -107,10 +107,10 @@ class ProtoVerbalizer(Verbalizer):
                     new_label_words_per_label.append(prefix + word)
             new_label_words.append(new_label_words_per_label)
         return new_label_words
-        
+
     def generate_parameters(self) -> List:
         r"""In basic manual template, the parameters are generated from label words directly.
-        In this implementation, the label_words should not be tokenized into more than one token. 
+        In this implementation, the label_words should not be tokenized into more than one token.
         """
         all_ids = []
         for words_per_label in self.label_words:
@@ -124,12 +124,12 @@ class ProtoVerbalizer(Verbalizer):
         max_num_label_words = max([len(ids_per_label) for ids_per_label in all_ids])
         words_ids_mask = torch.zeros(max_num_label_words, max_len)
         words_ids_mask = [[[1]*len(ids) + [0]*(max_len-len(ids)) for ids in ids_per_label]
-                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label)) 
+                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label))
                              for ids_per_label in all_ids]
         words_ids = [[ids + [0]*(max_len-len(ids)) for ids in ids_per_label]
-                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label)) 
+                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label))
                              for ids_per_label in all_ids]
-        
+
         words_ids_tensor = torch.tensor(words_ids)
         words_ids_mask = torch.tensor(words_ids_mask)
         self.label_words_ids = nn.Parameter(words_ids_tensor, requires_grad=False)
@@ -137,7 +137,7 @@ class ProtoVerbalizer(Verbalizer):
         self.label_words_mask = nn.Parameter(torch.clamp(words_ids_mask.sum(dim=-1), max=1), requires_grad=False)
 
     def process_hiddens(self, hiddens: torch.Tensor, **kwargs):
-        r"""A whole framework to process the original logits over the vocabulary, which contains four steps: 
+        r"""A whole framework to process the original logits over the vocabulary, which contains four steps:
         """
         proto_logits = self.sim(self.head(hiddens), self.proto)
         return proto_logits
@@ -147,11 +147,11 @@ class ProtoVerbalizer(Verbalizer):
                 **kwargs,
                 ) -> torch.Tensor:
         r"""
-        Project the labels, the return value is the normalized (sum to 1) probs of label words. 
-        
+        Project the labels, the return value is the normalized (sum to 1) probs of label words.
+
         Args:
             logits (:obj:`torch.Tensor`): The orginal logits of label words.
-        
+
         Returns:
             :obj:`torch.Tensor`: The normalized logits of label words
         """
@@ -162,7 +162,7 @@ class ProtoVerbalizer(Verbalizer):
         return label_words_logits
 
     def process_logits(self, logits: torch.Tensor, **kwargs):
-        r"""A whole framework to process the original logits over the vocabulary, which contains four steps: 
+        r"""A whole framework to process the original logits over the vocabulary, which contains four steps:
 
         (1) Project the logits into logits of label words
 
@@ -176,14 +176,14 @@ class ProtoVerbalizer(Verbalizer):
 
         Args:
             logits (:obj:`torch.Tensor`): The orginal logits.
-        
+
         Returns:
             (:obj:`torch.Tensor`): The final processed logits over the labels (classes).
         """
         # project
         label_words_logits = self.project(logits, **kwargs)  #Output: (batch_size, num_classes) or  (batch_size, num_classes, num_label_words_per_label)
 
-        
+
         if self.post_log_softmax:
             # normalize
             # label_words_probs = self.normalize(label_words_logits)
@@ -198,17 +198,17 @@ class ProtoVerbalizer(Verbalizer):
         # aggreate
         label_logits = self.aggregate(label_words_logits)
         return label_logits
-    
+
     def normalize(self, logits: torch.Tensor) -> torch.Tensor:
         """
         Given logits regarding the entire vocabulary, return the probs over the label words set.
-        
+
         Args:
             logits (:obj:`Tensor`): The logits over the entire vocabulary.
 
         Returns:
             :obj:`Tensor`: The logits over the label words set.
-        
+
         """
         batch_size = logits.shape[0]
         return F.softmax(logits.reshape(batch_size, -1), dim=-1).reshape(*logits.shape)
@@ -219,19 +219,19 @@ class ProtoVerbalizer(Verbalizer):
 
         Args:
             label_words_logits(:obj:`torch.Tensor`): The logits of the label words.
-        
+
         Returns:
-            :obj:`torch.Tensor`: The aggregated logits from the label words. 
+            :obj:`torch.Tensor`: The aggregated logits from the label words.
         """
         label_words_logits = (label_words_logits * self.label_words_mask).sum(-1)/self.label_words_mask.sum(-1)
         return label_words_logits
 
     def calibrate(self, label_words_probs: torch.Tensor, **kwargs) -> torch.Tensor:
         r"""
-        
+
         Args:
             label_words_probs (:obj:`torch.Tensor`): The probability distribution of the label words with the shape of [``batch_size``, ``num_classes``, ``num_label_words_per_class``]
-        
+
         Returns:
             :obj:`torch.Tensor`: The calibrated probability of label words.
         """
@@ -248,7 +248,7 @@ class ProtoVerbalizer(Verbalizer):
         return label_words_probs
 
     def ensemble_logits(self, manual_logits, proto_logits):
-        
+
         logits = torch.stack([manual_logits, proto_logits])
         logits = logits.permute(1,0,2)
         logits = self.scaler(logits)
@@ -265,7 +265,7 @@ class ProtoVerbalizer(Verbalizer):
         manual_logits = self.process_logits(outputs[1])
         if self.trained is False:
             return manual_logits
-        
+
         proto_logits = self.process_hiddens(outputs[0])
         if self.trained and self.multi_verb == "proto":
             return proto_logits
@@ -291,7 +291,7 @@ class ProtoVerbalizer(Verbalizer):
         norm_x = F.normalize(x, dim=-1)
         norm_y = F.normalize(y, dim=-1)
         return torch.matmul(norm_x, norm_y.transpose(1,0))
-    
+
     def pcl_loss(self, v_ins):
         # instance-prototype loss
 
@@ -300,12 +300,12 @@ class ProtoVerbalizer(Verbalizer):
         loss = 0.
         for i in range(num):
             pos_score = torch.diag(sim_mat[:,i,:])
-            neg_score = (sim_mat[:,i,:].sum(1) - pos_score) 
+            neg_score = (sim_mat[:,i,:].sum(1) - pos_score)
             loss += - torch.log(pos_score / (pos_score + neg_score)).sum()
         loss = loss / (num * self.num_classes * self.num_classes)
 
         # instance-instance loss
-        
+
         loss_ins = 0.
         for i in range(v_ins.shape[0]):
             sim_instance = torch.exp(self.sim(v_ins, v_ins[i]))
@@ -314,7 +314,7 @@ class ProtoVerbalizer(Verbalizer):
             loss_ins += - torch.log(pos_ins / (pos_ins + neg_ins)).sum()
         loss_ins = loss_ins / (num * self.num_classes * num * self.num_classes)
         loss = loss + loss_ins
-        
+
         return loss
 
 
@@ -344,10 +344,10 @@ class ProtoVerbalizer(Verbalizer):
         logger.info("Total epoch: {}. ProtoVerb loss: {}".format(self.epochs, loss))
         self.trained = True
 
-    
-
-        
 
 
-    
-        
+
+
+
+
+

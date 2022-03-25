@@ -29,8 +29,8 @@ from transformers.optimization import  Adafactor, AdafactorSchedule
 
 class BaseRunner(object):
     r"""A base runner for training without training tricks.
-    Applying training tricks such as ensemble of template or verbalizer, 
-    or self-training can use other runner class. 
+    Applying training tricks such as ensemble of template or verbalizer,
+    or self-training can use other runner class.
     This class is specially implemented for classification.
     For generation task, though it can be integrated in this class
     via `task` option, we keep it as another class for simplicity.
@@ -43,7 +43,7 @@ class BaseRunner(object):
         config (:obj:`CfgNode`): A configuration object.
         loss_function (:obj:`Callable`, optional): The loss function in the training process.
     """
-    def __init__(self, 
+    def __init__(self,
                  model: PromptForClassification,
                  config: CfgNode = None,
                  train_dataloader: Optional[PromptDataLoader] = None,
@@ -66,13 +66,13 @@ class BaseRunner(object):
             os.mkdir(os.path.join(config.logging.path, 'checkpoints'))
 
         self.clean = self.config.train.clean
-        
+
     def __del__(self):
         if hasattr(self, 'writer'):
             self.writer.close()
 
     def log(self, name, y, x):
-        if self.clean: return  #TODO add more types 
+        if self.clean: return  #TODO add more types
         self.writer.add_scalar(name, y, x)
 
     def set_stop_criterion(self):
@@ -81,13 +81,13 @@ class BaseRunner(object):
             if self.config.train.num_epochs is not None:
                 logger.warning("num_training_steps set explicitly, num_epochs is not in use.")
             self.num_training_steps = self.config.train.num_training_steps
-            self.num_epochs = int(1e8) # set to a large number 
+            self.num_epochs = int(1e8) # set to a large number
         else:
             if self.config.train.num_epochs is None:
                 raise RuntimeError("At least num_training_steps & num_epochs should be specified.")
             self.num_training_steps = self.steps_per_epoch * self.config.train.num_epochs
             self.num_epochs = self.config.train.num_epochs
-        
+
     @property
     def steps_per_epoch(self) -> int:
         """num of training steps per epoch"""
@@ -101,14 +101,14 @@ class BaseRunner(object):
     @property
     def inner_model(self):
         return self.model.module if isinstance(self.model, DataParallel) else self.model
-    
+
     def configure_optimizers(self):
         r"""config the optimizer and scheduler for
-        
+
         1. model
-        
+
         2. template
-        
+
         3. verbalizer(optional)
         """
 
@@ -133,7 +133,7 @@ class BaseRunner(object):
             if self.config.plm.optimize.scheduler is not None:
                 plm_scheduler = get_linear_schedule_with_warmup(
                     plm_optimizer,
-                    num_warmup_steps = self.config.plm.optimize.scheduler.num_warmup_steps, 
+                    num_warmup_steps = self.config.plm.optimize.scheduler.num_warmup_steps,
                     num_training_steps = self.num_training_steps
                 )
                 schedulers.append(plm_scheduler)
@@ -154,7 +154,7 @@ class BaseRunner(object):
                     if hasattr(template_config.optimize, "scheduler") and template_config.optimize.scheduler is not None:
                         template_scheduler = get_linear_schedule_with_warmup(
                             template_optimizer,
-                            num_warmup_steps = template_config.optimize.scheduler.num_warmup_steps, 
+                            num_warmup_steps = template_config.optimize.scheduler.num_warmup_steps,
                             num_training_steps = self.num_training_steps
                         )
                         schedulers.append(template_scheduler)
@@ -182,7 +182,7 @@ class BaseRunner(object):
                     if hasattr(verbalizer_config.optimize, "scheduler") and verbalizer_config.optimize.scheduler is not None:
                         verbalizer_scheduler = get_linear_schedule_with_warmup(
                             verbalizer_optimizer,
-                            num_warmup_steps = verbalizer_config.optimize.scheduler.num_warmup_steps, 
+                            num_warmup_steps = verbalizer_config.optimize.scheduler.num_warmup_steps,
                             num_training_steps = self.num_training_steps
                         )
                         schedulers.append(verbalizer_scheduler)
@@ -206,7 +206,7 @@ class BaseRunner(object):
         except FileNotFoundError:
             logger.warning(f"Checkpoint {self.checkpoint_path(ckpt)} not found")
             return False
-        
+
         # load state to model
         self.model = self.inner_model
         self.model.load_state_dict(state_dict['state_dict'])
@@ -259,8 +259,8 @@ class BaseRunner(object):
             with open(file_name, 'w') as fout:
                 for value in values:
                     print(value, file = fout)
- 
-    def inference_epoch(self, split: str): 
+
+    def inference_epoch(self, split: str):
         outputs = []
         self.model.eval()
         with torch.no_grad():
@@ -312,10 +312,10 @@ class BaseRunner(object):
                     pbar.update(1)
                 if self.global_step >= self.num_training_steps:
                     logger.info(f"Training epoch {epoch}, num_steps {self.global_step}, avg_loss: {total_loss/self.steps_per_epoch:.4f}, total_loss: {total_loss:.4f}")
-                    return -1 # an indicator of stoping the training 
+                    return -1 # an indicator of stoping the training
         logger.info(f"Training epoch {epoch}, num_steps {self.global_step},  avg_loss: {total_loss/self.steps_per_epoch:.4f}, total_loss: {total_loss:.4f}")
         return 1
-    
+
     def on_fit_start(self):
         """Some initialization works"""
         pass
@@ -323,14 +323,14 @@ class BaseRunner(object):
     def fit(self, ckpt: Optional[str] = None):
         self.set_stop_criterion()
         self.configure_optimizers()
-        
+
 
         if ckpt:
             if not self.load_checkpoint(ckpt):
                 logger.warning("Train from scratch instead ...")
         if self.cur_epoch == 0:
             self.on_fit_start()
-        
+
         for self.cur_epoch in range(self.cur_epoch, self.num_epochs):
             continue_training = self.training_epoch(self.cur_epoch)
             score = self.inference_epoch("validation")
@@ -354,12 +354,12 @@ class BaseRunner(object):
     def run(self, ckpt: Optional[str] = None) -> dict:
         self.fit(ckpt)
         return self.test(ckpt = None if self.clean else 'best')
-        
+
 
 class ClassificationRunner(BaseRunner):
     r"""A runner for simple training without training tricks.
-    Applying training tricks such as ensemble of template or verbalizer, 
-    or self-training can use other runner class. 
+    Applying training tricks such as ensemble of template or verbalizer,
+    or self-training can use other runner class.
     This class is specially implemented for classification.
     For generation task, though it can be integrated in this class
     via `task` option, we keep it as another class for simplicity.
@@ -372,7 +372,7 @@ class ClassificationRunner(BaseRunner):
         config (:obj:`CfgNode`): A configuration object.
         loss_function (:obj:`Callable`, optional): The loss function in the training process.
     """
-    def __init__(self, 
+    def __init__(self,
                  model: PromptForClassification,
                  config: CfgNode = None,
                  train_dataloader: Optional[PromptDataLoader] = None,
@@ -389,8 +389,8 @@ class ClassificationRunner(BaseRunner):
                         )
         self.loss_function = loss_function if loss_function else self.configure_loss_function()
         self.id2label = id2label
-        self.label_path_sep = config.dataset.label_path_sep   
-    
+        self.label_path_sep = config.dataset.label_path_sep
+
     def configure_loss_function(self,):
         r"""config the loss function if it's not passed."""
         if self.config.classification.loss_function == "cross_entropy":
@@ -399,7 +399,7 @@ class ClassificationRunner(BaseRunner):
             return torch.nn.NLLLoss()
         else:
             raise NotImplementedError
-    
+
     def inference_step(self, batch, batch_idx):
         label = batch.pop('label')
         logits = self.model(batch)
@@ -428,11 +428,11 @@ class ClassificationRunner(BaseRunner):
         logits = self.model(batch)
         loss = self.loss_function(logits, batch['label'])
         return loss
-    
+
     def on_fit_start(self):
         """Some initialization works"""
         self.prompt_initialize()
-    
+
     def prompt_initialize(self):
         verbalizer_config = self.config[self.config.verbalizer]
         template_config = self.config[self.config.template]
@@ -461,14 +461,14 @@ class ClassificationRunner(BaseRunner):
                 self.inner_model.verbalizer.optimize_to_initialize()
             if hasattr(self.inner_model.template, "optimize_to_initialize" ):
                 self.inner_model.template.optimize_to_initialize()
-        
+
         self.wrap_model()
 
 
 class GenerationRunner(BaseRunner):
     r"""A runner for simple training without training tricks.
-    Applying training tricks such as ensemble of template or verbalizer, 
-    or self-training can use other runner class. 
+    Applying training tricks such as ensemble of template or verbalizer,
+    or self-training can use other runner class.
     This class is specially implemented for generation.
 
     Args:
@@ -478,7 +478,7 @@ class GenerationRunner(BaseRunner):
         test_dataloader (:obj:`PromptDataloader`, optional): The dataloader to bachify and process the test data.
         config (:obj:`CfgNode`): A configuration object.
     """
-    def __init__(self, 
+    def __init__(self,
                  model: PromptForGeneration,
                  config: CfgNode = None,
                  train_dataloader: Optional[PromptDataLoader] = None,

@@ -19,7 +19,7 @@ class TokenizerWrapper:
                  create_token_type_ids: Optional[str] = False,
                  **kwargs):
         self.max_seq_length = max_seq_length
-        
+
         self.tokenizer = tokenizer
         if truncate_method=='tail':
             self.truncate_fct = self.truncate_from_tail
@@ -29,20 +29,20 @@ class TokenizerWrapper:
             self.truncate_fct = self.balanced_truncate
         else:
             raise NotImplementedError
-        
+
         self.create_token_type_ids = create_token_type_ids
-        
+
         self.template_mask_token = '<mask>'
         self.template_eos_token = '<eos>'
         self.template_bos_token = '<bos>'
         self.template_sep_token = '<sep>'
         self.template_cls_token = '<cls>'
         self.template_pad_token = '<pad>'
-        
+
         from transformers import logging
         verbosity_before = logging.get_verbosity()
         logging.set_verbosity(logging.CRITICAL) # TODO solve this in a more elegant way
-        self.mask_token_map = {self.template_mask_token: self.tokenizer.mask_token if hasattr(self.tokenizer, 'mask_token') else ''} 
+        self.mask_token_map = {self.template_mask_token: self.tokenizer.mask_token if hasattr(self.tokenizer, 'mask_token') else ''}
         self.eos_token_map = {self.template_eos_token: self.tokenizer.eos_token if hasattr(self.tokenizer, 'eos_token') else ''}
         self.bos_token_map = {self.template_bos_token: self.tokenizer.bos_token if hasattr(self.tokenizer, 'bos_token') else ''}
         self.sep_token_map = {self.template_sep_token: self.tokenizer.sep_token if hasattr(self.tokenizer, 'sep_token') else ''}
@@ -52,7 +52,7 @@ class TokenizerWrapper:
 
         self.num_truncated_sentences = 0
         self.total_passed_sentences = 0
-    
+
     @property
     def truncate_rate(self,):
         r"""Using this function, one can easily identify how many sentence has be truncated, thus help the user to choose a better thresthold for chunking.
@@ -61,7 +61,7 @@ class TokenizerWrapper:
             return None
         else:
             return self.num_truncated_sentences/self.total_passed_sentences
-        
+
     @property
     def special_tokens_maps(self,) -> Dict:
         r"""This need to be specified in specific language model
@@ -72,23 +72,23 @@ class TokenizerWrapper:
                 if attrname.endswith('_token_map'):
                     _special_tokens_map.update(getattr(self, attrname))
         return  _special_tokens_map
-   
+
     def tokenize_with_mask(self,
                             wrapped_example: List[Dict],
                             ) -> InputFeatures:
         raise NotImplementedError
-    
+
     def tokenize_without_mask(self,
                             wrapped_example: List[Dict],
                             ) -> InputFeatures:
         raise NotImplementedError
 
     @staticmethod
-    def balanced_truncate(input_dict: Dict, 
+    def balanced_truncate(input_dict: Dict,
                  num_tokens_to_truncate: int=0) -> Dict:
         '''truncate the inputs with balance, number of cut tokens is proportional to the part's length.
         '''
-        shortenable_lens = [len(parts) if parts[0]==1 else 0 
+        shortenable_lens = [len(parts) if parts[0]==1 else 0
                                   for parts in input_dict['shortenable_ids']]
         total_shortenable_len = sum(shortenable_lens)
         num_tokens_to_truncate_each_part = [part_len/total_shortenable_len*num_tokens_to_truncate
@@ -103,7 +103,7 @@ class TokenizerWrapper:
         return truncated_example
 
     @staticmethod
-    def truncate_from_tail(input_dict: Dict, 
+    def truncate_from_tail(input_dict: Dict,
                  num_tokens_to_truncate: int=0) -> Dict:
         r"""truncate the inputs from the rear
         """
@@ -123,9 +123,9 @@ class TokenizerWrapper:
                     break
             truncated_example[key] = parts
         return truncated_example
-    
+
     @staticmethod
-    def truncate_from_head(input_dict: Dict, 
+    def truncate_from_head(input_dict: Dict,
                  num_tokens_to_truncate: int=0) -> Dict:
         r"""truncate the inputs from the head
         """
@@ -169,20 +169,20 @@ class TokenizerWrapper:
     def add_special_tokens(self, encoder_inputs):
             # add special tokens
         for key in encoder_inputs:
-            if key == "input_ids": 
+            if key == "input_ids":
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     encoder_inputs[key] = self.tokenizer.build_inputs_with_special_tokens(
                                                         encoder_inputs[key])
             else:
                 special_tokens_mask = np.array(self.tokenizer.get_special_tokens_mask(encoder_inputs[key]))
-                with_special_tokens = np.array(self.tokenizer.build_inputs_with_special_tokens(encoder_inputs[key]))  
+                with_special_tokens = np.array(self.tokenizer.build_inputs_with_special_tokens(encoder_inputs[key]))
                 if key in ["soft_token_ids"]: # TODO maybe more than this
                     encoder_inputs[key] =  ((1-special_tokens_mask) * with_special_tokens).tolist() # use 0 as special
                 else:
                     encoder_inputs[key] =  ((1-special_tokens_mask) * with_special_tokens - special_tokens_mask*100).tolist() # use -100 as special
         return encoder_inputs
-    
+
     def truncate(self, encoder_inputs):
         total_tokens = sum([len(part) for part in encoder_inputs['input_ids']])
         num_specials = self.num_special_tokens_to_add

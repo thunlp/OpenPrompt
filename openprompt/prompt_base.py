@@ -21,17 +21,17 @@ import torch.nn.functional as F
 
 class Template(nn.Module):
     r'''
-    Base class for all the templates. 
+    Base class for all the templates.
     Most of methods are abstract, with some expections to hold the common methods for all template, such as ``loss_ids``, ``save``, ``load``.
 
-    Args: 
+    Args:
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
-        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. 
+        placeholder_mapping (:obj:`dict`): A place holder to represent the original input text.
     '''
 
     registered_inputflag_names = ["loss_ids", "shortenable_ids"]
 
-    def __init__(self, 
+    def __init__(self,
                  tokenizer: PreTrainedTokenizer,
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
@@ -51,7 +51,7 @@ class Template(nn.Module):
 
         Returns:
             :obj:`List[int]`: A list of integers in the range [0, 1]:
-            
+
             - 1 for a masked tokens.
             - 0 for a sequence tokens.
         '''
@@ -60,11 +60,11 @@ class Template(nn.Module):
     def get_default_shortenable_ids(self) -> List[int]:
         """Every template needs shortenable_ids, denoting which part of the template can be trucate to fit
         the language model's ``max_seq_length``. Default: the input text is shortenable, while the template text and other
-        special tokens are not shortenable. 
+        special tokens are not shortenable.
 
         e.g. when self.text is ``'{"placeholder": "text_a"} {"placeholder": "text_b", "shortenable": False} {"meta": "word"} is {"mask"}.'``,
         output is ``[1, 0, 0, 0, 0, 0, 0]``.
-        
+
         Returns:
             :obj:`List[int]`: A list of integers in the range ``[0, 1]``:
 
@@ -83,7 +83,7 @@ class Template(nn.Module):
         r'''
         This function identifies which tokens are soft tokens.
 
-        Sometimes tokens in the template are not from the vocabulary, 
+        Sometimes tokens in the template are not from the vocabulary,
         but a sequence of soft tokens.
         In this case, you need to implement this function
 
@@ -91,7 +91,7 @@ class Template(nn.Module):
             NotImplementedError: if needed, add ``soft_token_ids`` into ``registered_inputflag_names`` attribute of Template class and implement this method.
         '''
         raise NotImplementedError
-    
+
     def incorporate_text_example(self,
                                  example: InputExample
                                 ):
@@ -112,7 +112,7 @@ class Template(nn.Module):
             else:
                 raise ValueError(f'can not parse {d}')
         return text
-    
+
     def _check_template_format(self, ):
         r"""check whether the template format is correct.
         TODO: add more
@@ -121,13 +121,13 @@ class Template(nn.Module):
         for i, d in enumerate(self.text):
             if 'mask' in d:
                 mask_num += 1
-        
+
         if mask_num==0:
             raise RuntimeError(f"'mask' position not found in the template: {self.text}. Please Check!")
 
 
 
-    
+
     def parse_text(self, text: str) -> List[Dict]:
         parsed = []
         i = 0
@@ -177,23 +177,23 @@ class Template(nn.Module):
         return parsed
 
     # @abstractmethod
-    def wrap_one_example(self, 
+    def wrap_one_example(self,
                          example: InputExample) -> List[Dict]:
         r'''Given an input example which contains input text, which can be referenced
-        by self.template.placeholder_mapping 's value. 
+        by self.template.placeholder_mapping 's value.
         This function process the example into a list of dict,
         Each dict functions as a group, which has the sample properties, such as
         whether it's shortenable, whether it's the masked position, whether it's soft token, etc.
         Since a text will be tokenized in the subsequent processing procedure,
         these attributes are broadcasted along the tokenized sentence.
-        
+
         Args:
             example (:obj:`InputExample`): An :py:class:`~openprompt.data_utils.data_utils.InputExample` object, which should have attributes that are able to be filled in the template.
-       
+
         Returns:
             :obj:`List[Dict]`: A list of dict of the same length as self.text. e.g. ``[{"loss_ids": 0, "text": "It was"}, {"loss_ids": 1, "text": "<mask>"}, ]``
         '''
-        
+
         if self.text is None:
             raise ValueError("template text has not been initialized")
         if isinstance(example, InputExample):
@@ -212,14 +212,14 @@ class Template(nn.Module):
                     v = getattr(self, inputflag_name)
                 elif hasattr(self, "get_default_"+inputflag_name):
                     v = getattr(self, "get_default_"+inputflag_name)()
-                    setattr(self, inputflag_name, v) # cache 
+                    setattr(self, inputflag_name, v) # cache
                 else:
                     raise ValueError("""
                     Template's inputflag '{}' is registered but not initialize.
                     Try using template.{} = [...] to initialize
                     or create an method get_default_{}(self) in your template.
                     """.format(inputflag_name, inputflag_name, inputflag_name))
-                
+
                 if len(v) != len(text):
                     raise ValueError("Template: len({})={} doesn't match len(text)={}."\
                         .format(inputflag_name, len(v), len(text)))
@@ -231,8 +231,8 @@ class Template(nn.Module):
             wrapped_parts_not_tokenize = {key: getattr(example, key) for key in not_empty_keys}
             return [wrapped_parts_to_tokenize, wrapped_parts_not_tokenize]
         else:
-            raise TypeError("InputExample")      
-    
+            raise TypeError("InputExample")
+
     @abstractmethod
     def process_batch(self, batch):
         r"""Template should rewrite this method if you need to process the batch input such as substituting embeddings.
@@ -247,13 +247,13 @@ class Template(nn.Module):
         should remove the outputs on these positions to keep the seq_len the same
         """
         return outputs
-        
+
     def save(self,
              path: str,
              **kwargs) -> None:
         r'''
         A save method API.
-        
+
         Args:
             path (str): A path to save your template.
         '''
@@ -263,7 +263,7 @@ class Template(nn.Module):
     def text(self):
         return self._text
 
-    @text.setter 
+    @text.setter
     def text(self, text):
         self._text = text
         if text is None:
@@ -281,7 +281,7 @@ class Template(nn.Module):
         self._in_on_text_set = True
         self.on_text_set()
         self._in_on_text_set = False
-   
+
     @abstractmethod
     def on_text_set(self):
         r"""
@@ -289,7 +289,7 @@ class Template(nn.Module):
         The designer of the template should explictly know what should be down when the template text is set.
         """
         raise NotImplementedError
-    
+
     def from_file(self,
                   path: str,
                   choice: int = 0,
@@ -297,7 +297,7 @@ class Template(nn.Module):
         r'''
         Read the template from a local file.
 
-        Args: 
+        Args:
             path (:obj:`str`): The path of the local template file.
             choice (:obj:`int`): The id-th line of the file.
         '''
@@ -311,12 +311,12 @@ class Template(nn.Module):
     def from_config(cls,
                     config: CfgNode,
                     **kwargs):
-        r"""load a template from template's configuration node. 
+        r"""load a template from template's configuration node.
 
         Args:
             config (:obj:`CfgNode`): the sub-configuration of template, i.e. config[config.template]
-                        if config is a global config node. 
-            kwargs: Other kwargs that might be used in initialize the verbalizer. 
+                        if config is a global config node.
+            kwargs: Other kwargs that might be used in initialize the verbalizer.
                     The actual value should match the arguments of __init__ functions.
         """
 
@@ -335,16 +335,16 @@ class Template(nn.Module):
                 elif (hasattr(config, "text") and config.text is not None) and config.file_path is not None:
                     raise RuntimeError("The text can't be both set from `text` and `file_path`.")
         return template
-    
+
 
 
 
 
 class Verbalizer(nn.Module):
     r'''
-    Base class for all the verbalizers. 
+    Base class for all the verbalizers.
 
-    Args: 
+    Args:
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
         classes (:obj:`Sequence[str]`): A sequence of classes that need to be projected.
     '''
@@ -371,14 +371,14 @@ class Verbalizer(nn.Module):
     @property
     def label_words(self,):
         r'''
-        Label words means the words in the vocabulary projected by the labels. 
+        Label words means the words in the vocabulary projected by the labels.
         E.g. if we want to establish a projection in sentiment classification: positive :math:`\rightarrow` {`wonderful`, `good`},
         in this case, `wonderful` and `good` are label words.
         '''
         if not hasattr(self, "_label_words"):
             raise RuntimeError("label words haven't been set.")
         return self._label_words
-    
+
     @label_words.setter
     def label_words(self, label_words):
         if label_words is None:
@@ -435,21 +435,21 @@ class Verbalizer(nn.Module):
     @property
     def vocab_size(self,) -> int:
         return self.tokenizer.vocab_size
-    
+
     @abstractmethod
     def generate_parameters(self, **kwargs) -> List:
         r"""
         The verbalizer can be seen as an extra layer on top of the originial
         pre-trained models. In manual verbalizer, it is a fixed one-hot vector of dimension
-        ``vocab_size``, with the position of the label word being 1 and 0 everywhere else. 
-        In other situation, the parameters may be a continuous vector over the 
+        ``vocab_size``, with the position of the label word being 1 and 0 everywhere else.
+        In other situation, the parameters may be a continuous vector over the
         vocab, with each dimension representing a weight of that token.
         Moreover, the parameters may be set to trainable to allow label words selection.
-        
+
         Therefore, this function serves as an abstract methods for generating the parameters
         of the verbalizer, and must be instantiated in any derived class.
 
-        Note that the parameters need to be registered as a part of pytorch's module to 
+        Note that the parameters need to be registered as a part of pytorch's module to
         It can be acheived by wrapping a tensor using ``nn.Parameter()``.
         """
         raise NotImplementedError
@@ -461,13 +461,13 @@ class Verbalizer(nn.Module):
         if logits.requires_grad:
             logits = logits.detach()
         self._calibrate_logits = logits
-        
+
     def process_outputs(self,
                        outputs: torch.Tensor,
                        batch: Union[Dict, InputFeatures],
                        **kwargs):
-        r"""By default, the verbalizer will process the logits of the PLM's 
-        output. 
+        r"""By default, the verbalizer will process the logits of the PLM's
+        output.
 
         Args:
             logits (:obj:`torch.Tensor`): The current logits generated by pre-trained language models.
@@ -484,11 +484,11 @@ class Verbalizer(nn.Module):
             outputs (:obj:`ModelOutput`) The output from the pretrained language model.
 
         Return:
-            :obj:`torch.Tensor` The gathered output, should be of shape (``batch_size``, 
+            :obj:`torch.Tensor` The gathered output, should be of shape (``batch_size``,
             ``seq_len``, ``any``)
         """
         return outputs.logits
-    
+
     @staticmethod
     def aggregate(label_words_logits: torch.Tensor) -> torch.Tensor:
         r""" To aggregate logits on multiple label words into the label's logits
@@ -510,7 +510,7 @@ class Verbalizer(nn.Module):
     def normalize(self, logits: torch.Tensor) -> torch.Tensor:
         r"""
         Given logits regarding the entire vocab, calculate the probs over the label words set by softmax.
-       
+
         Args:
             logits(:obj:`Tensor`): The logits of the entire vocab.
 
@@ -524,27 +524,27 @@ class Verbalizer(nn.Module):
     def project(self,
                 logits: torch.Tensor,
                 **kwargs) -> torch.Tensor:
-        r"""This method receives input logits of shape ``[batch_size, vocab_size]``, and use the 
+        r"""This method receives input logits of shape ``[batch_size, vocab_size]``, and use the
         parameters of this verbalizer to project the logits over entire vocab into the
-        logits of labels words. 
+        logits of labels words.
 
-        Args: 
-            logits (:obj:`Tensor`): The logits over entire vocab generated by the pre-trained lanuage model with shape [``batch_size``, ``max_seq_length``, ``vocab_size``] 
-        
+        Args:
+            logits (:obj:`Tensor`): The logits over entire vocab generated by the pre-trained lanuage model with shape [``batch_size``, ``max_seq_length``, ``vocab_size``]
+
         Returns:
             :obj:`Tensor`: The normalized probs (sum to 1) of each label .
         """
         raise NotImplementedError
-    
+
     def handle_multi_token(self, label_words_logits, mask):
         r"""
         Support multiple methods to handle the multi tokens produced by the tokenizer.
         We suggest using 'first' or 'max' if the some parts of the tokenization is not meaningful.
         Can broadcast to 3-d tensor.
-    
+
         Args:
             label_words_logits (:obj:`torch.Tensor`):
-        
+
         Returns:
             :obj:`torch.Tensor`
         """
@@ -558,17 +558,17 @@ class Verbalizer(nn.Module):
         else:
             raise ValueError("multi_token_handler {} not configured".format(self.multi_token_handler))
         return label_words_logits
-    
+
     @classmethod
-    def from_config(cls, 
-                    config: CfgNode, 
+    def from_config(cls,
+                    config: CfgNode,
                     **kwargs):
-        r"""load a verbalizer from verbalizer's configuration node. 
+        r"""load a verbalizer from verbalizer's configuration node.
 
         Args:
             config (:obj:`CfgNode`): the sub-configuration of verbalizer, i.e. ``config[config.verbalizer]``
-                        if config is a global config node. 
-            kwargs: Other kwargs that might be used in initialize the verbalizer. 
+                        if config is a global config node.
+            kwargs: Other kwargs that might be used in initialize the verbalizer.
                     The actual value should match the arguments of ``__init__`` functions.
         """
 
@@ -587,26 +587,26 @@ class Verbalizer(nn.Module):
                 elif (hasattr(config, "label_words") and config.label_words is not None) and config.file_path is not None:
                     raise RuntimeError("The text can't be both set from `text` and `file_path`.")
         return verbalizer
-    
+
     def from_file(self,
-                  path: str, 
+                  path: str,
                   choice: Optional[int] = 0 ):
         r"""Load the predefined label words from verbalizer file.
         Currently support three types of file format:
-        1. a .jsonl or .json file, in which is a single verbalizer 
+        1. a .jsonl or .json file, in which is a single verbalizer
         in dict format.
         2. a .jsonal or .json file, in which is a list of verbalizers in dict format
-        3.  a .txt or a .csv file, in which is the label words of a class are listed in line, 
+        3.  a .txt or a .csv file, in which is the label words of a class are listed in line,
         seperated by commas. Begin a new verbalizer by an empty line.
         This format is recommended when you don't know the name of each class.
 
-        The details of verbalizer format can be seen in :ref:`How_to_write_a_verbalizer`. 
+        The details of verbalizer format can be seen in :ref:`How_to_write_a_verbalizer`.
 
-        Args: 
+        Args:
             path (:obj:`str`): The path of the local template file.
             choice (:obj:`int`): The choice of verbalizer in a file containing
                              multiple verbalizers.
-        
+
         Returns:
             Template : `self` object
         """
@@ -632,7 +632,7 @@ class Verbalizer(nn.Module):
                 label_words = label_words_all[choice]
                 label_words = [label_words_per_label.strip().split(",") \
                             for label_words_per_label in label_words]
-            
+
         elif path.endswith(".jsonl") or path.endswith(".json"):
             with open(path, "r") as f:
                 label_words_all = json.load(f)
@@ -647,7 +647,7 @@ class Verbalizer(nn.Module):
                     if choice>0:
                         logger.warning("Choice of verbalizer is 1, but the file  \
                         only contains one verbalizer.")
-                
+
         self.label_words = label_words
         if self.num_classes is not None:
             num_classes = len(self.label_words)

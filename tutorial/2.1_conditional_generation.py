@@ -19,7 +19,7 @@ dataset['test'] = WebNLGProcessor().get_test_examples("./datasets/CondGen/webnlg
 
 
 # ## Construct Template
-# 
+#
 # A template can be constructed from the yaml config, but it can also be constructed by directly passing arguments.
 # You can load the plm related things provided by openprompt simply by calling:
 
@@ -32,7 +32,7 @@ plm, tokenizer, model_config, WrapperClass = load_plm(args.model, args.model_nam
 # # Try more prompt!
 
 # You can use templates other than manual template, for example the mixedtemplate is a good place to start.
-# In MixedTemplate, you can use {"soft"} to denote a tunable template. 
+# In MixedTemplate, you can use {"soft"} to denote a tunable template.
 
 
 
@@ -49,7 +49,7 @@ mytemplate = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":
 
 # To better understand how does the template wrap the example, we visualize one instance.
 
-wrapped_example = mytemplate.wrap_one_example(dataset['train'][0])  # If you use template 3, don't worry the {"soft": "Question:"} is replace by an empty template, it is used to initialize the mixed template and then removed. 
+wrapped_example = mytemplate.wrap_one_example(dataset['train'][0])  # If you use template 3, don't worry the {"soft": "Question:"} is replace by an empty template, it is used to initialize the mixed template and then removed.
 print(wrapped_example)
 
 
@@ -58,18 +58,18 @@ print(wrapped_example)
 
 from openprompt import PromptDataLoader
 
-train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
+train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256,
     batch_size=5,shuffle=True, teacher_forcing=True, predict_eos_token=True,
     truncate_method="head")
 
-validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
+validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256,
     batch_size=5,shuffle=False, teacher_forcing=False, predict_eos_token=True,
     truncate_method="head")
 
-test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
+test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256,
     batch_size=5,shuffle=False, teacher_forcing=False, predict_eos_token=True,
     truncate_method="head")
 
@@ -105,7 +105,7 @@ tot_step  = len(train_dataloader)*5
 scheduler = get_linear_schedule_with_warmup(optimizer, 0, tot_step)
 # We provide generation a generation metric, you can also define your own. Note that it's not directly comparable to WebNLG's scripts evaluation.
 from openprompt.utils.metrics import generation_metric
-# Define evaluate function 
+# Define evaluate function
 def evaluate(prompt_model, dataloader):
     generated_sentence = []
     groundtruth_sentence = []
@@ -133,11 +133,11 @@ generation_arguments = {
     "bad_words_ids": None
 }
 
-global_step = 0 
-tot_loss = 0 
+global_step = 0
+tot_loss = 0
 log_loss = 0
 # training and generation.
-tot_loss = 0 
+tot_loss = 0
 for epoch in range(5):
     for step, inputs in enumerate(train_dataloader):
         global_step +=1
@@ -150,7 +150,7 @@ for epoch in range(5):
         optimizer.step()
         scheduler.step()
         optimizer.zero_grad()
-        if global_step %500 ==0: 
+        if global_step %500 ==0:
             print("Epoch {}, global_step {} average loss: {} lr: {}".format(epoch, global_step, (tot_loss-log_loss)/500, scheduler.get_last_lr()[0]), flush=True)
             log_loss = tot_loss
 evaluate(prompt_model, test_dataloader)

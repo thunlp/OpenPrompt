@@ -3,8 +3,8 @@
 # In this tutorial, we do conditional generation with prefix tuning template.
 
 # we use WebNLG as an example, as well. Note that the evaluation of generation result should be done
-# by using the scripts provided by https://github.com/Yale-LILY/dart/tree/master/evaluation, 
-# Which we do not include in it. 
+# by using the scripts provided by https://github.com/Yale-LILY/dart/tree/master/evaluation,
+# Which we do not include in it.
 
 import argparse
 import torch
@@ -24,41 +24,41 @@ dataset['validation'] = WebNLGProcessor().get_dev_examples("./datasets/CondGen/w
 dataset['test'] = WebNLGProcessor().get_test_examples("./datasets/CondGen/webnlg_2017/")
 
 
-# load a pretrained model, its tokenizer, its config, and its TokenzerWrapper by one function 
+# load a pretrained model, its tokenizer, its config, and its TokenzerWrapper by one function
 from openprompt.plms import load_plm
 plm, tokenizer, model_config, WrapperClass = load_plm(args.model, args.model_name_or_path)
 
 # Instantiating the PrefixTuning Template !
 from openprompt.prompts.prefix_tuning_template import PrefixTuningTemplate
 # we can use a plain text as the default setting
-# i.e. 
+# i.e.
 # mytemplate = PrefixTuningTemplate(model=plm, tokenizer=tokenizer)
-# is equal to 
+# is equal to
 # mytemplate = PrefixTuningTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"mask"}')
 mytemplate = PrefixTuningTemplate(model=plm,  tokenizer=tokenizer, text=' {"placeholder":"text_a"} {"special": "<eos>"} {"mask"} ', using_decoder_past_key_values=False)
 
 # To better understand how does the template wrap the example, we visualize one instance.
 # You may observe that the example doesn't end with <|endoftext|> token. Don't worry, adding specific end-of-text token
 # is a language-model-specific token. we will add it for you in the TokenizerWrapper once you pass `predict_eos_token=True`
-wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
+wrapped_example = mytemplate.wrap_one_example(dataset['train'][0])
 print(wrapped_example)
 
 
 # Your can loop over the dataset by yourself by subsequently call mytemplate.wrap_one_example  and WrapperClass().tokenizer()
 # but we have provide a PromptDataLoader for you.
 from openprompt import PromptDataLoader
-train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
+train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256,
     batch_size=5,shuffle=True, teacher_forcing=True, predict_eos_token=True, # be sure to pass predict_eos_token=True if your tempalte doesn't contain one, or you model may fail to stop generation.
     truncate_method="head")
 
-validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
+validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256,
     batch_size=5,shuffle=False, teacher_forcing=False, predict_eos_token=True,
     truncate_method="head")
 
-test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256, 
+test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=256,
     batch_size=5,shuffle=False, teacher_forcing=False, predict_eos_token=True,
     truncate_method="head")
 
@@ -72,7 +72,7 @@ if use_cuda:
 
 from transformers import AdamW
 # Follow PrefixTuning（https://github.com/XiangLi1999/PrefixTuning), we also fix the language model
-# only include the template's parameters in training. 
+# only include the template's parameters in training.
 
 no_decay = ["bias", "LayerNorm.weight"]
 optimizer_grouped_parameters = [
@@ -96,7 +96,7 @@ scheduler = get_linear_schedule_with_warmup(optimizer, 0, tot_step)
 
 # We provide generation a generation metric, you can also define your own. Note that it's not directly comparable to WebNLG's scripts evaluation.
 from openprompt.utils.metrics import generation_metric
-# Define evaluate function 
+# Define evaluate function
 def evaluate(prompt_model, dataloader):
     generated_sentence = []
     groundtruth_sentence = []
@@ -129,8 +129,8 @@ generation_arguments = {
 }
 
 # training and generation.
-global_step = 0 
-tot_loss = 0 
+global_step = 0
+tot_loss = 0
 log_loss = 0
 for epoch in range(5):
     prompt_model.train()
@@ -145,7 +145,7 @@ for epoch in range(5):
         optimizer.step()
         scheduler.step()
         optimizer.zero_grad()
-        if global_step %500 ==0: 
+        if global_step %500 ==0:
             print("Epoch {}, global_step {} average loss: {} lr: {}".format(epoch, global_step, (tot_loss-log_loss)/500, scheduler.get_last_lr()[0]), flush=True)
             log_loss = tot_loss
 

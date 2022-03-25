@@ -39,7 +39,7 @@ template = LMBFFTemplateGenerationTemplate(tokenizer=template_generate_tokenizer
 # template = ManualTemplate(tokenizer=tokenizer, text='{"placeholder":"text_a"} It is {"mask"}.')
 
 # view wrapped example
-wrapped_example = template.wrap_one_example(dataset['train'][0]) 
+wrapped_example = template.wrap_one_example(dataset['train'][0])
 print(wrapped_example)
 
 # %%
@@ -69,7 +69,7 @@ def fit(model, train_dataloader, val_dataloader, loss_func, optimizer):
         if score > best_score:
             best_score = score
     return best_score
-        
+
 
 def train_epoch(model, train_dataloader, loss_func, optimizer):
     model.train()
@@ -118,7 +118,7 @@ if auto_t:
         if cuda:
             data = data.cuda()
         template_generator._register_buffer(data)
-        
+
     template_generate_model.eval()
     print('generating...')
     template_texts = template_generator._get_templates()

@@ -28,14 +28,14 @@ class PrefixTuningTemplate(Template):
         plm_config (:obj:`PretrainedConfig`): The configuration of the current pre-trained model.
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model.
         mapping_hook (:obj:`nn.Module`, optional):
-        text (:obj:`str`, optional): 
+        text (:obj:`str`, optional):
         num_token (:obj:`int`, optional):
         placeholder_mapping (:obj:`dict`):
         prefix_dropout (:obj:`float`, optional): The dropout rate for the prefix sequence.
     """
     registered_inputflag_names = ["loss_ids", 'shortenable_ids']
 
-    def __init__(self, 
+    def __init__(self,
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  mapping_hook: Optional[nn.Module] = None,
@@ -83,12 +83,12 @@ class PrefixTuningTemplate(Template):
         self.default_text2 = '{"placeholder": "text_a"} {"placeholder": "text_b"} {"mask"}'
 
         self.text = text
-        
+
         self.generate_parameters() # in prefix tuning the template text has no interact with the parameters.
 
         self.plm_modified = False # flag to indicate whether the function of plm are replaced for prefix tuning.
         self.modify_plm(model)
-    
+
 
     def on_text_set(self):
         self.text = self.parse_text(self.text)
@@ -128,7 +128,7 @@ class PrefixTuningTemplate(Template):
         r"""
         Generate parameters needed for new tokens' embedding in P-tuning
         """
-        
+
         self.input_tokens = nn.Parameter(torch.arange(self.num_token).long(), requires_grad=False) # to allow automatic devicing
         if self.config.is_encoder_decoder and self.using_encoder_past_key_values:
             self.wte = nn.Embedding(self.num_token, self.n_embd)
@@ -174,7 +174,7 @@ class PrefixTuningTemplate(Template):
         batch_size = batch['input_ids'].size(0)
         self.past_key_values = self.get_past_key_values()
 
-        if self.config.is_encoder_decoder: 
+        if self.config.is_encoder_decoder:
             # the attention_mask is encoder attention mask, the new token mask will be added in modified_encoder_forward.
             pass
         else: # the attention_mask is decoder attention mask
@@ -184,7 +184,7 @@ class PrefixTuningTemplate(Template):
                 batch['attention_mask'] = torch.cat([torch.ones((batch_size,self.num_token), dtype = am.dtype,device=am.device), am], dim=-1)
             batch['past_key_values'] = past_key_values
         return batch
-    
+
     def modify_plm(self, model):
         if self.plm_modified:
             return None
@@ -222,9 +222,9 @@ class PrefixTuningTemplate(Template):
                             kwargs['attention_mask'] = torch.cat([torch.zeros((*am.shape[:-1],self.num_token), dtype = am.dtype,device=am.device), am], dim=-1)
                         else:
                             raise RuntimeError("Size not match: past length: {}, inputlength:{},\
-                                attention mask length {}".format(kwargs['past_key_value'][0].size(-2), 
+                                attention mask length {}".format(kwargs['past_key_value'][0].size(-2),
                                 args[0].size(-2),kwargs['attention_mask'].size(-1)))
-                        
+
                         return backup_decoder_self_attn_forward_functions[layer_id](*args, **kwargs)
                     layer_module.layer[0].forward = partial(modified_decoder_self_attn_forward, layer_id=i)
 
@@ -234,4 +234,4 @@ class PrefixTuningTemplate(Template):
             raise NotImplementedError
         self.plm_modified = True
 
-    
+

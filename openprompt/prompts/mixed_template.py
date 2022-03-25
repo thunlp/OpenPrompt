@@ -28,7 +28,7 @@ class MixedTemplate(Template):
                  tokenizer: PreTrainedTokenizer,
                  text: Optional[str] = None,
                 ):
-        
+
         super().__init__(tokenizer)
 
         self.raw_embedding = model.get_input_embeddings()
@@ -37,10 +37,10 @@ class MixedTemplate(Template):
 
     def get_default_soft_token_ids(self) -> List[int]:
         return self.soft_token_ids
-    
+
     def prepare(self):
         r"""get the soft token indices ( soft_token_ids ) for the template
-        
+
         ``"soft_id"`` can be used to reference the previous soft token, which means these tokens use the same embeddings.
         **Note that ``"soft_id"`` should have index start from 1 but not 0**
 
@@ -166,7 +166,7 @@ class MixedTemplate(Template):
     def on_text_set(self):
         """
         when template text was set
-        
+
         1. parse text
 
         2. generate parameter needed

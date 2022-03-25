@@ -95,7 +95,7 @@ class WebNLGProcessor(DataProcessor):
 
         assert len(full_rela_lst) == len(full_src_lst)
         assert len(full_rela_lst) == len(full_tgt_lst)
-        
+
         if split.lower() == "train":
             for i, (src, tgt) in enumerate(zip(full_src_lst, full_tgt_lst)):
                 example = InputExample(guid=str(i), text_a=src, tgt_text=tgt)
@@ -106,11 +106,11 @@ class WebNLGProcessor(DataProcessor):
                 examples.append(example)
         return examples
 
-    
+
     def get_src_tgt_len_ratio(self,):
         pass
 
-    
+
 
 PROCESSORS = {
     "webnlg_2017": WebNLGProcessor,

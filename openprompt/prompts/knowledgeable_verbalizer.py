@@ -17,17 +17,17 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
     r"""
     This is the implementation of knowledeagble verbalizer, which uses external knowledge to expand the set of label words.
     This class inherit the ``ManualVerbalizer`` class.
-    
+
     Args:
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.
         classes (:obj:`classes`): The classes (or labels) of the current task.
         prefix (:obj:`str`, optional): The prefix string of the verbalizer.
         multi_token_handler (:obj:`str`, optional): The handling strategy for multiple tokens produced by the tokenizer.
-        max_token_split (:obj:`int`, optional): 
+        max_token_split (:obj:`int`, optional):
         verbalizer_lr (:obj:`float`, optional): The learning rate of the verbalizer optimization.
-        candidate_frac (:obj:`float`, optional): 
+        candidate_frac (:obj:`float`, optional):
     """
-    def __init__(self, 
+    def __init__(self,
                  tokenizer: PreTrainedTokenizer = None,
                  classes: Sequence[str] = None,
                  prefix: Optional[str] = " ",
@@ -73,10 +73,10 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
         for words in label_words:
             new_label_words.append([prefix + word.lstrip(prefix) for word in words])
         return new_label_words
-        
+
     def generate_parameters(self) -> List:
         r"""In basic manual template, the parameters are generated from label words directly.
-        In this implementation, the label_words should not be tokenized into more one token. 
+        In this implementation, the label_words should not be tokenized into more one token.
         """
         all_ids = []
         label_words = []
@@ -86,8 +86,8 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
             words_keep_per_label = []
             for word in words_per_label:
                 ids = self.tokenizer.encode(word, add_special_tokens=False)
-                if self.max_token_split>0  and len(ids) > self.max_token_split: 
-                    # in knowledgebale verbalizer, the labelwords may be very rare, so we may 
+                if self.max_token_split>0  and len(ids) > self.max_token_split:
+                    # in knowledgebale verbalizer, the labelwords may be very rare, so we may
                     # want to remove the label words which are not recogonized by tokenizer.
                     logger.warning("Word {} is split into {} (>{}) tokens: {}. Ignored.".format(word, \
                                     len(ids), self.max_token_split,
@@ -99,19 +99,19 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
             label_words.append(words_keep_per_label)
             all_ids.append(ids_per_label)
         self.label_words = label_words
-        
-        
+
+
 
         max_len  = max([max([len(ids) for ids in ids_per_label]) for ids_per_label in all_ids])
         max_num_label_words = max([len(ids_per_label) for ids_per_label in all_ids])
         words_ids_mask = torch.zeros(max_num_label_words, max_len)
         words_ids_mask = [[[1]*len(ids) + [0]*(max_len-len(ids)) for ids in ids_per_label]
-                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label)) 
+                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label))
                              for ids_per_label in all_ids]
         words_ids = [[ids + [0]*(max_len-len(ids)) for ids in ids_per_label]
-                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label)) 
+                             + [[0]*max_len]*(max_num_label_words-len(ids_per_label))
                              for ids_per_label in all_ids]
-        
+
         words_ids_tensor = torch.tensor(words_ids)
         words_ids_mask = torch.tensor(words_ids_mask)
         self.label_words_ids = nn.Parameter(words_ids_tensor, requires_grad=False)
@@ -147,13 +147,13 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
                     new_label_words[-1].append(self.label_words[i_label][j_word])
         self.label_words = new_label_words
         self.to(self._calibrate_logits.device)
-    
+
 
     def project(self,
                  logits: torch.Tensor,
                  **kwargs,
                  ) -> torch.Tensor:
-        r"""The return value if the normalized (sum to 1) probs of label words. 
+        r"""The return value if the normalized (sum to 1) probs of label words.
         """
         label_words_logits = logits[:, self.label_words_ids]
         label_words_logits = self.handle_multi_token(label_words_logits, self.words_ids_mask)
@@ -165,9 +165,9 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
 
         Args:
             label_words_logits(:obj:`torch.Tensor`): The logits of the label words.
-        
+
         Returns:
-            :obj:`torch.Tensor`: The aggregated logits from the label words. 
+            :obj:`torch.Tensor`: The aggregated logits from the label words.
         """
         if not self.training:
             label_words_weights = F.softmax(self.pred_temp*self.label_words_weights-10000*(1-self.label_words_mask), dim=-1)
@@ -176,7 +176,7 @@ class KnowledgeableVerbalizer(ManualVerbalizer):
         label_words_logits = (label_words_logits * self.label_words_mask * label_words_weights).sum(-1)
         return label_words_logits
 
-    
+
     # def optimize(self,):
     #     self.verbalizer_optimizer.step()
     #     self.verbalizer_optimizer.zero_grad()

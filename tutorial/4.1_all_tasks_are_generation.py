@@ -1,5 +1,5 @@
 # There is a recent trend to unify all tasks (such as classification) into tasks generation.
-# In fact, unifying the tasks into text generation can be neatly conducted using prompt. 
+# In fact, unifying the tasks into text generation can be neatly conducted using prompt.
 # In OpenPrompt, we provide a GenerationVerbalizer for this utility.
 # Here we go!
 
@@ -33,7 +33,7 @@ parser.add_argument("--model_name_or_path", default='../../plm_cache/t5-large-lm
 parser.add_argument("--project_root", default="/mnt/sfs_turbo/hsd/OpenPrompt_official/OpenPrompt/", help="The project root in the file system, i.e. the absolute path of OpenPrompt")
 parser.add_argument("--template_id", type=int)
 parser.add_argument("--verbalizer_id", type=int)
-parser.add_argument("--data_dir", type=str, default="/mnt/sfs_turbo/huggingface_datasets/") # sometimes, huggingface datasets can not be automatically downloaded due to network issue, please refer to 0_basic.py line 15 for solutions. 
+parser.add_argument("--data_dir", type=str, default="/mnt/sfs_turbo/huggingface_datasets/") # sometimes, huggingface datasets can not be automatically downloaded due to network issue, please refer to 0_basic.py line 15 for solutions.
 parser.add_argument("--dataset",type=str)
 parser.add_argument("--result_file", type=str, default="../sfs_out/results.txt")
 parser.add_argument("--max_steps", default=20000, type=int)
@@ -71,7 +71,7 @@ this_run_unicode = str(random.randint(0, 1e10))
 from openprompt.utils.reproduciblity import set_seed
 set_seed(args.seed)
 
-# use lm-adapted version or t5-v1.1 checkpoint. Note that the originial t5 checkpoint has been pretrained 
+# use lm-adapted version or t5-v1.1 checkpoint. Note that the originial t5 checkpoint has been pretrained
 # on part of GLUE dataset, thus should not be used.
 from openprompt.plms.seq2seq import T5TokenizerWrapper, T5LMTokenizerWrapper
 from transformers import T5Config, T5Tokenizer, T5ForConditionalGeneration
@@ -81,7 +81,7 @@ from openprompt.plms import load_plm
 plm, tokenizer, model_config, WrapperClass = load_plm(args.model, args.model_name_or_path)
 dataset = {}
 
-# Below are multiple dataset examples, including few-shot ones. 
+# Below are multiple dataset examples, including few-shot ones.
 if args.dataset == "boolq":
     Processor = PROCESSORS["super_glue.boolq"]
     dataset['train'] = Processor().get_train_examples(args.data_dir)
@@ -91,9 +91,9 @@ if args.dataset == "boolq":
     scriptsbase = "SuperGLUE/BoolQ"
     scriptformat = "txt"
     dataset_decoder_max_length = 10
-    max_seq_l = 480 # this should be specified according to the running GPU's capacity 
+    max_seq_l = 480 # this should be specified according to the running GPU's capacity
     if args.tune_plm: # tune the entire plm will use more gpu-memories, thus we should use a smaller batch_size.
-        batchsize_t = 4 
+        batchsize_t = 4
         batchsize_e = 4
         gradient_accumulation_steps = 8
         model_parallelize = True # if multiple gpus are available, one can use model_parallelize
@@ -134,12 +134,12 @@ elif args.dataset == "rte":
     dataset_decoder_max_length = 10
     if args.tune_plm:
         batchsize_t = 4
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 2
         model_parallelize = True
     else:
         batchsize_t = 8
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 4
         model_parallelize = False
 elif args.dataset == "cb":
@@ -154,12 +154,12 @@ elif args.dataset == "cb":
     dataset_decoder_max_length = 10
     if args.tune_plm:
         batchsize_t = 4
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 8
         model_parallelize = True
     else:
         batchsize_t = 8
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 4
         model_parallelize = False
 elif args.dataset == "wic":
@@ -174,12 +174,12 @@ elif args.dataset == "wic":
     dataset_decoder_max_length = 10
     if args.tune_plm:
         batchsize_t = 4
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 8
         model_parallelize = True
     else:
         batchsize_t = 8
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 4
         model_parallelize = False
 elif args.dataset == "copa":
@@ -194,12 +194,12 @@ elif args.dataset == "copa":
     dataset_decoder_max_length = 50
     if args.tune_plm:
         batchsize_t = 4
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 8
         model_parallelize = True
     else:
         batchsize_t = 8
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 4
         model_parallelize = False
 elif args.dataset == "wsc":
@@ -214,12 +214,12 @@ elif args.dataset == "wsc":
     dataset_decoder_max_length = 10
     if args.tune_plm:
         batchsize_t = 4
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 8
         model_parallelize = True
     else:
         batchsize_t = 8
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 4
         model_parallelize = False
 elif args.dataset == "record":
@@ -234,22 +234,22 @@ elif args.dataset == "record":
     dataset_decoder_max_length = 20
     if args.tune_plm:
         batchsize_t = 4
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 8
         model_parallelize = True
     else:
         batchsize_t = 8
-        batchsize_e = 4 
+        batchsize_e = 4
         gradient_accumulation_steps = 4
         model_parallelize = False
 else:
     raise NotImplementedError
 
 
-# Now define the template and verbalizer. 
-# Note that soft template can be combined with hard template, by loading the hard template from file. 
+# Now define the template and verbalizer.
+# Note that soft template can be combined with hard template, by loading the hard template from file.
 # For example, the template in soft_template.txt is {}
-# The choice_id 1 is the hard template 
+# The choice_id 1 is the hard template
 mytemplate = SoftTemplate(model=plm, tokenizer=tokenizer, num_tokens=args.soft_token_num, initialize_from_vocab=args.init_from_vocab).from_file(f"scripts/{scriptsbase}/soft_template.txt", choice=args.template_id)
 if os.path.exists(f"scripts/{scriptsbase}/generation_verbalizer.{scriptformat}"):
     myverbalizer = GenerationVerbalizer(tokenizer, classes=class_labels, is_rule=True).from_file(f"scripts/{scriptsbase}/generation_verbalizer.{scriptformat}", choice=args.verbalizer_id)
@@ -266,18 +266,18 @@ if model_parallelize:
     prompt_model.parallelize()
 
 
-train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, verbalizer=myverbalizer, tokenizer=tokenizer, # be sure to add verbalizer 
+train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, verbalizer=myverbalizer, tokenizer=tokenizer, # be sure to add verbalizer
     tokenizer_wrapper_class=WrapperClass, max_seq_length=max_seq_l, decoder_max_length=dataset_decoder_max_length,  # be sure to use larger decoder_max_length for teacher forcing.
     batch_size=batchsize_t,shuffle=True, teacher_forcing=True, predict_eos_token=True,  # be sure to use teacher_forcing and predict_eos_token=True
     truncate_method="tail")
 
-validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, verbalizer=myverbalizer, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=max_seq_l, decoder_max_length=3, 
-    batch_size=batchsize_e,shuffle=False, teacher_forcing=False, predict_eos_token=False, # predict_eos_token=True or False are both ok 
+validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, verbalizer=myverbalizer, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=max_seq_l, decoder_max_length=3,
+    batch_size=batchsize_e,shuffle=False, teacher_forcing=False, predict_eos_token=False, # predict_eos_token=True or False are both ok
     truncate_method="tail")
 
-test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, verbalizer=myverbalizer, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=max_seq_l, decoder_max_length=3, 
+test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, verbalizer=myverbalizer, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=max_seq_l, decoder_max_length=3,
     batch_size=batchsize_e,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="tail")
 
@@ -306,8 +306,8 @@ def evaluate(prompt_model, dataloader):
     score =  crossfit_evaluate(predictions, ground_truths, metric="ACC")
     return score
 
-    
-from transformers import  AdamW, get_linear_schedule_with_warmup,get_constant_schedule_with_warmup  # use AdamW is a standard practice for transformer 
+
+from transformers import  AdamW, get_linear_schedule_with_warmup,get_constant_schedule_with_warmup  # use AdamW is a standard practice for transformer
 from transformers.optimization import Adafactor, AdafactorSchedule  # use Adafactor is the default setting for T5
 loss_func = torch.nn.CrossEntropyLoss()
 
@@ -322,7 +322,7 @@ if args.tune_plm: # normally we freeze the model when using soft_template. Howev
     ]
     optimizer1 = AdamW(optimizer_grouped_parameters1, lr=3e-5)
     scheduler1 = get_linear_schedule_with_warmup(
-        optimizer1, 
+        optimizer1,
         num_warmup_steps=500, num_training_steps=tot_step)
 else:
     optimizer1 = None
@@ -331,7 +331,7 @@ else:
 
 optimizer_grouped_parameters2 = [{'params': [p for name, p in prompt_model.template.named_parameters() if 'raw_embedding' not in name]}] # note that you have to remove the raw_embedding manually from the optimization
 if args.optimizer.lower() == "adafactor":
-    optimizer2 = Adafactor(optimizer_grouped_parameters2,  
+    optimizer2 = Adafactor(optimizer_grouped_parameters2,
                             lr=args.prompt_lr,
                             relative_step=False,
                             scale_parameter=False,
@@ -340,11 +340,11 @@ if args.optimizer.lower() == "adafactor":
 elif args.optimizer.lower() == "adamw":
     optimizer2 = AdamW(optimizer_grouped_parameters2, lr=args.prompt_lr) # usually lr = 0.5
     scheduler2 = get_linear_schedule_with_warmup(
-                    optimizer2, 
+                    optimizer2,
                     num_warmup_steps=args.warmup_step_prompt, num_training_steps=tot_step) # usually num_warmup_steps is 500
 
 
-tot_loss = 0 
+tot_loss = 0
 log_loss = 0
 best_val_acc = 0
 glb_step = 0
@@ -377,7 +377,7 @@ for epoch in range(1000000):
                 pbar.set_postfix({'loss': aveloss})
                 log_loss = tot_loss
 
-        
+
                 if optimizer1 is not None:
                     optimizer1.step()
                     optimizer1.zero_grad()
@@ -396,7 +396,7 @@ for epoch in range(1000000):
             if val_acc >= best_val_acc:
                 torch.save(prompt_model.state_dict(),f"{args.project_root}/../ckpts/{this_run_unicode}.ckpt")
                 best_val_acc = val_acc
-            
+
             acc_traces.append(val_acc)
             print("Glb_step {}, val_acc {}, average time {}".format(glb_step, val_acc, tot_train_time/actual_step ), flush=True)
             prompt_model.train()
@@ -404,11 +404,11 @@ for epoch in range(1000000):
         if glb_step > args.max_steps:
             leave_training = True
             break
-    
+
     if leave_training:
-        break  
-    
-    
+        break
+
+
 # # super_glue test split can not be evaluated without submitting the results to their website. So we skip it here and keep them as comments.
 #
 # prompt_model.load_state_dict(torch.load(f"{args.project_root}/ckpts/{this_run_unicode}.ckpt"))

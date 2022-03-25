@@ -35,7 +35,7 @@ mytemplate = SoftTemplate(
     text = '文本：{"meta": "context", "shortenable": True} 问题:上述文本所表达的情感是积极的还是消极的? 回答：{"mask"}',
 )
 
-wrapped_example = mytemplate.wrap_one_example(trainset[0]) 
+wrapped_example = mytemplate.wrap_one_example(trainset[0])
 print("Wrapped Example:", wrapped_example)
 
 # ## Define the verbalizer
@@ -60,13 +60,13 @@ if use_cuda:
 
 from openprompt import PromptDataLoader
 
-train_dataloader = PromptDataLoader(dataset=trainset, template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=8, 
+train_dataloader = PromptDataLoader(dataset=trainset, template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=8,
     batch_size=16, shuffle=True, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
 # next(iter(train_dataloader))
 
-validation_dataloader = PromptDataLoader(dataset=devset, template=mytemplate, tokenizer=tokenizer, 
+validation_dataloader = PromptDataLoader(dataset=devset, template=mytemplate, tokenizer=tokenizer,
     tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=8,
     batch_size=16, shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
@@ -97,7 +97,7 @@ for epoch in range(3):
     # ## train
     prompt_model.train()
 
-    tot_loss = 0 
+    tot_loss = 0
     for step, inputs in enumerate(train_dataloader):
         if use_cuda:
             inputs = inputs.cuda()
@@ -112,7 +112,7 @@ for epoch in range(3):
         optimizer2.step()
         optimizer2.zero_grad()
         print(f"epoch {epoch} - step {step}: ", loss.item(), tot_loss/(step+1))
-    
+
     # ## evaluate
 
     prompt_model = prompt_model.eval()

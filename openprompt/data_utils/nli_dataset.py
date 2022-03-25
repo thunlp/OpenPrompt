@@ -27,7 +27,7 @@ class SNLIProcessor(DataProcessor):
 
     Examples:
 
-    ..  code-block:: python 
+    ..  code-block:: python
 
         from openprompt.data_utils.lmbff_dataset import PROCESSORS
 
@@ -52,7 +52,7 @@ class SNLIProcessor(DataProcessor):
     def __init__(self):
         super().__init__()
         self.labels = ['entailment', 'neutral', 'contradiction']
-    
+
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.tsv")
         examples = []

@@ -29,15 +29,15 @@ mytemplate1 = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder"
 mytemplate = MixedTemplate(model=plm, tokenizer=tokenizer, text='{"placeholder":"text_a"} {"soft"} {"soft"} {"soft"} {"placeholder":"text_b"} {"soft"} {"mask"}.')
 
 
-wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
+wrapped_example = mytemplate.wrap_one_example(dataset['train'][0])
 print(wrapped_example)
 
 wrapped_t5tokenizer = WrapperClass(max_seq_length=128, decoder_max_length=3, tokenizer=tokenizer,truncate_method="head")
 
 from openprompt import PromptDataLoader
 
-train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3, 
+train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3,
     batch_size=4,shuffle=True, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
 # next(iter(train_dataloader))
@@ -49,7 +49,7 @@ from openprompt.prompts import ManualVerbalizer
 import torch
 
 # for example the verbalizer contains multiple label words in each class
-myverbalizer = ManualVerbalizer(tokenizer, num_classes=3, 
+myverbalizer = ManualVerbalizer(tokenizer, num_classes=3,
                         label_words=[["yes"], ["no"], ["maybe"]])
 
 print(myverbalizer.label_words_ids)
@@ -87,7 +87,7 @@ optimizer1 = AdamW(optimizer_grouped_parameters1, lr=1e-4)
 optimizer2 = AdamW(optimizer_grouped_parameters2, lr=1e-3)
 
 for epoch in range(10):
-    tot_loss = 0 
+    tot_loss = 0
     for step, inputs in enumerate(train_dataloader):
         if use_cuda:
             inputs = inputs.cuda()
@@ -101,12 +101,12 @@ for epoch in range(10):
         optimizer2.step()
         optimizer2.zero_grad()
         print(tot_loss/(step+1))
-    
+
 # ## evaluate
 
 # %%
-validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3, 
+validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3,
     batch_size=4,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
 

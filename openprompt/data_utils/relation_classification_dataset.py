@@ -20,11 +20,11 @@ class TACREDProcessor(DataProcessor):
     """
     `TAC Relation Extraction Dataset (TACRED) <https://nlp.stanford.edu/projects/tacred/>`_ is one of the largest and most widely used datasets for relation classification.
     It was released together with the paper `Position-aware Attention and Supervised Data Improve Slot Filling (Zhang et al. 2017) <https://nlp.stanford.edu/pubs/zhang2017tacred.pdf>`_
-    This processor is also inherited by :py:class:`TACREVProcessor` and :py:class:`ReTACREDProcessor`. 
-    
+    This processor is also inherited by :py:class:`TACREVProcessor` and :py:class:`ReTACREDProcessor`.
+
     Examples:
 
-    ..  code-block:: python 
+    ..  code-block:: python
 
         from openprompt.data_utils.relation_classification_dataset import PROCESSORS
 
@@ -77,9 +77,9 @@ class TACREVProcessor(TACREDProcessor):
     `TACRED Revisted (TACREV) <https://github.com/DFKI-NLP/tacrev>`_ is a variant of the TACRED dataset
 
     It was proposed by the paper `TACRED Revisited: A Thorough Evaluation of the TACRED Relation Extraction Task (Alt et al. 2020) <https://aclanthology.org/2020.acl-main.142.pdf>`_
-    
+
     This processor inherit :py:class:`TACREDProcessor` and can be used similarly
-    
+
     Examples:
 
     ..  code-block:: python
@@ -87,7 +87,7 @@ class TACREVProcessor(TACREDProcessor):
         from openprompt.data_utils.relation_classification_dataset import PROCESSORS
 
         base_path = "datasets/RelationClassification"
-    
+
         dataset_name = "TACREV"
         dataset_path = os.path.join(base_path, dataset_name)
         processor = PROCESSORS[dataset_name.lower()]()
@@ -111,9 +111,9 @@ class ReTACREDProcessor(TACREDProcessor):
     `Re-TACRED <https://github.com/gstoica27/Re-TACRED>`_ is a variant of the TACRED dataset
 
     It was proposed by the paper `Re-TACRED: Addressing Shortcomings of the TACRED Dataset (Stoica et al. 2021) <https://arxiv.org/pdf/2104.08398.pdf>`_
-    
+
     This processor inherit :py:class:`TACREDProcessor` and can be used similarly
-    
+
     Examples:
 
     ..  code-block:: python
@@ -145,7 +145,7 @@ class SemEvalProcessor(DataProcessor):
     `SemEval-2010 Task 8 <https://aclanthology.org/S10-1006.pdf>`_ is a  a traditional dataset in relation classification.
 
     It was released together with the paper `SemEval-2010 Task 8: Multi-Way Classification of Semantic Relations Between Pairs of Nominals (Hendrickx et al. 2010) <https://aclanthology.org/S10-1006.pdf>`_
-    
+
     Examples:
 
     ..  code-block:: python

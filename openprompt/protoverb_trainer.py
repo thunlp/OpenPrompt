@@ -42,7 +42,7 @@ class ProtoVerbClassificationRunner(BaseRunner):
         config (:obj:`CfgNode`): A configuration object.
         loss_function (:obj:`Callable`, optional): The loss function in the training process.
     """
-    def __init__(self, 
+    def __init__(self,
                  model: PromptForClassification,
                  config: CfgNode = None,
                  train_dataloader: Optional[PromptDataLoader] = None,
@@ -59,8 +59,8 @@ class ProtoVerbClassificationRunner(BaseRunner):
                         )
         self.loss_function = loss_function if loss_function else self.configure_loss_function()
         self.id2label = id2label
-        self.label_path_sep = config.dataset.label_path_sep   
-    
+        self.label_path_sep = config.dataset.label_path_sep
+
     def configure_loss_function(self,):
         r"""config the loss function if it's not passed."""
         if self.config.classification.loss_function == "cross_entropy":
@@ -69,7 +69,7 @@ class ProtoVerbClassificationRunner(BaseRunner):
             return torch.nn.NLLLoss()
         else:
             raise NotImplementedError
-    
+
     def inference_step(self, batch, batch_idx):
         label = batch.pop('label')
         logits = self.model(batch)
@@ -98,7 +98,7 @@ class ProtoVerbClassificationRunner(BaseRunner):
         logits = self.model(batch)
         loss = self.loss_function(logits, batch['label'])
         return loss
-    
+
     def prompt_initialize(self):
         verbalizer_config = self.config[self.config.verbalizer]
         template_config = self.config[self.config.template]
@@ -143,7 +143,7 @@ class ProtoVerbClassificationRunner(BaseRunner):
                 logger.warning("Train from scratch instead ...")
         if self.cur_epoch == 0:
             self.on_fit_start()
-        
+
         for self.cur_epoch in range(self.cur_epoch, self.num_epochs):
             continue_training = self.training_epoch(self.cur_epoch)
             score = self.inference_epoch("validation")
@@ -157,7 +157,7 @@ class ProtoVerbClassificationRunner(BaseRunner):
                 break
             if self.config.train.train_verblizer == "alternate":
                 self.inner_model.verbalizer.train_proto(self.model, self.train_dataloader, self.config.environment.local_rank)
-        
+
         if self.config.train.train_verblizer == "post":
             self.inner_model.verbalizer.train_proto(self.model, self.train_dataloader, self.config.environment.local_rank)
 

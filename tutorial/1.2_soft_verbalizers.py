@@ -19,13 +19,13 @@ from openprompt.prompts import ManualTemplate
 mytemplate = ManualTemplate(tokenizer=tokenizer, text='{"placeholder":"text_a"} {"placeholder":"text_b"} In this sentence, the topic is {"mask"}.')
 
 
-wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
+wrapped_example = mytemplate.wrap_one_example(dataset['train'][0])
 print(wrapped_example)
 
 from openprompt import PromptDataLoader
 
-train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3, 
+train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3,
     batch_size=4,shuffle=True, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
 # next(iter(train_dataloader))
@@ -77,7 +77,7 @@ optimizer2 = AdamW(optimizer_grouped_parameters2)
 
 
 for epoch in range(5):
-    tot_loss = 0 
+    tot_loss = 0
     for step, inputs in enumerate(train_dataloader):
         if use_cuda:
             inputs = inputs.cuda()
@@ -91,12 +91,12 @@ for epoch in range(5):
         optimizer2.step()
         optimizer2.zero_grad()
         print(tot_loss/(step+1))
-    
+
 # ## evaluate
 
 # %%
-validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3, 
+validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3,
     batch_size=4,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
 
@@ -116,8 +116,8 @@ acc = sum([int(i==j) for i,j in zip(allpreds, alllabels)])/len(allpreds)
 print("validation:",acc)
 
 
-test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3, 
+test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3,
     batch_size=4,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
 allpreds = []

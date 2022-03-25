@@ -31,8 +31,8 @@ class T5TokenizerWrapper(TokenizerWrapper):
 
     def mask_token(self,i):
         return self.tokenizer.additional_special_tokens[i]
-        
-        
+
+
     def mask_token_ids(self, i ):
         return self.tokenizer.additional_special_tokens_ids[i]
 
@@ -47,7 +47,7 @@ class T5TokenizerWrapper(TokenizerWrapper):
         ''' # TODO doens't consider the situation that input has two parts
         '''
         wrapped_example, others = wrapped_example
-        
+
         if teacher_forcing:
             tgt_text = others['tgt_text']
             if isinstance(tgt_text, str):
@@ -56,27 +56,27 @@ class T5TokenizerWrapper(TokenizerWrapper):
         encoder_inputs = defaultdict(list)
 
         num_mask_token_used = 0
-        
+
         decoder_input_ids = []
         loss_ids =[]
-        
+
         for piece_id, piece in enumerate(wrapped_example):
             if piece['text'] == self.template_mask_token:
                 if teacher_forcing:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
-                    if num_mask_token_used > 0: 
+                    if num_mask_token_used > 0:
                         # if used in multiple mask setting, the <extra_id_1> etc. are also required
-                        # to be predicted. 
+                        # to be predicted.
                         loss_ids.append(1)
                     else:
                         loss_ids.append(0)
-                    encode_text = [self.mask_token_ids(num_mask_token_used)] 
+                    encode_text = [self.mask_token_ids(num_mask_token_used)]
                     tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
                 else:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
-                    encode_text = [self.mask_token_ids(num_mask_token_used)] 
+                    encode_text = [self.mask_token_ids(num_mask_token_used)]
                     loss_ids.append(1)
                 num_mask_token_used += 1
             else:
@@ -89,11 +89,11 @@ class T5TokenizerWrapper(TokenizerWrapper):
 
                 if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                     encode_text =  [0] # can be replace by any token, since these token will use their own embeddings
-                else: 
+                else:
                     encode_text = self.tokenizer.encode(piece['text'], add_special_tokens=False)
-                
+
             encoding_length = len(encode_text)
-            
+
             encoder_inputs['input_ids'].append(encode_text)
             for key in piece:
                 if key not in ['text', 'loss_ids']:
@@ -122,10 +122,10 @@ class T5TokenizerWrapper(TokenizerWrapper):
         if self.decode_from_pad:
             inputs['decoder_input_ids'].insert(0, self.tokenizer.pad_token_id)
             inputs['loss_ids'].insert(0, 0)
-        
+
         for key in inputs:
             inputs[key] = inputs[key][:self.decoder_max_length - 1]
-        
+
         if self.predict_eos:
             inputs['decoder_input_ids'].append(self.tokenizer.eos_token_id)
             inputs['loss_ids'].append(1)
@@ -136,11 +136,11 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
     r"""
     The tokenizerwrapper is for the t5-lm-adapted version proposed by
     `The Power of Scale for Parameter-Efficient Prompt Tuning <https://arxiv.org/abs/2104.08691>`_
-    Since this model is a autogressive language model fashion, it only support generation from the 
-    and of the text. 
+    Since this model is a autogressive language model fashion, it only support generation from the
+    and of the text.
 
     Given wrapped example, e.g. A fun movie ! it is {"mask"}
-    The encoder input is :  A fun movie ! it is </s>  
+    The encoder input is :  A fun movie ! it is </s>
     (Note that </s> is added in T5 encoder inputs, this will yield better result compared to not using </s>)
     The decoder input is : <pad> <extra_id_0> </s>
     The expected output is : good
@@ -163,8 +163,8 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
 
     def mask_token(self,i):
         return self.tokenizer.additional_special_tokens[i]
-        
-        
+
+
     def mask_token_ids(self, i ):
         return self.tokenizer.additional_special_tokens_ids[i]
 
@@ -177,7 +177,7 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
 
     def tokenize_one_example(self, wrapped_example, teacher_forcing):
         wrapped_example, others = wrapped_example
-        if teacher_forcing: 
+        if teacher_forcing:
             tgt_text = others['tgt_text']
             if isinstance(tgt_text, str):
                 tgt_text = [tgt_text]
@@ -185,16 +185,16 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
         encoder_inputs = defaultdict(list)
 
         num_mask_token_used = 0
-        
+
         decoder_input_ids = []
         loss_ids =[]
-        
+
         for piece_id, piece in enumerate(wrapped_example):
             if piece['text'] == self.template_mask_token:
                 if teacher_forcing:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
                     loss_ids.append(0)
-                    encode_text = [] 
+                    encode_text = []
                     tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
@@ -213,11 +213,11 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
 
                 if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                     encode_text =  [0] # can be replace by any token, since these token will use their own embeddings
-                else: 
+                else:
                     encode_text = self.tokenizer.encode(piece['text'], add_special_tokens=False)
-                
+
             encoding_length = len(encode_text)
-            
+
             encoder_inputs['input_ids'].append(encode_text)
             for key in piece:
                 if key not in ['text', 'loss_ids']:
@@ -246,10 +246,10 @@ class T5LMTokenizerWrapper(TokenizerWrapper):
         if self.decode_from_pad:
             inputs['decoder_input_ids'].insert(0, self.tokenizer.pad_token_id)
             inputs['loss_ids'].insert(0, 0)
-        
+
         for key in inputs:
             inputs[key] = inputs[key][:self.decoder_max_length - 1]
-        
+
         inputs['decoder_input_ids'].append(self.tokenizer.eos_token_id)
         if self.predict_eos:
             inputs['loss_ids'].append(1)
@@ -287,8 +287,8 @@ class CPM2TokenizerWrapper(TokenizerWrapper):
 
     def mask_token(self,i):
         return self.tokenizer.additional_special_tokens[i]
-        
-        
+
+
     def mask_token_ids(self, i ):
         return self.tokenizer.additional_special_tokens_ids[i]
 
@@ -303,7 +303,7 @@ class CPM2TokenizerWrapper(TokenizerWrapper):
         ''' # TODO doens't consider the situation that input has two parts
         '''
         wrapped_example, others = wrapped_example
-        
+
         if teacher_forcing:
             tgt_text = others['tgt_text']
             if isinstance(tgt_text, str):
@@ -312,15 +312,15 @@ class CPM2TokenizerWrapper(TokenizerWrapper):
         encoder_inputs = defaultdict(list)
 
         num_mask_token_used = 0
-        
+
         decoder_input_ids = []
         loss_ids =[0]
-        
+
         for piece_id, piece in enumerate(wrapped_example):
             if piece['text'] == self.template_mask_token:
                 if teacher_forcing:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
-                    encode_text = [self.mask_token_ids(num_mask_token_used)] 
+                    encode_text = [self.mask_token_ids(num_mask_token_used)]
                     tgt_text_ids = self.tokenizer.encode(" " + tgt_text[num_mask_token_used], add_special_tokens=False)
                     decoder_input_ids.extend(tgt_text_ids)
                     loss_ids.extend([1] * len(tgt_text_ids))
@@ -328,7 +328,7 @@ class CPM2TokenizerWrapper(TokenizerWrapper):
                     loss_ids.append(1)
                 else:
                     decoder_input_ids.append(self.mask_token_ids(num_mask_token_used))
-                    encode_text = [self.mask_token_ids(num_mask_token_used)] 
+                    encode_text = [self.mask_token_ids(num_mask_token_used)]
                     # decoder_input_ids.append(self.mask_token_ids(num_mask_token_used+1))
                     loss_ids[-1] = 1 # shift loss_ids
                     loss_ids.append(0)
@@ -343,11 +343,11 @@ class CPM2TokenizerWrapper(TokenizerWrapper):
 
                 if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                     encode_text =  [0] # can be replace by any token, since these token will use their own embeddings
-                else: 
+                else:
                     encode_text = self.tokenizer.encode(piece['text'], add_special_tokens=False)
-                
+
             encoding_length = len(encode_text)
-            
+
             encoder_inputs['input_ids'].append(encode_text)
             for key in piece:
                 if key not in ['text', 'loss_ids']:
@@ -376,19 +376,19 @@ class CPM2TokenizerWrapper(TokenizerWrapper):
         if self.decode_from_start:
             inputs['decoder_input_ids'].insert(0, self.tokenizer.sod_token_id)
             inputs['loss_ids'].insert(0, 0)
-        
+
         for key in inputs:
             inputs[key] = inputs[key][:self.decoder_max_length - 1]
-        
+
         if self.predict_eos:
             inputs['decoder_input_ids'].append(self.tokenizer.eos_token_id)
             inputs['loss_ids'].append(1)
         inputs = self.padding(inputs, max_len = self.decoder_max_length, pad_id_for_inputs=self.tokenizer.pad_token_id)
         return inputs
-            
 
 
-         
 
 
-    
+
+
+

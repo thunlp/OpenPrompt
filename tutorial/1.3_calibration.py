@@ -36,8 +36,8 @@ dataset['support'] = support_sampler(dataset['train'], seed=1)
 
 for example in dataset['support']:
     example.label = -1 # remove the labels of support set for classification
-support_dataloader = PromptDataLoader(dataset=dataset["support"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=512, decoder_max_length=3, 
+support_dataloader = PromptDataLoader(dataset=dataset["support"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=512, decoder_max_length=3,
     batch_size=5,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="tail")
 
@@ -61,8 +61,8 @@ new_label_words_num = [len(prompt_model.verbalizer.label_words[i]) for i in rang
 print("Original number of label words per class: {} \n After filtering, number of label words per class: {}".format(org_label_words_num, new_label_words_num))
 
 # zero-shot test
-test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=512, decoder_max_length=3, 
+test_dataloader = PromptDataLoader(dataset=dataset["test"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=512, decoder_max_length=3,
     batch_size=5,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="tail")
 allpreds = []

@@ -1,4 +1,4 @@
-# In this scripts, you will learn 
+# In this scripts, you will learn
 # 1. how to use integrate huggingface datasets utilities into openprompt to
 #  enable prompt learning in diverse datasets.
 # 2. How to instantiate a template using a template language
@@ -14,11 +14,11 @@ from datasets import load_dataset
 # raw_dataset['train'][0]
 from datasets import load_from_disk
 raw_dataset = load_from_disk("/home/hushengding/huggingface_datasets/saved_to_disk/super_glue.cb")
-# Note that if you are running this scripts inside a GPU cluster, there are chances are you are not able to connect to huggingface website directly. 
-# In this case, we recommend you to run `raw_dataset = load_dataset(...)` on some machine that have internet connections. 
+# Note that if you are running this scripts inside a GPU cluster, there are chances are you are not able to connect to huggingface website directly.
+# In this case, we recommend you to run `raw_dataset = load_dataset(...)` on some machine that have internet connections.
 # Then use `raw_dataset.save_to_disk(path)` method to save to local path.
-# Thirdly upload the saved content into the machiine in cluster. 
-# Then use `load_from_disk` method to load the dataset. 
+# Thirdly upload the saved content into the machiine in cluster.
+# Then use `load_from_disk` method to load the dataset.
 
 from openprompt.data_utils import InputExample
 
@@ -42,12 +42,12 @@ mytemplate = ManualTemplate(tokenizer=tokenizer, text=template_text)
 
 # To better understand how does the template wrap the example, we visualize one instance.
 
-wrapped_example = mytemplate.wrap_one_example(dataset['train'][0]) 
+wrapped_example = mytemplate.wrap_one_example(dataset['train'][0])
 print(wrapped_example)
 
 
 # Now, the wrapped example is ready to be pass into the tokenizer, hence producing the input for language models.
-# You can use the tokenizer to tokenize the input by yourself, but we recommend using our wrapped tokenizer, which is a wrapped tokenizer tailed for InputExample. 
+# You can use the tokenizer to tokenize the input by yourself, but we recommend using our wrapped tokenizer, which is a wrapped tokenizer tailed for InputExample.
 # The wrapper has been given if you use our `load_plm` function, otherwise, you should choose the suitable wrapper based on
 # the configuration in `openprompt.plms.__init__.py`.
 # Note that when t5 is used for classification, we only need to pass <pad> <extra_id_0> <eos> to decoder.
@@ -57,7 +57,7 @@ wrapped_t5tokenizer = WrapperClass(max_seq_length=128, decoder_max_length=3, tok
 from openprompt.plms import T5TokenizerWrapper
 wrapped_t5tokenizer= T5TokenizerWrapper(max_seq_length=128, decoder_max_length=3, tokenizer=tokenizer,truncate_method="head")
 
-# You can see what a tokenized example looks like by 
+# You can see what a tokenized example looks like by
 tokenized_example = wrapped_t5tokenizer.tokenize_one_example(wrapped_example, teacher_forcing=False)
 print(tokenized_example)
 print(tokenizer.convert_ids_to_tokens(tokenized_example['input_ids']))
@@ -77,8 +77,8 @@ for split in ['train', 'validation', 'test']:
 # We provide a `PromptDataLoader` class to help you do all the above matters and wrap them into an `torch.DataLoader` style iterator.
 from openprompt import PromptDataLoader
 
-train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3, 
+train_dataloader = PromptDataLoader(dataset=dataset["train"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3,
     batch_size=4,shuffle=True, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
 # next(iter(train_dataloader))
@@ -91,15 +91,15 @@ from openprompt.prompts import ManualVerbalizer
 import torch
 
 # for example the verbalizer contains multiple label words in each class
-myverbalizer = ManualVerbalizer(tokenizer, num_classes=3, 
+myverbalizer = ManualVerbalizer(tokenizer, num_classes=3,
                         label_words=[["yes"], ["no"], ["maybe"]])
 
 print(myverbalizer.label_words_ids)
-logits = torch.randn(2,len(tokenizer)) # creating a pseudo output from the plm, and 
+logits = torch.randn(2,len(tokenizer)) # creating a pseudo output from the plm, and
 print(myverbalizer.process_logits(logits)) # see what the verbalizer do
 
 
-# Although you can manually combine the plm, template, verbalizer together, we provide a pipeline 
+# Although you can manually combine the plm, template, verbalizer together, we provide a pipeline
 # model which take the batched data from the PromptDataLoader and produce a class-wise logits
 
 from openprompt import PromptForClassification
@@ -122,7 +122,7 @@ optimizer_grouped_parameters = [
 optimizer = AdamW(optimizer_grouped_parameters, lr=1e-4)
 
 for epoch in range(10):
-    tot_loss = 0 
+    tot_loss = 0
     for step, inputs in enumerate(train_dataloader):
         if use_cuda:
             inputs = inputs.cuda()
@@ -135,10 +135,10 @@ for epoch in range(10):
         optimizer.zero_grad()
         if step %100 ==1:
             print("Epoch {}, average loss: {}".format(epoch, tot_loss/(step+1)), flush=True)
-    
+
 # Evaluate
-validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer, 
-    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3, 
+validation_dataloader = PromptDataLoader(dataset=dataset["validation"], template=mytemplate, tokenizer=tokenizer,
+    tokenizer_wrapper_class=WrapperClass, max_seq_length=256, decoder_max_length=3,
     batch_size=4,shuffle=False, teacher_forcing=False, predict_eos_token=False,
     truncate_method="head")
 

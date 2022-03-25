@@ -21,46 +21,46 @@ class GenerationVerbalizer(Verbalizer):
     This verbalizer is usefull when the label prediction is better defined by a piece of input.
     For example, in correference resolution, the tgt_text is a proper noun metioned in the text.
     This is there is no fixed mapping between a class label and its label words. This verbalizer
-    is can be used as verbalizer of ``COPA`` and ``WSC`` dataset in superglue datasets. 
+    is can be used as verbalizer of ``COPA`` and ``WSC`` dataset in superglue datasets.
 
-    This verbalizer is especially powerful when combined with 
+    This verbalizer is especially powerful when combined with
     `All NLP Tasks Are Generation Tasks <https://arxiv.org/abs/2103.10360>`_ Paradigm (Also see
-    `Crossfit <https://arxiv.org/abs/2104.08835>`_). It can make any piece of text the tgt_text. The tgt_text will then be filled in the `{"mask"}`. 
-    
-    For example, when label word is ``"good"``, the tgt_text is ``"good"``; 
+    `Crossfit <https://arxiv.org/abs/2104.08835>`_). It can make any piece of text the tgt_text. The tgt_text will then be filled in the `{"mask"}`.
 
-    when label word is ``{"text":"good"}``, the tgt_text is also ``"good"``; 
+    For example, when label word is ``"good"``, the tgt_text is ``"good"``;
 
-    when label word is ``{"meta":"choice1"}``, the tgt_text is the ``"meta['choice1']"`` field of the ``InputExample``; 
-    
-    when label word is ``{"meta":"choice1"} {"placeholder", "text_a"} .``, the tgt_text is the ``"meta['choice1']"`` field of the ``InputExample``, 
-    followed by ``text_a`` field of the ``InputExample``, and then a ``'.'``; 
+    when label word is ``{"text":"good"}``, the tgt_text is also ``"good"``;
+
+    when label word is ``{"meta":"choice1"}``, the tgt_text is the ``"meta['choice1']"`` field of the ``InputExample``;
+
+    when label word is ``{"meta":"choice1"} {"placeholder", "text_a"} .``, the tgt_text is the ``"meta['choice1']"`` field of the ``InputExample``,
+    followed by ``text_a`` field of the ``InputExample``, and then a ``'.'``;
 
     A use case can be seen in `Tutorial 4.1 <https://github.com/thunlp/OpenPrompt/blob/main/tutorial/4.1_all_tasks_are_generation.py>`_
 
-    Args:   
+    Args:
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.
         classes (:obj:`List[Any]`): The classes (or labels) of the current task.
         prefix (:obj:`str`, optional): The prefix string of the verbalizer (used in PLMs like RoBERTa, which is sensitive to prefix space)
-        is_rule (:obj:`bool`, optional): When the verbalizer use the rule syntax of MixTemplate. 
+        is_rule (:obj:`bool`, optional): When the verbalizer use the rule syntax of MixTemplate.
         label_words (:obj:`dict`, optional): The label words of the generation verbalizer
-    
-    Example: 
+
+    Example:
     To use this verbalizer to train the T5 model to predict answer and explanation using two masks.
-    
+
     When the template is:
     >>> input_example = InputExample(text_a = "Can fish run?", meta={"answer":"no", "explanation": "The fish have no legs"}, label=0)
     >>> template = "{'placeholder':'text_a'} answer: {'mask'} explanation: {'mask'}"
-    
+
     The verbalizer can be:
     >>> label_words = {0:["no", "{'meta':'explanation'}"], 1:["yes", "{'meta':'explanation'}"]}
     >>> verbalizer = GenerationVerbalizer(tokenizer, classes=None, is_rule=True, label_words=label_words)
-    
 
-        
+
+
 
     """
-    def __init__(self, 
+    def __init__(self,
                  tokenizer: PreTrainedTokenizer,
                  classes: Optional[List] = None,
                  num_classes: Optional[Sequence[str]] = None,
@@ -74,10 +74,10 @@ class GenerationVerbalizer(Verbalizer):
         self.is_rule = is_rule
         self.mixed_token_start = "{"
         self.mixed_token_end = "}"
- 
+
         if label_words is not None: # use label words as an initialization
             self.label_words = label_words
-    
+
     def wrap_one_example(self, example: InputExample) -> List[Dict]:
         r"""Take an InputExample, and fill the tgt_text with label words
         """
@@ -116,7 +116,7 @@ class GenerationVerbalizer(Verbalizer):
                 self.label_words[id] = partial(lambda x, text: self.incorporate_text_example(text, x), text=d)
 
 
-    
+
     def parse_text(self, text: str) -> List[Dict]:
         parsed = []
         i = 0
@@ -160,7 +160,7 @@ class GenerationVerbalizer(Verbalizer):
             parsed.append(d)
 
         return parsed
-    
+
     def incorporate_text_example(self,
                                  text,
                                  example: InputExample
@@ -183,11 +183,11 @@ class GenerationVerbalizer(Verbalizer):
                 raise ValueError(f'can not parse {d}')
         text = " ".join(text)
         return text
-    
 
 
 
-    
 
 
-        
+
+
+

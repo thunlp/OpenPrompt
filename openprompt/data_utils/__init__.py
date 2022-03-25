@@ -29,12 +29,12 @@ PROCESSORS = {
 def load_dataset(config: CfgNode, return_class=True, test=False):
     r"""A plm loader using a global config.
     It will load the train, valid, and test set (if exists) simulatenously.
-    
+
     Args:
         config (:obj:`CfgNode`): The global config from the CfgNode.
         return_class (:obj:`bool`): Whether return the data processor class
                     for future usage.
-    
+
     Returns:
         :obj:`Optional[List[InputExample]]`: The train dataset.
         :obj:`Optional[List[InputExample]]`: The valid dataset.

@@ -21,10 +21,10 @@ from openprompt.plms import load_plm_from_config
 
 def build_dataloader(dataset, template, tokenizer,tokenizer_wrapper_class, config, split):
     dataloader = PromptDataLoader(
-        dataset = dataset, 
-        template = template, 
-        tokenizer = tokenizer, 
-        tokenizer_wrapper_class=tokenizer_wrapper_class, 
+        dataset = dataset,
+        template = template,
+        tokenizer = tokenizer,
+        tokenizer_wrapper_class=tokenizer_wrapper_class,
         batch_size = config[split].batch_size,
         shuffle = config[split].shuffle_data,
         teacher_forcing = config[split].teacher_forcing if hasattr(config[split],'teacher_forcing') else None,
@@ -37,7 +37,7 @@ def build_dataloader(dataset, template, tokenizer,tokenizer_wrapper_class, confi
 class LMBFFClassificationRunner:
     r"""
         This runner implements the LM-BFF training process in paper `Making Pre-trained Language Models Better Few-shot Learners(Gao et al. 2020) <https://arxiv.org/pdf/2012.15723.pdf>`_.
-        
+
         Args:
             train_dataset (:obj:`List[InputExample]`): The dataset for training
             valid_dataset (:obj:`List[InputExample]`): The dataset for validation
@@ -53,14 +53,14 @@ class LMBFFClassificationRunner:
                 verbalizer: Optional[Verbalizer] = None,
                 template: Optional[str] = None,
                 config: CfgNode = None):
-        
+
         self.train_dataset = train_dataset
         self.valid_dataset = valid_dataset
         self.test_dataset = test_dataset
         self.model, self.tokenizer, self.model_config, self.tokenizer_wrapper = load_plm_from_config(config)
         self.auto_t = config.classification.auto_t
         self.auto_v = config.classification.auto_v
-        
+
         self.verbalizer = verbalizer
         self.template = template
         self.config = config
@@ -79,8 +79,8 @@ class LMBFFClassificationRunner:
                 warnings.warn("auto_v is set True, ignore the given verbalizer")
         else:
             warnings.warn("auto_t and auto_v are both False, the trainer will degenerate to a simple classification trainer")
-        
-    
+
+
     def _auto_t(self):
         logger.info("performing auto-t...")
         template_generate_model, template_generate_tokenizer, template_generate_model_config, template_tokenizer_wrapper = load_plm_from_config(self.config.template_generator)
@@ -90,7 +90,7 @@ class LMBFFClassificationRunner:
         template_generator.release_memory()
         del template_generator, model
         return template_texts
-    
+
     def _auto_v(self, template):
         logger.info("performing auto-v...")
         model = copy.deepcopy(self.model)
@@ -121,7 +121,7 @@ class LMBFFClassificationRunner:
                 best_template_text = template_text
                 logger.info('best template:' + str(best_template_text))
         return best_template_text
-    
+
     def _get_best_label_words(self, verbalizer_labelwords_candidates, template, verbalizer):
         current_verbalizer = copy.deepcopy(verbalizer)
         best_metrics = 0.0
@@ -143,7 +143,7 @@ class LMBFFClassificationRunner:
         runner.clean = True
         best_score = runner.fit()
         return best_score
-    
+
     def run(self):
         r"""
         Run LM-BFF. if both `auto_v` and `auto_v` are set to True in ``config``, automatic template generation will be performed first.
@@ -158,7 +158,7 @@ class LMBFFClassificationRunner:
             label_words_list = self._auto_v(best_template)
             best_label_words = self._get_best_label_words(label_words_list, best_template, best_verbalizer)
             best_verbalizer.label_words = best_label_words
-        
+
         train_dataloader = build_dataloader(self.train_dataset, best_template, self.tokenizer, self.tokenizer_wrapper, self.config, 'train')
         valid_dataloader = build_dataloader(self.valid_dataset, best_template, self.tokenizer, self.tokenizer_wrapper, self.config, 'dev')
         test_dataloader = build_dataloader(self.test_dataset, best_template, self.tokenizer, self.tokenizer_wrapper, self.config, 'test')

@@ -25,8 +25,8 @@ from transformers import  AdamW, get_linear_schedule_with_warmup
 class PromptDataLoader(object):
     r"""
     PromptDataLoader wraps the orginal dataset. The input data is firstly wrapped with the
-    prompt's template, and then is tokenized by a wrapperd-tokenizer. 
-    
+    prompt's template, and then is tokenized by a wrapperd-tokenizer.
+
     Args:
         dataset (:obj:`Dataset` or :obj:`List`): Either a DatasetObject or a list containing the input examples.
         template (:obj:`Template`): A derived class of of :obj:`Template`
@@ -38,9 +38,9 @@ class PromptDataLoader(object):
         decoder_max_length (:obj:`bool`, optional): the decoder maximum length of an encoder-decoder model.
         predict_eos_token (:obj:`bool`, optional): Whether to predict the <eos> token. Suggest to set to true in generation.
         truncate_method (:obj:`bool`, optional): the truncate method to use. select from `head`, `tail`, `balanced`.
-        kwargs  :Other kwargs that might be passed into a tokenizer wrapper. 
+        kwargs  :Other kwargs that might be passed into a tokenizer wrapper.
     """
-    def __init__(self, 
+    def __init__(self,
                  dataset: Union[Dataset, List],
                  template: Template,
                  tokenizer: PreTrainedTokenizer,
@@ -60,7 +60,7 @@ class PromptDataLoader(object):
         assert hasattr(dataset, "__iter__"), f"The dataset must have __iter__ method. dataset is {dataset}"
         assert hasattr(dataset, "__len__"), f"The dataset must have __len__ method. dataset is {dataset}"
         self.raw_dataset = dataset
-        
+
         self.wrapped_dataset = []
         self.tensor_dataset = []
         self.template = template
@@ -79,14 +79,14 @@ class PromptDataLoader(object):
             **kwargs,
         }
         to_pass_kwargs = {key: prepare_kwargs[key] for key in prepare_kwargs if key in tokenizer_wrapper_init_keys}
-        
+
 
         self.tokenizer_wrapper = tokenizer_wrapper_class(**to_pass_kwargs)
-        
+
         # check the satisfiability of each component
         assert hasattr(self.template, 'wrap_one_example'), "Your prompt has no function variable \
                                                          named wrap_one_example"
-        
+
         # processs
         self.wrap()
         self.tokenize()
@@ -97,18 +97,18 @@ class PromptDataLoader(object):
             sampler = None
 
         self.dataloader = DataLoader(
-            self.tensor_dataset, 
+            self.tensor_dataset,
             batch_size = self.batch_size,
             sampler= sampler,
             collate_fn = InputFeatures.collate_fct,
             drop_last = drop_last,
         )
-    
-    
+
+
     def wrap(self):
         r"""A simple interface to pass the examples to prompt, and wrap the text with template.
         """
-        if isinstance(self.raw_dataset, Dataset) or isinstance(self.raw_dataset, List): 
+        if isinstance(self.raw_dataset, Dataset) or isinstance(self.raw_dataset, List):
             assert len(self.raw_dataset) > 0, 'The dataset to be wrapped is empty.'
             # for idx, example in tqdm(enumerate(self.raw_dataset),desc='Wrapping'):
             for idx, example in enumerate(self.raw_dataset):
@@ -118,16 +118,16 @@ class PromptDataLoader(object):
                 self.wrapped_dataset.append(wrapped_example)
         else:
             raise NotImplementedError
-    
+
     def tokenize(self) -> None:
-        r"""Pass the wraped text into a prompt-specialized tokenizer, 
+        r"""Pass the wraped text into a prompt-specialized tokenizer,
            the true PretrainedTokenizer inside the tokenizer is flexible, e.g. AlBert, Bert, T5,...
         """
         for idx, wrapped_example in tqdm(enumerate(self.wrapped_dataset),desc='tokenizing'):
         # for idx, wrapped_example in enumerate(self.wrapped_dataset):
             inputfeatures = InputFeatures(**self.tokenizer_wrapper.tokenize_one_example(wrapped_example, self.teacher_forcing), **wrapped_example[1]).to_tensor()
             self.tensor_dataset.append(inputfeatures)
-        
+
     def __len__(self):
         return  len(self.dataloader)
 
@@ -137,17 +137,17 @@ class PromptDataLoader(object):
 
 
 class PromptModel(nn.Module):
-    r'''``PromptModel`` is the encapsulation of ``Template`` and the ``pre-trained model``, 
+    r'''``PromptModel`` is the encapsulation of ``Template`` and the ``pre-trained model``,
     with OpenPrompt, these modules could be flexibly combined. And this class is the base class of ``PromptForClassification`` and ``PromptForGeneration``
 
     Args:
         plm (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.
         template (:obj:`Template`): The ``Template`` object to warp the input data.
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
-        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train. 
+        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train.
     '''
     def __init__(self,
-                 plm: PreTrainedModel, 
+                 plm: PreTrainedModel,
                  template: Template,
                  freeze_plm: bool = False,
                  plm_eval_mode: bool=False,
@@ -167,7 +167,7 @@ class PromptModel(nn.Module):
 
         # get model's forward function's keywords
         self.forward_keys = signature(self.plm.forward).args
-    
+
     def train(self, mode: bool = True):
         if not isinstance(mode, bool):
             raise ValueError("training mode is expected to be boolean")
@@ -176,11 +176,11 @@ class PromptModel(nn.Module):
             if not (self.plm_eval_mode and 'plm' in name and mode):
                 module.train(mode)
         return self
-        
+
     def forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
-        r""" 
+        r"""
         This is a forward method to make wrapped input data go through the model, and return the output logits.
-        Typically, this function aims to predict the ``<mask>`` position. 
+        Typically, this function aims to predict the ``<mask>`` position.
 
         Args:
             batch (:obj:`Union[Dict, InputFeatures]`): The input features of batchified data sequences.
@@ -190,28 +190,28 @@ class PromptModel(nn.Module):
         outputs = self.plm(**input_batch, output_hidden_states=True)
         outputs = self.template.post_processing_outputs(outputs)
         return outputs
-    
+
     def prepare_model_inputs(self, batch: Union[Dict, InputFeatures]) -> Dict:
         r"""Will be used in generation
         """
         batch = self.template.process_batch(batch)
         input_batch = {key: batch[key] for key in batch if key in self.forward_keys}
         return input_batch
-    
+
 class PromptForClassification(nn.Module):
     r'''``PromptModel`` with a classification head on top. The classification head will map
     the logits in all position of the sequence (return value of a ``PromptModel``) into the
-    logits of the labels, using a verbalizer. 
+    logits of the labels, using a verbalizer.
 
     Args:
         plm (:obj:`PretrainedModel`): A pre-traiend model you decide to use for classification, e.g. BERT.
         template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``ManualTemplate``.
         verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the lables to label words for classification, e.g. ``ManualVerbalizer``.
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
-        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train. 
+        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train.
     '''
     def __init__(self,
-                 plm: PreTrainedModel, 
+                 plm: PreTrainedModel,
                  template: Template,
                  verbalizer: Verbalizer,
                  freeze_plm: bool = False,
@@ -224,7 +224,7 @@ class PromptForClassification(nn.Module):
     @property
     def plm(self):
         return self.prompt_model.plm
-    
+
     @property
     def template(self):
         return self.prompt_model.template
@@ -249,26 +249,26 @@ class PromptForClassification(nn.Module):
             outputs (:obj:`torch.Tensor`): The original outputs (maybe process by verbalizer's
                  `gather_outputs` before) etc. of the whole sequence.
             batch (:obj:`Union[Dict, InputFeatures]`): The original batch
-        
+
         Returns:
             :obj:`torch.Tensor`: The extracted outputs of ``<mask>`` tokens.
-            
+
         """
         outputs = outputs[torch.where(batch['loss_ids']>0)]
         outputs = outputs.view(batch['loss_ids'].shape[0], -1, outputs.shape[1])
         if outputs.shape[1] == 1:
             outputs = outputs.view(outputs.shape[0], outputs.shape[2])
         return outputs
-        
+
     def forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
-        r""" 
+        r"""
         Get the logits of label words.
-        
+
         Args:
             batch (:obj:`Union[Dict, InputFeatures]`): The original batch
-        
+
         Returns:
-            :obj:`torch.Tensor`: The logits of the lable words (obtained by the current verbalizer). 
+            :obj:`torch.Tensor`: The logits of the lable words (obtained by the current verbalizer).
         """
         outputs = self.prompt_model(batch)
         outputs = self.verbalizer.gather_outputs(outputs)
@@ -278,10 +278,10 @@ class PromptForClassification(nn.Module):
             outputs_at_mask = self.extract_at_mask(outputs, batch)
         label_words_logits = self.verbalizer.process_outputs(outputs_at_mask, batch=batch)
         return label_words_logits
-    
+
     def predict(self):
         pass
-    
+
     def forward_without_verbalize(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
         outputs = self.prompt_model(batch)
         outputs = self.verbalizer.gather_outputs(outputs)
@@ -293,7 +293,7 @@ class PromptForClassification(nn.Module):
         r'''Utility property, to get the tokenizer more easily.
         '''
         return self.verbalizer.tokenizer
-    
+
     def state_dict(self, *args, **kwargs):
         """ Save the model using template, plm and verbalizer's save methods."""
         _state_dict = {}
@@ -302,7 +302,7 @@ class PromptForClassification(nn.Module):
         _state_dict['template'] = self.template.state_dict(*args, **kwargs)
         _state_dict['verbalizer'] = self.verbalizer.state_dict(*args, **kwargs)
         return _state_dict
-    
+
     def load_state_dict(self, state_dict, *args, **kwargs):
         """ Load the model using template, plm and verbalizer's load methods."""
         if 'plm' in state_dict and not self.prompt_model.freeze_plm:
@@ -343,11 +343,11 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         tokenizer (:obj:`Tokenizer`): A ``Tokenizer`` of the current model.
         gen_config (:obj:`CfgNode`): The generation configs to pass into `GenerationMixin.generate <https://huggingface.co/transformers/_modules/transformers/generation_utils.html#GenerationMixin.generate>`_
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
-        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train. 
+        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train.
     '''
 
     def __init__(self,
-                 plm: PreTrainedModel, 
+                 plm: PreTrainedModel,
                  template: Template,
                  freeze_plm: bool = False,
                  plm_eval_mode: bool = False,
@@ -373,7 +373,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
     @property
     def plm(self):
         return self.prompt_model.plm
-    
+
     @property
     def template(self):
         return self.prompt_model.template
@@ -381,11 +381,11 @@ class PromptForGeneration(nn.Module, GenerationMixin):
     @property
     def device(self):
         return self.plm.device
-    
 
-    def shift_logits_and_labels(self, 
-                                logits, 
-                                loss_ids, 
+
+    def shift_logits_and_labels(self,
+                                logits,
+                                loss_ids,
                                 reference_ids):
 
         r"""
@@ -396,13 +396,13 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         Args:
             logits (:obj:`torch.Tensor`):
             batch (:obj:`InputFeatures`): The input features of batchified data sequences.
-        
+
         Returns:
             shift_logits (:obj:`torch.Tensor`):
             shift_input_ids (:obj:`List[int]`):
 
         """
-        
+
         shift_logits = logits[..., :-1, :].contiguous()
         shift_loss_ids = loss_ids[..., 1:].contiguous()
         shift_input_ids = reference_ids[..., 1:].contiguous()
@@ -411,12 +411,12 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
     def forward(self, *args, **kwargs):
         r"""In generation process, it will use the plm's forward function.
-        This is because, in the first step we will directly call the process_batch function to 
+        This is because, in the first step we will directly call the process_batch function to
         generate initial input with the template, after that the all template
         have been processed into the past_key_value,
-        then we can use the normal generation function. 
+        then we can use the normal generation function.
         In learning process, the forward is linked to ``_forward`` functions.
-        in which the loss will be calculated for all the positions in the same time. 
+        in which the loss will be calculated for all the positions in the same time.
         """
         if self.in_generation_function:
             return self.plm.forward(*args, **kwargs)
@@ -424,12 +424,12 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             return self._forward(*args, **kwargs)
 
     def _forward(self, batch: Union[Dict, InputFeatures]) -> torch.Tensor:
-        r""" 
-        This is the forward method of the training of generation in prompt-learning framework. 
-        
+        r"""
+        This is the forward method of the training of generation in prompt-learning framework.
+
         Args:
             batch (:obj:`Union[Dict, InputFeatures]`): The input features of batchified data sequences.
-        
+
         Returns:
             loss(:obj:torch.Tensor): The loss of the current generation procedure.
         """
@@ -445,18 +445,18 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         loss = loss.view(batch_size, -1).sum(dim=-1) # TODO support more objectives
         loss = loss.mean()
         return loss
-    
-    
+
+
     def generate(self, batch: Union[Dict, InputFeatures], verbose: Optional[bool]=False, **generation_kwargs):
         r""" This function wraps the generate() methods in parent class ``GenerationMixin``.
-        Forward uses the ``PretrainedModel``'s forward method. 
-        generation_kwargs include all the parameters that are passed in to 
+        Forward uses the ``PretrainedModel``'s forward method.
+        generation_kwargs include all the parameters that are passed in to
         ``transformers.generation_util.GenerationMixin.generate``
-    
+
         Args:
             batch (:obj:`Union[Dict, InputFeatures]`): The input features of batchified data sequences.
-            verbose (:obj:`Optional[bool]`): Set to true to verbose the generated sentence. 
-        
+            verbose (:obj:`Optional[bool]`): Set to true to verbose the generated sentence.
+
         Returns:
             output_sequences (:obj:`List[torch.Tensor]`): The raw sequences generated by the generation model.
             generated_sentences (:obj:`List[torch.Tensor]`): The generated sentences that have been post-processed.
@@ -478,17 +478,17 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         else:
             input_length = batch['input_ids'].size(1)
             batch_size = batch['input_ids'].size(0)
-            
+
             # Currently huggingface transformers only support single sample generation, or padding to the left (instead of the right).
-            # because it will only extract the last position of the output 
+            # because it will only extract the last position of the output
             # generate one_by_one
             if 'input_ids_len' in batch:
                 input_real_lens = batch['input_ids_len']
             else:
                 input_real_lens = torch.sum((batch['input_ids'] != self.tokenizer.pad_token_id).to(torch.int), dim=-1)
             output_sequences = []
-            for instance_id in range(batch_size):  
-                # remove the pad token 
+            for instance_id in range(batch_size):
+                # remove the pad token
                 instance = {key: batch[key][instance_id:instance_id+1][:,:input_real_lens[instance_id]] for key in batch if isinstance(batch[key], torch.Tensor) and batch[key].shape[:2]==torch.Size([batch_size, input_length])}
                 self.generate_ith_token = 0
                 self.in_generation_function = True
@@ -499,7 +499,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         if verbose:
             logger.info(f"Generated:{generated_sentences}")
         return output_sequences, generated_sentences
-    
+
 
 
     def post_processing(self, output_sequences, input_lengths):
@@ -509,7 +509,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             Args:
                 output_sequences (:obj:`torch.Tensor`): The raw sequences generated by the generation model.
                 input_lengths (:obj:`int` or `list`): The length(s) of the input sequence.
-            
+
             Returns:
                 :obj:`List`: The generated sentences that have been post-processed.
         """
@@ -527,12 +527,12 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         return generated_sentences
 
 
-    
+
     def prepare_inputs_for_generation(self, input_ids: Optional[torch.Tensor] = None,
                                          **model_kwargs):
         r"""This function wraps the ``prepare_inputs_for_generation`` function in the huggingface transformers.
 
-        When the `past` not in model_kwargs, we prepare the input from scratch. 
+        When the `past` not in model_kwargs, we prepare the input from scratch.
         When `past` is in model_kwargs, we don't need to prepare the template wrapped input,
         instead we use the inner pretrain_models' function to prepare the next step's input.
         `model_kwargs` includes all the argument passed in the `batch`: InputFeatures, except ``input_ids``
@@ -551,8 +551,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             model_inputs = self.plm.prepare_inputs_for_generation(input_ids, **model_kwargs)
         self.last_model_inputs = model_inputs  # to update the model_kwargs in _update_model_kwargs_for_generation, in-place operation.
         return model_inputs
-    
-    
+
+
     def _update_model_kwargs_for_generation(self,
         outputs, model_kwargs: Dict[str, Any], is_encoder_decoder: bool = False
     ) -> Dict[str, Any]:
@@ -561,13 +561,13 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
         In case some of the model_kwargs are modified in the prepare_inputs_for_generation function
         and should be used as the subsequent model_kwargs, we upate these kwargs before the parent class
-        call. 
+        call.
 
         Other updates should be added here after the parent's function call.
 
         Args:
-            outputs (:obj:`torch.Tensor`): 
-            is_encoder_decoder (:obj:`bool`, defaults to False): 
+            outputs (:obj:`torch.Tensor`):
+            is_encoder_decoder (:obj:`bool`, defaults to False):
         """
         if self.generate_ith_token == 0:
             for key in self.last_model_inputs:
@@ -582,9 +582,9 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         self, input_ids: torch.LongTensor, model_kwargs
     ) -> Dict[str, Any]:
         r""" This function resemble the function in GeneraionMix
-        
+
         Args:
-            input_ids (:obj:`torch.LongTensor`) The input ids for 
+            input_ids (:obj:`torch.LongTensor`) The input ids for
         """
         if "encoder_outputs" not in model_kwargs:
             # retrieve encoder hidden states
@@ -604,7 +604,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
                     model_kwargs[key] = model_inputs[key]
             model_kwargs["encoder_outputs"] = encoder(return_dict=True, **model_inputs)
         return model_kwargs
-    
+
     def state_dict(self, *args, **kwargs):
         """ Save the model using template and plm's save methods. """
         _state_dict = {}
@@ -612,13 +612,13 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             _state_dict['plm'] = self.plm.state_dict(*args, **kwargs)
         _state_dict['template'] = self.template.state_dict(*args, **kwargs)
         return _state_dict
-    
+
     def load_state_dict(self, state_dict, *args, **kwargs):
         """ Load the model using template and plm's load methods. """
         if 'plm' in state_dict and not self.prompt_model.freeze_plm:
             self.plm.load_state_dict(state_dict['plm'], *args, **kwargs)
         self.template.load_state_dict(state_dict['template'], *args, **kwargs)
-    
+
     def _reorder_cache(self, past, beam_idx):
         r"""Use the plm's default _reorder_cache function
         """

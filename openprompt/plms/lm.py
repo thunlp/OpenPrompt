@@ -9,12 +9,12 @@ from openprompt.utils.logging import logger
 class LMTokenizerWrapper(TokenizerWrapper):
     r"""
     LMTokenizer is a causual language model. Therefore it can only predict <mask> position
-    at the end of the sentence. A prefix-style template like: 'A <mask> news : <text_a> <text_b> ' is 
-    not applicable in this situation. 
+    at the end of the sentence. A prefix-style template like: 'A <mask> news : <text_a> <text_b> ' is
+    not applicable in this situation.
     For the template where there is '<text_a>' or '<text_b>' after '<mask>', we raise an exception and terminate
-    the program. 
+    the program.
     For the template where there are template words after '<mask>', we ignore these template words.
-    Moreover, it can only predict one '<mask>' position. All template that has multiple '<mask>' will 
+    Moreover, it can only predict one '<mask>' position. All template that has multiple '<mask>' will
     give rise to an exception.
     """
     def __init__(self,
@@ -39,11 +39,11 @@ class LMTokenizerWrapper(TokenizerWrapper):
         wrapped_example, others = wrapped_example
 
         if teacher_forcing:
-            
+
             tgt_text = others['tgt_text']
             if isinstance(tgt_text, str):
                 tgt_text = [tgt_text]
-            
+
         if self.predict_eos:
             if not wrapped_example[-1]['text'].endswith(self.tokenizer.eos_token):
                 wrapped_example.append({"text":self.tokenizer.eos_token, "shortenable_ids":0, "loss_ids":1})
@@ -51,11 +51,11 @@ class LMTokenizerWrapper(TokenizerWrapper):
         encoder_inputs = defaultdict(list)
 
         num_mask_token_used = 0
-        
+
         for piece_id, piece in enumerate(wrapped_example):
             if len(piece['text']) == 0:
                 continue
-        
+
             if piece['text'] == self.tokenizer.eos_token and self.predict_eos and wrapped_example[piece_id-1]['loss_ids'] == 1: # eos after the mask also need to be pred
                 piece['loss_ids'] = 1
 
@@ -75,11 +75,11 @@ class LMTokenizerWrapper(TokenizerWrapper):
 
             if 'soft_token_ids' in piece and piece['soft_token_ids']!=0:
                 encode_text =  [0] # can be replace by any token, since these token will use their own embeddings
-            else: 
+            else:
                 encode_text = self.tokenizer.encode(piece['text'], add_special_tokens=False)
-            
+
             encoding_length = len(encode_text)
-            
+
             encoder_inputs['input_ids'].append(encode_text)
             for key in piece:
                 if key not in ['text']:
@@ -104,5 +104,5 @@ class LMTokenizerWrapper(TokenizerWrapper):
         )
         encoder_inputs = {**encoder_inputs, "input_ids_len": input_ids_len}
         return encoder_inputs
-    
+
 

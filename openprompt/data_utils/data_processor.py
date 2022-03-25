@@ -5,7 +5,7 @@ from openprompt.data_utils.utils import InputExample
 
 class DataProcessor:
     """
-    labels of the dataset is optional 
+    labels of the dataset is optional
 
     here's the examples of loading the labels:
 
@@ -14,14 +14,14 @@ class DataProcessor:
     :obj:`II`: ``DataProcessor(labels_path = 'datasets/labels.txt')``
     labels file should have label names seperated by any blank characters, such as
 
-    ..  code-block:: 
+    ..  code-block::
 
         positive neutral
         negative
 
     Args:
         labels (:obj:`Sequence[Any]`, optional): class labels of the dataset. Defaults to None.
-        labels_path (:obj:`str`, optional): Defaults to None. If set and :obj:`labels` is None, load labels from :obj:`labels_path`. 
+        labels_path (:obj:`str`, optional): Defaults to None. If set and :obj:`labels` is None, load labels from :obj:`labels_path`.
     """
 
     def __init__(self,
@@ -39,7 +39,7 @@ class DataProcessor:
         if not hasattr(self, "_labels"):
             raise ValueError("DataProcessor doesn't set labels or label_mapping yet")
         return self._labels
-        
+
     @labels.setter
     def labels(self, labels: Sequence[Any]):
         if labels is not None:
@@ -56,7 +56,7 @@ class DataProcessor:
     def label_mapping(self, label_mapping: Mapping[Any, int]):
         self._labels = [item[0] for item in sorted(label_mapping.items(), key=lambda item: item[1])]
         self._label_mapping = label_mapping
-    
+
     @property
     def id2label(self) -> Dict[int, Any]:
         if not hasattr(self, "_labels"):
@@ -82,7 +82,7 @@ class DataProcessor:
             List[Any]: labels of the dataset
         """
         return self.labels
-    
+
     def get_num_labels(self):
         """get the number of labels in the dataset
 

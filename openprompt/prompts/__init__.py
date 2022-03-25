@@ -52,43 +52,43 @@ VERBALIZER_GENERATOR_CLASS = {
 }
 
 
-def load_template(config: CfgNode, 
+def load_template(config: CfgNode,
                 **kwargs,
                 ):
     r"""
     Args:
         config: (:obj:`CfgNode`) The global configure file.
         kwargs: kwargs might include:
-                plm_model: Optional[PreTrainedModel], 
+                plm_model: Optional[PreTrainedModel],
                 plm_tokenizer: Optional[PreTrainedTokenizer],
                 plm_config: Optional[PreTrainedConfig]
-    
+
     Returns:
         A template
     """
     if config.template is not None:
         template_class = TEMPLATE_CLASS[config.template]
-        template = template_class.from_config(config=config[config.template], 
+        template = template_class.from_config(config=config[config.template],
                                      **kwargs)
     return template
 
 def load_verbalizer(config: CfgNode,
                 **kwargs,
-                ): 
+                ):
     r"""
     Args:
         config: (;obj:`CfgNode`) The global configure file.
         kwargs: kwargs might include:
-                plm_model: Optional[PreTrainedModel], 
+                plm_model: Optional[PreTrainedModel],
                 plm_tokenizer: Optional[PreTrainedTokenizer],
                 plm_config: Optional[PreTrainedConfig]
-    
+
     Returns:
         A template
-    """   
+    """
     if config.verbalizer is not None:
         verbalizer_class = VERBALIZER_CLASS[config.verbalizer]
-        verbalizer = verbalizer_class.from_config(config=config[config.verbalizer], 
+        verbalizer = verbalizer_class.from_config(config=config[config.verbalizer],
                                      **kwargs)
     return verbalizer
 

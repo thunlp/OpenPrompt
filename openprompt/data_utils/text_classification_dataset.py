@@ -46,7 +46,7 @@ class MnliProcessor(DataProcessor):
                 example = InputExample(
                     guid=str(idx), text_a=text_a, text_b=text_b, label=int(label)-1)
                 examples.append(example)
-                
+
         return examples
 
 
@@ -54,7 +54,7 @@ class MnliProcessor(DataProcessor):
 class AgnewsProcessor(DataProcessor):
     """
     `AG News <https://arxiv.org/pdf/1509.01626.pdf>`_ is a News Topic classification dataset
-    
+
     we use dataset provided by `LOTClass <https://github.com/yumeng5/LOTClass>`_
 
     Examples:
@@ -96,7 +96,7 @@ class AgnewsProcessor(DataProcessor):
                 example = InputExample(guid=str(idx), text_a=text_a, text_b=text_b, label=int(label)-1)
                 examples.append(example)
         return examples
-    
+
 class DBpediaProcessor(DataProcessor):
     """
     `Dbpedia <https://aclanthology.org/L16-1532.pdf>`_ is a Wikipedia Topic Classification dataset.
@@ -128,7 +128,7 @@ class DBpediaProcessor(DataProcessor):
 
     def get_examples(self, data_dir, split):
         examples = []
-        label_file  = open(os.path.join(data_dir,"{}_labels.txt".format(split)),'r') 
+        label_file  = open(os.path.join(data_dir,"{}_labels.txt".format(split)),'r')
         labels  = [int(x.strip()) for x in label_file.readlines()]
         with open(os.path.join(data_dir,'{}.txt'.format(split)),'r') as fin:
             for idx, line in enumerate(fin):
@@ -139,7 +139,7 @@ class DBpediaProcessor(DataProcessor):
                 example = InputExample(guid=str(idx), text_a=text_a, text_b=text_b, label=int(labels[idx]))
                 examples.append(example)
         return examples
-    
+
 
 class ImdbProcessor(DataProcessor):
     """
@@ -172,7 +172,7 @@ class ImdbProcessor(DataProcessor):
 
     def get_examples(self, data_dir, split):
         examples = []
-        label_file = open(os.path.join(data_dir, "{}_labels.txt".format(split)), 'r') 
+        label_file = open(os.path.join(data_dir, "{}_labels.txt".format(split)), 'r')
         labels = [int(x.strip()) for x in label_file.readlines()]
         with open(os.path.join(data_dir, '{}.txt'.format(split)),'r') as fin:
             for idx, line in enumerate(fin):
@@ -184,10 +184,10 @@ class ImdbProcessor(DataProcessor):
 
     @staticmethod
     def get_test_labels_only(data_dir, dirname):
-        label_file  = open(os.path.join(data_dir,dirname,"{}_labels.txt".format('test')),'r') 
+        label_file  = open(os.path.join(data_dir,dirname,"{}_labels.txt".format('test')),'r')
         labels  = [int(x.strip()) for x in label_file.readlines()]
         return labels
-   
+
 
 class AmazonProcessor(DataProcessor):
     """
@@ -205,9 +205,9 @@ class AmazonProcessor(DataProcessor):
 
     def get_examples(self, data_dir, split):
         examples = []
-        label_file = open(os.path.join(data_dir, "{}_labels.txt".format(split)), 'r') 
+        label_file = open(os.path.join(data_dir, "{}_labels.txt".format(split)), 'r')
         labels = [int(x.strip()) for x in label_file.readlines()]
-        if split == "test": 
+        if split == "test":
             logger.info("Sample a mid-size test set for effeciecy, use sampled_test_idx.txt")
             with open(os.path.join(self.args.data_dir,self.dirname,"sampled_test_idx.txt"),'r') as sampleidxfile:
                 sampled_idx = sampleidxfile.readline()
@@ -228,7 +228,7 @@ class AmazonProcessor(DataProcessor):
 class YahooProcessor(DataProcessor):
     """
     Yahoo! Answers Topic Classification Dataset
-    
+
     Examples:
 
     ..  code-block:: python
@@ -285,7 +285,7 @@ class SST2Processor(DataProcessor):
 
     Examples:
 
-    ..  code-block:: python 
+    ..  code-block:: python
 
         from openprompt.data_utils.lmbff_dataset import PROCESSORS
 
@@ -310,7 +310,7 @@ class SST2Processor(DataProcessor):
     def __init__(self):
         super().__init__()
         self.labels = ['0', '1']
-    
+
     def get_examples(self, data_dir, split):
         path = os.path.join(data_dir, f"{split}.tsv")
         examples = []

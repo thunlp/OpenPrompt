@@ -165,7 +165,7 @@ class SuperglueWSCProcessor(DataProcessor):
     def __init__(self):
         super().__init__()
         self.labels = ["Different", "Same"]
-    
+
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
@@ -195,7 +195,7 @@ class SuperglueRecordProcessor(DataProcessor):
     def __init__(self):
         super().__init__()
         self.labels = [None]
-    
+
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "validation"
@@ -233,7 +233,7 @@ class YahooAnswersTopicsProcessor(DataProcessor):
                         "Family & Relationships",
                         "Politics & Government",
                     ]
-    
+
     def get_examples(self, data_dir, split):
         if split == "valid" or split == "dev":
             split = "train"# "validation"
@@ -243,7 +243,7 @@ class YahooAnswersTopicsProcessor(DataProcessor):
             dataset = load_from_disk("/mnt/sfs_turbo/hsd/thunlp_openprompt_private/hf_scripts/datasets/")
             dataset = dataset[split]
         return list(map(self.transform, dataset))
-    
+
     def transform(self, example):
         meta = {}
         text_a = example["question_title"]
@@ -253,9 +253,9 @@ class YahooAnswersTopicsProcessor(DataProcessor):
         return InputExample(guid = guid, text_a=text_a, text_b=text_b, label=label)
 
 
-        
 
-        
+
+
 
 
 
@@ -270,6 +270,6 @@ PROCESSORS = {
     "super_glue.rte": SuperglueRTEProcessor,
     "super_glue.wic": SuperglueWiCProcessor,
     "super_glue.wsc": SuperglueWSCProcessor,
-    "super_glue.record": SuperglueRecordProcessor, 
+    "super_glue.record": SuperglueRecordProcessor,
     "yahoo_answers_topics": YahooAnswersTopicsProcessor
 }

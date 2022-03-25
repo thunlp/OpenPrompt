@@ -20,14 +20,14 @@ class PtuningTemplate(MixedTemplate):
 
     registered_inputflag_names = ["soft_token_ids", "loss_ids", 'shortenable_ids']
 
-    def __init__(self, 
+    def __init__(self,
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  text:  Optional[List[str]] = None,
                  prompt_encoder_type: str = "lstm",
                 ):
         super().__init__(model = model,
-                         tokenizer=tokenizer, 
+                         tokenizer=tokenizer,
                         )
         self.prompt_encoder_type = prompt_encoder_type
         self.text = text
@@ -68,7 +68,7 @@ class PtuningTemplate(MixedTemplate):
             )
         else:
             raise ValueError("unknown prompt_enocder_type")
-            
+
     def process_batch(self, batch: Union[Dict, InputFeatures]) -> Union[Dict, InputFeatures]:
         r"""
         Convert input_ids to inputs_embeds

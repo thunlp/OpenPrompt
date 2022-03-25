@@ -10,9 +10,9 @@ from openprompt.utils.logging import logger
 
 
 class AutomaticVerbalizer(Verbalizer):
-    r""" 
+    r"""
     This implementation is slightly different from the original code in that
-    1). we allow re-selecting the verbalizer after a fixed training steps. 
+    1). we allow re-selecting the verbalizer after a fixed training steps.
     The original implementation only performs one step selection after getting
     the inital logits on the training data. To adopt their implementation,
     please only do ``optimize()`` after the first pass of training data.
@@ -21,22 +21,22 @@ class AutomaticVerbalizer(Verbalizer):
     paper, which take softmax over the logits.
 
     3). We do not implements the ``combine_patterns'' if-branch. Since it's
-    not a pure verbalizer type, and doesn't yield much improvement. However, 
-    it can be achieve by using EnsembleTrainer to pass text wrapped by 
-    multiple templates together with this verbalizer. 
-    
-    We use a probs_buffer to store the probability :math:`q_{P,t}(1|\mathbf{x})` that to be used in later verbalizer selection, 
+    not a pure verbalizer type, and doesn't yield much improvement. However,
+    it can be achieve by using EnsembleTrainer to pass text wrapped by
+    multiple templates together with this verbalizer.
+
+    We use a probs_buffer to store the probability :math:`q_{P,t}(1|\mathbf{x})` that to be used in later verbalizer selection,
     and a label_buffer to store the label :math:`y` that to be used in later verbalizer selection.
 
     Args:
         num_candidates (:obj:`int`, optional): the number of candidates for further selection based on Section 4.1
         label_word_num_per_class (:obj:`int`, optional): set to be greater than 1 to support Multi-Verbalizers in Section 4.2
-        num_searches (:obj:`int`, optional): Maximnum number of label_words search. After reaching this number, the verbalizer will use the same label_words as the previous iterations. 
+        num_searches (:obj:`int`, optional): Maximnum number of label_words search. After reaching this number, the verbalizer will use the same label_words as the previous iterations.
         search_id (:obj:`int`, optional): the id of current search, used to determine when to stop label words searching.
         score_fct (:obj:`str`, optional): the scoring function of label words selection. ``llr`` means log likelihood ratio, corresponding to Equation (7); ``ce`` means cross entropy, corresponding to Equation (6). As the paper points out, ``llr'' is significantly better than 'ce', we only keep it to match the original code.
         balance (:obj:`book`, optional): whether to perform normalization of unbalanced training dataset, as Equation (5).
     """
-    def __init__(self, 
+    def __init__(self,
                  tokenizer: PreTrainedTokenizer = None,
                  num_candidates: Optional[int]= 1000,
                  label_word_num_per_class: Optional[int] = 1,
@@ -55,7 +55,7 @@ class AutomaticVerbalizer(Verbalizer):
         self.num_searches = num_searches
         self.search_id = 0
         self.accumulate_step = 0 # currently not used, to support not epoch-level optimize.
-        self.accumulate = True # A flag to indicate whether to 
+        self.accumulate = True # A flag to indicate whether to
                                # accumulate examples for optimization.
                                # set to False after finish optimization.
         self.score_fct = score_fct
@@ -64,12 +64,12 @@ class AutomaticVerbalizer(Verbalizer):
 
     def register_buffer(self, logits, labels):
         r'''
-        
+
         Args:
-            logits (:obj:`torch.Tensor`): 
-            labels (:obj:`List`): 
+            logits (:obj:`torch.Tensor`):
+            labels (:obj:`List`):
         '''
-        
+
         logits = F.softmax(logits.detach(),dim=-1)
         labels = labels.detach()
         if self.probs_buffer is None :
@@ -80,7 +80,7 @@ class AutomaticVerbalizer(Verbalizer):
             self.labels_buffer = torch.hstack([self.labels_buffer, labels])
 
     def process_logits(self, logits: torch.Tensor, **kwargs):
-    
+
         if self.accumulate: # inherit from nn.Module, only store buffer in training mode.
             self.accumulate_step+=1
             self.register_buffer(logits, kwargs['batch']['label'])
@@ -108,18 +108,18 @@ class AutomaticVerbalizer(Verbalizer):
 
         else:
             return torch.randn((logits.size(0), self.num_classes), requires_grad=True).to(logits.device)
-        
+
     def project(self,
                 logits: torch.Tensor,
-                **kwargs, # TODO 
+                **kwargs, # TODO
                 ) -> torch.Tensor:
-        r"""When this verbalizer hasn't perform optimize(), it has no 
+        r"""When this verbalizer hasn't perform optimize(), it has no
         ``label_words_ids``, thus will give random predictions, and should
         have no connection to the model to give (miss-leading) grads.
-        
+
         Args:
             logits (:obj:`torch.Tensor`): The original logits over the vocabulary.
-            
+
         Returns:
             :obj:`torch.Tensor`: The projected logits of label words.
         """
@@ -129,8 +129,8 @@ class AutomaticVerbalizer(Verbalizer):
 
     def optimize(self):
         pass
-        
-        
+
+
     def optimize_to_initialize(self):
         r"""This is an epoch-level optimize. If used in batch-level like an ordinary
         gradient descend optimizer, the result may not be very satisfying since the accumated
@@ -138,7 +138,7 @@ class AutomaticVerbalizer(Verbalizer):
         is small.
         """
         if self.search_id < self.num_searches:
-            self.label_words_ids = self._find_verbalizer(words_per_label=self.label_word_num_per_class, 
+            self.label_words_ids = self._find_verbalizer(words_per_label=self.label_word_num_per_class,
                                                          num_candidates=self.num_candidates,
                                                          score_fct=self.score_fct,
                                                          balance=self.balance)
@@ -149,8 +149,8 @@ class AutomaticVerbalizer(Verbalizer):
         else:
             logger.info("Verbalizer's max num_searches reached, use the previous label words.")
         self._show_verbalizer()
-        
-            
+
+
     def _show_verbalizer(self):
         tokens = [self.tokenizer.convert_ids_to_tokens(i) for i in self.label_words_ids]
         logger.info("Verbalizer is {}".format(tokens))
@@ -169,7 +169,7 @@ class AutomaticVerbalizer(Verbalizer):
                                     score_fct=score_fct)
         return label_words
 
-    def _get_candidates(self, 
+    def _get_candidates(self,
                         num_candidates: int,
                         probs: torch.Tensor,
                         labels: torch.Tensor,
@@ -185,8 +185,8 @@ class AutomaticVerbalizer(Verbalizer):
             candidate_id = torch.argsort(score, descending=True)[:num_candidates]
             candidate_ids.append(candidate_id)
         return candidate_ids
-    
-    def _get_top_words(self, 
+
+    def _get_top_words(self,
                        probs: torch.Tensor,
                        candidates: List[torch.Tensor],
                        balance: bool = True,
@@ -219,7 +219,7 @@ class AutomaticVerbalizer(Verbalizer):
         pos_score = torch.sum(torch.log(probs+1e-15) * label_mask, dim=0) - torch.sum(torch.log(1 - probs + 1e-15) * label_mask, dim=0)
         neg_score = torch.sum(torch.log(1 - probs +1e-15) * scale_factor, dim=0) - torch.sum(torch.log(probs+1e-15) * scale_factor, dim=0)
         return pos_score + neg_score
-    
+
     def _cross_entropy(self, probs, label_mask, balance):
         if balance:
             scale_factor =  torch.sum(label_mask) / torch.sum(1 - label_mask) \
@@ -231,8 +231,8 @@ class AutomaticVerbalizer(Verbalizer):
         pos_score = torch.sum(torch.log(probs+1e-15) * label_mask, dim=0)
         neg_score = torch.sum(torch.log(1 - probs +1e-15) * scale_factor, dim=0)
         return pos_score + neg_score
-    
+
     def from_file(self,
-                  path: str, 
+                  path: str,
                   choice: Optional[int] = 0 ):
         raise NotImplementedError("This verbalizer is learned and can't be set from file.")

@@ -19,7 +19,7 @@ class PTRTemplate(PtuningTemplate):
         soft_token (:obj:`str`, optional): The special token for soft token. Default to ``<soft>``
         placeholder_mapping (:obj:`dict`): A place holder to represent the original input text. Default to ``{'<text_a>': 'text_a', '<text_b>': 'text_b'}``
     """
-    def __init__(self, 
+    def __init__(self,
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  text:  Optional[str] = None,
@@ -38,7 +38,7 @@ class PTRVerbalizer(Verbalizer):
     Different ``<mask>`` tokens have different label words.
     The final label is predicted jointly by these label words using logic rules.
 
-    Args: 
+    Args:
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
         classes (:obj:`Sequence[str]`): A sequence of classes that need to be projected.
         label_words (:obj:`Union[Sequence[Sequence[str]], Mapping[str, Sequence[str]]]`, optional): The label words that are projected by the labels.

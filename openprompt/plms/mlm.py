@@ -7,11 +7,11 @@ from collections import defaultdict
 
 class MLMTokenizerWrapper(TokenizerWrapper):
     add_input_keys = ['input_ids', 'attention_mask', 'token_type_ids']
-    
+
     @property
     def mask_token(self):
         return self.tokenizer.mask_token
-    
+
     @property
     def mask_token_ids(self):
         return self.tokenizer.mask_token_id
@@ -27,8 +27,8 @@ class MLMTokenizerWrapper(TokenizerWrapper):
         '''
 
         wrapped_example, others = wrapped_example
-        
-        # for some dataset like SuperGLUE.COPA, the answer requires prediction an span of 
+
+        # for some dataset like SuperGLUE.COPA, the answer requires prediction an span of
         # the input. Or in generation tasks, we need to generate a piece of target_text.
         # In these case, it tokenized to the encoded_tgt_text for furture use.
         encoded_tgt_text = []
@@ -38,9 +38,9 @@ class MLMTokenizerWrapper(TokenizerWrapper):
                 tgt_text = [tgt_text]
             for t in tgt_text:
                 encoded_tgt_text.append(self.tokenizer.encode(t, add_special_tokens=False))
-            
-        
-        mask_id = 0 # the i-th the mask token in the template. 
+
+
+        mask_id = 0 # the i-th the mask token in the template.
 
         encoder_inputs = defaultdict(list)
         for piece in wrapped_example:
@@ -68,7 +68,7 @@ class MLMTokenizerWrapper(TokenizerWrapper):
             for key in piece:
                 if key not in ['text']:
                     encoder_inputs[key].append([piece[key]]*encoding_length)
-        
+
         encoder_inputs = self.truncate(encoder_inputs=encoder_inputs)
         # delete shortenable ids
         encoder_inputs.pop("shortenable_ids")
@@ -87,7 +87,7 @@ class MLMTokenizerWrapper(TokenizerWrapper):
         else:
             encoder_inputs = {**encoder_inputs}
         return encoder_inputs
-    
+
 
 
 

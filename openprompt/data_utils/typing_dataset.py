@@ -1,6 +1,6 @@
 """
 This file contains the logic for loading data for all typing tasks.
-# TODO license 
+# TODO license
 """
 
 import os
@@ -23,7 +23,7 @@ class FewNERDProcessor(DataProcessor):
     `Few-NERD <https://ningding97.github.io/fewnerd/>`_ a large-scale, fine-grained manually annotated named entity recognition dataset
 
     It was released together with `Few-NERD: Not Only a Few-shot NER Dataset (Ning Ding et al. 2021) <https://arxiv.org/pdf/2105.07464.pdf>`_
-    
+
     Examples:
 
     ..  code-block:: python

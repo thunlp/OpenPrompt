@@ -5,7 +5,7 @@ except ImportError:
 import argparse
 from yacs.config import CfgNode
 import sys
-from openprompt.utils.utils import check_config_conflicts 
+from openprompt.utils.utils import check_config_conflicts
 from .default_config import get_default_config
 from openprompt.utils.logging import logger
 import os
@@ -27,7 +27,7 @@ def get_user_config(usr_config_path, default_config=None):
 
     config = get_conditional_config(config)
     return config
-    
+
 
 def get_conditional_config(config):
     r"""Extract the config entries that do not have ``parent_config`` key.
@@ -38,10 +38,10 @@ def get_conditional_config(config):
         if config[key] is not None and 'parent_config' in config[key]:
             deeper_config[key] = config[key]
             config.pop(key)
-    
-    # breadth first search over all config nodes 
+
+    # breadth first search over all config nodes
     queue = [config]
-    
+
     while len(queue) > 0:
         v = queue.pop(0)
         ordv = OrderedDict(v.copy())
@@ -51,7 +51,7 @@ def get_conditional_config(config):
                 leaf[1] in deeper_config.keys():
                 retrieved = deeper_config[leaf[1]]
                 setattr(config, leaf[1], retrieved)
-                if isinstance(retrieved, CfgNode): 
+                if isinstance(retrieved, CfgNode):
                     # also BFS the newly added CfgNode.
                     queue.append(retrieved)
             elif isinstance(leaf[1], CfgNode):
@@ -119,7 +119,7 @@ def save_config_to_yaml(config):
     with open(saved_yaml_path, 'w') as f:
         with redirect_stdout(f): print(config.dump())
     logger.info("Config saved as {}".format(saved_yaml_path))
-                
+
 def get_config():
     parser = argparse.ArgumentParser("Global Config Argument Parser", allow_abbrev=False)
     parser.add_argument("--config_yaml", required=True, type=str, help='the configuration file for this experiment.')

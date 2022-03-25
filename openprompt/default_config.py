@@ -14,23 +14,23 @@ def get_default_config():
     cfg.environment.model_parallel = False  # whether to perform model parallel
     cfg.environment.device_map = None  # the device_map, such as "{0: [0, 1, 2], 1: [3, 4, 5, 6, 7, 8, 9], 2: [10, 11, 12, 13, 14, 15, 16],3: [17, 18, 19, 20, 21, 22, 23]}
 
-    cfg.reproduce = CfgNode(new_allowed=True) # seed for reproduction 
+    cfg.reproduce = CfgNode(new_allowed=True) # seed for reproduction
     cfg.reproduce.seed = 100  # a seed for all everything
 
     # PLM PARAMETERS
     ##################################
-    cfg.plm = CfgNode(new_allowed=True)    
+    cfg.plm = CfgNode(new_allowed=True)
     cfg.plm.model_name = None # the model name, e.g. bert, roberta, gpt2, ...
                 # for all the available model, please check the ./plms directory.
     cfg.plm.model_path = None
     cfg.plm.specials_to_add = ['<pad>'] # always need to add pad token, if the tokenizer doesn't have one.
-    cfg.plm.optimize = CfgNode(new_allowed=True) 
-    cfg.plm.optimize.name = 'AdamW'  # TODO: curently not in use. 
+    cfg.plm.optimize = CfgNode(new_allowed=True)
+    cfg.plm.optimize.name = 'AdamW'  # TODO: curently not in use.
     cfg.plm.optimize.freeze_para = False
     cfg.plm.optimize.no_decay = ['bias', 'LayerNorm.weight']
     cfg.plm.optimize.lr = 0.0005
     cfg.plm.optimize.weight_decay = 0.01
-    cfg.plm.optimize.betas = [0.9, 0.999] 
+    cfg.plm.optimize.betas = [0.9, 0.999]
     cfg.plm.optimize.eps = 1.0e-8
     cfg.plm.optimize.scheduler = CfgNode(new_allowed=True)
     cfg.plm.optimize.scheduler.type = None      # by default, it will choose get_linear_schedule_with_warmup
@@ -38,7 +38,7 @@ def get_default_config():
 
     ## LOGGIN and CHECKPOINTING ##################################################
     ## in logging, each experiment will create a seperate folder for saving log.txt
-    ## , (full) config.json, and the checkpoint (if use the same path). 
+    ## , (full) config.json, and the checkpoint (if use the same path).
     ## logging is in the following format：
     ## ./log
     ##  - DIR_NAME_1
@@ -53,17 +53,17 @@ def get_default_config():
     cfg.logging.path_base = 'logs' # the path base of all the logs.
     cfg.logging.file_level = 'NOTSET' # make sure it's an option of logging package
     cfg.logging.console_level = 'INFO' # make sure it's an option of logging package
-    cfg.logging.unique_string = None  # the generated (or usr defined) unique string for one experiment. 
-    cfg.logging.unique_string_keys = ['dataset.name', 'plm.model_path', 'template', 'verbalizer', 'datetime'] # used to generate the unique string for saving 
+    cfg.logging.unique_string = None  # the generated (or usr defined) unique string for one experiment.
+    cfg.logging.unique_string_keys = ['dataset.name', 'plm.model_path', 'template', 'verbalizer', 'datetime'] # used to generate the unique string for saving
         #- dataset.name
-        #- plm.model_path # only keep the last folder name in code, 
-            # .i.e ../.cache/roberta-large/ will save as roberta-large 
+        #- plm.model_path # only keep the last folder name in code,
+            # .i.e ../.cache/roberta-large/ will save as roberta-large
         #- template
         #- verbalizer
         #- datetime  # a 12-digit string recording the date time of running the experiment, i.e., YYMMDDHHMMSS.
     cfg.logging.datetime_format = "%m%d%H%M%S%f" # only useful when unique_string_keys includes `datetime`.
         #  make sure it's a valid format for datetime package.
-    cfg.logging.path = None # always keep none to let the config generate a full path according to 
+    cfg.logging.path = None # always keep none to let the config generate a full path according to
             # path_base and unique_string.
     cfg.logging.overwrite = True # if a same log path exists, overwrite it.
 
@@ -72,7 +72,7 @@ def get_default_config():
     cfg.checkpoint = CfgNode(new_allowed=True) # checkpoint use the same directory as logging.
     cfg.checkpoint.save_lastest = True # Normaly set to False to reduce memory use, set
                         # to true to allow resuming learning process.
-    cfg.checkpoint.save_best = True   # Keep saving the epoch of the best-performance. 
+    cfg.checkpoint.save_best = True   # Keep saving the epoch of the best-performance.
     cfg.checkpoint.higher_better = True # is the metric to determine best checkpoint highter better?
 
 
@@ -98,7 +98,7 @@ def get_default_config():
     cfg.test = CfgNode(new_allowed=True)
     cfg.test.batch_size = 2 # evaluationn batch_size, can be a bit larger than training batch_size
     cfg.test.shuffle_data = False # whether to perform data shuffling in evaluation
-    
+
     ## TASK ##########################################################@
     cfg.task = 'classification'
 
@@ -109,7 +109,7 @@ def get_default_config():
 
     # LMBFF-classification config ###########################################################W
     cfg.classification.auto_t = False
-    cfg.classification.auto_v = False 
+    cfg.classification.auto_v = False
 
     cfg.template_generator = CfgNode(new_allowed=True)
     cfg.template_generator.plm = CfgNode(new_allowed=True)
@@ -118,7 +118,7 @@ def get_default_config():
     cfg.template_generator.plm.model_path = None
     cfg.template_generator.plm.specials_to_add = ['<pad>'] # always need to add pad token, if the tokenizer doesn't have one.
 
-    cfg.template_generator.max_length = 20 # maximum length of generated template     
+    cfg.template_generator.max_length = 20 # maximum length of generated template
     cfg.template_generator.target_number = 2 # number of parts to generate, e.g. in T5, every <extra_id_{}> token is one part
     cfg.template_generator.beam_width = 5
     cfg.template_generator.length_limit = None # List[str] length limit for each part of content
@@ -161,13 +161,13 @@ def get_default_config():
     ## DATASET #########################################################
     cfg.dataset = CfgNode(new_allowed=True)
     cfg.dataset.name = None   # the name of the dataset, for the supported choices,
-            # please see the processors in ./data_utils/ 
+            # please see the processors in ./data_utils/
     cfg.dataset.path = None  # whether is the dataset saved in your local machine.
     cfg.dataset.label_path_sep = None # label path separation token, only for hierarchical label
 
     ## DATALOADER ######################################################
     cfg.dataloader = CfgNode(new_allowed=True)
-    cfg.dataloader.max_seq_length = 256 # max_seq_length 
+    cfg.dataloader.max_seq_length = 256 # max_seq_length
     cfg.dataloader.decoder_max_length = 256 # the decoder max length to truncate decoder input sequence
                         # if it is an encoder-decoder architecture. Note that it's not equavalent
                         # to generation.max_length which is used merely in the generation phase.
@@ -182,7 +182,7 @@ def get_default_config():
     cfg.few_shot = CfgNode(new_allowed=True)
     cfg.few_shot.parent_config = 'learning_setting'
     cfg.few_shot.few_shot_sampling = None
-    
+
     cfg.sampling_from_train = CfgNode(new_allowed=True)
     cfg.sampling_from_train.parent_config = 'few_shot_sampling'
     cfg.sampling_from_train.num_examples_per_label = 10
@@ -207,7 +207,7 @@ def get_default_config():
 
     cfg.manual_template = CfgNode(new_allowed=True)
     cfg.manual_template.parent_config = 'template'
-    cfg.manual_template.text = None 
+    cfg.manual_template.text = None
     cfg.manual_template.mask_token = '<mask>'
     cfg.manual_template.placeholder_mapping = CfgNode(new_allowed=True)
     cfg.manual_template.placeholder_mapping['<text_a>'] = 'text_a'
@@ -238,7 +238,7 @@ def get_default_config():
     cfg.one2one_verbalizer.choice = None
     cfg.one2one_verbalizer.num_classes = None
     cfg.one2one_verbalizer.optimize = None
-    
+
     cfg.manual_verbalizer = CfgNode(new_allowed=True)
     cfg.manual_verbalizer.parent_config = 'verbalizer'
     cfg.manual_verbalizer.label_words = None
@@ -259,8 +259,8 @@ def get_default_config():
     cfg.prefix_tuning_template.placeholder_mapping['<text_b>'] = 'text_b'
     cfg.prefix_tuning_template.prefix_dropout = 0.0
     cfg.prefix_tuning_template.mid_dim = 512
-    cfg.prefix_tuning_template.optimize = CfgNode(new_allowed=True) 
-    cfg.prefix_tuning_template.optimize.name = 'AdamW' 
+    cfg.prefix_tuning_template.optimize = CfgNode(new_allowed=True)
+    cfg.prefix_tuning_template.optimize.name = 'AdamW'
     cfg.prefix_tuning_template.optimize.lr = 0.00005
     cfg.prefix_tuning_template.optimize.betas = [0.9, 0.999]
     cfg.prefix_tuning_template.optimize.adam_epsilon = 1.0e-8
@@ -276,8 +276,8 @@ def get_default_config():
     cfg.mixed_template.placeholder_mapping = CfgNode(new_allowed=True)
     cfg.mixed_template.placeholder_mapping['<text_a>'] = 'text_a'
     cfg.mixed_template.placeholder_mapping['<text_b>'] = 'text_b'
-    cfg.mixed_template.optimize = CfgNode(new_allowed=True) 
-    cfg.mixed_template.optimize.name = 'AdamW' 
+    cfg.mixed_template.optimize = CfgNode(new_allowed=True)
+    cfg.mixed_template.optimize.name = 'AdamW'
     cfg.mixed_template.optimize.lr = 0.00005
     cfg.mixed_template.optimize.betas = [0.9, 0.999]
     cfg.mixed_template.optimize.adam_epsilon = 1.0e-8
@@ -286,6 +286,6 @@ def get_default_config():
     cfg.mixed_template.optimize.scheduler = CfgNode(new_allowed=True)
     cfg.mixed_template.optimize.scheduler.num_warmup_steps = 0
 
-    
+
     return cfg
 

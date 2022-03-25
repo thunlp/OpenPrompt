@@ -21,8 +21,8 @@ class SoftTemplate(Template):
     r"""This is the implementation of `The Power of Scale for Parameter-Efficient
     Prompt Tuning <https://arxiv.org/pdf/2104.08691v1.pdf>`_ . Similar to :obj:`PrefixTuningTemplate`,
     This template also does not need any textual template. Addition tokens are directly
-    concatenated into the input ids. There are two initializations of the new tokens. 
-    (1). random initialization. (2) initialize with the tokens of the plm (We simply take 
+    concatenated into the input ids. There are two initializations of the new tokens.
+    (1). random initialization. (2) initialize with the tokens of the plm (We simply take
     the first n_tokens similar to their implementation).
     """
     registered_inputflag_names = ["loss_ids", "shortenable_ids"]
@@ -84,7 +84,7 @@ class SoftTemplate(Template):
         self.soft_embeds = nn.Parameter(soft_embeds, requires_grad=True)
 
 
-    
+
     def process_batch(self, batch: Union[Dict, InputFeatures]) -> Union[Dict, InputFeatures]:
         """
         Convert input_ids to inputs_embeds
@@ -103,7 +103,7 @@ class SoftTemplate(Template):
             am = batch['attention_mask']
             batch['attention_mask'] = torch.cat([torch.ones((batch_size,self.num_tokens), dtype = am.dtype,device=am.device), am], dim=-1)
         return batch
-    
+
 
     def post_processing_outputs(self, outputs: torch.Tensor):
         r"""Post processing the outputs of language models according
