@@ -168,6 +168,19 @@ class PromptModel(nn.Module):
         # get model's forward function's keywords
         self.forward_keys = signature(self.plm.forward).args
 
+        self._prepare_main_input_name()
+
+    def _prepare_main_input_name(self):
+        model = self.plm
+        if hasattr(model, "encoder") and hasattr(model.encoder, "main_input_name"):
+            if model.encoder.main_input_name != model.main_input_name:
+                main_input_name = model.encoder.main_input_name
+            else:
+                main_input_name = model.main_input_name
+        else:
+            main_input_name = getattr(model, "main_input_name", "input_ids")
+        self.main_input_name = main_input_name
+
     def train(self, mode: bool = True):
         if not isinstance(mode, bool):
             raise ValueError("training mode is expected to be boolean")
@@ -369,6 +382,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             for key in gen_config:
                 setattr(self.config, key, gen_config[key])
         self.in_generation_function = False
+
+        self.main_input_name = self.prompt_model.main_input_name # for transformers 4.17.0 and higher.
 
     @property
     def plm(self):
@@ -579,7 +594,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
 
     def _prepare_encoder_decoder_kwargs_for_generation(
-        self, input_ids: torch.LongTensor, model_kwargs
+        self, input_ids: torch.LongTensor, model_kwargs, model_input_name: Optional[str] = None,
     ) -> Dict[str, Any]:
         r""" This function resemble the function in GeneraionMix
 
@@ -594,7 +609,8 @@ class PromptForGeneration(nn.Module, GenerationMixin):
                 for argument, value in model_kwargs.items()
                 if not (argument.startswith("decoder_") or argument.startswith("cross_attn"))
             }
-            batch = {"input_ids":input_ids, **encoder_kwargs}
+            model_input_name = model_input_name if model_input_name is not None else self.main_input_name
+            batch = {model_input_name:input_ids, **encoder_kwargs}
             model_inputs = self.prompt_model.prepare_model_inputs(batch) # This line differs from the orinigal code base, we should process the input
             # with our template, then pass it into the model.
             # some of the arguments may have been changed by the template,

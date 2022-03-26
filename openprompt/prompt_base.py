@@ -93,9 +93,14 @@ class Template(nn.Module):
         raise NotImplementedError
 
     def incorporate_text_example(self,
-                                 example: InputExample
+                                 example: InputExample,
+                                 text = None,
                                 ):
-        text = self.text.copy()
+        if text is None:
+            text = self.text.copy()
+        else:
+            text = text.copy()
+
         for i, d in enumerate(text):
             if 'placeholder' in d:
                 text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example, d['placeholder']))

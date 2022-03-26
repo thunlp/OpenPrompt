@@ -23,7 +23,8 @@ from openprompt.utils.logging import logger
 from datasets import load_from_disk
 import os
 
-HUGGING_FACE_SCRIPTS = 'super_glue' # if you can not connect huggingface in our machine, you can download the scripts manually and change this line.
+HUGGING_FACE_SCRIPTS = 'super_glue' # if you can not connect huggingface in your machine, you can download the scripts manually and change this line.
+HUGGING_FACE_SCRIPTS = '../../huggingface_datasets/super_glue'
 class SuperglueMultiRCProcessor(DataProcessor):
     def __init__(self):
         super().__init__()

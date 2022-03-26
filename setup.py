@@ -1,5 +1,6 @@
 import setuptools
 import os
+import importlib
 
 def get_requirements(path):
     ret = []
@@ -40,3 +41,21 @@ with open('README.md', 'r') as f:
             "Operating System :: OS Independent",
         ]
     )
+
+required_list = ["torch"]
+for package in required_list:
+    try:
+        m = importlib.import_module(package)
+    except ModuleNotFoundError:
+        print("\n"+"="*30+"  WARNING  "+"="*30)
+        print(f"{package} is not found on your environment, please install it manually.")
+        print("We do not install it for you because the environment sometimes needs special care.")
+
+optional_list = ["sklearn"]
+for package in optional_list:
+    try:
+        m = importlib.import_module(package)
+    except ModuleNotFoundError:
+        print("\n"+"="*30+"  WARNING  "+"="*30)
+        print(f"{package} is not found on your environment, please install it if the specific script needs.")
+
