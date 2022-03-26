@@ -258,6 +258,19 @@
         <span class="c1"># get model&#39;s forward function&#39;s keywords</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">forward_keys</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_main_input_name</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_main_input_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;encoder&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span> <span class="s2">&quot;main_input_name&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">main_input_name</span> <span class="o">!=</span> <span class="n">model</span><span class="o">.</span><span class="n">main_input_name</span><span class="p">:</span>
+                <span class="n">main_input_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">main_input_name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">main_input_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">main_input_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">main_input_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;main_input_name&quot;</span><span class="p">,</span> <span class="s2">&quot;input_ids&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_input_name</span> <span class="o">=</span> <span class="n">main_input_name</span>
+
 <div class="viewcode-block" id="PromptModel.train"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptModel.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;training mode is expected to be boolean&quot;</span><span class="p">)</span>
@@ -459,6 +472,8 @@
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">gen_config</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">gen_config</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_generation_function</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_input_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">main_input_name</span> <span class="c1"># for transformers 4.17.0 and higher.</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">plm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -669,7 +684,7 @@
 
 
     <span class="k">def</span> <span class="nf">_prepare_encoder_decoder_kwargs_for_generation</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">,</span> <span class="n">model_kwargs</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">,</span> <span class="n">model_input_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; This function resemble the function in GeneraionMix</span>
 
@@ -684,7 +699,8 @@
                 <span class="k">for</span> <span class="n">argument</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">model_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">argument</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;decoder_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">argument</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cross_attn&quot;</span><span class="p">))</span>
             <span class="p">}</span>
-            <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;input_ids&quot;</span><span class="p">:</span><span class="n">input_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">encoder_kwargs</span><span class="p">}</span>
+            <span class="n">model_input_name</span> <span class="o">=</span> <span class="n">model_input_name</span> <span class="k">if</span> <span class="n">model_input_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_input_name</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="n">model_input_name</span><span class="p">:</span><span class="n">input_ids</span><span class="p">,</span> <span class="o">**</span><span class="n">encoder_kwargs</span><span class="p">}</span>
             <span class="n">model_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">prepare_model_inputs</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="c1"># This line differs from the orinigal code base, we should process the input</span>
             <span class="c1"># with our template, then pass it into the model.</span>
             <span class="c1"># some of the arguments may have been changed by the template,</span>
