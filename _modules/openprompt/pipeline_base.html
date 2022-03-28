@@ -88,7 +88,8 @@
            <div itemprop="articleBody">
              
   <h1>Source code for openprompt.pipeline_base</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">torch.utils.data.sampler</span> <span class="kn">import</span> <span class="n">RandomSampler</span>
+<span></span><span class="kn">from</span> <span class="nn">pickle</span> <span class="kn">import</span> <span class="n">FALSE</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data.sampler</span> <span class="kn">import</span> <span class="n">RandomSampler</span>
 <span class="kn">from</span> <span class="nn">transformers.configuration_utils</span> <span class="kn">import</span> <span class="n">PretrainedConfig</span>
 <span class="kn">from</span> <span class="nn">transformers.generation_utils</span> <span class="kn">import</span> <span class="n">GenerationMixin</span>
 <span class="kn">import</span> <span class="nn">torch</span>
@@ -133,8 +134,9 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span>
                  <span class="n">template</span><span class="p">:</span> <span class="n">Template</span><span class="p">,</span>
-                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
-                 <span class="n">tokenizer_wrapper_class</span><span class="p">:</span> <span class="n">TokenizerWrapper</span><span class="p">,</span>
+                 <span class="n">tokenizer_wrapper</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TokenizerWrapper</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">tokenizer_wrapper_class</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">verbalizer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Verbalizer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">max_seq_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span>
                  <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -159,19 +161,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span> <span class="o">=</span> <span class="n">shuffle</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">teacher_forcing</span> <span class="o">=</span> <span class="n">teacher_forcing</span>
 
-        <span class="n">tokenizer_wrapper_init_keys</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">tokenizer_wrapper_class</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
-        <span class="n">prepare_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;max_seq_length&quot;</span> <span class="p">:</span> <span class="n">max_seq_length</span><span class="p">,</span>
-            <span class="s2">&quot;truncate_method&quot;</span> <span class="p">:</span> <span class="n">truncate_method</span><span class="p">,</span>
-            <span class="s2">&quot;decoder_max_length&quot;</span> <span class="p">:</span> <span class="n">decoder_max_length</span><span class="p">,</span>
-            <span class="s2">&quot;predict_eos_token&quot;</span> <span class="p">:</span> <span class="n">predict_eos_token</span><span class="p">,</span>
-            <span class="s2">&quot;tokenizer&quot;</span> <span class="p">:</span> <span class="n">tokenizer</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="n">to_pass_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">prepare_kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">prepare_kwargs</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tokenizer_wrapper_init_keys</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">tokenizer_wrapper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tokenizer_wrapper_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Either wrapped_tokenizer or tokenizer_wrapper_class should be specified.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tokenizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No tokenizer specified to instantiate tokenizer_wrapper.&quot;</span><span class="p">)</span>
 
+            <span class="n">tokenizer_wrapper_init_keys</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">tokenizer_wrapper_class</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span><span class="o">.</span><span class="n">args</span>
+            <span class="n">prepare_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;max_seq_length&quot;</span> <span class="p">:</span> <span class="n">max_seq_length</span><span class="p">,</span>
+                <span class="s2">&quot;truncate_method&quot;</span> <span class="p">:</span> <span class="n">truncate_method</span><span class="p">,</span>
+                <span class="s2">&quot;decoder_max_length&quot;</span> <span class="p">:</span> <span class="n">decoder_max_length</span><span class="p">,</span>
+                <span class="s2">&quot;predict_eos_token&quot;</span> <span class="p">:</span> <span class="n">predict_eos_token</span><span class="p">,</span>
+                <span class="s2">&quot;tokenizer&quot;</span> <span class="p">:</span> <span class="n">tokenizer</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span> <span class="o">=</span> <span class="n">tokenizer_wrapper_class</span><span class="p">(</span><span class="o">**</span><span class="n">to_pass_kwargs</span><span class="p">)</span>
+            <span class="n">to_pass_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">prepare_kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">prepare_kwargs</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tokenizer_wrapper_init_keys</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span> <span class="o">=</span> <span class="n">tokenizer_wrapper_class</span><span class="p">(</span><span class="o">**</span><span class="n">to_pass_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer_wrapper</span> <span class="o">=</span> <span class="n">tokenizer_wrapper</span>
 
         <span class="c1"># check the satisfiability of each component</span>
         <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;wrap_one_example&#39;</span><span class="p">),</span> <span class="s2">&quot;Your prompt has no function variable </span><span class="se">\</span>
@@ -397,21 +406,22 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">tokenizer</span>
 
-<div class="viewcode-block" id="PromptForClassification.state_dict"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Save the model using template, plm and verbalizer&#39;s save methods.&quot;&quot;&quot;</span>
-        <span class="n">_state_dict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">freeze_plm</span><span class="p">:</span>
-            <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;verbalizer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_state_dict</span></div>
+    <span class="c1">##  We comment this code since it conflict with [OpenDelta](https://github.com/thunlp/OpenDelta)</span>
+    <span class="c1"># def state_dict(self, *args, **kwargs):</span>
+    <span class="c1">#     &quot;&quot;&quot; Save the model using template, plm and verbalizer&#39;s save methods.&quot;&quot;&quot;</span>
+    <span class="c1">#     _state_dict = {}</span>
+    <span class="c1">#     if not self.prompt_model.freeze_plm:</span>
+    <span class="c1">#         _state_dict[&#39;plm&#39;] = self.plm.state_dict(*args, **kwargs)</span>
+    <span class="c1">#     _state_dict[&#39;template&#39;] = self.template.state_dict(*args, **kwargs)</span>
+    <span class="c1">#     _state_dict[&#39;verbalizer&#39;] = self.verbalizer.state_dict(*args, **kwargs)</span>
+    <span class="c1">#     return _state_dict</span>
 
-<div class="viewcode-block" id="PromptForClassification.load_state_dict"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.load_state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Load the model using template, plm and verbalizer&#39;s load methods.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s1">&#39;plm&#39;</span> <span class="ow">in</span> <span class="n">state_dict</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">freeze_plm</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;verbalizer&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+    <span class="c1"># def load_state_dict(self, state_dict, *args, **kwargs):</span>
+    <span class="c1">#     &quot;&quot;&quot; Load the model using template, plm and verbalizer&#39;s load methods.&quot;&quot;&quot;</span>
+    <span class="c1">#     if &#39;plm&#39; in state_dict and not self.prompt_model.freeze_plm:</span>
+    <span class="c1">#         self.plm.load_state_dict(state_dict[&#39;plm&#39;], *args, **kwargs)</span>
+    <span class="c1">#     self.template.load_state_dict(state_dict[&#39;template&#39;], *args, **kwargs)</span>
+    <span class="c1">#     self.verbalizer.load_state_dict(state_dict[&#39;verbalizer&#39;], *args, **kwargs)</span>
 
 <div class="viewcode-block" id="PromptForClassification.parallelize"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForClassification.parallelize">[docs]</a>    <span class="k">def</span> <span class="nf">parallelize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_map</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Parallelize the model across device</span>
@@ -623,10 +633,14 @@
             <span class="n">input_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_lengths</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_sequences</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">sent_id</span><span class="p">,</span> <span class="n">seq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">output_sequences</span><span class="p">):</span>
             <span class="n">seq</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[</span><span class="n">input_lengths</span><span class="p">[</span><span class="n">sent_id</span><span class="p">]:]</span>
-            <span class="n">text_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">clean_up_tokenization_spaces</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="n">text_output</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">text_output</span> <span class="o">=</span> <span class="n">text_output</span><span class="p">[:</span><span class="n">idx</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">&quot;eos_token&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">text_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">clean_up_tokenization_spaces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">text_output</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">text_output</span> <span class="o">=</span> <span class="n">text_output</span><span class="p">[:</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">text_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">clean_up_tokenization_spaces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">text_output</span> <span class="o">=</span> <span class="n">text_output</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">generated_sentences</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text_output</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">generated_sentences</span></div>
@@ -711,19 +725,20 @@
             <span class="n">model_kwargs</span><span class="p">[</span><span class="s2">&quot;encoder_outputs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span><span class="n">return_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">model_inputs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model_kwargs</span>
 
-<div class="viewcode-block" id="PromptForGeneration.state_dict"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration.state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Save the model using template and plm&#39;s save methods. &quot;&quot;&quot;</span>
-        <span class="n">_state_dict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">freeze_plm</span><span class="p">:</span>
-            <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">_state_dict</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_state_dict</span></div>
+    <span class="c1">##  We comment this code since it conflict with [OpenDelta](https://github.com/thunlp/OpenDelta)</span>
+    <span class="c1"># def state_dict(self, *args, **kwargs):</span>
+    <span class="c1">#     &quot;&quot;&quot; Save the model using template and plm&#39;s save methods. &quot;&quot;&quot;</span>
+    <span class="c1">#     _state_dict = {}</span>
+    <span class="c1">#     if not self.prompt_model.freeze_plm:</span>
+    <span class="c1">#         _state_dict[&#39;plm&#39;] = self.plm.state_dict(*args, **kwargs)</span>
+    <span class="c1">#     _state_dict[&#39;template&#39;] = self.template.state_dict(*args, **kwargs)</span>
+    <span class="c1">#     return _state_dict</span>
 
-<div class="viewcode-block" id="PromptForGeneration.load_state_dict"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration.load_state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Load the model using template and plm&#39;s load methods. &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s1">&#39;plm&#39;</span> <span class="ow">in</span> <span class="n">state_dict</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="o">.</span><span class="n">freeze_plm</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plm</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;plm&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+    <span class="c1"># def load_state_dict(self, state_dict, *args, **kwargs):</span>
+    <span class="c1">#     &quot;&quot;&quot; Load the model using template and plm&#39;s load methods. &quot;&quot;&quot;</span>
+    <span class="c1">#     if &#39;plm&#39; in state_dict and not self.prompt_model.freeze_plm:</span>
+    <span class="c1">#         self.plm.load_state_dict(state_dict[&#39;plm&#39;], *args, **kwargs)</span>
+    <span class="c1">#     self.template.load_state_dict(state_dict[&#39;template&#39;], *args, **kwargs)</span>
 
     <span class="k">def</span> <span class="nf">_reorder_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">past</span><span class="p">,</span> <span class="n">beam_idx</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Use the plm&#39;s default _reorder_cache function</span>
