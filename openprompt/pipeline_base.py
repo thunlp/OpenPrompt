@@ -1,3 +1,4 @@
+from pickle import FALSE
 from torch.utils.data.sampler import RandomSampler
 from transformers.configuration_utils import PretrainedConfig
 from transformers.generation_utils import GenerationMixin
@@ -43,8 +44,9 @@ class PromptDataLoader(object):
     def __init__(self,
                  dataset: Union[Dataset, List],
                  template: Template,
-                 tokenizer: PreTrainedTokenizer,
-                 tokenizer_wrapper_class: TokenizerWrapper,
+                 tokenizer_wrapper: Optional[TokenizerWrapper] = None,
+                 tokenizer: PreTrainedTokenizer = None,
+                 tokenizer_wrapper_class = None,
                  verbalizer: Optional[Verbalizer] = None,
                  max_seq_length: Optional[str] = 512,
                  batch_size: Optional[int] = 1,
@@ -69,19 +71,26 @@ class PromptDataLoader(object):
         self.shuffle = shuffle
         self.teacher_forcing = teacher_forcing
 
-        tokenizer_wrapper_init_keys = signature(tokenizer_wrapper_class.__init__).args
-        prepare_kwargs = {
-            "max_seq_length" : max_seq_length,
-            "truncate_method" : truncate_method,
-            "decoder_max_length" : decoder_max_length,
-            "predict_eos_token" : predict_eos_token,
-            "tokenizer" : tokenizer,
-            **kwargs,
-        }
-        to_pass_kwargs = {key: prepare_kwargs[key] for key in prepare_kwargs if key in tokenizer_wrapper_init_keys}
+        if tokenizer_wrapper is None:
+            if tokenizer_wrapper_class is None:
+                raise RuntimeError("Either wrapped_tokenizer or tokenizer_wrapper_class should be specified.")
+            if tokenizer is None:
+                raise RuntimeError("No tokenizer specified to instantiate tokenizer_wrapper.")
 
+            tokenizer_wrapper_init_keys = signature(tokenizer_wrapper_class.__init__).args
+            prepare_kwargs = {
+                "max_seq_length" : max_seq_length,
+                "truncate_method" : truncate_method,
+                "decoder_max_length" : decoder_max_length,
+                "predict_eos_token" : predict_eos_token,
+                "tokenizer" : tokenizer,
+                **kwargs,
+            }
 
-        self.tokenizer_wrapper = tokenizer_wrapper_class(**to_pass_kwargs)
+            to_pass_kwargs = {key: prepare_kwargs[key] for key in prepare_kwargs if key in tokenizer_wrapper_init_keys}
+            self.tokenizer_wrapper = tokenizer_wrapper_class(**to_pass_kwargs)
+        else:
+            self.tokenizer_wrapper = tokenizer_wrapper
 
         # check the satisfiability of each component
         assert hasattr(self.template, 'wrap_one_example'), "Your prompt has no function variable \
@@ -307,21 +316,22 @@ class PromptForClassification(nn.Module):
         '''
         return self.verbalizer.tokenizer
 
-    def state_dict(self, *args, **kwargs):
-        """ Save the model using template, plm and verbalizer's save methods."""
-        _state_dict = {}
-        if not self.prompt_model.freeze_plm:
-            _state_dict['plm'] = self.plm.state_dict(*args, **kwargs)
-        _state_dict['template'] = self.template.state_dict(*args, **kwargs)
-        _state_dict['verbalizer'] = self.verbalizer.state_dict(*args, **kwargs)
-        return _state_dict
+    ##  We comment this code since it conflict with [OpenDelta](https://github.com/thunlp/OpenDelta)
+    # def state_dict(self, *args, **kwargs):
+    #     """ Save the model using template, plm and verbalizer's save methods."""
+    #     _state_dict = {}
+    #     if not self.prompt_model.freeze_plm:
+    #         _state_dict['plm'] = self.plm.state_dict(*args, **kwargs)
+    #     _state_dict['template'] = self.template.state_dict(*args, **kwargs)
+    #     _state_dict['verbalizer'] = self.verbalizer.state_dict(*args, **kwargs)
+    #     return _state_dict
 
-    def load_state_dict(self, state_dict, *args, **kwargs):
-        """ Load the model using template, plm and verbalizer's load methods."""
-        if 'plm' in state_dict and not self.prompt_model.freeze_plm:
-            self.plm.load_state_dict(state_dict['plm'], *args, **kwargs)
-        self.template.load_state_dict(state_dict['template'], *args, **kwargs)
-        self.verbalizer.load_state_dict(state_dict['verbalizer'], *args, **kwargs)
+    # def load_state_dict(self, state_dict, *args, **kwargs):
+    #     """ Load the model using template, plm and verbalizer's load methods."""
+    #     if 'plm' in state_dict and not self.prompt_model.freeze_plm:
+    #         self.plm.load_state_dict(state_dict['plm'], *args, **kwargs)
+    #     self.template.load_state_dict(state_dict['template'], *args, **kwargs)
+    #     self.verbalizer.load_state_dict(state_dict['verbalizer'], *args, **kwargs)
 
     def parallelize(self, device_map=None):
         r"""Parallelize the model across device
@@ -533,10 +543,14 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             input_lengths = [input_lengths] * len(output_sequences)
         for sent_id, seq in enumerate(output_sequences):
             seq = seq[input_lengths[sent_id]:]
-            text_output = self.tokenizer.decode(seq, clean_up_tokenization_spaces=True)
-            idx = text_output.find(self.tokenizer.eos_token)
-            if idx >= 0:
-                text_output = text_output[:idx]
+
+            if hasattr(self.tokenizer, "eos_token") and self.tokenizer.eos_token is not None:
+                text_output = self.tokenizer.decode(seq, clean_up_tokenization_spaces=True, skip_special_tokens=False)
+                idx = text_output.find(self.tokenizer.eos_token)
+                if idx >= 0:
+                    text_output = text_output[:idx]
+            else:
+                text_output = self.tokenizer.decode(seq, clean_up_tokenization_spaces=True, skip_special_tokens=True)
             text_output = text_output.strip()
             generated_sentences.append(text_output)
         return generated_sentences
@@ -621,19 +635,20 @@ class PromptForGeneration(nn.Module, GenerationMixin):
             model_kwargs["encoder_outputs"] = encoder(return_dict=True, **model_inputs)
         return model_kwargs
 
-    def state_dict(self, *args, **kwargs):
-        """ Save the model using template and plm's save methods. """
-        _state_dict = {}
-        if not self.prompt_model.freeze_plm:
-            _state_dict['plm'] = self.plm.state_dict(*args, **kwargs)
-        _state_dict['template'] = self.template.state_dict(*args, **kwargs)
-        return _state_dict
+    ##  We comment this code since it conflict with [OpenDelta](https://github.com/thunlp/OpenDelta)
+    # def state_dict(self, *args, **kwargs):
+    #     """ Save the model using template and plm's save methods. """
+    #     _state_dict = {}
+    #     if not self.prompt_model.freeze_plm:
+    #         _state_dict['plm'] = self.plm.state_dict(*args, **kwargs)
+    #     _state_dict['template'] = self.template.state_dict(*args, **kwargs)
+    #     return _state_dict
 
-    def load_state_dict(self, state_dict, *args, **kwargs):
-        """ Load the model using template and plm's load methods. """
-        if 'plm' in state_dict and not self.prompt_model.freeze_plm:
-            self.plm.load_state_dict(state_dict['plm'], *args, **kwargs)
-        self.template.load_state_dict(state_dict['template'], *args, **kwargs)
+    # def load_state_dict(self, state_dict, *args, **kwargs):
+    #     """ Load the model using template and plm's load methods. """
+    #     if 'plm' in state_dict and not self.prompt_model.freeze_plm:
+    #         self.plm.load_state_dict(state_dict['plm'], *args, **kwargs)
+    #     self.template.load_state_dict(state_dict['template'], *args, **kwargs)
 
     def _reorder_cache(self, past, beam_idx):
         r"""Use the plm's default _reorder_cache function

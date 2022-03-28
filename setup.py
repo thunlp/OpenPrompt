@@ -18,7 +18,7 @@ print(requires)
 with open('README.md', 'r') as f:
     setuptools.setup(
         name = 'openprompt',
-        version = '0.2.0',
+        version = '1.0.0',
         description = "An open source framework for prompt-learning.",
         long_description=open("README.md", "r", encoding="utf-8").read(),
         long_description_content_type="text/markdown",

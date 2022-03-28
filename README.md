@@ -3,7 +3,7 @@
 <div align="center">
 
 <img src="https://z3.ax1x.com/2021/11/11/IwED0K.png" width="350px">
-  
+
 **An Open-Source Framework for Prompt-learning.**
 
 ------
@@ -12,8 +12,8 @@
   <a href="#Overview">Overview</a> •
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
-  <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> • 
-  <a href="https://arxiv.org/abs/2111.01998">Paper</a> •  
+  <a href="https://thunlp.github.io/OpenPrompt/">Docs</a> •
+  <a href="https://arxiv.org/abs/2111.01998">Paper</a> •
   <a href="#citation">Citation</a> •
   <a href="https://github.com/thunlp/OpenPrompt/tree/main/results/">Performance</a> •
 </p>
@@ -27,13 +27,14 @@
 
 ## What's New?
 
+- Mar 2022: We add a [tutorial](https://github.com/thunlp/OpenPrompt/blob/main/tutorial/6.1_chinese_dataset_uer_t5.py) as the response to [issue 124](https://github.com/thunlp/OpenPrompt/issues/124), which use a cutomized tokenizer_wrapper to perform tasks that are not in the default configuration of OpenPrompt.
 - Feb 2022: Check out our sister repo [OpenDelta](https://github.com/thunlp/OpenDelta)!
 - Dec 2021: `pip install openprompt`
-- Dec 2021: [SuperGLUE performance](https://github.com/thunlp/OpenPrompt/tree/main/results) are added 
+- Dec 2021: [SuperGLUE performance](https://github.com/thunlp/OpenPrompt/tree/main/results) are added
 - Dec 2021: We support **generation paradigm for all tasks** by adding a new verbalizer:[GenerationVerbalizer](https://github.com/thunlp/OpenPrompt/blob/main/openprompt/prompts/generation_verbalizer.py) and a [tutorial: 4.1_all_tasks_are_generation.py](https://github.com/thunlp/OpenPrompt/blob/main/tutorial/4.1_all_tasks_are_generation.py)
 - Nov 2021: Now we have released a paper [OpenPrompt: An Open-source Framework for Prompt-learning](https://arxiv.org/abs/2111.01998).
 - Nov 2021 PrefixTuning supports t5 now.
-- Nov 2021: We made some major changes from the last version, where a flexible template language is newly introduced! Part of the docs is outdated and we will fix it soon. 
+- Nov 2021: We made some major changes from the last version, where a flexible template language is newly introduced! Part of the docs is outdated and we will fix it soon.
 
 
 ## Overview
@@ -75,9 +76,9 @@ pip install openprompt
 
 To play with the latest features, you can also install OpenPrompt from the source.
 
-### Using Git  
+### Using Git
 
-Clone the repository from github: 
+Clone the repository from github:
 
 ```shell
 git clone https://github.com/thunlp/OpenPrompt.git
@@ -98,7 +99,7 @@ python setup.py develop
 
 ### Base Concepts
 
-A  `PromptModel`  object contains a `PLM`, a (or multiple) `Template`  and a (or multiple) `Verbalizer`, where the `Template` class is defined to wrap the original input with templates, and the `Verbalizer` class is to construct a projection between labels and target words in the current vocabulary. And a `PromptModel`  object practically participates in training and inference. 
+A  `PromptModel`  object contains a `PLM`, a (or multiple) `Template`  and a (or multiple) `Verbalizer`, where the `Template` class is defined to wrap the original input with templates, and the `Verbalizer` class is to construct a projection between labels and target words in the current vocabulary. And a `PromptModel`  object practically participates in training and inference.
 
 ### Introduction by a Simple Example
 
@@ -195,8 +196,8 @@ A ``PromptDataLoader`` is basically a prompt version of pytorch Dataloader, whic
     from openprompt import PromptDataLoader
     data_loader = PromptDataLoader(
         dataset = dataset,
-        tokenizer = tokenizer, 
-        template = promptTemplate, 
+        tokenizer = tokenizer,
+        template = promptTemplate,
         tokenizer_wrapper_class=WrapperClass,
     )
 ```
@@ -208,7 +209,7 @@ Done! We can conduct training and inference the same as other processes in Pytor
 
 ```python
     import torch
-    
+
     # making zero-shot inference using pretrained MLM with prompt
     promptModel.eval()
     with torch.no_grad():
@@ -255,5 +256,5 @@ Please cite our paper if you use OpenPrompt in your work
 </a>
 
 We thank all the  contributors to this project, more contributors are welcome!
- 
+
 

@@ -21,7 +21,7 @@ class ManualTemplate(Template):
 
     def __init__(self,
                  tokenizer: PreTrainedTokenizer,
-                 text: Optional[List[str]] = None,
+                 text: Optional[str] = None,
                  placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
         super().__init__(tokenizer=tokenizer,

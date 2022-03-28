@@ -53,6 +53,7 @@ class T5TokenizerWrapper(TokenizerWrapper):
             if isinstance(tgt_text, str):
                 tgt_text = [tgt_text]
 
+
         encoder_inputs = defaultdict(list)
 
         num_mask_token_used = 0

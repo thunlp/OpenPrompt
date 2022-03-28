@@ -174,7 +174,7 @@ METRICS = {
     'yelp_review_full': 'Pearson-Correlation'
 }
 
-def evaluate(predictions, data, metric):
+def evaluate(predictions, data, metric, **kwargs):
     def cast_to_float(predictions):
         new_predictions = []
         for prediction in predictions:
@@ -195,7 +195,7 @@ def evaluate(predictions, data, metric):
     elif metric == "ACC":
         accs = []
         for (prediction, dp) in zip(predictions, data):
-            accs.append(get_accruacy_over_list(prediction, dp))
+            accs.append(get_accruacy_over_list(prediction, dp, **kwargs))
         return np.mean(accs)
     elif metric == "QA-F1": # haven't be tested
         f1s = []
@@ -243,8 +243,10 @@ def qa_f1_score(prediction, ground_truth):
     f1 = (2 * precision * recall) / (precision + recall)
     return f1
 
-def accuracy(prediction, ground_truth):
+def accuracy(prediction, ground_truth, **kwargs):
     if isinstance(prediction, str) and isinstance(ground_truth, str):
+        if kwargs.get("only_compare_prefix", False):
+            prediction = prediction[:len(ground_truth)]
         return prediction.lower() == ground_truth.lower()
     else:
         return prediction == ground_truth
@@ -263,11 +265,11 @@ def get_rouge_over_list(prediction, groundtruth):
         return np.max([rouge.get_scores(prediction, gt, avg=True)["rouge-l"]["f"] for gt in groundtruth])
     return rouge.get_scores(prediction, groundtruth, avg=True)["rouge-l"]["f"]
 
-def get_accruacy_over_list(prediction, groundtruth):
+def get_accruacy_over_list(prediction, groundtruth, **kwargs):
     if type(groundtruth)==list:
         if len(groundtruth)==0:
             return 0
-        return np.max([accuracy(prediction, gt) for gt in groundtruth])
+        return np.max([accuracy(prediction, gt, **kwargs) for gt in groundtruth])
     return accuracy(prediction, groundtruth)
 
 def get_f1_over_list(prediction, groundtruth):

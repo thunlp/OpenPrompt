@@ -1,6 +1,5 @@
 from functools import partial
 import json
-from selectors import EpollSelector
 from openprompt.data_utils.utils import InputExample
 from transformers.tokenization_utils import PreTrainedTokenizer
 from yacs.config import CfgNode
@@ -62,10 +61,10 @@ class GenerationVerbalizer(Verbalizer):
     """
     def __init__(self,
                  tokenizer: PreTrainedTokenizer,
-                 classes: Optional[List] = None,
-                 num_classes: Optional[Sequence[str]] = None,
+                 classes: Optional[List[str]] = None,
+                 num_classes: Optional[int] = None,
                  is_rule: Optional[bool] = False,
-                 label_words = None,
+                 label_words: Optional[dict] = None,
                 ):
         if classes is None and label_words is not None:
             classes = list(label_words.keys())
