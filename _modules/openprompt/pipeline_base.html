@@ -123,10 +123,10 @@
 <span class="sd">        template (:obj:`Template`): A derived class of of :obj:`Template`</span>
 <span class="sd">        tokenizer (:obj:`PretrainedTokenizer`): The pretrained tokenizer.</span>
 <span class="sd">        tokenizer_wrapper_class (:cls:`TokenizerWrapper`): The class of tokenizer wrapper.</span>
-<span class="sd">        max_seq_length (:obj:`str`, optional): The max sequence length of the input ids. It&#39;s used to trucate sentences.</span>
+<span class="sd">        max_seq_length (:obj:`int`, optional): The max sequence length of the input ids. It&#39;s used to trucate sentences.</span>
 <span class="sd">        batch_size (:obj:`int`, optional): The batch_size of data loader</span>
 <span class="sd">        teacher_forcing (:obj:`bool`, optional): Whether to fill the mask with target text. Set to true in training generation model.</span>
-<span class="sd">        decoder_max_length (:obj:`bool`, optional): the decoder maximum length of an encoder-decoder model.</span>
+<span class="sd">        decoder_max_length (:obj:`int`, optional): the decoder maximum length of an encoder-decoder model.</span>
 <span class="sd">        predict_eos_token (:obj:`bool`, optional): Whether to predict the &lt;eos&gt; token. Suggest to set to true in generation.</span>
 <span class="sd">        truncate_method (:obj:`bool`, optional): the truncate method to use. select from `head`, `tail`, `balanced`.</span>
 <span class="sd">        kwargs  :Other kwargs that might be passed into a tokenizer wrapper.</span>
