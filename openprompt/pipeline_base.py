@@ -33,10 +33,10 @@ class PromptDataLoader(object):
         template (:obj:`Template`): A derived class of of :obj:`Template`
         tokenizer (:obj:`PretrainedTokenizer`): The pretrained tokenizer.
         tokenizer_wrapper_class (:cls:`TokenizerWrapper`): The class of tokenizer wrapper.
-        max_seq_length (:obj:`str`, optional): The max sequence length of the input ids. It's used to trucate sentences.
+        max_seq_length (:obj:`int`, optional): The max sequence length of the input ids. It's used to trucate sentences.
         batch_size (:obj:`int`, optional): The batch_size of data loader
         teacher_forcing (:obj:`bool`, optional): Whether to fill the mask with target text. Set to true in training generation model.
-        decoder_max_length (:obj:`bool`, optional): the decoder maximum length of an encoder-decoder model.
+        decoder_max_length (:obj:`int`, optional): the decoder maximum length of an encoder-decoder model.
         predict_eos_token (:obj:`bool`, optional): Whether to predict the <eos> token. Suggest to set to true in generation.
         truncate_method (:obj:`bool`, optional): the truncate method to use. select from `head`, `tail`, `balanced`.
         kwargs  :Other kwargs that might be passed into a tokenizer wrapper.
