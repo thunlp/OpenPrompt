@@ -8,7 +8,7 @@
 
 ------
 
-<p align="center">
+<p align="center">Cancel changes
   <a href="#Overview">Overview</a> •
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
@@ -27,7 +27,7 @@
 
 ## What's New?
 
-- Mar 2022: We add a [tutorial](https://github.com/thunlp/OpenPrompt/blob/main/tutorial/6.1_chinese_dataset_uer_t5.py) as the response to [issue 124](https://github.com/thunlp/OpenPrompt/issues/124), which use a cutomized tokenizer_wrapper to perform tasks that are not in the default configuration of OpenPrompt.
+- Mar 2022: We add a [tutorial](https://github.com/thunlp/OpenPrompt/blob/main/tutorial/6.1_chinese_dataset_uer_t5.py) as the response to [issue 124](https://github.com/thunlp/OpenPrompt/issues/124), which uses a customized tokenizer_wrapper to perform tasks that are not in the default configuration of OpenPrompt (e.g., Bert tokenizer+T5 model）.
 - Feb 2022: Check out our sister repo [OpenDelta](https://github.com/thunlp/OpenDelta)!
 - Dec 2021: `pip install openprompt`
 - Dec 2021: [SuperGLUE performance](https://github.com/thunlp/OpenPrompt/tree/main/results) are added
