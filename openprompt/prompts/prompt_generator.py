@@ -273,7 +273,7 @@ class TemplateGenerator:
         """
         template_for_auto_t = LMBFFTemplateGenerationTemplate.from_config(config=self.config.template, tokenizer=self.tokenizer, verbalizer = self.verbalizer)
 
-        dataloader = PromptDataLoader(dataset, template_for_auto_t, self.tokenizer, self.tokenizer_wrapper, batch_size=len(dataset), decoder_max_length=128) # register all data at once
+        dataloader = PromptDataLoader(dataset, template_for_auto_t, tokenizer=self.tokenizer, tokenizer_wrapper_class=self.tokenizer_wrapper, batch_size=len(dataset), decoder_max_length=128) # register all data at once
         for data in dataloader:
             data = data.to(self.device)
             self._register_buffer(data)

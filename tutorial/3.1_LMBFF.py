@@ -113,7 +113,7 @@ if auto_t:
     template_generator = T5TemplateGenerator(template_generate_model, template_generate_tokenizer, template_tokenizer_wrapper, verbalizer, beam_width=5) # beam_width is set to 5 here for efficiency, to improve performance, try a larger number.
 
 
-    dataloader = PromptDataLoader(dataset['train'], template, template_generate_tokenizer, template_tokenizer_wrapper, batch_size=len(dataset['train']), decoder_max_length=128) # register all data at once
+    dataloader = PromptDataLoader(dataset['train'], template, tokenizer=template_generate_tokenizer, tokenizer_wrapper_class=template_tokenizer_wrapper, batch_size=len(dataset['train']), decoder_max_length=128, max_seq_length=128, shuffle=False, teacher_forcing=False) # register all data at once
     print('pass!')
     for data in dataloader:
         if cuda:
@@ -136,8 +136,8 @@ if auto_t:
     for template_text in tqdm(template_texts):
         template = ManualTemplate(tokenizer, template_text)
 
-        train_dataloader = PromptDataLoader(dataset['train'], template, tokenizer, WrapperClass)
-        valid_dataloader = PromptDataLoader(dataset['validation'], template, tokenizer, WrapperClass)
+        train_dataloader = PromptDataLoader(dataset['train'], template, tokenizer=tokenizer, tokenizer_wrapper_class=WrapperClass)
+        valid_dataloader = PromptDataLoader(dataset['validation'], template, tokenizer=tokenizer, tokenizer_wrapper_class=WrapperClass)
 
         model = PromptForClassification(copy.deepcopy(plm), template, verbalizer)
 
@@ -174,7 +174,7 @@ if auto_v:
     verbalizer_generator = RobertaVerbalizerGenerator(model=plm, tokenizer=tokenizer, candidate_num=20, label_word_num_per_class=20)
     # to improve performace , try larger numbers
 
-    dataloader = PromptDataLoader(dataset['train'], template, tokenizer, WrapperClass, batch_size=32)
+    dataloader = PromptDataLoader(dataset['train'], template, tokenizer=tokenizer, tokenizer_wrapper_class=WrapperClass, batch_size=32)
     for data in dataloader:
         if cuda:
             data = data.cuda()
@@ -188,8 +188,8 @@ if auto_v:
     best_label_words = None
     for label_words in tqdm(label_words_list):
         current_verbalizer.label_words = label_words
-        train_dataloader = PromptDataLoader(dataset['train'], template, tokenizer, WrapperClass)
-        valid_dataloader = PromptDataLoader(dataset['validation'], template, tokenizer, WrapperClass)
+        train_dataloader = PromptDataLoader(dataset['train'], template, tokenizer=tokenizer, tokenizer_wrapper_class=WrapperClass)
+        valid_dataloader = PromptDataLoader(dataset['validation'], template, tokenizer=tokenizer, tokenizer_wrapper_class=WrapperClass)
 
         model = PromptForClassification(copy.deepcopy(plm), template, current_verbalizer)
 
@@ -218,9 +218,9 @@ if auto_v:
 
 # %%
 # main training loop
-train_dataloader = PromptDataLoader(dataset['train'], template, tokenizer, WrapperClass)
-valid_dataloader = PromptDataLoader(dataset['validation'], template, tokenizer, WrapperClass)
-test_dataloader = PromptDataLoader(dataset['test'], template, tokenizer, WrapperClass)
+train_dataloader = PromptDataLoader(dataset['train'], template, tokenizer=tokenizer, tokenizer_wrapper_class=WrapperClass)
+valid_dataloader = PromptDataLoader(dataset['validation'], template, tokenizer=tokenizer, tokenizer_wrapper_class=WrapperClass)
+test_dataloader = PromptDataLoader(dataset['test'], template, tokenizer=tokenizer, tokenizer_wrapper_class=WrapperClass)
 
 
 model = PromptForClassification(copy.deepcopy(plm), template, verbalizer)
