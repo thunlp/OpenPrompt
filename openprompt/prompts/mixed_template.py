@@ -27,9 +27,10 @@ class MixedTemplate(Template):
                  model: PreTrainedModel,
                  tokenizer: PreTrainedTokenizer,
                  text: Optional[str] = None,
+                 placeholder_mapping: dict = {'<text_a>':'text_a','<text_b>':'text_b'},
                 ):
 
-        super().__init__(tokenizer)
+        super().__init__(tokenizer = tokenizer, placeholder_mapping = placeholder_mapping)
 
         self.raw_embedding = model.get_input_embeddings()
         self.embedding_size = self.raw_embedding.weight.shape[-1]

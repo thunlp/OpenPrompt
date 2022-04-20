@@ -25,9 +25,11 @@ class PtuningTemplate(MixedTemplate):
                  tokenizer: PreTrainedTokenizer,
                  text:  Optional[List[str]] = None,
                  prompt_encoder_type: str = "lstm",
+                 placeholder_mapping: dict = {'<text_a>':'text_a', '<text_b>':'text_b'},
                 ):
         super().__init__(model = model,
                          tokenizer=tokenizer,
+                         placeholder_mapping = placeholder_mapping,
                         )
         self.prompt_encoder_type = prompt_encoder_type
         self.text = text
