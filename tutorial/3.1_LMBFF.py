@@ -12,9 +12,9 @@
 # args = parser.parse_args()
 from openprompt.data_utils.text_classification_dataset import SST2Processor
 dataset = {}
-dataset['train'] = SST2Processor().get_train_examples("./datasets/TextClassification/SST-2/16-shot/16-13")
-dataset['validation'] = SST2Processor().get_dev_examples("./datasets/TextClassification/SST-2/16-shot/16-13")
-dataset['test'] = SST2Processor().get_test_examples("./datasets/TextClassification/SST-2/16-shot/16-13")
+dataset['train'] = SST2Processor().get_train_examples("../datasets/TextClassification/SST-2/16-shot/16-13")
+dataset['validation'] = SST2Processor().get_dev_examples("../datasets/TextClassification/SST-2/16-shot/16-13")
+dataset['test'] = SST2Processor().get_test_examples("../datasets/TextClassification/SST-2/16-shot/16-13")
 
 # %% [markdown]
 # ### 2. build initial verbalizer and template
@@ -114,6 +114,7 @@ if auto_t:
 
 
     dataloader = PromptDataLoader(dataset['train'], template, template_generate_tokenizer, template_tokenizer_wrapper, batch_size=len(dataset['train']), decoder_max_length=128) # register all data at once
+    print('pass!')
     for data in dataloader:
         if cuda:
             data = data.cuda()
