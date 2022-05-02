@@ -189,6 +189,42 @@ class ImdbProcessor(DataProcessor):
         return labels
 
 
+# class AmazonProcessor(DataProcessor):
+#     """
+#     `Amazon <https://cs.stanford.edu/people/jure/pubs/reviews-recsys13.pdf>`_ is a Product Review Sentiment Classification dataset.
+
+#     we use dataset provided by `LOTClass <https://github.com/yumeng5/LOTClass>`_
+
+#     Examples: # TODO implement this
+#     """
+
+#     def __init__(self):
+#         # raise NotImplementedError
+#         super().__init__()
+#         self.labels = ["bad", "good"]
+
+#     def get_examples(self, data_dir, split):
+#         examples = []
+#         label_file = open(os.path.join(data_dir, "{}_labels.txt".format(split)), 'r')
+#         labels = [int(x.strip()) for x in label_file.readlines()]
+#         if split == "test":
+#             logger.info("Sample a mid-size test set for effeciecy, use sampled_test_idx.txt")
+#             with open(os.path.join(self.args.data_dir,self.dirname,"sampled_test_idx.txt"),'r') as sampleidxfile:
+#                 sampled_idx = sampleidxfile.readline()
+#                 sampled_idx = sampled_idx.split()
+#                 sampled_idx = set([int(x) for x in sampled_idx])
+
+#         with open(os.path.join(data_dir,'{}.txt'.format(split)),'r') as fin:
+#             for idx, line in enumerate(fin):
+#                 if split=='test':
+#                     if idx not in sampled_idx:
+#                         continue
+#                 text_a = line.strip()
+#                 example = InputExample(guid=str(idx), text_a=text_a, label=int(labels[idx]))
+#                 examples.append(example)
+#         return examples
+
+
 class AmazonProcessor(DataProcessor):
     """
     `Amazon <https://cs.stanford.edu/people/jure/pubs/reviews-recsys13.pdf>`_ is a Product Review Sentiment Classification dataset.
@@ -199,7 +235,6 @@ class AmazonProcessor(DataProcessor):
     """
 
     def __init__(self):
-        raise NotImplementedError
         super().__init__()
         self.labels = ["bad", "good"]
 
@@ -207,18 +242,8 @@ class AmazonProcessor(DataProcessor):
         examples = []
         label_file = open(os.path.join(data_dir, "{}_labels.txt".format(split)), 'r')
         labels = [int(x.strip()) for x in label_file.readlines()]
-        if split == "test":
-            logger.info("Sample a mid-size test set for effeciecy, use sampled_test_idx.txt")
-            with open(os.path.join(self.args.data_dir,self.dirname,"sampled_test_idx.txt"),'r') as sampleidxfile:
-                sampled_idx = sampleidxfile.readline()
-                sampled_idx = sampled_idx.split()
-                sampled_idx = set([int(x) for x in sampled_idx])
-
         with open(os.path.join(data_dir,'{}.txt'.format(split)),'r') as fin:
             for idx, line in enumerate(fin):
-                if split=='test':
-                    if idx not in sampled_idx:
-                        continue
                 text_a = line.strip()
                 example = InputExample(guid=str(idx), text_a=text_a, label=int(labels[idx]))
                 examples.append(example)

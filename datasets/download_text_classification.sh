@@ -28,4 +28,16 @@ wget --content-disposition https://cloud.tsinghua.edu.cn/f/bccfdb243eca404f8bf3/
 tar -zxvf SST-2.tar.gz
 rm -rf SST-2.tar.gz
 
+rm -rf amazon
+wget --content-disposition https://cloud.tsinghua.edu.cn/f/e00a4c44aaf844cdb6c9/?dl=1
+tar -zxvf amazon.tar.gz
+mv datasets/amazon/ amazon
+rm  -rf ./datasets
+rm -rf amazon.tar.gz
+
+rm -rf yahoo_answers_topics
+wget --content-disposition https://cloud.tsinghua.edu.cn/f/79257038afaa4730a03f/?dl=1
+tar -zxvf yahoo_answers_topics.tar.gz
+rm -rf yahoo_answers_topics.tar.gz
+
 cd ..

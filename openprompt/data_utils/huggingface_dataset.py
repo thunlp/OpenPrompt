@@ -239,9 +239,9 @@ class YahooAnswersTopicsProcessor(DataProcessor):
         if split == "valid" or split == "dev":
             split = "train"# "validation"
         try:
-            dataset = load_dataset(path="/mnt/sfs_turbo/hsd/thunlp_openprompt_private/hf_scripts/yahoo_answers_topics.py", cache_dir=data_dir, split=split)
+            dataset = load_dataset("yahoo_answers_topics",split=split) # If you have network issues, we use the manually downloaded datsets.
         except:
-            dataset = load_from_disk("/mnt/sfs_turbo/hsd/thunlp_openprompt_private/hf_scripts/datasets/")
+            dataset = load_from_disk(f"{data_dir}")#[split]
             dataset = dataset[split]
         return list(map(self.transform, dataset))
 
