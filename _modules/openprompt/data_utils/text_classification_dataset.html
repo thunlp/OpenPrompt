@@ -279,6 +279,42 @@
         <span class="k">return</span> <span class="n">labels</span></div>
 
 
+<span class="c1"># class AmazonProcessor(DataProcessor):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     `Amazon &lt;https://cs.stanford.edu/people/jure/pubs/reviews-recsys13.pdf&gt;`_ is a Product Review Sentiment Classification dataset.</span>
+
+<span class="c1">#     we use dataset provided by `LOTClass &lt;https://github.com/yumeng5/LOTClass&gt;`_</span>
+
+<span class="c1">#     Examples: # TODO implement this</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+<span class="c1">#     def __init__(self):</span>
+<span class="c1">#         # raise NotImplementedError</span>
+<span class="c1">#         super().__init__()</span>
+<span class="c1">#         self.labels = [&quot;bad&quot;, &quot;good&quot;]</span>
+
+<span class="c1">#     def get_examples(self, data_dir, split):</span>
+<span class="c1">#         examples = []</span>
+<span class="c1">#         label_file = open(os.path.join(data_dir, &quot;{}_labels.txt&quot;.format(split)), &#39;r&#39;)</span>
+<span class="c1">#         labels = [int(x.strip()) for x in label_file.readlines()]</span>
+<span class="c1">#         if split == &quot;test&quot;:</span>
+<span class="c1">#             logger.info(&quot;Sample a mid-size test set for effeciecy, use sampled_test_idx.txt&quot;)</span>
+<span class="c1">#             with open(os.path.join(self.args.data_dir,self.dirname,&quot;sampled_test_idx.txt&quot;),&#39;r&#39;) as sampleidxfile:</span>
+<span class="c1">#                 sampled_idx = sampleidxfile.readline()</span>
+<span class="c1">#                 sampled_idx = sampled_idx.split()</span>
+<span class="c1">#                 sampled_idx = set([int(x) for x in sampled_idx])</span>
+
+<span class="c1">#         with open(os.path.join(data_dir,&#39;{}.txt&#39;.format(split)),&#39;r&#39;) as fin:</span>
+<span class="c1">#             for idx, line in enumerate(fin):</span>
+<span class="c1">#                 if split==&#39;test&#39;:</span>
+<span class="c1">#                     if idx not in sampled_idx:</span>
+<span class="c1">#                         continue</span>
+<span class="c1">#                 text_a = line.strip()</span>
+<span class="c1">#                 example = InputExample(guid=str(idx), text_a=text_a, label=int(labels[idx]))</span>
+<span class="c1">#                 examples.append(example)</span>
+<span class="c1">#         return examples</span>
+
+
 <span class="k">class</span> <span class="nc">AmazonProcessor</span><span class="p">(</span><span class="n">DataProcessor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `Amazon &lt;https://cs.stanford.edu/people/jure/pubs/reviews-recsys13.pdf&gt;`_ is a Product Review Sentiment Classification dataset.</span>
@@ -289,7 +325,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bad&quot;</span><span class="p">,</span> <span class="s2">&quot;good&quot;</span><span class="p">]</span>
 
@@ -297,18 +332,8 @@
         <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">label_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_labels.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">)),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">label_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
-        <span class="k">if</span> <span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sample a mid-size test set for effeciecy, use sampled_test_idx.txt&quot;</span><span class="p">)</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span><span class="s2">&quot;sampled_test_idx.txt&quot;</span><span class="p">),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sampleidxfile</span><span class="p">:</span>
-                <span class="n">sampled_idx</span> <span class="o">=</span> <span class="n">sampleidxfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-                <span class="n">sampled_idx</span> <span class="o">=</span> <span class="n">sampled_idx</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-                <span class="n">sampled_idx</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sampled_idx</span><span class="p">])</span>
-
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split</span><span class="p">)),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fin</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">split</span><span class="o">==</span><span class="s1">&#39;test&#39;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">idx</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sampled_idx</span><span class="p">:</span>
-                        <span class="k">continue</span>
                 <span class="n">text_a</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="n">example</span> <span class="o">=</span> <span class="n">InputExample</span><span class="p">(</span><span class="n">guid</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="n">text_a</span><span class="o">=</span><span class="n">text_a</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
                 <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">example</span><span class="p">)</span>
