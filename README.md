@@ -8,7 +8,7 @@
 
 ------
 
-<p align="center">Cancel changes
+<p align="center">
   <a href="#Overview">Overview</a> •
   <a href="#installation">Installation</a> •
   <a href="#use-openprompt">How To Use</a> •
