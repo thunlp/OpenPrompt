@@ -41,7 +41,7 @@
 
 **Prompt-learning** is the latest paradigm to adapt pre-trained language models (PLMs) to downstream NLP tasks, which modifies the input text with a textual template and directly uses PLMs to conduct pre-trained tasks. This library provides a standard, flexible and extensible framework to deploy the prompt-learning pipeline. OpenPrompt supports loading PLMs directly from [huggingface transformers](https://github.com/huggingface/transformers). In the future, we will also support PLMs implemented by other libraries. For more resources about prompt-learning, please check our [paper list](https://github.com/thunlp/PromptPapers).
 
-**Note: Please use Python 3.8+ for OpenPrompt**
+
 
 <div align="center">
 
@@ -65,7 +65,10 @@
 
 
 
+
 ## Installation
+
+**Note: Please use Python 3.8+ for OpenPrompt**
 
 ### Using Pip
 
