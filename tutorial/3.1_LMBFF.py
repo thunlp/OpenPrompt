@@ -18,7 +18,7 @@ dataset['test'] = SST2Processor().get_test_examples("../datasets/TextClassificat
 
 # %% [markdown]
 # ### 2. build initial verbalizer and template
-# - note that if you wish to do automaitc label word generation, the verbalizer is not the final verbalizer, and is only used for template generation.
+# - note that if you wish to do automatic label word generation, the verbalizer is not the final verbalizer, and is only used for template generation.
 # - note that if you wish to do automatic template generation, the template text may desirably include `{"meta":"labelword"}` so that label word can be used and remember to use `LMBFFTemplateGenerationTemplate` class so that "labelword" can be handled properly. Else you can just use `ManualTemplate`
 # - below is a template that expects plain text generation at each "mask" token position
 
@@ -172,7 +172,7 @@ if auto_v:
     if cuda:
         plm = plm.cuda()
     verbalizer_generator = RobertaVerbalizerGenerator(model=plm, tokenizer=tokenizer, candidate_num=20, label_word_num_per_class=20)
-    # to improve performace , try larger numbers
+    # to improve performance , try larger numbers
 
     dataloader = PromptDataLoader(dataset['train'], template, tokenizer=tokenizer, tokenizer_wrapper_class=WrapperClass, batch_size=32)
     for data in dataloader:

@@ -124,7 +124,7 @@ def get_config():
     parser = argparse.ArgumentParser("Global Config Argument Parser", allow_abbrev=False)
     parser.add_argument("--config_yaml", required=True, type=str, help='the configuration file for this experiment.')
     parser.add_argument("--resume", type=str, help='a specified logging path to resume training.\
-           It will fall back to run from initialization if no lastest checkpoint are found.')
+           It will fall back to run from initialization if no latest checkpoint are found.')
     parser.add_argument("--test", type=str, help='a specified logging path to test')
     args, _ = parser.parse_known_args()
     config = get_user_config(args.config_yaml)

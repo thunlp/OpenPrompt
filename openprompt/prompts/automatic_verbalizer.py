@@ -14,7 +14,7 @@ class AutomaticVerbalizer(Verbalizer):
     This implementation is slightly different from the original code in that
     1). we allow re-selecting the verbalizer after a fixed training steps.
     The original implementation only performs one step selection after getting
-    the inital logits on the training data. To adopt their implementation,
+    the initial logits on the training data. To adopt their implementation,
     please only do ``optimize()`` after the first pass of training data.
 
     2). We strictly follows the probility calculation in Equation (3) in the
@@ -99,7 +99,7 @@ class AutomaticVerbalizer(Verbalizer):
             # convert to logits
             label_words_logits = torch.log(label_words_probs+1e-15)
 
-            # aggreate
+            # aggregate
             if label_words_logits.dim()>2:
                 label_logits = self.aggregate(label_words_logits)
             else:

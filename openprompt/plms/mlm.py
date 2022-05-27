@@ -23,14 +23,14 @@ class MLMTokenizerWrapper(TokenizerWrapper):
         return self._num_specials
 
     def tokenize_one_example(self, wrapped_example, teacher_forcing):
-        ''' # TODO doens't consider the situation that input has two parts
+        ''' # TODO doesn't consider the situation that input has two parts
         '''
 
         wrapped_example, others = wrapped_example
 
         # for some dataset like SuperGLUE.COPA, the answer requires prediction an span of
         # the input. Or in generation tasks, we need to generate a piece of target_text.
-        # In these case, it tokenized to the encoded_tgt_text for furture use.
+        # In these case, it tokenized to the encoded_tgt_text for future use.
         encoded_tgt_text = []
         if 'tgt_text' in others:
             tgt_text = others['tgt_text']

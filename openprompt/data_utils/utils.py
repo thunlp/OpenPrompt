@@ -19,7 +19,7 @@ class InputExample(object):
     Args:
         guid (:obj:`str`, optional): A unique identifier of the example.
         text_a (:obj:`str`, optional): The placeholder for sequence of text.
-        text_b (:obj:`str`, optional): A secend sequence of text, which is not always neccessary.
+        text_b (:obj:`str`, optional): A secend sequence of text, which is not always necessary.
         label (:obj:`int`, optional): The label id of the example in classification task.
         tgt_text (:obj:`Union[str,List[str]]`, optional):  The target sequence of the example in a generation task..
         meta (:obj:`Dict`, optional): An optional dictionary to store arbitrary extra information for the example.

@@ -61,8 +61,8 @@ class FewShotSampler(object):
         The ``__call__`` function of the few-shot sampler.
 
         Args:
-            train_dataset (:obj:`Union[Dataset, List]`): The train datset for the sampler.
-            valid_dataset (:obj:`Union[Dataset, List]`, optional): The valid datset for the sampler. Default to None.
+            train_dataset (:obj:`Union[Dataset, List]`): The train dataset for the sampler.
+            valid_dataset (:obj:`Union[Dataset, List]`, optional): The valid dataset for the sampler. Default to None.
             seed (:obj:`int`, optional): The random seed for the sampling.
 
         Returns:

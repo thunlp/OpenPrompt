@@ -1,5 +1,5 @@
 # Used in tutorial 4.1, where all tasks are completed in generation fashion
-# This scripts is used for evaluation of the generation text and convert it into the metric of the orginial task.
+# This scripts is used for evaluation of the generation text and convert it into the metric of the original task.
 # directly copied from https://github.com/INK-USC/CrossFit/blob/ce47dfa9478d2d19e7176888ee1f39413b3bd91c/dataloader/metrics.py#L241
 # Thanks to the authors of CrossFit for the interesting paper (https://arxiv.org/abs/2104.08835) and awesome  project.
 
@@ -256,7 +256,7 @@ def get_rouge_over_list(prediction, groundtruth):
         exclude = set(string.punctuation)
         return ''.join(ch for ch in text if ch not in exclude)
     if len(remove_punc(prediction)) == 0:
-        return 0.0 # during early stages, it might generate nothin?
+        return 0.0 # during early stages, it might generate nothing?
     # print(prediction)
     rouge = Rouge()
     if type(groundtruth)==list:

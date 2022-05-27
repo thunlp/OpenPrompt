@@ -35,7 +35,7 @@ args.result_file = os.path.join(args.project_root, args.result_file)
 
 # Different from the other scripts, here the combination of tokenizer and model
 # is not in the default configurations of openprompt.
-# So we load the tokenizer and model seperately.
+# So we load the tokenizer and model separately.
 from transformers import BertTokenizer, MT5ForConditionalGeneration, Text2TextGenerationPipeline
 tokenizer = BertTokenizer.from_pretrained("uer/t5-v1_1-base-chinese-cluecorpussmall")
 model = MT5ForConditionalGeneration.from_pretrained("uer/t5-v1_1-base-chinese-cluecorpussmall")
@@ -43,7 +43,7 @@ text2text_generator = Text2TextGenerationPipeline(model, tokenizer)
 generated_text = text2text_generator("中国的首都是extra0京", max_length=50, do_sample=False)
 print(generated_text)
 
-# Then we slighly modify the Tokenizer wrapper to change the mask token to the BertTokenizer's mask token.
+# Then we slightly modify the Tokenizer wrapper to change the mask token to the BertTokenizer's mask token.
 from openprompt.plms.seq2seq import T5TokenizerWrapper
 class T5BertTokenizerWrapper(T5TokenizerWrapper):
     def mask_token(self, id):
@@ -58,7 +58,7 @@ tokenizer_wrapper = T5BertTokenizerWrapper(max_seq_length=128, tokenizer=tokeniz
 
 ## Load a Chinese Classical Poetry Retrieval Dataset-Multiple Choice
 ## (http://cuge.baai.ac.cn/#/dataset?id=1&name=CCPM)
-## In this task we choose the peotry that is best descripted by the translation.
+## In this task we choose the poetry that is best descripted by the translation.
 ## Please register in the web and download the dataset then put it into the <path> directory.
 ## A correct download have the follow file in "../CCPM"
 ## CCPM

@@ -34,7 +34,7 @@ class LMTokenizerWrapper(TokenizerWrapper):
 
 
     def tokenize_one_example(self, wrapped_example, teacher_forcing):
-        ''' # TODO doens't consider the situation that input has two parts
+        ''' # TODO doesn't consider the situation that input has two parts
         '''
         wrapped_example, others = wrapped_example
 

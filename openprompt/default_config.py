@@ -25,7 +25,7 @@ def get_default_config():
     cfg.plm.model_path = None
     cfg.plm.specials_to_add = ['<pad>'] # always need to add pad token, if the tokenizer doesn't have one.
     cfg.plm.optimize = CfgNode(new_allowed=True)
-    cfg.plm.optimize.name = 'AdamW'  # TODO: curently not in use.
+    cfg.plm.optimize.name = 'AdamW'  # TODO: currently not in use.
     cfg.plm.optimize.freeze_para = False
     cfg.plm.optimize.no_decay = ['bias', 'LayerNorm.weight']
     cfg.plm.optimize.lr = 0.0005
@@ -36,8 +36,8 @@ def get_default_config():
     cfg.plm.optimize.scheduler.type = None      # by default, it will choose get_linear_schedule_with_warmup
     cfg.plm.optimize.scheduler.num_warmup_steps = 500
 
-    ## LOGGIN and CHECKPOINTING ##################################################
-    ## in logging, each experiment will create a seperate folder for saving log.txt
+    ## LOGIN and CHECKPOINTING ##################################################
+    ## in logging, each experiment will create a separate folder for saving log.txt
     ## , (full) config.json, and the checkpoint (if use the same path).
     ## logging is in the following format：
     ## ./log
@@ -70,10 +70,10 @@ def get_default_config():
     # CHECKPOINT
     ######################################
     cfg.checkpoint = CfgNode(new_allowed=True) # checkpoint use the same directory as logging.
-    cfg.checkpoint.save_lastest = True # Normaly set to False to reduce memory use, set
+    cfg.checkpoint.save_lastest = True # Normally set to False to reduce memory use, set
                         # to true to allow resuming learning process.
     cfg.checkpoint.save_best = True   # Keep saving the epoch of the best-performance.
-    cfg.checkpoint.higher_better = True # is the metric to determine best checkpoint highter better?
+    cfg.checkpoint.higher_better = True # is the metric to determine best checkpoint higher better?
 
 
     ## PIPELINE #######################################################
@@ -214,7 +214,7 @@ def get_default_config():
     cfg.manual_template.placeholder_mapping['<text_b>'] = 'text_b'
     cfg.manual_template.file_path = None
     cfg.manual_template.choice = 0
-    cfg.manual_template.optimize = None  # the parameters related to optimize the tempalte
+    cfg.manual_template.optimize = None  # the parameters related to optimize the template
 
 
     cfg.automatic_verbalizer = CfgNode(new_allowed=True)

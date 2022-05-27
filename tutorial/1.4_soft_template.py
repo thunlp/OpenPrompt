@@ -61,7 +61,7 @@ this_run_unicode = str(random.randint(0, 1e10))
 from openprompt.utils.reproduciblity import set_seed
 set_seed(args.seed)
 
-# use lm-adapted version or t5-v1.1 checkpoint. Note that the originial t5 checkpoint has been pretrained
+# use lm-adapted version or t5-v1.1 checkpoint. Note that the original t5 checkpoint has been pretrained
 # on part of GLUE dataset, thus should not be used.
 from openprompt.plms.seq2seq import T5TokenizerWrapper, T5LMTokenizerWrapper
 from transformers import T5Config, T5Tokenizer, T5ForConditionalGeneration

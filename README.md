@@ -165,7 +165,7 @@ promptTemplate = ManualTemplate(
 
 #### Step 4: Define a Verbalizer
 
-A `Verbalizer` is another important (but not neccessary) in prompt-learning,which projects the original labels (we have defined them as `classes`, remember?) to a set of label words. Here is an example that we project the `negative` class to the word bad, and project the `positive` class to the words good, wonderful, great.
+A `Verbalizer` is another important (but not necessary) in prompt-learning,which projects the original labels (we have defined them as `classes`, remember?) to a set of label words. Here is an example that we project the `negative` class to the word bad, and project the `positive` class to the words good, wonderful, great.
 
 ```python
 from openprompt.prompts import ManualVerbalizer

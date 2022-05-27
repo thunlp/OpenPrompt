@@ -12,7 +12,7 @@ class DataProcessor:
     :obj:`I`: ``DataProcessor(labels = ['positive', 'negative'])``
 
     :obj:`II`: ``DataProcessor(labels_path = 'datasets/labels.txt')``
-    labels file should have label names seperated by any blank characters, such as
+    labels file should have label names separated by any blank characters, such as
 
     ..  code-block::
 

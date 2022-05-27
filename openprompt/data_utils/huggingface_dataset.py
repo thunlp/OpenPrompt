@@ -239,7 +239,7 @@ class YahooAnswersTopicsProcessor(DataProcessor):
         if split == "valid" or split == "dev":
             split = "train"# "validation"
         try:
-            dataset = load_dataset("yahoo_answers_topics",split=split) # If you have network issues, we use the manually downloaded datsets.
+            dataset = load_dataset("yahoo_answers_topics",split=split) # If you have network issues, we use the manually downloaded datasets.
         except:
             dataset = load_from_disk(f"{data_dir}")#[split]
             dataset = dataset[split]

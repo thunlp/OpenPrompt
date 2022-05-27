@@ -87,9 +87,9 @@ or multiple verbalizers (with different label-word sets) , in a dict format, e.g
         }
     ]
 
-For the ``list-like`` input format, we allow `.txt` file and `.csv` file. The label words for a class is seperated by
-a comma, and the label words for different classes are writen in consecutive lines.
-You can also seperate multiple verbalizers by entering empty line(s).
+For the ``list-like`` input format, we allow `.txt` file and `.csv` file. The label words for a class is separated by
+a comma, and the label words for different classes are written in consecutive lines.
+You can also separate multiple verbalizers by entering empty line(s).
 
 .. code-block::
 

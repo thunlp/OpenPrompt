@@ -3,7 +3,7 @@ Templates
 
 Overview
 -------------------------------
-The template is one of the most important module in prompt-learning, which wraps the orginal input with textual or soft-encoding sequence.
+The template is one of the most important module in prompt-learning, which wraps the original input with textual or soft-encoding sequence.
 
 We implement common template classes in OpenPrompt. 
 
