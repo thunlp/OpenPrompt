@@ -113,7 +113,7 @@
 
 <span class="k">class</span> <span class="nc">LMBFFTemplateGenerationTemplate</span><span class="p">(</span><span class="n">ManualTemplate</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is a special template used only for earch of template in LM-BFF. For example, a template could be ``{&quot;placeholder&quot;: &quot;text_a&quot;}{&quot;mask&quot;}{&quot;meta&quot;:&quot;labelword&quot;}{&quot;mask&quot;}``, where ``{&quot;meta&quot;:&quot;labelword&quot;}`` is replaced by label_words in verbalizer in `wrap_one_example` method, and ``{&quot;mask&quot;}`` is replaced by special tokens used for generation, for T5, it is ``&lt;extra_id_0&gt;, &lt;extra_id_1&gt;, ...``.</span>
+<span class="sd">    This is a special template used only for search of template in LM-BFF. For example, a template could be ``{&quot;placeholder&quot;: &quot;text_a&quot;}{&quot;mask&quot;}{&quot;meta&quot;:&quot;labelword&quot;}{&quot;mask&quot;}``, where ``{&quot;meta&quot;:&quot;labelword&quot;}`` is replaced by label_words in verbalizer in `wrap_one_example` method, and ``{&quot;mask&quot;}`` is replaced by special tokens used for generation, for T5, it is ``&lt;extra_id_0&gt;, &lt;extra_id_1&gt;, ...``.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.</span>
@@ -408,7 +408,7 @@
     <span class="c1"># def convert_template(self, generate_text_list):</span>
     <span class="c1">#     # original_template = self.template_for_auto_t.text</span>
     <span class="c1">#     text_list = self.tokenizer.convert_tokens_to_string(generate_text_list).replace(&#39;&lt;extra_id_0&gt;&#39;, &#39;{&quot;placeholder&quot;:&quot;text_a&quot;}&#39;).replace(&#39;&lt;extra_id_1&gt;&#39;, &#39; {&quot;mask&quot;}&#39;).replace(&#39;&lt;extra_id_2&gt;&#39;, &#39; {&quot;placeholder&quot;:&quot;text_b&quot;}&#39;).replace(&#39;&lt;/s&gt;&#39;, &#39;&#39;).replace(&#39;  &#39;, &#39; &#39;).split(&#39; &#39;)</span>
-    <span class="c1">#     # incase no &lt;extra_id_1&gt; (generation stop by maximum length)</span>
+    <span class="c1">#     # in case no &lt;extra_id_1&gt; (generation stop by maximum length)</span>
     <span class="c1">#     if &#39;{&quot;mask&quot;}&#39; not in text_list:</span>
     <span class="c1">#         text_list.append(&#39;{&quot;mask&quot;}&#39;)</span>
     <span class="c1">#     if &#39;{&quot;placeholder&quot;:&quot;text_b&quot;}&#39; not in text_list:</span>

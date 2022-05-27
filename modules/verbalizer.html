@@ -170,7 +170,7 @@ In this implementation, the label_words should not be tokenized into more than o
 <dd><p>Project the labels, the return value is the normalized (sum to 1) probs of label words.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The orginal logits of label words.</p>
+<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The original logits of label words.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The normalized logits of label words</p>
@@ -197,7 +197,7 @@ In this implementation, the label_words should not be tokenized into more than o
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The orginal logits.</p>
+<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The original logits.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The final processed logits over the label words set.</p>
@@ -303,7 +303,7 @@ In this implementation, the label_words should not be tokenized into more than o
 <dd><p>Project the labels, the return value is the normalized (sum to 1) probs of label words.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The orginal logits of label words.</p>
+<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The original logits of label words.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The normalized logits of label words</p>
@@ -333,7 +333,7 @@ In this implementation, the label_words should not be tokenized into more than o
 </ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The orginal logits.</p>
+<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – The original logits.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The final processed logits over the labels (classes).</p>
@@ -406,7 +406,7 @@ In this implementation, the label_words should not be tokenized into more than o
 <dd><p>This implementation is slightly different from the original code in that
 1). we allow re-selecting the verbalizer after a fixed training steps.
 The original implementation only performs one step selection after getting
-the inital logits on the training data. To adopt their implementation,
+the initial logits on the training data. To adopt their implementation,
 please only do <code class="docutils literal notranslate"><span class="pre">optimize()</span></code> after the first pass of training data.</p>
 <p>2). We strictly follows the probility calculation in Equation (3) in the
 paper, which take softmax over the logits.</p>
@@ -478,7 +478,7 @@ Currently support three types of file format:
 in dict format.
 2. a .jsonal or .json file, in which is a list of verbalizers in dict format
 3.  a .txt or a .csv file, in which is the label words of a class are listed in line,
-seperated by commas. Begin a new verbalizer by an empty line.
+separated by commas. Begin a new verbalizer by an empty line.
 This format is recommended when you don’t know the name of each class.</p>
 <p>The details of verbalizer format can be seen in <a class="reference internal" href="../notes/verbalizer.html#how-to-write-a-verbalizer"><span class="std std-ref">How to Write a Verbalizer?</span></a>.</p>
 <dl class="field-list simple">
@@ -596,7 +596,7 @@ The final label is predicted jointly by these label words using logic rules.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompts.ptr_prompts.PTRVerbalizer.on_label_words_set">
 <span class="sig-name descname"><span class="pre">on_label_words_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/ptr_prompts.html#PTRVerbalizer.on_label_words_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.ptr_prompts.PTRVerbalizer.on_label_words_set" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prepare One2oneVerbalizer for each <cite>&lt;mask&gt;</cite> seperately</p>
+<dd><p>Prepare One2oneVerbalizer for each <cite>&lt;mask&gt;</cite> separately</p>
 </dd></dl>
 
 <dl class="py method">
@@ -628,8 +628,8 @@ The final label is predicted jointly by these label words using logic rules.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openprompt.prompts.generation_verbalizer.GenerationVerbalizer">
 <em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">GenerationVerbalizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_rule</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_words</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/generation_verbalizer.html#GenerationVerbalizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.generation_verbalizer.GenerationVerbalizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>This verbalizer is usefull when the label prediction is better defined by a piece of input.
-For example, in correference resolution, the tgt_text is a proper noun metioned in the text.
+<dd><p>This verbalizer is useful when the label prediction is better defined by a piece of input.
+For example, in correference resolution, the tgt_text is a proper noun mentioned in the text.
 This is there is no fixed mapping between a class label and its label words. This verbalizer
 is can be used as verbalizer of <code class="docutils literal notranslate"><span class="pre">COPA</span></code> and <code class="docutils literal notranslate"><span class="pre">WSC</span></code> dataset in superglue datasets.</p>
 <p>This verbalizer is especially powerful when combined with
@@ -766,7 +766,7 @@ output.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompts.soft_verbalizer.SoftVerbalizer.gather_outputs">
 <span class="sig-name descname"><span class="pre">gather_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.file_utils.ModelOutput</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompts/soft_verbalizer.html#SoftVerbalizer.gather_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompts.soft_verbalizer.SoftVerbalizer.gather_outputs" title="Permalink to this definition">¶</a></dt>
-<dd><p>retrieve useful output for the verbalizer from the whole model ouput
+<dd><p>retrieve useful output for the verbalizer from the whole model output
 By default, it will only retrieve the logits</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

@@ -112,7 +112,7 @@
 <div class="viewcode-block" id="Template"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template">[docs]</a><span class="k">class</span> <span class="nc">Template</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Base class for all the templates.</span>
-<span class="sd">    Most of methods are abstract, with some expections to hold the common methods for all template, such as ``loss_ids``, ``save``, ``load``.</span>
+<span class="sd">    Most of methods are abstract, with some exceptions to hold the common methods for all template, such as ``loss_ids``, ``save``, ``load``.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.</span>
@@ -148,7 +148,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="s1">&#39;mask&#39;</span> <span class="ow">in</span> <span class="n">d</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Template.get_default_shortenable_ids"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Template.get_default_shortenable_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_shortenable_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Every template needs shortenable_ids, denoting which part of the template can be trucate to fit</span>
+        <span class="sd">&quot;&quot;&quot;Every template needs shortenable_ids, denoting which part of the template can be truncate to fit</span>
 <span class="sd">        the language model&#39;s ``max_seq_length``. Default: the input text is shortenable, while the template text and other</span>
 <span class="sd">        special tokens are not shortenable.</span>
 
@@ -381,7 +381,7 @@
     <span class="k">def</span> <span class="nf">on_text_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A hook to do something when template text was set.</span>
-<span class="sd">        The designer of the template should explictly know what should be down when the template text is set.</span>
+<span class="sd">        The designer of the template should explicitly know what should be down when the template text is set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
@@ -495,7 +495,7 @@
 <span class="s2">                Since we will match the label word with respect to class A, to A&#39;s index in classes</span>
 <span class="s2">                &quot;&quot;&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">label_words</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;name of classes in verbalizer are differnt from those of dataset&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;name of classes in verbalizer are different from those of dataset&quot;</span><span class="p">)</span>
             <span class="n">label_words</span> <span class="o">=</span> <span class="p">[</span> <span class="c1"># sort the dict to match dataset</span>
                 <span class="n">label_words</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span>
@@ -534,7 +534,7 @@
 <div class="viewcode-block" id="Verbalizer.generate_parameters"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.generate_parameters">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">generate_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The verbalizer can be seen as an extra layer on top of the originial</span>
+<span class="sd">        The verbalizer can be seen as an extra layer on top of the original</span>
 <span class="sd">        pre-trained models. In manual verbalizer, it is a fixed one-hot vector of dimension</span>
 <span class="sd">        ``vocab_size``, with the position of the label word being 1 and 0 everywhere else.</span>
 <span class="sd">        In other situation, the parameters may be a continuous vector over the</span>
@@ -545,13 +545,13 @@
 <span class="sd">        of the verbalizer, and must be instantiated in any derived class.</span>
 
 <span class="sd">        Note that the parameters need to be registered as a part of pytorch&#39;s module to</span>
-<span class="sd">        It can be acheived by wrapping a tensor using ``nn.Parameter()``.</span>
+<span class="sd">        It can be achieved by wrapping a tensor using ``nn.Parameter()``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="Verbalizer.register_calibrate_logits"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.register_calibrate_logits">[docs]</a>    <span class="k">def</span> <span class="nf">register_calibrate_logits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This function aims to register logits that need to be calibrated, and detach the orginal logits from the current graph.</span>
+<span class="sd">        This function aims to register logits that need to be calibrated, and detach the original logits from the current graph.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">logits</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">:</span>
             <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
@@ -572,7 +572,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_logits</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Verbalizer.gather_outputs"><a class="viewcode-back" href="../../modules/root.html#openprompt.prompt_base.Verbalizer.gather_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">gather_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">ModelOutput</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; retrieve useful output for the verbalizer from the whole model ouput</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; retrieve useful output for the verbalizer from the whole model output</span>
 <span class="sd">        By default, it will only retrieve the logits</span>
 
 <span class="sd">        Args:</span>
@@ -624,7 +624,7 @@
 <span class="sd">        logits of labels words.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            logits (:obj:`Tensor`): The logits over entire vocab generated by the pre-trained lanuage model with shape [``batch_size``, ``max_seq_length``, ``vocab_size``]</span>
+<span class="sd">            logits (:obj:`Tensor`): The logits over entire vocab generated by the pre-trained language model with shape [``batch_size``, ``max_seq_length``, ``vocab_size``]</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`Tensor`: The normalized probs (sum to 1) of each label .</span>
@@ -692,7 +692,7 @@
 <span class="sd">        in dict format.</span>
 <span class="sd">        2. a .jsonal or .json file, in which is a list of verbalizers in dict format</span>
 <span class="sd">        3.  a .txt or a .csv file, in which is the label words of a class are listed in line,</span>
-<span class="sd">        seperated by commas. Begin a new verbalizer by an empty line.</span>
+<span class="sd">        separated by commas. Begin a new verbalizer by an empty line.</span>
 <span class="sd">        This format is recommended when you don&#39;t know the name of each class.</span>
 
 <span class="sd">        The details of verbalizer format can be seen in :ref:`How_to_write_a_verbalizer`.</span>

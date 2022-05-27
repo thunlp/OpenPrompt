@@ -111,7 +111,7 @@
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template">
 <em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">placeholder_mapping</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{'&lt;text_a&gt;':</span> <span class="pre">'text_a',</span> <span class="pre">'&lt;text_b&gt;':</span> <span class="pre">'text_b'}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for all the templates.
-Most of methods are abstract, with some expections to hold the common methods for all template, such as <code class="docutils literal notranslate"><span class="pre">loss_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">save</span></code>, <code class="docutils literal notranslate"><span class="pre">load</span></code>.</p>
+Most of methods are abstract, with some exceptions to hold the common methods for all template, such as <code class="docutils literal notranslate"><span class="pre">loss_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">save</span></code>, <code class="docutils literal notranslate"><span class="pre">load</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -149,7 +149,7 @@ output is <code class="docutils literal notranslate"><span class="pre">[0,</span
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template.get_default_shortenable_ids">
 <span class="sig-name descname"><span class="pre">get_default_shortenable_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_shortenable_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.get_default_shortenable_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>Every template needs shortenable_ids, denoting which part of the template can be trucate to fit
+<dd><p>Every template needs shortenable_ids, denoting which part of the template can be truncate to fit
 the language model’s <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>. Default: the input text is shortenable, while the template text and other
 special tokens are not shortenable.</p>
 <p>e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">'{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_a&quot;}</span> <span class="pre">{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_b&quot;,</span> <span class="pre">&quot;shortenable&quot;:</span> <span class="pre">False}</span> <span class="pre">{&quot;meta&quot;:</span> <span class="pre">&quot;word&quot;}</span> <span class="pre">is</span> <span class="pre">{&quot;mask&quot;}.'</span></code>,
@@ -259,7 +259,7 @@ will not trigger <code class="docutils literal notranslate"><span class="pre">on
 <dt class="sig sig-object py" id="openprompt.prompt_base.Template.on_text_set">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Template.on_text_set" title="Permalink to this definition">¶</a></dt>
 <dd><p>A hook to do something when template text was set.
-The designer of the template should explictly know what should be down when the template text is set.</p>
+The designer of the template should explicitly know what should be down when the template text is set.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -343,7 +343,7 @@ in this case, <cite>wonderful</cite> and <cite>good</cite> are label words.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.generate_parameters">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">generate_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.generate_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.generate_parameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>The verbalizer can be seen as an extra layer on top of the originial
+<dd><p>The verbalizer can be seen as an extra layer on top of the original
 pre-trained models. In manual verbalizer, it is a fixed one-hot vector of dimension
 <code class="docutils literal notranslate"><span class="pre">vocab_size</span></code>, with the position of the label word being 1 and 0 everywhere else.
 In other situation, the parameters may be a continuous vector over the
@@ -352,13 +352,13 @@ Moreover, the parameters may be set to trainable to allow label words selection.
 <p>Therefore, this function serves as an abstract methods for generating the parameters
 of the verbalizer, and must be instantiated in any derived class.</p>
 <p>Note that the parameters need to be registered as a part of pytorch’s module to
-It can be acheived by wrapping a tensor using <code class="docutils literal notranslate"><span class="pre">nn.Parameter()</span></code>.</p>
+It can be achieved by wrapping a tensor using <code class="docutils literal notranslate"><span class="pre">nn.Parameter()</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.register_calibrate_logits">
 <span class="sig-name descname"><span class="pre">register_calibrate_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.register_calibrate_logits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.register_calibrate_logits" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function aims to register logits that need to be calibrated, and detach the orginal logits from the current graph.</p>
+<dd><p>This function aims to register logits that need to be calibrated, and detach the original logits from the current graph.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -379,7 +379,7 @@ output.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openprompt.prompt_base.Verbalizer.gather_outputs">
 <span class="sig-name descname"><span class="pre">gather_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.file_utils.ModelOutput</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Verbalizer.gather_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openprompt.prompt_base.Verbalizer.gather_outputs" title="Permalink to this definition">¶</a></dt>
-<dd><p>retrieve useful output for the verbalizer from the whole model ouput
+<dd><p>retrieve useful output for the verbalizer from the whole model output
 By default, it will only retrieve the logits</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -441,7 +441,7 @@ parameters of this verbalizer to project the logits over entire vocab into the
 logits of labels words.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Tensor</span></code>) – The logits over entire vocab generated by the pre-trained lanuage model with shape [<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>, <code class="docutils literal notranslate"><span class="pre">vocab_size</span></code>]</p>
+<dd class="field-odd"><p><strong>logits</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Tensor</span></code>) – The logits over entire vocab generated by the pre-trained language model with shape [<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>, <code class="docutils literal notranslate"><span class="pre">vocab_size</span></code>]</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The normalized probs (sum to 1) of each label .</p>
@@ -493,7 +493,7 @@ Currently support three types of file format:
 in dict format.
 2. a .jsonal or .json file, in which is a list of verbalizers in dict format
 3.  a .txt or a .csv file, in which is the label words of a class are listed in line,
-seperated by commas. Begin a new verbalizer by an empty line.
+separated by commas. Begin a new verbalizer by an empty line.
 This format is recommended when you don’t know the name of each class.</p>
 <p>The details of verbalizer format can be seen in <a class="reference internal" href="../notes/verbalizer.html#how-to-write-a-verbalizer"><span class="std std-ref">How to Write a Verbalizer?</span></a>.</p>
 <dl class="field-list simple">
@@ -519,7 +519,7 @@ multiple verbalizers.</p></li>
 <dt class="sig sig-object py" id="id0">
 <em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">transformers.tokenization_utils.PreTrainedTokenizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">placeholder_mapping</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{'&lt;text_a&gt;':</span> <span class="pre">'text_a',</span> <span class="pre">'&lt;text_b&gt;':</span> <span class="pre">'text_b'}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for all the templates.
-Most of methods are abstract, with some expections to hold the common methods for all template, such as <code class="docutils literal notranslate"><span class="pre">loss_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">save</span></code>, <code class="docutils literal notranslate"><span class="pre">load</span></code>.</p>
+Most of methods are abstract, with some exceptions to hold the common methods for all template, such as <code class="docutils literal notranslate"><span class="pre">loss_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">save</span></code>, <code class="docutils literal notranslate"><span class="pre">load</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -557,7 +557,7 @@ output is <code class="docutils literal notranslate"><span class="pre">[0,</span
 <dl class="py method">
 <dt class="sig sig-object py" id="id3">
 <span class="sig-name descname"><span class="pre">get_default_shortenable_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.get_default_shortenable_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Permalink to this definition">¶</a></dt>
-<dd><p>Every template needs shortenable_ids, denoting which part of the template can be trucate to fit
+<dd><p>Every template needs shortenable_ids, denoting which part of the template can be truncate to fit
 the language model’s <code class="docutils literal notranslate"><span class="pre">max_seq_length</span></code>. Default: the input text is shortenable, while the template text and other
 special tokens are not shortenable.</p>
 <p>e.g. when self.text is <code class="docutils literal notranslate"><span class="pre">'{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_a&quot;}</span> <span class="pre">{&quot;placeholder&quot;:</span> <span class="pre">&quot;text_b&quot;,</span> <span class="pre">&quot;shortenable&quot;:</span> <span class="pre">False}</span> <span class="pre">{&quot;meta&quot;:</span> <span class="pre">&quot;word&quot;}</span> <span class="pre">is</span> <span class="pre">{&quot;mask&quot;}.'</span></code>,
@@ -667,7 +667,7 @@ will not trigger <code class="docutils literal notranslate"><span class="pre">on
 <dt class="sig sig-object py" id="id13">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">on_text_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openprompt/prompt_base.html#Template.on_text_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Permalink to this definition">¶</a></dt>
 <dd><p>A hook to do something when template text was set.
-The designer of the template should explictly know what should be down when the template text is set.</p>
+The designer of the template should explicitly know what should be down when the template text is set.</p>
 </dd></dl>
 
 <dl class="py method">

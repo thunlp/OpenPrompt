@@ -200,7 +200,7 @@
 <span class="sd">        Project the labels, the return value is the normalized (sum to 1) probs of label words.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            logits (:obj:`torch.Tensor`): The orginal logits of label words.</span>
+<span class="sd">            logits (:obj:`torch.Tensor`): The original logits of label words.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`torch.Tensor`: The normalized logits of label words</span>
@@ -225,7 +225,7 @@
 <span class="sd">        (4) Aggregate (for multiple label words)</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            logits (:obj:`torch.Tensor`): The orginal logits.</span>
+<span class="sd">            logits (:obj:`torch.Tensor`): The original logits.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (:obj:`torch.Tensor`): The final processed logits over the labels (classes).</span>
@@ -245,7 +245,7 @@
             <span class="c1"># convert to logits</span>
             <span class="n">label_words_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">label_words_probs</span><span class="o">+</span><span class="mf">1e-15</span><span class="p">)</span>
 
-        <span class="c1"># aggreate</span>
+        <span class="c1"># aggregate</span>
         <span class="n">label_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">label_words_logits</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">label_logits</span></div>
 

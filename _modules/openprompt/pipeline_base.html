@@ -115,7 +115,7 @@
 
 <div class="viewcode-block" id="PromptDataLoader"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptDataLoader">[docs]</a><span class="k">class</span> <span class="nc">PromptDataLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    PromptDataLoader wraps the orginal dataset. The input data is firstly wrapped with the</span>
+<span class="sd">    PromptDataLoader wraps the original dataset. The input data is firstly wrapped with the</span>
 <span class="sd">    prompt&#39;s template, and then is tokenized by a wrapperd-tokenizer.</span>
 
 <span class="sd">    Args:</span>
@@ -123,7 +123,7 @@
 <span class="sd">        template (:obj:`Template`): A derived class of of :obj:`Template`</span>
 <span class="sd">        tokenizer (:obj:`PretrainedTokenizer`): The pretrained tokenizer.</span>
 <span class="sd">        tokenizer_wrapper_class (:cls:`TokenizerWrapper`): The class of tokenizer wrapper.</span>
-<span class="sd">        max_seq_length (:obj:`int`, optional): The max sequence length of the input ids. It&#39;s used to trucate sentences.</span>
+<span class="sd">        max_seq_length (:obj:`int`, optional): The max sequence length of the input ids. It&#39;s used to truncate sentences.</span>
 <span class="sd">        batch_size (:obj:`int`, optional): The batch_size of data loader</span>
 <span class="sd">        teacher_forcing (:obj:`bool`, optional): Whether to fill the mask with target text. Set to true in training generation model.</span>
 <span class="sd">        decoder_max_length (:obj:`int`, optional): the decoder maximum length of an encoder-decoder model.</span>
@@ -186,7 +186,7 @@
         <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;wrap_one_example&#39;</span><span class="p">),</span> <span class="s2">&quot;Your prompt has no function variable </span><span class="se">\</span>
 <span class="s2">                                                         named wrap_one_example&quot;</span>
 
-        <span class="c1"># processs</span>
+        <span class="c1"># process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wrap</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenize</span><span class="p">()</span>
 
@@ -219,7 +219,7 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="PromptDataLoader.tokenize"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptDataLoader.tokenize">[docs]</a>    <span class="k">def</span> <span class="nf">tokenize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Pass the wraped text into a prompt-specialized tokenizer,</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Pass the wrapped text into a prompt-specialized tokenizer,</span>
 <span class="sd">           the true PretrainedTokenizer inside the tokenizer is flexible, e.g. AlBert, Bert, T5,...</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">wrapped_example</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wrapped_dataset</span><span class="p">),</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;tokenizing&#39;</span><span class="p">):</span>
@@ -318,7 +318,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">        plm (:obj:`PretrainedModel`): A pre-traiend model you decide to use for classification, e.g. BERT.</span>
 <span class="sd">        template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``ManualTemplate``.</span>
-<span class="sd">        verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the lables to label words for classification, e.g. ``ManualVerbalizer``.</span>
+<span class="sd">        verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the labels to label words for classification, e.g. ``ManualVerbalizer``.</span>
 <span class="sd">        freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model</span>
 <span class="sd">        plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -380,7 +380,7 @@
 <span class="sd">            batch (:obj:`Union[Dict, InputFeatures]`): The original batch</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            :obj:`torch.Tensor`: The logits of the lable words (obtained by the current verbalizer).</span>
+<span class="sd">            :obj:`torch.Tensor`: The logits of the label words (obtained by the current verbalizer).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_model</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbalizer</span><span class="o">.</span><span class="n">gather_outputs</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
@@ -447,7 +447,7 @@
 
 
 <div class="viewcode-block" id="PromptForGeneration"><a class="viewcode-back" href="../../modules/base.html#openprompt.pipeline_base.PromptForGeneration">[docs]</a><span class="k">class</span> <span class="nc">PromptForGeneration</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">GenerationMixin</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;``PromptModel`` with generation loss caculation and generation utils integrated.</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;``PromptModel`` with generation loss calculation and generation utils integrated.</span>
 
 
 <span class="sd">    Args:</span>
@@ -679,7 +679,7 @@
 <span class="sd">        add ``past_key_values`` to model_kwargs, and update ``token_type_ids``, and ``attention_mask_ids``.</span>
 
 <span class="sd">        In case some of the model_kwargs are modified in the prepare_inputs_for_generation function</span>
-<span class="sd">        and should be used as the subsequent model_kwargs, we upate these kwargs before the parent class</span>
+<span class="sd">        and should be used as the subsequent model_kwargs, we update these kwargs before the parent class</span>
 <span class="sd">        call.</span>
 
 <span class="sd">        Other updates should be added here after the parent&#39;s function call.</span>

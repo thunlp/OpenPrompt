@@ -104,7 +104,7 @@
 <span class="sd">    This implementation is slightly different from the original code in that</span>
 <span class="sd">    1). we allow re-selecting the verbalizer after a fixed training steps.</span>
 <span class="sd">    The original implementation only performs one step selection after getting</span>
-<span class="sd">    the inital logits on the training data. To adopt their implementation,</span>
+<span class="sd">    the initial logits on the training data. To adopt their implementation,</span>
 <span class="sd">    please only do ``optimize()`` after the first pass of training data.</span>
 
 <span class="sd">    2). We strictly follows the probility calculation in Equation (3) in the</span>
@@ -189,7 +189,7 @@
             <span class="c1"># convert to logits</span>
             <span class="n">label_words_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">label_words_probs</span><span class="o">+</span><span class="mf">1e-15</span><span class="p">)</span>
 
-            <span class="c1"># aggreate</span>
+            <span class="c1"># aggregate</span>
             <span class="k">if</span> <span class="n">label_words_logits</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
                 <span class="n">label_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">label_words_logits</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
