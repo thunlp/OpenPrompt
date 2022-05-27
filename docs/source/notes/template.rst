@@ -11,8 +11,8 @@ is one of the most important module in a prompt-leanring framework.
 In this tutorial, we introduce how to write a template and set the corresponding attributes for a ``Template`` class.
 
 
-Our template language takes the insight fromthe Dict grammer from Python in order to make it easy-to-learn. 
-We use a ``meta`` key to denote the orginal text input, or the part of the input, or other key information.
+Our template language takes the insight from the Dict grammar from Python in order to make it easy-to-learn. 
+We use a ``meta`` key to denote the original text input, or the part of the input, or other key information.
 A ``mask`` key is used to denote the indice of the token that need to be predicted. A ``soft`` key denotes soft tokens and textual tokens could be directly written down.
 
 Textual Template

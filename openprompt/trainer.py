@@ -312,7 +312,7 @@ class BaseRunner(object):
                     pbar.update(1)
                 if self.global_step >= self.num_training_steps:
                     logger.info(f"Training epoch {epoch}, num_steps {self.global_step}, avg_loss: {total_loss/self.steps_per_epoch:.4f}, total_loss: {total_loss:.4f}")
-                    return -1 # an indicator of stoping the training
+                    return -1 # an indicator of stopping the training
         logger.info(f"Training epoch {epoch}, num_steps {self.global_step},  avg_loss: {total_loss/self.steps_per_epoch:.4f}, total_loss: {total_loss:.4f}")
         return 1
 

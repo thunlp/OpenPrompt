@@ -103,7 +103,7 @@ class One2oneVerbalizer(Verbalizer):
         Project the labels, the return value is the normalized (sum to 1) probs of label words.
 
         Args:
-            logits (:obj:`torch.Tensor`): The orginal logits of label words.
+            logits (:obj:`torch.Tensor`): The original logits of label words.
 
         Returns:
             :obj:`torch.Tensor`: The normalized logits of label words
@@ -124,7 +124,7 @@ class One2oneVerbalizer(Verbalizer):
             (3) Calibrate (optional)
 
         Args:
-            logits (:obj:`torch.Tensor`): The orginal logits.
+            logits (:obj:`torch.Tensor`): The original logits.
 
         Returns:
             (:obj:`torch.Tensor`): The final processed logits over the label words set.

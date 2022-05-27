@@ -54,7 +54,7 @@ class PTRVerbalizer(Verbalizer):
 
     def on_label_words_set(self):
         """
-        Prepare One2oneVerbalizer for each `<mask>` seperately
+        Prepare One2oneVerbalizer for each `<mask>` separately
         """
         super().on_label_words_set()
 

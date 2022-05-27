@@ -17,8 +17,8 @@ import re
 
 class GenerationVerbalizer(Verbalizer):
     r"""
-    This verbalizer is usefull when the label prediction is better defined by a piece of input.
-    For example, in correference resolution, the tgt_text is a proper noun metioned in the text.
+    This verbalizer is useful when the label prediction is better defined by a piece of input.
+    For example, in correference resolution, the tgt_text is a proper noun mentioned in the text.
     This is there is no fixed mapping between a class label and its label words. This verbalizer
     is can be used as verbalizer of ``COPA`` and ``WSC`` dataset in superglue datasets.
 

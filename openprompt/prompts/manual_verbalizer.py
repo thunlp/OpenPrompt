@@ -110,7 +110,7 @@ class ManualVerbalizer(Verbalizer):
         Project the labels, the return value is the normalized (sum to 1) probs of label words.
 
         Args:
-            logits (:obj:`torch.Tensor`): The orginal logits of label words.
+            logits (:obj:`torch.Tensor`): The original logits of label words.
 
         Returns:
             :obj:`torch.Tensor`: The normalized logits of label words
@@ -135,7 +135,7 @@ class ManualVerbalizer(Verbalizer):
         (4) Aggregate (for multiple label words)
 
         Args:
-            logits (:obj:`torch.Tensor`): The orginal logits.
+            logits (:obj:`torch.Tensor`): The original logits.
 
         Returns:
             (:obj:`torch.Tensor`): The final processed logits over the labels (classes).
@@ -155,7 +155,7 @@ class ManualVerbalizer(Verbalizer):
             # convert to logits
             label_words_logits = torch.log(label_words_probs+1e-15)
 
-        # aggreate
+        # aggregate
         label_logits = self.aggregate(label_words_logits)
         return label_logits
 

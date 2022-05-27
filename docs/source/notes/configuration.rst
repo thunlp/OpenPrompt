@@ -222,7 +222,7 @@ Here are some examples:
         <text_b>: text_b
     file_path:
         choice: 0
-        optimize:  # the parameters related to optimize the tempalte
+        optimize:  # the parameters related to optimize the template
 
 
     automatic_verbalizer:

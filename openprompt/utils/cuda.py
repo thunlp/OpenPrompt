@@ -10,7 +10,7 @@ def model_to_device(model, config):
     if "CUDA_VISIBLE_DEVICES" not in os.environ and config.cuda_visible_devices is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = ",".join([str(i) for i in config.cuda_visible_devices])
 
-    if config.model_parallel: # currently not support dataparallel and model parallel simutaneously. 
+    if config.model_parallel: # currently not support dataparallel and model parallel simultaneously. 
         if hasattr(model, "parallelize"):
             if config.device_map is None:
                 model.parallelize()

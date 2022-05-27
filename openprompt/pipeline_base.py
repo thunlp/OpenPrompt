@@ -25,7 +25,7 @@ from transformers import  AdamW, get_linear_schedule_with_warmup
 
 class PromptDataLoader(object):
     r"""
-    PromptDataLoader wraps the orginal dataset. The input data is firstly wrapped with the
+    PromptDataLoader wraps the original dataset. The input data is firstly wrapped with the
     prompt's template, and then is tokenized by a wrapperd-tokenizer.
 
     Args:
@@ -33,7 +33,7 @@ class PromptDataLoader(object):
         template (:obj:`Template`): A derived class of of :obj:`Template`
         tokenizer (:obj:`PretrainedTokenizer`): The pretrained tokenizer.
         tokenizer_wrapper_class (:cls:`TokenizerWrapper`): The class of tokenizer wrapper.
-        max_seq_length (:obj:`int`, optional): The max sequence length of the input ids. It's used to trucate sentences.
+        max_seq_length (:obj:`int`, optional): The max sequence length of the input ids. It's used to truncate sentences.
         batch_size (:obj:`int`, optional): The batch_size of data loader
         teacher_forcing (:obj:`bool`, optional): Whether to fill the mask with target text. Set to true in training generation model.
         decoder_max_length (:obj:`int`, optional): the decoder maximum length of an encoder-decoder model.
@@ -96,7 +96,7 @@ class PromptDataLoader(object):
         assert hasattr(self.template, 'wrap_one_example'), "Your prompt has no function variable \
                                                          named wrap_one_example"
 
-        # processs
+        # process
         self.wrap()
         self.tokenize()
 
@@ -129,7 +129,7 @@ class PromptDataLoader(object):
             raise NotImplementedError
 
     def tokenize(self) -> None:
-        r"""Pass the wraped text into a prompt-specialized tokenizer,
+        r"""Pass the wrapped text into a prompt-specialized tokenizer,
            the true PretrainedTokenizer inside the tokenizer is flexible, e.g. AlBert, Bert, T5,...
         """
         for idx, wrapped_example in tqdm(enumerate(self.wrapped_dataset),desc='tokenizing'):
@@ -228,7 +228,7 @@ class PromptForClassification(nn.Module):
     Args:
         plm (:obj:`PretrainedModel`): A pre-traiend model you decide to use for classification, e.g. BERT.
         template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``ManualTemplate``.
-        verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the lables to label words for classification, e.g. ``ManualVerbalizer``.
+        verbalizer (:obj:`Verbalizer`): A ``Verbalizer`` object you use to project the labels to label words for classification, e.g. ``ManualVerbalizer``.
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
         plm_eval_mode (:obj:`bool`): this is a stronger freezing mode than freeze_plm, i.e. the dropout of the model is turned off. No matter whether the other part is set to train.
     '''
@@ -290,7 +290,7 @@ class PromptForClassification(nn.Module):
             batch (:obj:`Union[Dict, InputFeatures]`): The original batch
 
         Returns:
-            :obj:`torch.Tensor`: The logits of the lable words (obtained by the current verbalizer).
+            :obj:`torch.Tensor`: The logits of the label words (obtained by the current verbalizer).
         """
         outputs = self.prompt_model(batch)
         outputs = self.verbalizer.gather_outputs(outputs)
@@ -357,7 +357,7 @@ class PromptForClassification(nn.Module):
 
 
 class PromptForGeneration(nn.Module, GenerationMixin):
-    r'''``PromptModel`` with generation loss caculation and generation utils integrated.
+    r'''``PromptModel`` with generation loss calculation and generation utils integrated.
 
 
     Args:
@@ -589,7 +589,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         add ``past_key_values`` to model_kwargs, and update ``token_type_ids``, and ``attention_mask_ids``.
 
         In case some of the model_kwargs are modified in the prepare_inputs_for_generation function
-        and should be used as the subsequent model_kwargs, we upate these kwargs before the parent class
+        and should be used as the subsequent model_kwargs, we update these kwargs before the parent class
         call.
 
         Other updates should be added here after the parent's function call.

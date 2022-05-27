@@ -23,7 +23,7 @@ from torch.nn.parallel import DataParallel
 
 class LMBFFTemplateGenerationTemplate(ManualTemplate):
     """
-    This is a special template used only for earch of template in LM-BFF. For example, a template could be ``{"placeholder": "text_a"}{"mask"}{"meta":"labelword"}{"mask"}``, where ``{"meta":"labelword"}`` is replaced by label_words in verbalizer in `wrap_one_example` method, and ``{"mask"}`` is replaced by special tokens used for generation, for T5, it is ``<extra_id_0>, <extra_id_1>, ...``.
+    This is a special template used only for search of template in LM-BFF. For example, a template could be ``{"placeholder": "text_a"}{"mask"}{"meta":"labelword"}{"mask"}``, where ``{"meta":"labelword"}`` is replaced by label_words in verbalizer in `wrap_one_example` method, and ``{"mask"}`` is replaced by special tokens used for generation, for T5, it is ``<extra_id_0>, <extra_id_1>, ...``.
 
     Args:
         tokenizer (:obj:`PreTrainedTokenizer`): A tokenizer to appoint the vocabulary and the tokenization strategy.
@@ -318,7 +318,7 @@ class T5TemplateGenerator(TemplateGenerator):
     # def convert_template(self, generate_text_list):
     #     # original_template = self.template_for_auto_t.text
     #     text_list = self.tokenizer.convert_tokens_to_string(generate_text_list).replace('<extra_id_0>', '{"placeholder":"text_a"}').replace('<extra_id_1>', ' {"mask"}').replace('<extra_id_2>', ' {"placeholder":"text_b"}').replace('</s>', '').replace('  ', ' ').split(' ')
-    #     # incase no <extra_id_1> (generation stop by maximum length)
+    #     # in case no <extra_id_1> (generation stop by maximum length)
     #     if '{"mask"}' not in text_list:
     #         text_list.append('{"mask"}')
     #     if '{"placeholder":"text_b"}' not in text_list:

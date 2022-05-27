@@ -75,7 +75,7 @@ Here is an example, where the ``<text_a>`` will be replaced by the :obj:`text_a`
 Step 4. Define a Verbalizer
 --------------------------------------------------------------------------------------------------------
 
-A ``Verbalizer`` is another important (but not neccessary such as in generation) in prompt-learning,which projects the original labels (we have defined them as ``classes``, remember?) to a set of label words.
+A ``Verbalizer`` is another important (but not necessary such as in generation) in prompt-learning,which projects the original labels (we have defined them as ``classes``, remember?) to a set of label words.
 A more advanced tutorial to define a verbalizer is in :ref:`How_to_write_a_verbalizer`
 
 
