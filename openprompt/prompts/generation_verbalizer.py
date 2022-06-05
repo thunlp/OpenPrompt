@@ -20,7 +20,7 @@ class GenerationVerbalizer(Verbalizer):
     This verbalizer is useful when the label prediction is better defined by a piece of input.
     For example, in correference resolution, the tgt_text is a proper noun mentioned in the text.
     There is no fixed mapping between a class label and its label words. This verbalizer
-    can be used as verbalizer of ``COPA`` and ``WSC`` datasets in SuperGlue.
+    can be used as verbalizer of ``COPA`` and ``WSC`` datasets in SuperGlue. 
 
     This verbalizer is especially powerful when combined with
     `All NLP Tasks Are Generation Tasks <https://arxiv.org/abs/2103.10360>`_ Paradigm (Also see
@@ -47,15 +47,15 @@ class GenerationVerbalizer(Verbalizer):
     Example:
     To use this verbalizer to train the T5 model to predict answer and explanation using two masks.
 
-    When the template is:
+    When the template (Defined by :obj:`MixedTemplate`) is:
     >>> input_example = InputExample(text_a = "Can fish run?", meta={"answer":"no", "explanation": "The fish have no legs"}, label=0)
-    >>> template = "{'placeholder':'text_a'} answer: {'mask'} explanation: {'mask'}"
+    >>> template = "{'placeholder':'text_a'} answer: {'mask'} explanation: {'mask'}" 
 
     The verbalizer can be:
     >>> label_words = {0:["no", "{'meta':'explanation'}"], 1:["yes", "{'meta':'explanation'}"]}
     >>> verbalizer = GenerationVerbalizer(tokenizer, classes=None, is_rule=True, label_words=label_words)
 
-
+    
 
 
     """

@@ -14,7 +14,7 @@ import torch
 from torch import nn
 
 class MixedTemplate(Template):
-    """Mixed of manual token, trainable token and trainable that initialized with given hard token
+    r"""The Mixed Template class defined by a string of `text`. See more examples in the `tutorial <https://github.com/thunlp/OpenPrompt/blob/ca27491101df0108a8dd753e5b1e79bf591f65d3/tutorial/1.1_mixed_template.py>`_.
 
     Args:
         model (:obj:`PreTrainedModel`): The pre-trained language model for the current prompt-learning task.

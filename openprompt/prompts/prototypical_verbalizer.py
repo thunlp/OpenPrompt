@@ -20,7 +20,7 @@ from transformers.models.t5 import  T5ForConditionalGeneration
 
 class ProtoVerbalizer(Verbalizer):
     r"""
-    The implementation of the verbalizer in `Prototypical Verbalizer for Prompt-based Few-shot Tuning`
+    The implementation of the prototypical verbalizer in `Prototypical Verbalizer for Prompt-based Few-shot Tuning <https://arxiv.org/pdf/2104.08691v1.pdf>`_ This class is inherited from the :obj:`Verbalizer` class.
 
     Args:
         tokenizer (:obj:`PreTrainedTokenizer`): The tokenizer of the current pre-trained model to point out the vocabulary.

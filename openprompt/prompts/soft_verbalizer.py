@@ -189,12 +189,3 @@ class SoftVerbalizer(Verbalizer):
                 raise NotImplementedError(f"Gather outputs method for outputs' type {type(outputs)} not implemented")
 
         return ret
-
-
-
-
-
-
-
-
-
