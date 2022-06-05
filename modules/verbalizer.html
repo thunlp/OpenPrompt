@@ -654,7 +654,7 @@ followed by <code class="docutils literal notranslate"><span class="pre">text_a<
 </dl>
 <p>Example:
 To use this verbalizer to train the T5 model to predict answer and explanation using two masks.</p>
-<p>When the template is:
+<p>When the template (Defined by <code class="xref py py-obj docutils literal notranslate"><span class="pre">MixedTemplate</span></code>) is:
 &gt;&gt;&gt; input_example = InputExample(text_a = “Can fish run?”, meta={“answer”:”no”, “explanation”: “The fish have no legs”}, label=0)
 &gt;&gt;&gt; template = “{‘placeholder’:’text_a’} answer: {‘mask’} explanation: {‘mask’}”</p>
 <p>The verbalizer can be:

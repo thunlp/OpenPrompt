@@ -110,7 +110,7 @@
 <span class="sd">    This verbalizer is useful when the label prediction is better defined by a piece of input.</span>
 <span class="sd">    For example, in correference resolution, the tgt_text is a proper noun mentioned in the text.</span>
 <span class="sd">    There is no fixed mapping between a class label and its label words. This verbalizer</span>
-<span class="sd">    can be used as verbalizer of ``COPA`` and ``WSC`` datasets in SuperGlue.</span>
+<span class="sd">    can be used as verbalizer of ``COPA`` and ``WSC`` datasets in SuperGlue. </span>
 
 <span class="sd">    This verbalizer is especially powerful when combined with</span>
 <span class="sd">    `All NLP Tasks Are Generation Tasks &lt;https://arxiv.org/abs/2103.10360&gt;`_ Paradigm (Also see</span>
@@ -137,15 +137,15 @@
 <span class="sd">    Example:</span>
 <span class="sd">    To use this verbalizer to train the T5 model to predict answer and explanation using two masks.</span>
 
-<span class="sd">    When the template is:</span>
+<span class="sd">    When the template (Defined by :obj:`MixedTemplate`) is:</span>
 <span class="sd">    &gt;&gt;&gt; input_example = InputExample(text_a = &quot;Can fish run?&quot;, meta={&quot;answer&quot;:&quot;no&quot;, &quot;explanation&quot;: &quot;The fish have no legs&quot;}, label=0)</span>
-<span class="sd">    &gt;&gt;&gt; template = &quot;{&#39;placeholder&#39;:&#39;text_a&#39;} answer: {&#39;mask&#39;} explanation: {&#39;mask&#39;}&quot;</span>
+<span class="sd">    &gt;&gt;&gt; template = &quot;{&#39;placeholder&#39;:&#39;text_a&#39;} answer: {&#39;mask&#39;} explanation: {&#39;mask&#39;}&quot; </span>
 
 <span class="sd">    The verbalizer can be:</span>
 <span class="sd">    &gt;&gt;&gt; label_words = {0:[&quot;no&quot;, &quot;{&#39;meta&#39;:&#39;explanation&#39;}&quot;], 1:[&quot;yes&quot;, &quot;{&#39;meta&#39;:&#39;explanation&#39;}&quot;]}</span>
 <span class="sd">    &gt;&gt;&gt; verbalizer = GenerationVerbalizer(tokenizer, classes=None, is_rule=True, label_words=label_words)</span>
 
-
+<span class="sd">    </span>
 
 
 <span class="sd">    &quot;&quot;&quot;</span>
