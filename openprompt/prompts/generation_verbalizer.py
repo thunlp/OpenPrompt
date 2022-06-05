@@ -19,8 +19,8 @@ class GenerationVerbalizer(Verbalizer):
     r"""
     This verbalizer is useful when the label prediction is better defined by a piece of input.
     For example, in correference resolution, the tgt_text is a proper noun mentioned in the text.
-    This is there is no fixed mapping between a class label and its label words. This verbalizer
-    is can be used as verbalizer of ``COPA`` and ``WSC`` dataset in superglue datasets.
+    There is no fixed mapping between a class label and its label words. This verbalizer
+    can be used as verbalizer of ``COPA`` and ``WSC`` datasets in SuperGlue.
 
     This verbalizer is especially powerful when combined with
     `All NLP Tasks Are Generation Tasks <https://arxiv.org/abs/2103.10360>`_ Paradigm (Also see
