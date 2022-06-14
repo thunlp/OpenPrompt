@@ -184,7 +184,7 @@ class InputFeatures(dict):
                 setattr(self, key, value.to(device))
         return self
 
-    def cuda(self):
+    def cuda(self, device: str = "cuda:0"):
         r"""mimic the tensor behavior
         """
         return self.to()
