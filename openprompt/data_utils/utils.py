@@ -187,7 +187,7 @@ class InputFeatures(dict):
     def cuda(self, device: str = "cuda:0"):
         r"""mimic the tensor behavior
         """
-        return self.to()
+        return self.to(device)
 
     def to_json_string(self, keep_none=False):
         """Serializes this instance to a JSON string."""
