@@ -30,7 +30,7 @@ class PromptDataLoader(object):
 
     Args:
         dataset (:obj:`Dataset` or :obj:`List`): Either a DatasetObject or a list containing the input examples.
-        template (:obj:`Template`): A derived class of of :obj:`Template`
+        template (:obj:`Template`): A derived class of :obj:`Template`
         tokenizer (:obj:`PretrainedTokenizer`): The pretrained tokenizer.
         tokenizer_wrapper_class (:cls:`TokenizerWrapper`): The class of tokenizer wrapper.
         max_seq_length (:obj:`int`, optional): The max sequence length of the input ids. It's used to truncate sentences.
