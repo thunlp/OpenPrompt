@@ -70,7 +70,7 @@ def get_default_config():
     # CHECKPOINT
     ######################################
     cfg.checkpoint = CfgNode(new_allowed=True) # checkpoint use the same directory as logging.
-    cfg.checkpoint.save_lastest = True # Normally set to False to reduce memory use, set
+    cfg.checkpoint.save_latest = True # Normally set to False to reduce memory use, set
                         # to true to allow resuming learning process.
     cfg.checkpoint.save_best = True   # Keep saving the epoch of the best-performance.
     cfg.checkpoint.higher_better = True # is the metric to determine best checkpoint higher better?

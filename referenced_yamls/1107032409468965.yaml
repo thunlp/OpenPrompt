@@ -2,7 +2,7 @@ calibrate: null
 checkpoint:
   higher_better: true
   save_best: true
-  save_lastest: true
+  save_latest: true
 classification:
   auto_t: false
   auto_v: false
