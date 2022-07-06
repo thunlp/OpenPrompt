@@ -2,23 +2,37 @@ import setuptools
 import os
 import importlib
 
-def get_requirements(path):
-    ret = []
-    with open(os.path.join(path, "requirements.txt"), encoding="utf-8") as freq:
-        for line in freq.readlines():
-            ret.append( line.strip() )
+requires = """
+transformers>=4.10.0
+sentencepiece==0.1.96
+# scikit-learn>=0.24.2
+tqdm>=4.62.2
+tensorboardX
+nltk
+yacs
+dill
+datasets
+rouge==1.0.0
+pyarrow
+scipy
+"""
+
+def get_requirements():
+    ret = [x for x in requires.split("\n") if len(x)>0]
+    print("requirements:", ret)
     return ret
 
 
-path = os.path.dirname(os.path.abspath(__file__))
-requires =  get_requirements(path)
-print("requirements:")
-print(requires)
+
+# path = os.path.dirname(os.path.abspath(__file__))
+# requires =  get_requirements(path)
+# print("requirements:")
+# print(requires)
 
 with open('README.md', 'r') as f:
     setuptools.setup(
         name = 'openprompt',
-        version = '1.0.0',
+        version = '1.0.1',
         description = "An open source framework for prompt-learning.",
         long_description=open("README.md", "r", encoding="utf-8").read(),
         long_description_content_type="text/markdown",
@@ -28,7 +42,7 @@ with open('README.md', 'r') as f:
         url="https://github.com/thunlp/OpenPrompt",
         keywords = ['PLM', 'prompt', 'AI', 'NLP'],
         python_requires=">=3.6.0",
-        install_requires=requires,
+        install_requires=get_requirements(),
         packages=setuptools.find_packages(),
         classifiers=[
             "Programming Language :: Python :: 3",
