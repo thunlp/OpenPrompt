@@ -10,7 +10,8 @@ from transformers import BertConfig, BertTokenizer, BertModel, BertForMaskedLM, 
                          AlbertTokenizer, AlbertConfig, AlbertModel, AlbertForMaskedLM, \
                          T5Config, T5Tokenizer, T5ForConditionalGeneration, \
                          OpenAIGPTTokenizer, OpenAIGPTLMHeadModel, OpenAIGPTConfig, \
-                         GPT2Config, GPT2Tokenizer, GPT2LMHeadModel
+                         GPT2Config, GPT2Tokenizer, GPT2LMHeadModel, \
+                         OPTConfig, OPTForCausalLM
 from collections import namedtuple
 from yacs.config import CfgNode
 
@@ -62,6 +63,12 @@ _MODEL_CLASSES = {
         'model': T5ForConditionalGeneration,
         'wrapper': T5LMTokenizerWrapper,
     }),
+    'opt': ModelClass(**{
+        'config': OPTConfig,
+        'tokenizer': GPT2Tokenizer,
+        'model': OPTForCausalLM,
+        'wrapper': LMTokenizerWrapper,
+    }),
 }
 
 
@@ -98,7 +105,13 @@ def load_plm(model_name, model_path, specials_to_add = None):
 
 
     model, tokenizer = add_special_tokens(model, tokenizer, specials_to_add=specials_to_add)
+
+    if 'opt' in model_name:
+        tokenizer.add_bos_token=False
     return model, tokenizer, model_config, wrapper
+
+
+
 
 def load_plm_from_config(config: CfgNode):
     r"""A plm loader using a global config.

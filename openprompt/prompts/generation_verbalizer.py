@@ -20,7 +20,7 @@ class GenerationVerbalizer(Verbalizer):
     This verbalizer is useful when the label prediction is better defined by a piece of input.
     For example, in correference resolution, the tgt_text is a proper noun mentioned in the text.
     There is no fixed mapping between a class label and its label words. This verbalizer
-    can be used as verbalizer of ``COPA`` and ``WSC`` datasets in SuperGlue. 
+    can be used as verbalizer of ``COPA`` and ``WSC`` datasets in SuperGlue.
 
     This verbalizer is especially powerful when combined with
     `All NLP Tasks Are Generation Tasks <https://arxiv.org/abs/2103.10360>`_ Paradigm (Also see
@@ -49,13 +49,13 @@ class GenerationVerbalizer(Verbalizer):
 
     When the template (Defined by :obj:`MixedTemplate`) is:
     >>> input_example = InputExample(text_a = "Can fish run?", meta={"answer":"no", "explanation": "The fish have no legs"}, label=0)
-    >>> template = "{'placeholder':'text_a'} answer: {'mask'} explanation: {'mask'}" 
+    >>> template = "{'placeholder':'text_a'} answer: {'mask'} explanation: {'mask'}"
 
     The verbalizer can be:
     >>> label_words = {0:["no", "{'meta':'explanation'}"], 1:["yes", "{'meta':'explanation'}"]}
     >>> verbalizer = GenerationVerbalizer(tokenizer, classes=None, is_rule=True, label_words=label_words)
 
-    
+
 
 
     """
@@ -87,11 +87,11 @@ class GenerationVerbalizer(Verbalizer):
 
         if example.tgt_text is not None:
             logger.warning(f"The example already has tgt_text {example.tgt_text}, and will be filled with new label words, is this intended?")
+
+        if not self.is_rule:
+            instance_label_word =  label_word
         else:
-            if not self.is_rule:
-                instance_label_word =  label_word
-            else:
-                instance_label_word = [i(example) for i in label_word]  #(example)
+            instance_label_word = [i(example) for i in label_word]  #(example)
         if len(instance_label_word) == 1:
             example.tgt_text = instance_label_word[0]
         else:
