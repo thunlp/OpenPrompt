@@ -1,3 +1,4 @@
+from statistics import mode
 from typing import List, Optional
 from transformers.modeling_utils import PreTrainedModel
 from .utils import TokenizerWrapper
@@ -11,7 +12,8 @@ from transformers import BertConfig, BertTokenizer, BertModel, BertForMaskedLM, 
                          T5Config, T5Tokenizer, T5ForConditionalGeneration, \
                          OpenAIGPTTokenizer, OpenAIGPTLMHeadModel, OpenAIGPTConfig, \
                          GPT2Config, GPT2Tokenizer, GPT2LMHeadModel, \
-                         OPTConfig, OPTForCausalLM
+                         OPTConfig, OPTForCausalLM, \
+                         ElectraConfig, ElectraForMaskedLM, ElectraTokenizer
 from collections import namedtuple
 from yacs.config import CfgNode
 
@@ -68,6 +70,12 @@ _MODEL_CLASSES = {
         'tokenizer': GPT2Tokenizer,
         'model': OPTForCausalLM,
         'wrapper': LMTokenizerWrapper,
+    }),
+    'electra': ModelClass(**{
+        'config': ElectraConfig,
+        'tokenizer': ElectraTokenizer,
+        'model': ElectraForMaskedLM,
+        'wrapper': MLMTokenizerWrapper,
     }),
 }
 
