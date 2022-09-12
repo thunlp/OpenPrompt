@@ -178,11 +178,12 @@ class InputFeatures(dict):
     def to(self, device: str = "cuda:0"):
         r"""move the tensor keys to runtime device, such as gpu:0
         """
-        for key in self.tensorable_keys:
-            value = getattr(self, key)
+        target = copy.deepcopy(self)
+        for key in target.tensorable_keys:
+            value = getattr(target, key)
             if value is not None:
-                setattr(self, key, value.to(device))
-        return self
+                setattr(target, key, value.to(device))
+        return target
 
     def cuda(self, device: str = "cuda:0"):
         r"""mimic the tensor behavior
