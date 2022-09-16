@@ -202,14 +202,13 @@ promptModel = PromptForClassification(
 A ``PromptDataLoader`` is basically a prompt version of pytorch Dataloader, which also includes a ``Tokenizer``, a ``Template`` and a ``TokenizerWrapper``.
 
 ```python
-
-    from openprompt import PromptDataLoader
-    data_loader = PromptDataLoader(
-        dataset = dataset,
-        tokenizer = tokenizer,
-        template = promptTemplate,
-        tokenizer_wrapper_class=WrapperClass,
-    )
+from openprompt import PromptDataLoader
+data_loader = PromptDataLoader(
+    dataset = dataset,
+    tokenizer = tokenizer,
+    template = promptTemplate,
+    tokenizer_wrapper_class=WrapperClass,
+)
 ```
 
 #### Step 7: Train and inference
@@ -218,16 +217,16 @@ Done! We can conduct training and inference the same as other processes in Pytor
 
 
 ```python
-    import torch
+import torch
 
-    # making zero-shot inference using pretrained MLM with prompt
-    promptModel.eval()
-    with torch.no_grad():
-        for batch in data_loader:
-            logits = promptModel(batch)
-            preds = torch.argmax(logits, dim = -1)
-            print(classes[preds])
-    # predictions would be 1, 0 for classes 'positive', 'negative'
+# making zero-shot inference using pretrained MLM with prompt
+promptModel.eval()
+with torch.no_grad():
+    for batch in data_loader:
+        logits = promptModel(batch)
+        preds = torch.argmax(logits, dim = -1)
+        print(classes[preds])
+# predictions would be 1, 0 for classes 'positive', 'negative'
 ```
 
 Please refer to our [tutorial scripts](https://github.com/thunlp/OpenPrompt/tree/main/tutorial), and [documentation](https://thunlp.github.io/OpenPrompt/) for more details.
