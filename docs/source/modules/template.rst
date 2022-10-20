@@ -24,7 +24,7 @@ The basic manually defined textual template.
 
 Prefix Template
 ---------------------------------
-The template of prefix-tuning from `Prefix-Tuning: Optimizing Contuous Prompts for Generation <https://arxiv.org/abs/2101.00190>`_. 
+The template of prefix-tuning from `Prefix-Tuning: Optimizing Continuous Prompts for Generation <https://arxiv.org/abs/2101.00190>`_. 
 
 .. autoclass:: openprompt.prompts.prefix_tuning_template.PrefixTuningTemplate
    :members:
