@@ -126,7 +126,7 @@ class PrefixTuningTemplate(Template):
 
     def generate_parameters(self) -> None:
         r"""
-        Generate parameters needed for new tokens' embedding in P-tuning
+        Generate parameters needed for new tokens' embedding in Prefix-tuning
         """
 
         self.input_tokens = nn.Parameter(torch.arange(self.num_token).long(), requires_grad=False) # to allow automatic devicing
