@@ -102,10 +102,12 @@ class Template(nn.Module):
             text = text.copy()
 
         for i, d in enumerate(text):
+            if not callable(d.get("post_processing")):
+                d["post_processing"] = eval(d.get("post_processing", 'lambda x:x'))
             if 'placeholder' in d:
-                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example, d['placeholder']))
+                text[i] = d["add_prefix_space"] + d.get("post_processing")(getattr(example, d['placeholder']))
             elif 'meta' in d:
-                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(example.meta[d['meta']])
+                text[i] = d["add_prefix_space"] + d.get("post_processing")(example.meta[d['meta']])
             elif 'soft' in d:
                 text[i] = ''; # unused
             elif 'mask' in d:
