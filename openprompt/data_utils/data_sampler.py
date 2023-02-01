@@ -71,19 +71,20 @@ class FewShotSampler(object):
         '''
         if valid_dataset is None:
             if self.also_sample_dev:
-                return self._sample(train_dataset, seed, sample_twice=True)
+                return self._sample(train_dataset, seed, sample_train=True, sample_valid=True)
             else:
-                return self._sample(train_dataset, seed, sample_twice=False)
+                return self._sample(train_dataset, seed, sample_train=True, sample_valid=False)
         else:
-            train_dataset = self._sample(train_dataset, seed)
+            train_dataset = self._sample(train_dataset, seed, sample_train=True, sample_valid=False)
             if self.also_sample_dev:
-                valid_dataset = self._sample(valid_dataset, seed)
+                valid_dataset = self._sample(valid_dataset, seed, sample_train=False, sample_valid=True)
             return train_dataset, valid_dataset
 
     def _sample(self,
                 data: Union[Dataset, List],
                 seed: Optional[int],
-                sample_twice = False,
+                sample_train = True,
+                sample_valid = False,
                ) -> Union[Dataset, List]:
         if seed is not None:
             self.rng = np.random.RandomState(seed)
@@ -91,33 +92,49 @@ class FewShotSampler(object):
             self.rng = np.random.RandomState()
         indices = [i for i in range(len(data))]
 
-        if self.num_examples_per_label is not None:
-            assert hasattr(data[0], 'label'), "sample by label requires the data has a 'label' attribute."
-            labels = [x.label for x in data]
-            selected_ids = self.sample_per_label(indices, labels, self.num_examples_per_label) # TODO fix: use num_examples_per_label_dev for dev
-        else:
-            selected_ids = self.sample_total(indices, self.num_examples_total)
-
-        if sample_twice:
-            selected_set = set(selected_ids)
-            remain_ids = [i for i in range(len(data)) if i not in selected_set]
-            if self.num_examples_per_label_dev is not None:
+        if sample_train:
+            if self.num_examples_per_label is not None:
                 assert hasattr(data[0], 'label'), "sample by label requires the data has a 'label' attribute."
-                remain_labels = [x.label for idx, x in enumerate(data) if idx not in selected_set]
-                selected_ids_dev = self.sample_per_label(remain_ids, remain_labels, self.num_examples_per_label_dev)
+                labels = [x.label for x in data]
+                selected_ids = self.sample_per_label(indices, labels, self.num_examples_per_label)
             else:
-                selected_ids_dev = self.sample_total(remain_ids, self.num_examples_total_dev)
+                selected_ids = self.sample_total(indices, self.num_examples_total)
 
-            if isinstance(data, Dataset):
-                return Subset(data, selected_ids), Subset(data, selected_ids_dev)
-            elif isinstance(data, List):
-                return [data[i] for i in selected_ids], [data[i] for i in selected_ids_dev]
+            if sample_valid:
+                selected_set = set(selected_ids)
+                remain_ids = [i for i in range(len(data)) if i not in selected_set]
+                if self.num_examples_per_label_dev is not None:
+                    assert hasattr(data[0], 'label'), "sample by label requires the data has a 'label' attribute."
+                    remain_labels = [x.label for idx, x in enumerate(data) if idx not in selected_set]
+                    selected_ids_dev = self.sample_per_label(remain_ids, remain_labels, self.num_examples_per_label_dev)
+                else:
+                    selected_ids_dev = self.sample_total(remain_ids, self.num_examples_total_dev)
+                
+                if isinstance(data, Dataset):
+                    return Subset(data, selected_ids), Subset(data, selected_ids_dev)
+                elif isinstance(data, List):
+                    return [data[i] for i in selected_ids], [data[i] for i in selected_ids_dev]
+            else:
+                if isinstance(data, Dataset):
+                    return Subset(data, selected_ids)
+                elif isinstance(data, List):
+                    return [data[i] for i in selected_ids]
 
-        else:
-            if isinstance(data, Dataset):
-                return Subset(data, selected_ids)
-            elif isinstance(data, List):
-                return [data[i] for i in selected_ids]
+        if not sample_train:
+            if sample_valid:
+                if self.num_examples_per_label_dev is not None:
+                    assert hasattr(data[0], 'label'), "sample by label requires the data has a 'label' attribute."
+                    labels = [x.label for x in data]
+                    selected_ids_dev = self.sample_per_label(indices, labels, self.num_examples_per_label_dev)
+                else:
+                    selected_ids_dev = self.sample_total(indices, self.num_examples_total_dev)
+
+                if isinstance(data, Dataset):
+                    return Subset(data, selected_ids_dev)
+                elif isinstance(data, List):
+                    return [data[i] for i in selected_ids_dev]
+            else:
+                raise ValueError("sample_train and sample_valid can't be both set to False.")
 
 
     def sample_total(self, indices: List, num_examples_total):
