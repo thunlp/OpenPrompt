@@ -12,6 +12,7 @@ from openprompt import Template
 
 import torch
 from torch import nn
+from sys import exit
 
 class MixedTemplate(Template):
     r"""The Mixed Template class defined by a string of `text`. See more examples in the `tutorial <https://github.com/thunlp/OpenPrompt/blob/ca27491101df0108a8dd753e5b1e79bf591f65d3/tutorial/1.1_mixed_template.py>`_.
@@ -175,28 +176,6 @@ class MixedTemplate(Template):
 
         self.text = self.parse_text(self.text)
         self.prepare()
-
-
-    def incorporate_text_example(self,
-                                 example: InputExample
-                                ):
-        text = self.text.copy()
-        for i, d in enumerate(text):
-            if 'placeholder' in d:
-                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(getattr(example, d['placeholder']))
-            elif 'meta' in d:
-                text[i] = d["add_prefix_space"] + d.get("post_processing", lambda x:x)(example.meta[d['meta']])
-            elif 'soft' in d:
-                text[i] = d['soft']; # unused
-            elif 'mask' in d:
-                text[i] = '<mask>'
-            elif 'special' in d:
-                text[i] = d['special']
-            elif 'text' in d:
-                text[i] = d["add_prefix_space"] + d['text']
-            else:
-                raise ValueError(f'can not parse {d}')
-        return text
 
 
     def process_batch(self, batch: Union[Dict, InputFeatures]) -> Union[Dict, InputFeatures]:
