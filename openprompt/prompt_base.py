@@ -293,7 +293,7 @@ class Template(nn.Module):
     def on_text_set(self):
         r"""
         A hook to do something when template text was set.
-        The designer of the template should explicitly know what should be down when the template text is set.
+        The designer of the template should explicitly know what should be done when the template text is set.
         """
         raise NotImplementedError
 

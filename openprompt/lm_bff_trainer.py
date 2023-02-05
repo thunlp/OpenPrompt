@@ -16,7 +16,9 @@ from openprompt.utils.cuda import model_to_device
 from openprompt.prompts import load_template_generator, load_verbalizer_generator
 from openprompt.plms import load_plm_from_config
 
-
+class ManualTemplateWithoutParse(ManualTemplate):
+    def on_text_set(self):
+        pass
 
 
 def build_dataloader(dataset, template, tokenizer,tokenizer_wrapper_class, config, split):
@@ -112,7 +114,7 @@ class LMBFFClassificationRunner:
         best_metrics = 0.0
         best_template_text = None
         for template_text in template_texts_candidates:
-            template = ManualTemplate(self.tokenizer, template_text)
+            template = ManualTemplateWithoutParse(self.tokenizer, template_text)
             train_dataloader = build_dataloader(self.train_dataset, template, self.tokenizer, self.tokenizer_wrapper, self.config, 'train')
             valid_dataloader = build_dataloader(self.valid_dataset, template, self.tokenizer, self.tokenizer_wrapper, self.config, 'dev')
             score = self._train_eval(template, verbalizer, train_dataloader, valid_dataloader)
@@ -153,7 +155,7 @@ class LMBFFClassificationRunner:
         if self.auto_t:
             template_texts = self._auto_t()
             best_template_text = self._get_best_template_text(template_texts, best_verbalizer)
-            best_template = ManualTemplate(self.tokenizer, best_template_text)
+            best_template = ManualTemplateWithoutParse(self.tokenizer, best_template_text)
         if self.auto_v:
             label_words_list = self._auto_v(best_template)
             best_label_words = self._get_best_label_words(label_words_list, best_template, best_verbalizer)
