@@ -394,8 +394,11 @@ class PromptForGeneration(nn.Module, GenerationMixin):
         self.in_generation_function = False
 
         self.main_input_name = self.prompt_model.main_input_name # for transformers 4.17.0 and higher.
-        self.generation_config = self.prompt_model.plm.generation_config
 
+    @property
+    def generation_config(self):
+        return self.plm.generation_config
+    
     @property
     def plm(self):
         return self.prompt_model.plm
