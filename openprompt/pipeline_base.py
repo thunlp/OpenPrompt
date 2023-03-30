@@ -362,7 +362,7 @@ class PromptForGeneration(nn.Module, GenerationMixin):
 
     Args:
         plm (:obj:`PretrainedModel`): A pre-traiend model you decide to use for generation, e.g. GPT.
-        template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``PrefixTemplate``.
+        template (:obj:`Template`): A ``Template`` object you use to wrap the input text for classification, e.g. ``PrefixTuningTemplate``.
         tokenizer (:obj:`Tokenizer`): A ``Tokenizer`` of the current model.
         gen_config (:obj:`CfgNode`): The generation configs to pass into `GenerationMixin.generate <https://huggingface.co/transformers/_modules/transformers/generation_utils.html#GenerationMixin.generate>`_
         freeze_plm (:obj:`bool`): whether or not to freeze the pretrained language model
