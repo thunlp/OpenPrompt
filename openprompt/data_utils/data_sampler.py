@@ -77,13 +77,14 @@ class FewShotSampler(object):
         else:
             train_dataset = self._sample(train_dataset, seed)
             if self.also_sample_dev:
-                valid_dataset = self._sample(valid_dataset, seed)
+                valid_dataset = self._sample(valid_dataset, seed, is_dev=True)
             return train_dataset, valid_dataset
 
     def _sample(self,
                 data: Union[Dataset, List],
                 seed: Optional[int],
                 sample_twice = False,
+                is_dev = False
                ) -> Union[Dataset, List]:
         if seed is not None:
             self.rng = np.random.RandomState(seed)
@@ -91,12 +92,15 @@ class FewShotSampler(object):
             self.rng = np.random.RandomState()
         indices = [i for i in range(len(data))]
 
-        if self.num_examples_per_label is not None:
+        num_examples_per_label = self.num_examples_per_label_dev if is_dev else self.num_examples_per_label
+        num_examples_total = self.num_examples_total_dev if is_dev else self.num_examples_total
+
+        if num_examples_per_label is not None:
             assert hasattr(data[0], 'label'), "sample by label requires the data has a 'label' attribute."
             labels = [x.label for x in data]
-            selected_ids = self.sample_per_label(indices, labels, self.num_examples_per_label) # TODO fix: use num_examples_per_label_dev for dev
+            selected_ids = self.sample_per_label(indices, labels, num_examples_per_label)
         else:
-            selected_ids = self.sample_total(indices, self.num_examples_total)
+            selected_ids = self.sample_total(indices, num_examples_total)
 
         if sample_twice:
             selected_set = set(selected_ids)
