@@ -77,7 +77,7 @@ class MixedTemplate(Template):
                 if "duplicate" in d:
                     if "same" in d and d["same"]:
                         num_soft_token += 1
-                        id_list = [num_soft_token for _ in range(len(d["duplicate"]))]
+                        id_list = [num_soft_token for _ in range(d["duplicate"])]
                     else:
                         num_soft_token += d["duplicate"]
                         id_list = list(range(old_num+1, num_soft_token+1))
