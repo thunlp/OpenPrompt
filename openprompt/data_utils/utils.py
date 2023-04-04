@@ -51,7 +51,7 @@ class InputExample(object):
 
     def to_json_string(self):
         r"""Serialize this instance to a JSON string."""
-        return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
+        return json.dumps(self.to_dict(), indent=2, sort_keys=True, ensure_ascii=False) + "\n"
 
     def keys(self, keep_none=False):
         return [key for key in self.__dict__.keys() if getattr(self, key) is not None]
