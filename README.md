@@ -27,7 +27,7 @@
 
 ## What's New?
 
-- **April 2023: We are releasing [UltraChat](https://github.com/thunlp/UltraChat), use OpenPrompt and UltraChat to train your chatbot, here is an [example](https://github.com/thunlp/OpenPrompt/blob/main/tutorial/9_UltraChat.py).**
+- **April 2023: ❗️We are releasing [UltraChat](https://github.com/thunlp/UltraChat), use OpenPrompt and UltraChat to train your chatbot, here is an [example](https://github.com/thunlp/OpenPrompt/blob/main/tutorial/9_UltraChat.py).❗️**
 - Aug 2022: Thanks to contributor [zhiyongLiu1114](https://github.com/zhiyongLiu1114), OpenPrompt now supports [ERNIE 1.0](https://github.com/thunlp/OpenPrompt/tree/main/tutorial/7_ernie_paddlepaddle) in PaddlePaddle.
 - July 2022: OpenPrompt supports OPT now.
 - June 2022: OpenPrompt wins ACL 2022 Best Demo Paper Award.
