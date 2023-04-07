@@ -1,0 +1,1 @@
+{"meta": "context", "post_processing": lambda x: "\n\n".join(x), "shortenable": True} {"text": "\nAssistant:"} {"mask"}

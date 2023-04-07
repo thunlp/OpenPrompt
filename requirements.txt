@@ -10,3 +10,5 @@ datasets
 rouge==1.0.0
 pyarrow
 scipy
+accelerate
+torchmetrics
