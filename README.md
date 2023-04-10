@@ -120,7 +120,7 @@ With the modularity and flexibility of OpenPrompt, you can easily develop a prom
 
 #### Step 1: Define a task
 
-The first step is to determine the current NLP task, think about what’s your data looks like and what do you want from the data! That is, the essence of this step is to determine the `classses` and the `InputExample` of the task. For simplicity, we use Sentiment Analysis as an example. tutorial_task.
+The first step is to determine the current NLP task, think about what’s your data looks like and what do you want from the data! That is, the essence of this step is to determine the `classes` and the `InputExample` of the task. For simplicity, we use Sentiment Analysis as an example. tutorial_task.
 
 ```python
 from openprompt.data_utils import InputExample
@@ -267,6 +267,6 @@ Please cite our paper if you use OpenPrompt in your work
   <img src="https://contrib.rocks/image?repo=thunlp/OpenPrompt" />
 </a>
 
-We thank all the  contributors to this project, more contributors are welcome!
+We thank all the contributors to this project, more contributors are welcome!
 
 
