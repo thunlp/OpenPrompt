@@ -1,5 +1,5 @@
 #!/bin/sh
-DIR="./TextClassification"
+DIR="./datasets/TextClassification"
 mkdir $DIR
 cd $DIR
 
@@ -41,8 +41,10 @@ cd $DIR
 # rm -rf yahoo_answers_topics.tar.gz
 
 rm -rf dwmw17
-wget --content-disposition https://raw.githubusercontent.com/t-davidson/hate-speech-and-offensive-language/master/data/labeled_data.csv
-mkdir -p dwmw17
-mv labeled_data.csv dwmw17
+FILEID="1FW_qQX8aubnuFy--y8cY8HW26CFixFei"
+FILENAME="dwmw17.zip"
+wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=${FILEID}' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=${FILEID}" -O ${FILENAME} && rm -rf /tmp/cookies.txt
+unzip dwmw17.zip
+rm dwmw17.zip
 
 cd ..

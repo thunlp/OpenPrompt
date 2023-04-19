@@ -29,34 +29,40 @@ from openprompt.data_utils.data_processor import DataProcessor
 
 
 class Dwmw17Processor(DataProcessor):
+    """
+    from openprompt.data_utils.text_classification_dataset import PROCESSORS
+    import os
+    # Get the absolute path of the parent directory of the current file
+    root_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+
+    # Set the base path to the 'datasets' directory located in the parent directory
+    base_path = os.path.join(root_dir, 'datasets/TextClassification')
+
+
+    dataset_name = "dwmw17"
+    dataset_path = os.path.join(base_path, dataset_name)
+    processor = PROCESSORS[dataset_name.lower()]()
+    trainvalid_dataset = processor.get_train_examples(dataset_path)
+    print(trainvalid_dataset)
+    """
     def __init__(self):
         super().__init__()
         self.labels = [ "hate speech", "offensive language", "neither" ]
     
     def get_examples(self, data_dir, split):
-        df = pd.read_csv(os.path.join(data_dir, 'labeled_data.csv'))
-        """
-        24783 rows in total, 0: 1430, 1: 19190, 2: 4163
-        I will take 50% as training and 50% as testing
-        """
-        train_splits = [ 715, 9595, 2081 ]
+        path = os.path.join(data_dir, "{}.csv".format(split))
         examples = []
-        for label_idx in range(len(self.labels)):
-            df_label = df[df['class'] == label_idx]
-            train_split = train_splits[label_idx]
-            
-            tweets = df_label['tweet'].tolist()
-            indexs = df_label.iloc[:, 0].tolist()
-            if split == 'train':
-                tweets_split = tweets[:train_split]
-                indexs_split = indexs[:train_split]
-            else:
-                tweets_split = tweets[train_split:]
-                indexs_split = indexs[train_split:]
-            for tweet, index in zip(tweets_split, indexs_split):
-                examples.append(InputExample(
-                    guid=str(index), text_a=tweet, text_b="", label=label_idx
-                ))
+        with open(path, encoding='utf8') as f:
+            reader = csv.reader(f, delimiter=',')
+            # Skip first row
+            next(reader)
+            for idx, row in enumerate(reader):
+                idx, _, _, _, _, label, tweet = row
+                text_a = tweet
+                example = InputExample(
+                    guid=str(idx), text_a=text_a, label=int(label))
+                examples.append(example)
+
         return examples
 
 
@@ -391,4 +397,5 @@ PROCESSORS = {
     "sst-2": SST2Processor,
     "mnli": MnliProcessor,
     "yahoo": YahooProcessor,
+    "dwmw17": Dwmw17Processor
 }
