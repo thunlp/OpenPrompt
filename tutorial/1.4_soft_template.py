@@ -359,16 +359,16 @@ for epoch in range(1000000):
                 log_loss = tot_loss
 
 
-        if optimizer1 is not None:
-            optimizer1.step()
-            optimizer1.zero_grad()
-        if scheduler1 is not None:
-            scheduler1.step()
-        if optimizer2 is not None:
-            optimizer2.step()
-            optimizer2.zero_grad()
-        if scheduler2 is not None:
-            scheduler2.step()
+            if optimizer1 is not None:
+                optimizer1.step()
+                optimizer1.zero_grad()
+            if scheduler1 is not None:
+                scheduler1.step()
+            if optimizer2 is not None:
+                optimizer2.step()
+                optimizer2.zero_grad()
+            if scheduler2 is not None:
+                scheduler2.step()
 
         tot_train_time += time.time()
 
