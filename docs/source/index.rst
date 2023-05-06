@@ -1,4 +1,4 @@
-:github_url: https://github.com/ningding97/OpenPrompt/tree/master/openprompt
+:github_url: https://github.com/thunlp/OpenPrompt/tree/main/openprompt
 
 OpenPrompt Documentation
 =============================
