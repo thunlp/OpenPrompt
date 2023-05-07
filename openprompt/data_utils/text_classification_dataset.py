@@ -17,6 +17,7 @@ This file contains the logic for loading data for all TextClassification tasks.
 
 import os
 import json, csv
+import pandas as pd
 from abc import ABC, abstractmethod
 from collections import defaultdict, Counter
 from typing import List, Dict, Callable
@@ -25,6 +26,38 @@ from openprompt.utils.logging import logger
 
 from openprompt.data_utils.utils import InputExample
 from openprompt.data_utils.data_processor import DataProcessor
+
+
+class Dwmw17Processor(DataProcessor):
+    def __init__(self):
+        super().__init__()
+        self.labels = [ "hate speech", "offensive language", "neither" ]
+    
+    def get_examples(self, data_dir, split):
+        df = pd.read_csv(os.path.join(data_dir, 'labeled_data.csv'))
+        """
+        24783 rows in total, 0: 1430, 1: 19190, 2: 4163
+        I will take 50% as training and 50% as testing
+        """
+        train_splits = [ 715, 9595, 2081 ]
+        examples = []
+        for label_idx in range(len(self.labels)):
+            df_label = df[df['class'] == label_idx]
+            train_split = train_splits[label_idx]
+            
+            tweets = df_label['tweet'].tolist()
+            indexs = df_label.iloc[:, 0].tolist()
+            if split == 'train':
+                tweets_split = tweets[:train_split]
+                indexs_split = indexs[:train_split]
+            else:
+                tweets_split = tweets[train_split:]
+                indexs_split = indexs[train_split:]
+            for tweet, index in zip(tweets_split, indexs_split):
+                examples.append(InputExample(
+                    guid=str(index), text_a=tweet, text_b="", label=label_idx
+                ))
+        return examples
 
 
 class MnliProcessor(DataProcessor):
