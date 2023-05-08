@@ -1,0 +1,5 @@
+{
+    "hate speech": ["Hateful", "Malicious", "Malevolent", "Vicious", "Nefarious", "Sinister", "Discriminatory", "Harmful", "Abusive", "Prejudice"],
+    "offensive language": ["Offensive", "Insulting", "Rude", "Inappropriate", "Insensitive", "Controversial", "Obscenity", "Profanity"],
+    "neither": ["Harmless", "Innocent", "Benign", "Nonthreatening", "Inoffensive", "Amicable", "Acceptable", "Respectful", "Neutral"]
+}

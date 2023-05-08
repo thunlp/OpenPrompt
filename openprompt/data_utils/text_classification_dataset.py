@@ -17,6 +17,7 @@ This file contains the logic for loading data for all TextClassification tasks.
 
 import os
 import json, csv
+import pandas as pd
 from abc import ABC, abstractmethod
 from collections import defaultdict, Counter
 from typing import List, Dict, Callable
@@ -25,6 +26,44 @@ from openprompt.utils.logging import logger
 
 from openprompt.data_utils.utils import InputExample
 from openprompt.data_utils.data_processor import DataProcessor
+
+
+class Dwmw17Processor(DataProcessor):
+    """
+    from openprompt.data_utils.text_classification_dataset import PROCESSORS
+    import os
+    # Get the absolute path of the parent directory of the current file
+    root_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+
+    # Set the base path to the 'datasets' directory located in the parent directory
+    base_path = os.path.join(root_dir, 'datasets/TextClassification')
+
+
+    dataset_name = "dwmw17"
+    dataset_path = os.path.join(base_path, dataset_name)
+    processor = PROCESSORS[dataset_name.lower()]()
+    trainvalid_dataset = processor.get_train_examples(dataset_path)
+    print(trainvalid_dataset)
+    """
+    def __init__(self):
+        super().__init__()
+        self.labels = [ "hate speech", "offensive language", "neither" ]
+    
+    def get_examples(self, data_dir, split):
+        path = os.path.join(data_dir, "{}.csv".format(split))
+        examples = []
+        with open(path, encoding='utf8') as f:
+            reader = csv.reader(f, delimiter=',')
+            # Skip first row
+            next(reader)
+            for idx, row in enumerate(reader):
+                idx, _, _, _, _, label, tweet = row
+                text_a = tweet
+                example = InputExample(
+                    guid=str(idx), text_a=text_a, label=int(label))
+                examples.append(example)
+
+        return examples
 
 
 class MnliProcessor(DataProcessor):
@@ -358,4 +397,5 @@ PROCESSORS = {
     "sst-2": SST2Processor,
     "mnli": MnliProcessor,
     "yahoo": YahooProcessor,
+    "dwmw17": Dwmw17Processor
 }
