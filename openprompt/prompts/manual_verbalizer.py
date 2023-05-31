@@ -1,14 +1,9 @@
-import json
 from transformers.tokenization_utils import PreTrainedTokenizer
-from yacs.config import CfgNode
-from openprompt.data_utils import InputFeatures
-import re
 from openprompt import Verbalizer
 from typing import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from openprompt.utils.logging import logger
 
 
 
