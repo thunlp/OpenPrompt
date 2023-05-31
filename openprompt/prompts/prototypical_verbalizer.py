@@ -1,22 +1,15 @@
-from inspect import Parameter
-import json
-from os import stat
 from transformers.file_utils import ModelOutput
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.utils.dummy_pt_objects import PreTrainedModel
-from yacs.config import CfgNode
 from openprompt.data_utils import InputFeatures
-import re
 from openprompt import Verbalizer
 from typing import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from openprompt.utils.logging import logger
-import copy
 from transformers.modeling_outputs import CausalLMOutputWithCrossAttentions, Seq2SeqLMOutput, MaskedLMOutput
 
-from transformers.models.t5 import  T5ForConditionalGeneration
 
 class ProtoVerbalizer(Verbalizer):
     r"""

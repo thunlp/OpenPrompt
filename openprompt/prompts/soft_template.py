@@ -1,21 +1,12 @@
-
-import os
-
-from torch.nn.parameter import Parameter
-from openprompt.utils.logging import logger
-
-
-
-from openprompt.data_utils import InputExample, InputFeatures
-from typing import *
-
-from transformers import PreTrainedModel
-from transformers.tokenization_utils import PreTrainedTokenizer
-from openprompt import Template
-from openprompt.prompts import ManualTemplate, ManualVerbalizer
+from typing import Dict, List, Optional, Union
 
 import torch
+from openprompt import Template
+from openprompt.data_utils import InputFeatures
+from openprompt.utils.logging import logger
 from torch import nn
+from transformers import PreTrainedModel
+from transformers.tokenization_utils import PreTrainedTokenizer
 
 class SoftTemplate(Template):
     r"""This is the implementation of `The Power of Scale for Parameter-Efficient

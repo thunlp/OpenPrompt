@@ -4,7 +4,6 @@ import json
 from transformers.file_utils import ModelOutput
 from openprompt.config import convert_cfg_to_dict
 
-from transformers.utils.dummy_pt_objects import PreTrainedModel
 from openprompt.utils.utils import signature
 
 from yacs.config import CfgNode
