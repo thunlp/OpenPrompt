@@ -48,7 +48,7 @@ class PromptDataLoader(object):
                  tokenizer: PreTrainedTokenizer = None,
                  tokenizer_wrapper_class = None,
                  verbalizer: Optional[Verbalizer] = None,
-                 max_seq_length: Optional[str] = 512,
+                 max_seq_length: Optional[int] = 512,
                  batch_size: Optional[int] = 1,
                  shuffle: Optional[bool] = False,
                  teacher_forcing: Optional[bool] = False,
