@@ -66,7 +66,7 @@
 
 
 
-- Use the implementations of current prompt-learning approaches.* We have implemented various of prompting methods, including templating, verbalizing and optimization strategies under a unified standard. You can easily call and understand these methods.
+- Use the implementations of current prompt-learning approaches.* We have implemented various prompting methods, including templating, verbalizing, and optimization strategies under a unified standard. You can easily call and understand these methods.
 - *Design your own prompt-learning work.* With the extensibility of OpenPrompt, you can quickly practice your prompt-learning ideas.
 
 
