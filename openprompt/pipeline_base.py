@@ -1,7 +1,15 @@
 from pickle import FALSE
 from torch.utils.data.sampler import RandomSampler
-from transformers.configuration_utils import PretrainedConfig
-from transformers.generation_utils import GenerationMixin
+
+from packaging import version
+from importlib import import_module
+
+transformers = import_module("transformers")
+transformers_version = version.parse(transformers.__version__)
+if transformers_version < version.parse("4.25.1"):
+    from transformers.generation_utils import GenerationMixin
+else:
+    from transformers.generation.utils import GenerationMixin
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
