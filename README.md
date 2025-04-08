@@ -1,12 +1,10 @@
-
-
 <div align="center">
 
 <img src="https://z3.ax1x.com/2021/11/11/IwED0K.png" width="350px">
 
 **An Open-Source Framework for Prompt-learning.**
 
-------
+---
 
 <p align="center">
   <a href="#Overview">Overview</a> •
@@ -22,12 +20,7 @@
 
 ![version](https://img.shields.io/badge/version-v1.0.1-blue)
 
-
-
-
 ## What's New?
-
- 
 
 - ❗️ April 2023: $\color{red}{\normalsize{\textbf{Want to build your Chat AI?}}}$ **We are releasing [UltraChat](https://github.com/thunlp/UltraChat), use OpenPrompt and UltraChat to conduct supervised instruction tuning, see** [`./tutorial/9_UltraChat.py`](./tutorial/9_UltraChat.py).
 - Aug 2022: Thanks to contributor [zhiyongLiu1114](https://github.com/zhiyongLiu1114), OpenPrompt now supports [ERNIE 1.0](https://github.com/thunlp/OpenPrompt/tree/main/tutorial/7_ernie_paddlepaddle) in PaddlePaddle.
@@ -42,35 +35,22 @@
 - Nov 2021 PrefixTuning supports t5 now.
 - Nov 2021: We made some major changes from the last version, where a flexible template language is newly introduced! Part of the docs is outdated and we will fix it soon.
 
-
 ## Overview
 
 **Prompt-learning** is the latest paradigm to adapt pre-trained language models (PLMs) to downstream NLP tasks, which modifies the input text with a textual template and directly uses PLMs to conduct pre-trained tasks. This library provides a standard, flexible and extensible framework to deploy the prompt-learning pipeline. OpenPrompt supports loading PLMs directly from [huggingface transformers](https://github.com/huggingface/transformers). In the future, we will also support PLMs implemented by other libraries. For more resources about prompt-learning, please check our [paper list](https://github.com/thunlp/PromptPapers).
 
-
-
 <div align="center">
-
 
 <img src="https://z3.ax1x.com/2021/11/03/IAdT3D.png" width="85%" align="center"/>
 
 </div>
 
-
-
 ## What Can You Do via OpenPrompt?
-
-
 
 ![demo](docs/source/demo.gif)
 
-
-
-- Use the implementations of current prompt-learning approaches.* We have implemented various of prompting methods, including templating, verbalizing and optimization strategies under a unified standard. You can easily call and understand these methods.
-- *Design your own prompt-learning work.* With the extensibility of OpenPrompt, you can quickly practice your prompt-learning ideas.
-
-
-
+- Use the implementations of current prompt-learning approaches.\* We have implemented various of prompting methods, including templating, verbalizing and optimization strategies under a unified standard. You can easily call and understand these methods.
+- _Design your own prompt-learning work._ With the extensibility of OpenPrompt, you can quickly practice your prompt-learning ideas.
 
 ## Installation
 
@@ -79,9 +59,6 @@
 ### Using Pip
 
 Our repo is tested on Python **3.8+** and PyTorch **1.8.1+**, install OpenPrompt using pip as follows:
-
-
-
 
 ```shell
 pip install openprompt
@@ -106,13 +83,11 @@ Modify the code
 python setup.py develop
 ```
 
-
-
 ## Use OpenPrompt
 
 ### Base Concepts
 
-A  `PromptModel`  object contains a `PLM`, a (or multiple) `Template`  and a (or multiple) `Verbalizer`, where the `Template` class is defined to wrap the original input with templates, and the `Verbalizer` class is to construct a projection between labels and target words in the current vocabulary. And a `PromptModel`  object practically participates in training and inference.
+A `PromptModel` object contains a `PLM`, a (or multiple) `Template` and a (or multiple) `Verbalizer`, where the `Template` class is defined to wrap the original input with templates, and the `Verbalizer` class is to construct a projection between labels and target words in the current vocabulary. And a `PromptModel` object practically participates in training and inference.
 
 ### Introduction by a Simple Example
 
@@ -141,8 +116,6 @@ dataset = [ # For simplicity, there's only two examples
 ]
 ```
 
-
-
 #### Step 2: Define a Pre-trained Language Models (PLMs) as backbone.
 
 Choose a PLM to support your task. Different models have different attributes, we encourge you to use OpenPrompt to explore the potential of various PLMs. OpenPrompt is compatible with models on [huggingface](https://huggingface.co/transformers/).
@@ -151,8 +124,6 @@ Choose a PLM to support your task. Different models have different attributes, w
 from openprompt.plms import load_plm
 plm, tokenizer, model_config, WrapperClass = load_plm("bert", "bert-base-cased")
 ```
-
-
 
 #### Step 3: Define a Template.
 
@@ -166,8 +137,6 @@ promptTemplate = ManualTemplate(
     tokenizer = tokenizer,
 )
 ```
-
-
 
 #### Step 4: Define a Verbalizer
 
@@ -185,8 +154,6 @@ promptVerbalizer = ManualVerbalizer(
 )
 ```
 
-
-
 #### Step 5: Combine them into a PromptModel
 
 Given the task, now we have a `PLM`, a `Template` and a `Verbalizer`, we combine them into a `PromptModel`. Note that although the example naively combine the three modules, you can actually define some complicated interactions among them.
@@ -202,7 +169,7 @@ promptModel = PromptForClassification(
 
 #### Step 6: Define a DataLoader
 
-A ``PromptDataLoader`` is basically a prompt version of pytorch Dataloader, which also includes a ``Tokenizer``, a ``Template`` and a ``TokenizerWrapper``.
+A `PromptDataLoader` is basically a prompt version of pytorch Dataloader, which also includes a `Tokenizer`, a `Template` and a `TokenizerWrapper`.
 
 ```python
 from openprompt import PromptDataLoader
@@ -217,7 +184,6 @@ data_loader = PromptDataLoader(
 #### Step 7: Train and inference
 
 Done! We can conduct training and inference the same as other processes in Pytorch.
-
 
 ```python
 import torch
@@ -239,16 +205,19 @@ Please refer to our [tutorial scripts](https://github.com/thunlp/OpenPrompt/tree
 We provide a series of download scripts in the `dataset/` folder, feel free to use them to download benchmarks.
 
 ## Performance Report
+
 There are too many possible combinations powered by OpenPrompt. We are trying our best
 to test the performance of different methods as soon as possible. The performance will be constantly updated into the [Tables](https://github.com/thunlp/OpenPrompt/tree/main/results/).
 We also encourage the users to find the best hyper-parameters for their own tasks and report the results by making pull request.
 
 ## Known Issues
+
 Major improvement/enhancement in future.
 
 - We made some major changes from the last version, so part of the docs is outdated. We will fix it soon.
 
 ## Citation
+
 Please cite our paper if you use OpenPrompt in your work
 
 ```bibtex
@@ -259,6 +228,35 @@ Please cite our paper if you use OpenPrompt in your work
   year={2021}
 }
 ```
+
+## Common Issues
+
+### Issue: ImportError when installing OpenPrompt
+
+**Solution**: Make sure you have Python 3.8+ installed, as mentioned in the requirements.
+
+### Issue: Errors when loading models from Hugging Face
+
+**Solution**: Ensure you have the latest version of transformers installed:
+
+```bash
+pip install --upgrade transformers
+```
+
+### Issue: Memory errors with large models
+
+**Solution**: Try reducing batch size or using a smaller model variant.
+
+### Issue: Environment compatibility
+
+**Solution**: If you encounter compatibility issues with dependencies, try creating a dedicated virtual environment:
+
+```bash
+python -m venv openprompt-env
+source openprompt-env/bin/activate  # On Windows: openprompt-env\Scripts\activate
+pip install openprompt
+```
+
 ## Contributors
 
 <!-- Copy-paste in your Readme.md file -->
@@ -268,5 +266,3 @@ Please cite our paper if you use OpenPrompt in your work
 </a>
 
 We thank all the contributors to this project, more contributors are welcome!
-
-
